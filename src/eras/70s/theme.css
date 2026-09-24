@@ -1,9 +1,11 @@
-/*.era-1970 .leaflet-tile-pane {
+.era-1970 .leaflet-tile-pane {
   filter: sepia(0.85) saturate(0.65) contrast(0.88) brightness(0.97);
 }
+
 .era-1970 .memory-map {
   background: #d8c798;
 }
+
 .era-1970 .era-atmosphere {
   display: block;
   position: absolute;
@@ -13,17 +15,16 @@
   background:
     radial-gradient(ellipse at 10% 15%, #a46b2020, transparent 35%),
     radial-gradient(ellipse at 90% 85%, #88541e24, transparent 40%),
-    repeating-linear-gradient(
-      90deg,
+    repeating-linear-gradient(90deg,
       transparent 0 24.8%,
       #694e191a 25%,
       #fff8dd30 25.15%,
-      transparent 25.4%
-    );
+      transparent 25.4%);
   box-shadow:
     inset 0 0 100px #65451b50,
     inset 0 0 0 10px #c4b17a50;
 }
+
 .era-1970 .era-atmosphere::after {
   content: "";
   position: absolute;
@@ -31,9 +32,11 @@
   border: 3px double #66542b70;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23745b2c' opacity='.12' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
 }
+
 .era-1970 :is(.vhs-horizon, .vhs-tape) {
   display: none;
 }
+
 .era-1970 .era-shell-top {
   background: #eadbb8;
   color: #344754;
@@ -44,6 +47,7 @@
   text-transform: uppercase;
   letter-spacing: 1.5px;
 }
+
 .era-1970 .press-footer {
   position: absolute;
   bottom: 0;
@@ -62,16 +66,19 @@
     serif;
   letter-spacing: 1px;
 }
+
 .era-1970 .navigation-rail {
   background: #e9d9b3;
   border-right: 3px double #263e4e;
 }
+
 .era-1970 .rail-logo {
   font:
     bold italic 42px Georgia,
     serif;
   color: #b44222;
 }
+
 .era-1970 .navigation-rail button {
   border-radius: 0;
   font:
@@ -79,16 +86,19 @@
     serif;
   text-transform: uppercase;
 }
+
 .era-1970 .navigation-rail :is(.rail-active, button[aria-expanded="true"]) {
   background: #d6c398;
   outline: 1px solid #887959;
 }
+
 .era-1970 .brand-card {
   background: #f2e7c9;
   border: 3px double #243c4e;
   padding: 11px 16px;
   box-shadow: 3px 4px #6f592635;
 }
+
 .era-1970 .brand-card h1 {
   font:
     bold 37px/0.98 Georgia,
@@ -99,10 +109,12 @@
     1px 1px #e8d6aa,
     3px 2px #214969;
 }
-.era-1970 .brand-card h1 > span {
+
+.era-1970 .brand-card h1>span {
   display: none;
 }
-.era-1970 .brand-card > .brand-era-label {
+
+.era-1970 .brand-card>.brand-era-label {
   font:
     8px Georgia,
     serif;
@@ -111,51 +123,54 @@
   margin-bottom: 7px;
   letter-spacing: 1px;
 }
-.era-1970 .brand-card > span:last-child {
+
+.era-1970 .brand-card>span:last-child {
   font:
     8px Georgia,
     serif;
   margin-top: 9px;
   letter-spacing: 0.8px;
 }
-.era-1970
-  :is(
-    .timeline,
-    .stories-drawer,
-    .era-fact-popup,
-    .memory-dialog,
-    .music-card
-  ) {
+
+.era-1970 :is(.timeline,
+  .stories-drawer,
+  .era-fact-popup,
+  .memory-dialog,
+  .music-card) {
   background: linear-gradient(110deg, #f7edcf, #eaddb9);
   border: 1px solid #7d735b;
   border-radius: 0;
   box-shadow: 3px 4px #6f592635;
 }
+
 .era-1970 :is(.drawer-heading, .fact-top, .music-heading, .dialog-heading) {
   background: #e8d5a9;
   color: #213c50;
   border-bottom: 3px double #263e4e;
 }
-.era-1970
-  :is(.fact-top > span, .drawer-heading .eyebrow, .music-heading .eyebrow) {
+
+.era-1970 :is(.fact-top > span, .drawer-heading .eyebrow, .music-heading .eyebrow) {
   font:
     bold 11px Georgia,
     serif;
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
+
 .era-1970 .fact-art {
   background: repeating-linear-gradient(0deg, #eadbb7 0 3px, #e6d5ad 4px);
   color: #b44321;
   border: 3px double #244760;
   border-radius: 0;
 }
+
 .era-1970 .fact-art strong {
   font:
     bold 66px Georgia,
     serif;
   text-shadow: 2px 2px #214969;
 }
+
 .era-1970 .fact-body h2 {
   font:
     bold 27px/1.1 Georgia,
@@ -164,12 +179,14 @@
   border-bottom: 1px solid #96866a;
   padding-bottom: 12px;
 }
+
 .era-1970 :is(.fact-body p, .memory-story) {
   font:
     15px/1.65 Georgia,
     serif;
   color: #403b2d;
 }
+
 .era-1970 .memory-story::first-letter {
   float: left;
   font:
@@ -178,34 +195,36 @@
   color: #b44222;
   padding: 5px 7px 0 0;
 }
-.era-1970 .memory-list > button {
+
+.era-1970 .memory-list>button {
   border-radius: 0;
   border-bottom: 1px solid #9c8b67;
 }
-.era-1970
-  :is(
-    .compact-menu summary,
-    .filters button,
-    .decades button,
-    .map-period,
-    .map-reset
-  ) {
+
+.era-1970 :is(.compact-menu summary,
+  .filters button,
+  .decades button,
+  .map-period,
+  .map-reset) {
   border-radius: 0;
   background: #f2e7c9;
   color: #243c4e;
   border: 1px solid #8c7c59;
 }
+
 .era-1970 .decades button.active,
 .era-1970 .filters button.active {
   background: #244760;
   color: #f7e9c5;
 }
+
 .era-1970 .primary-button {
   background: #b44222;
   color: #fff2d1;
   border: 1px solid #6a321e;
   box-shadow: 2px 2px #213e53;
 }
+
 .era-1970 .memory-marker {
   background: #355768;
   border: 3px double #eee0b4;
@@ -214,29 +233,35 @@
   transform: none;
   box-shadow: 2px 2px #6f592650;
 }
+
 .era-1970 :is(.marker-musica, .marker-cine, .marker-personales) {
   background: #ab4b2b;
 }
+
 .era-1970 .device-illustration {
   height: 93px;
   margin: 10px;
   border: 3px double #766446;
   background: #d9c393;
 }
+
 .era-1970 .vinyl-platter {
   left: 20px;
   width: 80px;
   height: 80px;
   border-color: #766446;
 }
+
 .era-1970 .vinyl-platter i {
   inset: 23px;
   background: radial-gradient(circle, #d7c393 0 3px, #b84b25 4px);
 }
+
 .era-1970 .tonearm {
   left: 132px;
 }
-.era-1970 .device-illustration > span {
+
+.era-1970 .device-illustration>span {
   position: absolute;
   right: 8px;
   bottom: 9px;
@@ -244,95 +269,119 @@
     9px Georgia,
     serif;
 }
+
 .era-1970 .music-compact {
   border-top: 3px double #766446;
 }
+
 .era-1970 .track-open strong {
   font:
     bold 15px Georgia,
     serif;
 }
+
 .era-1970 .listen-button {
   border-radius: 50%;
   background: #244760;
   color: #f5e8c4;
 }
+
 @media (max-width: 899px) {
   .era-1970 .press-footer {
     display: none;
   }
+
   .era-1970 .era-atmosphere {
     inset: 0 0 59px;
   }
+
   .era-1970 .brand-card {
     padding: 7px 9px;
   }
+
   .era-1970 .brand-card h1 {
     font-size: 27px;
     letter-spacing: -1px;
   }
-  .era-1970 .brand-card > .brand-era-label {
+
+  .era-1970 .brand-card>.brand-era-label {
     font-size: 6px;
     padding-bottom: 3px;
     margin-bottom: 4px;
   }
-  .era-1970 .brand-card > span:last-child {
+
+  .era-1970 .brand-card>span:last-child {
     font-size: 5px;
     margin-top: 4px;
     letter-spacing: 0.3px;
   }
+
   .era-1970 .navigation-rail {
     border-right: 0;
     border-top: 3px double #263e4e;
   }
+
   .era-1970 .fact-body h2 {
     font-size: 22px;
   }
+
   .era-1970 .fact-body p {
     font-size: 13px;
   }
+
   .era-1970 .music-card.expanded .device-illustration {
     display: block;
   }
 }
+
 .era-1970:is(.view-feed, .view-profile) {
   background: #d9c79b;
 }
+
 .era-1970 .social-stream {
   border-inline: 1px solid #9c8b67;
   padding-inline: 18px;
 }
+
 .era-1970 .feed-heading {
   border-bottom: 3px double #243c4e;
 }
+
 .era-1970 .feed-post h3 {
   color: #a44024;
 }
+
 @media (max-width: 899px) {
   .era-1970 .social-stream {
     padding-inline: 8px;
   }
 }
+
 .era-1970 .personal-header {
   border: 3px double #243c4e;
   background: linear-gradient(115deg, #f4e8c4, #e6d2a3);
 }
+
 .era-1970 .personal-identity h2 {
   color: #ae4626;
   text-shadow: 1px 1px #e8d6aa;
   font-size: 40px;
 }
+
 .era-1970 .personal-map {
   border: 6px double #7e6a3c;
 }
+
 .era-1970 .personal-memory {
   border: 3px double #95815c;
 }
+
 @media (max-width: 899px) {
   .era-1970 .personal-identity h2 {
     font-size: 26px;
   }
 }
+
 .era-1970 .expanded-map-dialog {
   border: 6px double #71613e;
 }

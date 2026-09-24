@@ -4,7 +4,7 @@ import "../styles.css";
 import "../themes.css";
 import "../social.css";
 import "../components/mapbox.css";
-//import "../eras/70s/theme.css";
+import "../eras/70s/theme.css";
 //import "../eras/80s/theme.css";
 import "../eras/90s/theme.css";
 //import "../eras/2000s/theme.css";
