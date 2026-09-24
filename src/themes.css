@@ -1,0 +1,481 @@
+/* Era-specific visual language. Layout and behavior remain in styles.css. */
+.app {
+  --font-body: Tahoma, Arial, sans-serif;
+  --font-display: Tahoma, Arial, sans-serif;
+  font-family: var(--font-body);
+}
+.app
+  :is(
+    .brand-card h1,
+    .decades button,
+    .stories-content h2,
+    .detail-title,
+    .fact-body h2,
+    .memory-dialog h2,
+    .art-year,
+    .fact-art > span
+  ) {
+  font-family: var(--font-display);
+}
+.app .memory-story {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.85;
+}
+.app .brand-card > .brand-era-label {
+  font-size: 8px;
+  margin: 0 0 7px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+.brand-card {
+  position: relative;
+}
+.era-chrome {
+  display: contents;
+}
+.era-shell-top {
+  position: absolute;
+  top: 0;
+  left: 72px;
+  right: 0;
+  height: 27px;
+  z-index: 550;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  font-size: 11px;
+}
+.shell-caption {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-weight: 700;
+}
+.shell-actions {
+  display: flex;
+  gap: 3px;
+}
+.shell-actions button {
+  width: 21px;
+  height: 20px;
+  font:
+    bold 13px Tahoma,
+    sans-serif;
+  line-height: 14px;
+  padding: 0;
+}
+.era-atmosphere {
+  display: none;
+  pointer-events: none;
+}
+.system-taskbar {
+  position: absolute;
+  z-index: 610;
+  bottom: 0;
+  left: 72px;
+  right: 0;
+  height: 33px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 5px;
+  font-size: 11px;
+}
+.system-taskbar button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  height: 26px;
+  min-width: 130px;
+  padding: 3px 9px;
+  white-space: nowrap;
+  font: inherit;
+}
+.system-taskbar .start-button {
+  min-width: 80px;
+  font-weight: 700;
+}
+.system-logo {
+  display: grid;
+  grid-template-columns: 8px 8px;
+  grid-template-rows: 7px 7px;
+  gap: 2px;
+  transform: skewY(-8deg);
+}
+.system-logo i:nth-child(1) {
+  background: #f34a28;
+}
+.system-logo i:nth-child(2) {
+  background: #6fa637;
+}
+.system-logo i:nth-child(3) {
+  background: #327cca;
+}
+.system-logo i:nth-child(4) {
+  background: #f1ca35;
+}
+.taskbar-separator {
+  height: 23px;
+  width: 3px;
+  margin: 0 3px;
+  border-left: 1px solid #777;
+  border-right: 1px solid white;
+}
+.system-tray {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 25px;
+  padding: 3px 8px;
+  font-size: 10px;
+}
+.tray-year {
+  padding-left: 8px;
+  margin-left: 4px;
+  border-left: 1px solid #8888;
+}
+.connection-dot {
+  width: 7px;
+  height: 7px;
+  background: #58b52e;
+  border: 1px solid #317e0f;
+  border-radius: 50%;
+}
+.start-menu {
+  position: fixed;
+  margin: 0;
+  inset: auto auto 36px 77px;
+  width: 245px;
+  padding: 3px;
+  border: 0;
+  color: var(--ink);
+  background: var(--surface);
+  font: 12px var(--font-body);
+}
+.start-menu::backdrop {
+  background: transparent;
+}
+.start-menu-brand {
+  font: bold 19px var(--font-display);
+  padding: 15px 12px;
+}
+.start-menu-brand small {
+  display: block;
+  font: 11px var(--font-body);
+  margin-top: 7px;
+}
+.start-menu nav {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+.start-menu nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 10px;
+  text-align: left;
+  background: none;
+  border: 0;
+  font: inherit;
+}
+.start-menu-footer {
+  padding: 9px 12px;
+  font-size: 10px;
+  border-top: 1px solid var(--line);
+}
+
+/* 1980 — a CRT monitor, arcade cabinet and handwritten VHS archive. */
+
+/* 1990 — Windows 95: system typography, gray plastic and real bevels. */
+
+/* 2000 — Internet Explorer chrome and the friendly glass of Messenger. */
+
+/* Reserve room for the era chrome; never cover map attribution or actions. */
+@media (min-width: 900px) {
+  .map-toolbar {
+    top: 43px;
+  }
+  .filters {
+    top: 156px;
+  }
+  .map-period {
+    top: 205px;
+  }
+  .stories-drawer {
+    top: 251px;
+    bottom: 160px;
+  }
+  .music-card {
+    bottom: 60px;
+  }
+  .music-open .stories-drawer {
+    bottom: 410px;
+  }
+  .era-fact-popup {
+    bottom: 201px;
+    max-height: calc(100dvh - 455px);
+  }
+  .leaflet-bottom {
+    bottom: 33px !important;
+  }
+  .map-reset {
+    bottom: 145px;
+  }
+  .map-notice {
+    top: 256px;
+  }
+  .map-error {
+    top: auto;
+    bottom: 185px;
+  }
+  .toast {
+    bottom: 69px;
+  }
+}
+@media (max-width: 899px) {
+  .era-shell-top,
+  .system-taskbar {
+    display: none;
+  }
+  .start-menu:popover-open {
+    display: none;
+  }
+  .app .brand-card {
+    min-width: 0;
+    height: 66px;
+  }
+  .app .brand-card > .brand-era-label {
+    display: none;
+  }
+  .app .stories-drawer {
+    max-height: calc(100dvh - 390px);
+  }
+  .app .memory-dialog input,
+  .app .memory-dialog select,
+  .app .memory-dialog textarea {
+    font-size: 16px;
+  }
+}
+@media (max-width: 370px) {
+  .app .timeline-clock {
+    display: none;
+  }
+  .app .year-picker select {
+    width: 117px;
+  }
+  .app .primary-button {
+    font-size: 9px;
+    padding: 9px;
+  }
+  .app .music-card .record-art {
+    display: none;
+  }
+}
+@media (min-width: 900px) and (max-height: 760px) {
+  .era-fact-popup {
+    bottom: 178px;
+    max-height: calc(100dvh - 425px);
+  }
+  .fact-art {
+    display: none;
+  }
+  .stories-drawer {
+    top: 247px;
+    bottom: 155px;
+  }
+  .music-open .stories-drawer {
+    left: 461px;
+    bottom: 155px;
+  }
+  .music-card.expanded {
+    max-height: calc(100dvh - 265px);
+  }
+}
+/* Compact controls and decade-specific music hardware. */
+.compact-selectors {
+  margin-left: auto;
+  position: relative;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.compact-selectors .timeline {
+  margin: 0;
+  width: auto;
+  height: auto;
+  min-height: 52px;
+}
+.app .compact-selectors .filters {
+  position: relative;
+  inset: auto;
+  max-width: none;
+  width: auto;
+  overflow: visible;
+  padding: 0;
+  display: block;
+}
+.compact-menu {
+  position: relative;
+}
+.compact-menu summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 10px 14px;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.compact-menu summary::-webkit-details-marker {
+  display: none;
+}
+.compact-menu summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.compact-menu summary > span[aria-hidden] {
+  letter-spacing: 2px;
+}
+.compact-menu[open] > summary {
+  outline: 2px solid var(--accent);
+}
+.compact-menu .decades,
+.category-options {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  min-width: 180px;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px #0005;
+  z-index: 20;
+}
+.category-options {
+  min-width: 220px;
+  max-height: 48dvh;
+  overflow: auto;
+}
+.app .category-options button {
+  width: 100%;
+  justify-content: flex-start;
+}
+.app .music-card .record-art {
+  display: none;
+}
+.device-illustration {
+  position: relative;
+}
+.vinyl-platter {
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  top: 3px;
+  left: 30px;
+  border-radius: 50%;
+  border: 4px solid #9b9c92;
+  background: repeating-radial-gradient(
+    circle,
+    #161616 0 2px,
+    #343434 3px,
+    #111 4px
+  );
+  box-shadow: 3px 3px 6px #000;
+}
+.vinyl-platter i {
+  position: absolute;
+  inset: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ccc 0 2px, #121212 3px 4px, #df42a9 5px);
+}
+.tonearm {
+  position: absolute;
+  top: 12px;
+  left: 144px;
+  width: 9px;
+  height: 66px;
+  background: linear-gradient(90deg, #555, #eee, #666);
+  transform: rotate(32deg);
+  transform-origin: top;
+  border-radius: 7px;
+  box-shadow: 3px 3px 3px #000;
+}
+@media (min-width: 900px) {
+  .map-toolbar {
+    align-items: flex-start;
+  }
+  .map-period {
+    top: 174px;
+  }
+}
+@media (max-width: 899px) {
+  .compact-selectors {
+    grid-row: 2;
+    grid-column: 1/-1;
+    margin: 0;
+    gap: 7px;
+  }
+  .app .compact-selectors .timeline {
+    justify-content: flex-start;
+    width: max-content;
+    max-width: 100%;
+  }
+  .compact-menu summary {
+    padding: 8px 11px;
+    gap: 18px;
+    font-size: 13px;
+  }
+  .app .compact-selectors .filters summary {
+    font-size: 12px;
+  }
+  .app .map-period {
+    top: 235px;
+  }
+  .app .device-illustration {
+    display: none;
+  }
+  .app .music-card.expanded .device-illustration {
+    display: flex;
+  }
+}
+.compact-menu summary {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+@media (min-width: 900px) {
+  .stories-drawer {
+    bottom: 305px;
+  }
+  .music-open .stories-drawer {
+    left: 461px;
+    bottom: 60px;
+  }
+  .music-card.expanded {
+    max-height: calc(100dvh - 240px);
+    overflow-y: auto;
+  }
+}
+/* Keep the decade menu above the category selector below it. */
+.compact-selectors .timeline {
+  position: relative;
+  z-index: 501;
+}
+/* 1970: ink, newsprint and a well-travelled paper atlas. */
+/* Expanded selectors stay above story windows on narrow screens. */
+.map-toolbar:has(.compact-menu[open]) {
+  z-index: 560;
+}

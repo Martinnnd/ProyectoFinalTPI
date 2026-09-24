@@ -1,0 +1,112 @@
+.main-map-shell {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.mapbox-section {
+  background: #031627;
+}
+.mapbox-memory-pin {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.mapbox-memory-pin:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+.globe-tools {
+  position: absolute;
+  bottom: 165px;
+  right: 24px;
+  z-index: 410;
+  display: flex;
+  gap: 6px;
+}
+.globe-tools button,
+.mapbox-settings,
+.mapbox-status {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  font: 12px var(--font-body);
+}
+.globe-tools button {
+  padding: 10px;
+  cursor: pointer;
+}
+.mapbox-settings {
+  position: absolute;
+  bottom: 215px;
+  right: 24px;
+  width: 225px;
+  z-index: 650;
+  padding: 16px;
+  max-height: calc(100% - 240px);
+  overflow: auto;
+}
+.mapbox-settings header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.mapbox-settings label {
+  display: block;
+  margin: 12px 0;
+}
+.mapbox-settings select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.mapbox-status {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 40px;
+  z-index: 420;
+  padding: 9px 12px;
+  max-width: 400px;
+}
+.mapbox-status button {
+  margin-left: 8px;
+}
+.mapbox-section .mapboxgl-ctrl-bottom-right,
+.mapbox-section .mapboxgl-ctrl-bottom-left {
+  bottom: 34px;
+}
+@media (max-width: 899px) {
+  .globe-tools {
+    bottom: 112px;
+    right: 12px;
+    flex-direction: column;
+  }
+  .globe-tools button {
+    padding: 7px;
+    font-size: 10px;
+  }
+  .mapbox-settings {
+    right: 12px;
+    bottom: 220px;
+    max-height: calc(100% - 380px);
+  }
+  .mapbox-status {
+    bottom: 160px;
+    left: 12px;
+    transform: none;
+    max-width: 220px;
+    font-size: 10px;
+  }
+  .mapbox-section .mapboxgl-ctrl-bottom-right,
+  .mapbox-section .mapboxgl-ctrl-bottom-left {
+    bottom: 0;
+  }
+}

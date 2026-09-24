@@ -1,0 +1,814 @@
+/*.era-1990 .decades .active {
+  border-radius: 3px;
+  box-shadow: 2px 2px 0 #153d2b40;
+}
+.era-1990 .drawer-heading {
+  background: var(--ink);
+  color: var(--surface);
+  font-family: monospace;
+}
+.era-1990 button:focus-visible,
+.era-1990 a:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: -5px;
+}
+.era-1990 .era-shell-top {
+  background: #000080;
+  color: #fff;
+  border: 2px solid #c0c0c0;
+  height: 27px;
+}
+.era-1990 .shell-actions button {
+  background: #c0c0c0;
+  color: #000;
+  box-shadow: var(--raised);
+  border: 0;
+}
+.era-1990 .navigation-rail {
+  background: #008080;
+  border-right: 1px solid #006161;
+  padding-top: 20px;
+  gap: 16px;
+}
+.era-1990 .rail-logo {
+  color: white;
+  border-color: white;
+  font-family: Tahoma, sans-serif;
+  text-shadow: 1px 1px #004646;
+}
+.era-1990 .navigation-rail button {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  font-size: 11px;
+  text-shadow: 1px 1px #004646;
+}
+.era-1990 .navigation-rail button > svg {
+  width: 30px;
+  height: 30px;
+  color: #ffffd0;
+  fill: #d8dabc;
+  stroke: #293f56;
+  filter: drop-shadow(2px 2px #00494b);
+  stroke-width: 1.5px;
+}
+.era-1990 .navigation-rail button:nth-of-type(2) > svg {
+  fill: #ffda64;
+  stroke: #775926;
+}
+.era-1990 .navigation-rail button:nth-of-type(3) > svg {
+  fill: #fff;
+  stroke: #252c65;
+}
+.era-1990 .navigation-rail button:nth-of-type(4) > svg {
+  color: #d0ffff;
+  fill: #759af6;
+  stroke: #20326a;
+}
+.era-1990 .navigation-rail .rail-active,
+.era-1990 .navigation-rail button[aria-expanded="true"] {
+  background: transparent;
+}
+.era-1990 .navigation-rail .rail-active > span,
+.era-1990 .navigation-rail button[aria-expanded="true"] > span {
+  background: #000080;
+  outline: 1px dotted #ddd;
+  padding: 2px 4px;
+}
+.era-1990 .rail-footer {
+  color: #e0eeee;
+  border-top-color: #6bb5b5;
+}
+.era-1990 .leaflet-tile-pane {
+  filter: saturate(0.48) hue-rotate(8deg) contrast(0.93);
+}
+.era-1990
+  :is(
+    .brand-card,
+    .timeline,
+    .stories-drawer,
+    .era-fact-popup,
+    .music-card,
+    .map-period,
+    .map-notice,
+    .map-empty,
+    .memory-dialog
+  ) {
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    var(--raised),
+    3px 3px 0 #0004;
+  background: #c0c0c0;
+}
+.era-1990 .brand-card {
+  padding: 8px 13px 12px;
+  min-width: 270px;
+}
+.era-1990 .brand-card > .brand-era-label {
+  background: #000080;
+  color: #fff;
+  margin: -5px -10px 8px;
+  padding: 4px 7px;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+.era-1990 .brand-card h1 {
+  font-size: 27px;
+  letter-spacing: -1px;
+  font-weight: 700;
+  color: #000;
+}
+.era-1990 .brand-card h1 > span {
+  display: none;
+}
+.era-1990 .brand-card > span:last-child {
+  font-size: 10px;
+  padding: 4px 5px;
+  margin-top: 7px;
+  box-shadow:
+    inset 1px 1px #808080,
+    inset -1px -1px white;
+  color: #303030;
+}
+.era-1990 .timeline {
+  padding: 8px;
+  gap: 8px;
+}
+.era-1990 .timeline-clock {
+  color: #000080;
+}
+.era-1990
+  :is(
+    .decades button,
+    .primary-button,
+    .secondary-button,
+    .filters button,
+    .map-reset,
+    .fact-pagination .icon-button,
+    .music-buttons .icon-button,
+    .listen-button,
+    .fact-expand-button
+  ) {
+  border: 0;
+  border-radius: 0;
+  background: #c0c0c0;
+  color: #111;
+  box-shadow: var(--raised);
+  text-shadow: none;
+}
+.era-1990
+  :is(
+    .decades button,
+    .filters button,
+    .primary-button,
+    .secondary-button,
+    .map-reset
+  ):active:not(:disabled) {
+  box-shadow: var(--sunken);
+  transform: none;
+}
+.era-1990 .decades button {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 10px 13px;
+}
+.era-1990 .decades .active,
+.era-1990 .filters .active {
+  background: repeating-conic-gradient(#ddd 0% 25%, #c9c9c9 0% 50%) 0/2px 2px;
+  color: #000;
+  box-shadow: var(--sunken);
+  outline: 1px dotted #111;
+  outline-offset: -5px;
+}
+.era-1990 .year-picker {
+  border: 0;
+  padding-left: 4px;
+}
+.era-1990 .year-picker select {
+  width: 140px;
+  border-radius: 0;
+  border: 0;
+  box-shadow: var(--sunken);
+  background: #fff;
+  padding: 8px;
+  font-size: 11px;
+}
+.era-1990 .primary-button {
+  font-weight: 700;
+  color: #111;
+  padding: 13px 17px;
+}
+.era-1990 .primary-button svg {
+  color: #153779;
+}
+.era-1990 .filters {
+  gap: 4px;
+  padding: 3px;
+  background: #c0c0c0;
+  box-shadow: var(--raised);
+}
+.era-1990 .filters button {
+  font-size: 11px;
+  padding: 8px 11px;
+}
+.era-1990 .filters button > span {
+  color: #000080;
+}
+.era-1990 .map-period {
+  padding: 8px 11px;
+  font-size: 10px;
+}
+.era-1990 .map-period strong {
+  font-size: 11px;
+}
+.era-1990 .map-period > span {
+  color: #333;
+}
+.era-1990 :is(.drawer-heading, .fact-top, .music-heading, .dialog-heading) {
+  margin: 3px 3px 0;
+  padding: 3px 4px 3px 7px;
+  min-height: 26px;
+  background: #000080;
+  color: white;
+  border: 0;
+  font-family: Tahoma, sans-serif;
+}
+.era-1990 .drawer-heading .eyebrow,
+.era-1990 .music-heading .eyebrow,
+.era-1990 .fact-top > span,
+.era-1990 .dialog-heading .eyebrow {
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 700;
+}
+.era-1990
+  :is(.drawer-heading, .fact-top, .music-heading, .dialog-heading)
+  .icon-button {
+  color: #000;
+  background: #c0c0c0;
+  border: 0;
+  box-shadow: var(--raised);
+  border-radius: 0;
+  width: 21px;
+  height: 21px;
+}
+.era-1990
+  :is(.drawer-heading, .fact-top, .music-heading, .dialog-heading)
+  .icon-button
+  svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5px;
+}
+.era-1990 .fact-top > span svg {
+  color: #fff;
+  width: 13px;
+}
+.era-1990 .side-panel {
+  background: white;
+  margin: 4px;
+  box-shadow: var(--sunken);
+  scrollbar-color: #c0c0c0 #e5e5e5;
+}
+.era-1990 .detail-content,
+.era-1990 .stories-content {
+  padding: 17px;
+}
+.era-1990
+  :is(.stories-content h2, .detail-title, .fact-body h2, .memory-dialog h2) {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+}
+.era-1990 .fact-body {
+  background: white;
+  margin: 0 5px;
+  padding: 14px;
+}
+.era-1990 .fact-body p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #333;
+}
+.era-1990 .fact-source,
+.era-1990 .fact-meta {
+  font-size: 10px;
+}
+.era-1990 .fact-source a {
+  text-decoration: underline;
+  color: #0000aa;
+}
+.era-1990 .fact-art {
+  margin: 5px 5px 0;
+  border-radius: 0;
+  background: #008080;
+  color: #fff;
+  border: 3px solid #d0d0d0;
+  box-shadow: var(--sunken);
+}
+.era-1990 .fact-art:before {
+  background: repeating-conic-gradient(#ffffff10 0% 25%, transparent 0% 50%)
+    0/3px 3px;
+}
+.era-1990 .fact-art > span {
+  font-size: 58px;
+  letter-spacing: -3px;
+  font-weight: 700;
+  text-shadow: 2px 2px #004848;
+}
+.era-1990 .fact-art i {
+  font-family: Tahoma, sans-serif;
+  letter-spacing: 1px;
+}
+.era-1990 .fact-pagination {
+  margin: 3px;
+  padding: 5px;
+  border: 0;
+}
+.era-1990 .fact-pagination > span {
+  padding: 6px;
+  box-shadow:
+    inset 1px 1px #808080,
+    inset -1px -1px white;
+  font:
+    10px Tahoma,
+    sans-serif;
+  letter-spacing: 0;
+  color: #333;
+}
+.era-1990 .fact-expand-button {
+  padding: 7px 9px;
+  text-decoration: none;
+  font-size: 11px;
+}
+.era-1990 .music-card {
+  padding: 3px;
+}
+.era-1990 .music-compact {
+  padding: 9px;
+}
+.era-1990 .record-art {
+  width: 42px;
+  height: 42px;
+  border-radius: 0;
+  background: #fff;
+  color: #000080;
+  box-shadow: var(--sunken);
+}
+.era-1990 .track-open {
+  background: #e7eacc;
+  color: #102806;
+  padding: 5px 7px;
+  box-shadow: var(--sunken);
+}
+.era-1990 .track-open .eyebrow {
+  font:
+    9px "Courier New",
+    monospace;
+  letter-spacing: 0;
+  color: #405a35;
+}
+.era-1990 .track-open strong {
+  font-size: 11px;
+}
+.era-1990 .track-open small {
+  font-size: 10px;
+  color: #36452e;
+}
+.era-1990 .music-buttons {
+  gap: 3px;
+}
+.era-1990 .listen-button {
+  margin-left: 1px;
+}
+.era-1990 .music-provider-note {
+  font-size: 10px;
+}
+.era-1990 .music-heading {
+  margin: 0 0 5px;
+}
+.era-1990 .memory-art {
+  border-radius: 0;
+  border: 3px solid #c0c0c0;
+  box-shadow: var(--sunken);
+  background: #008080;
+  color: white;
+}
+.era-1990 .art-grid {
+  background-image:
+    linear-gradient(#ffffff12 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff12 1px, transparent 1px);
+}
+.era-1990 .art-year {
+  font-size: 38px;
+  font-weight: 700;
+  text-shadow: 2px 2px #004848;
+}
+.era-1990 .art-symbol {
+  text-shadow: 3px 3px #004848;
+}
+.era-1990 .list-symbol {
+  background: #ffffdc;
+  color: #000080;
+  border-radius: 0;
+  box-shadow: var(--raised);
+}
+.era-1990 .category-badge {
+  border-radius: 0;
+  background: #e7e7e7;
+  color: #111;
+  box-shadow: inset 1px 1px #aaa;
+}
+.era-1990 .avatar {
+  border-radius: 0;
+  background: #d7e7fb;
+  box-shadow: var(--raised);
+  font-family: Tahoma, sans-serif;
+}
+.era-1990 .source-note {
+  background: #ffffde;
+  color: #333;
+  border: 1px solid #8e8b70;
+  border-radius: 0;
+}
+.era-1990 .memory-marker {
+  border: 2px solid #ddd;
+  border-top-color: white;
+  border-left-color: white;
+  border-right-color: #333;
+  border-bottom-color: #333;
+  border-radius: 0;
+  transform: none;
+  box-shadow: 3px 3px #0007;
+  font-family: Tahoma, sans-serif;
+  font-size: 23px;
+}
+.era-1990 .memory-marker.selected {
+  transform: scale(1.12);
+  outline: 2px dotted #000080;
+}
+.era-1990 .leaflet-control-zoom {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: var(--raised) !important;
+  padding: 2px;
+}
+.era-1990 .leaflet-control-zoom a {
+  box-shadow: var(--raised);
+  font-family: Tahoma, sans-serif;
+  border: 0 !important;
+}
+.era-1990 .memory-dialog {
+  padding: 5px 20px 20px;
+}
+.era-1990 .dialog-heading {
+  margin: 0 -15px 18px;
+}
+.era-1990 :is(input, textarea, select) {
+  border: 0;
+  border-radius: 0;
+  box-shadow: var(--sunken);
+  background: white;
+  padding: 11px;
+}
+.era-1990 .coordinate-label {
+  border-radius: 0;
+  background: #d8d8d8;
+  box-shadow: var(--sunken);
+}
+.era-1990 .system-taskbar {
+  background: #c0c0c0;
+  box-shadow:
+    inset 0 1px white,
+    inset 0 2px #ddd;
+}
+.era-1990 .system-taskbar button {
+  border: 0;
+  border-radius: 0;
+  background: #c0c0c0;
+  color: #111;
+  box-shadow: var(--raised);
+}
+.era-1990 .system-taskbar .task-active {
+  box-shadow: var(--sunken);
+  background: #dedede;
+  font-weight: 700;
+}
+.era-1990 .system-tray {
+  box-shadow:
+    inset 1px 1px #808080,
+    inset -1px -1px white;
+}
+.era-1990 .start-menu-1990 {
+  background: #c0c0c0;
+  box-shadow:
+    inset 1px 1px white,
+    inset -1px -1px black,
+    inset 2px 2px #ddd,
+    inset -2px -2px #888;
+  border-radius: 0;
+}
+.era-1990 .start-menu-1990 .start-menu-brand {
+  background: linear-gradient(90deg, #000080, #3355a0);
+  color: white;
+}
+.era-1990 .start-menu-1990 nav button:hover,
+.era-1990 .start-menu-1990 nav button:focus-visible {
+  background: #000080;
+  color: white;
+}
+@media (min-width: 900px) and (max-width: 1150px) {
+  .era-1990 .brand-card {
+    min-width: 224px;
+  }
+  .era-1990 .year-picker select {
+    width: 121px;
+  }
+  .era-1990 .primary-button {
+    padding: 12px;
+  }
+  .era-1990 .decades button {
+    padding: 9px 10px;
+  }
+}
+@media (max-width: 899px) {
+  .era-1990 .brand-card {
+    padding: 10px 12px;
+  }
+  .era-1990 .brand-card h1 {
+    font-size: 22px;
+  }
+  .era-1990 .brand-card > span:last-child {
+    font-size: 8px;
+    margin-top: 5px;
+    padding: 3px;
+  }
+  .era-1990 .primary-button {
+    padding: 11px;
+    font-size: 10px;
+  }
+  .era-1990 .timeline {
+    padding: 6px 8px;
+    gap: 5px;
+  }
+  .era-1990 .timeline-clock {
+    width: 15px;
+  }
+  .era-1990 .decades button {
+    padding: 9px 7px;
+    font-size: 14px;
+  }
+  .era-1990 .year-picker select {
+    width: 126px;
+    padding: 7px;
+    font-size: 10px;
+  }
+  .era-1990 .navigation-rail {
+    background: #c0c0c0;
+    border-top: 2px solid white;
+    gap: 6px;
+    padding: 4px 10px;
+  }
+  .era-1990 .navigation-rail button {
+    color: #111;
+    text-shadow: none;
+    font-size: 9px;
+    background: #c0c0c0;
+    box-shadow: var(--raised);
+    min-height: 48px;
+    width: 80px;
+  }
+  .era-1990 .navigation-rail button > svg {
+    width: 20px;
+    height: 20px;
+    filter: none;
+  }
+  .era-1990 .navigation-rail .rail-active,
+  .era-1990 .navigation-rail button[aria-expanded="true"] {
+    background: #d8d8d8;
+    box-shadow: var(--sunken);
+  }
+  .era-1990 .navigation-rail .rail-active > span,
+  .era-1990 .navigation-rail button[aria-expanded="true"] > span {
+    color: #000;
+    background: none;
+    outline: 0;
+    padding: 0;
+  }
+  .era-1990 .filters {
+    gap: 3px;
+  }
+  .era-1990 .filters button {
+    font-size: 10px;
+    padding: 7px 9px;
+  }
+  .era-1990 .map-period {
+    font-size: 8px;
+  }
+  .era-1990 .map-period strong {
+    font-size: 10px;
+  }
+  .era-1990 .drawer-heading .eyebrow,
+  .era-1990 .fact-top > span {
+    font-size: 10px;
+  }
+  .era-1990 .fact-body {
+    padding: 11px;
+  }
+  .era-1990 .fact-body h2 {
+    font-size: 19px;
+  }
+  .era-1990 .fact-body p {
+    font-size: 11px;
+  }
+  .era-1990 .fact-meta {
+    font-size: 9px;
+  }
+  .era-1990 .fact-pagination > span {
+    font-size: 9px;
+    padding: 5px;
+  }
+  .era-1990 .fact-expand-button {
+    font-size: 10px;
+  }
+  .era-1990 .fact-pagination .icon-button {
+    width: 27px;
+    height: 27px;
+  }
+  .era-1990 .music-compact {
+    padding: 5px;
+    gap: 6px;
+  }
+  .era-1990 .record-art {
+    width: 31px;
+    height: 35px;
+  }
+  .era-1990 .track-open {
+    padding: 4px 6px;
+  }
+  .era-1990 .track-open .eyebrow {
+    font-size: 7px;
+  }
+  .era-1990 .track-open strong {
+    font-size: 10px;
+  }
+  .era-1990 .track-open small {
+    font-size: 9px;
+  }
+  .era-1990 .music-buttons {
+    gap: 2px;
+  }
+  .era-1990 .music-buttons .icon-button {
+    width: 20px;
+  }
+  .era-1990 .listen-button {
+    width: 27px;
+    height: 30px;
+  }
+  .era-1990 .dialog-heading {
+    margin: 0 -15px 16px;
+  }
+  .era-1990 .dialog-heading .eyebrow {
+    font-size: 9px;
+  }
+  .era-1990 .memory-dialog {
+    padding: 5px 20px 20px;
+  }
+}
+@media (max-width: 370px) {
+  .era-1990 .brand-card h1 {
+    font-size: 20px;
+  }
+}
+.era-1990 .compact-menu summary {
+  background: #c0c0c0;
+  color: #111;
+  box-shadow: var(--raised);
+  border: 0;
+}
+.app.era-1990 .device-1990 {
+  background: linear-gradient(115deg, #e1e3df, #939b9d);
+  border: 3px solid #4d5457;
+  border-radius: 9px;
+  box-shadow:
+    0 5px 15px #0006,
+    inset 0 0 0 2px #e8ebe5;
+}
+.era-1990 .device-1990 .device-illustration {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px 4px;
+}
+.era-1990 .radio-speaker {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 4px solid #7b8587;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, #0c1e21 4px 5px),
+    repeating-linear-gradient(90deg, #263d40 0 3px, #0b1b1e 4px 5px);
+  box-shadow:
+    inset 0 0 0 7px #172a2d,
+    0 1px 2px white;
+}
+.era-1990 .radio-tuner {
+  width: 118px;
+  background: #203e3c;
+  padding: 6px;
+  border: 2px inset #a4af9b;
+  color: #ecedb5;
+}
+.era-1990 .radio-tuner > span {
+  font: 8px monospace;
+  white-space: nowrap;
+}
+.era-1990 .radio-tuner > i {
+  display: block;
+  height: 14px;
+  margin: 4px 0;
+  background:
+    linear-gradient(90deg, transparent 60%, #f77738 60% 63%, transparent 63%),
+    repeating-linear-gradient(90deg, #b5bc95 0 1px, transparent 1px 7px);
+}
+.era-1990 .cassette {
+  border: 4px solid #b3b998;
+  background: #d2d3ae;
+  color: #264141;
+  text-align: center;
+  font: 22px monospace;
+}
+.era-1990 .social-stream {
+  background: #c0c0c0;
+  padding: 6px;
+  box-shadow: var(--raised);
+}
+.era-1990 .feed-heading {
+  padding: 10px;
+  background: #000080;
+  color: white;
+}
+.era-1990 .feed-post {
+  background: white;
+  padding: 16px;
+  margin: 8px;
+  box-shadow: var(--sunken);
+}
+.era-1990
+  :is(
+    .feed-tabs button,
+    .follow-button,
+    .feed-sidebar > section,
+    .profile-card
+  ) {
+  border-radius: 0;
+  background: #c0c0c0;
+  color: #111;
+  box-shadow: var(--raised);
+}
+.era-1990 .follow-button[aria-pressed="true"] {
+  box-shadow: var(--sunken);
+}
+.era-1990 .personal-header,
+.era-1990 .personal-memory {
+  background: #c0c0c0;
+  box-shadow: var(--raised);
+  border: 0;
+}
+.era-1990 .personal-identity h2 {
+  background: #000080;
+  color: white;
+  padding: 8px 12px;
+  font-size: 26px;
+}
+.era-1990 .personal-map {
+  border: 3px solid #c0c0c0;
+  box-shadow: var(--sunken);
+}
+.era-1990 .expanded-map-dialog {
+  border: 3px solid #c0c0c0;
+  box-shadow:
+    var(--raised),
+    0 20px 70px #0007;
+}
+.era-1990 .expanded-map-dialog > header {
+  background: #000080;
+  color: white;
+}
+.era-1990 .expanded-map-dialog small {
+  color: white;
+}
+
+@media (max-width: 899px) {
+  .era-1990 .brand-card {
+    min-width: 0;
+  }
+  .app.era-1990 .music-card:not(.expanded) .device-illustration {
+    display: none;
+  }
+}

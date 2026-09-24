@@ -1,0 +1,795 @@
+/*.era-2000 .primary-button {
+  color: white;
+  background: linear-gradient(#4794cc, #266da6);
+}
+.era-2000 .leaflet-tile-pane {
+  filter: saturate(0.85);
+}
+.era-2000 .decades .active {
+  color: white;
+  background: linear-gradient(#4c97cf, #286fa9);
+  border-radius: 9px;
+}
+.era-2000 .drawer-heading {
+  background: linear-gradient(#6babda, #3f83ba);
+  color: white;
+}
+.era-2000 .fact-art {
+  background: #d6eaf8;
+  color: #367db2;
+}
+.era-2000 .era-shell-top {
+  background: linear-gradient(#478ef3 0%, #0864df 16%, #004bbb 75%, #267ae5);
+  color: #fff;
+  border-bottom: 2px solid #123c9b;
+  text-shadow: 1px 1px #174083;
+  height: 27px;
+}
+.era-2000 .shell-actions button {
+  background: linear-gradient(#85b5fc, #316ac8);
+  color: white;
+  border: 1px solid #d7e9ff;
+  border-radius: 3px;
+  box-shadow:
+    inset 1px 1px #fff5,
+    inset -1px -1px #123b7c;
+}
+.era-2000 .navigation-rail {
+  background: linear-gradient(90deg, #e7f2ff, #cbdff5);
+  border-right: 1px solid #83a9d3;
+  box-shadow: inset -1px 0 white;
+}
+.era-2000 .rail-logo {
+  font-family: "Trebuchet MS", sans-serif;
+  font-style: italic;
+  color: #1765b7;
+  border-color: #70ba33;
+  text-shadow: 1px 1px white;
+}
+.era-2000 .navigation-rail button {
+  color: #274f7e;
+  font:
+    10px Tahoma,
+    sans-serif;
+  border-radius: 6px;
+}
+.era-2000 .navigation-rail button > svg {
+  stroke: #255b92;
+  fill: #a7cef5;
+  filter: drop-shadow(0 1px 0 white);
+}
+.era-2000 .navigation-rail button:nth-of-type(2) > svg {
+  fill: #88c344;
+  stroke: #3f8220;
+}
+.era-2000 .navigation-rail button:nth-of-type(3) > svg {
+  fill: #ffe090;
+  stroke: #926e1e;
+}
+.era-2000 .navigation-rail .rail-active,
+.era-2000 .navigation-rail button[aria-expanded="true"] {
+  background: linear-gradient(#fff, #c3ddf7);
+  border: 1px solid #8fb6dc;
+  box-shadow:
+    inset 0 1px white,
+    0 2px 3px #4778a526;
+}
+.era-2000 .navigation-rail button:first-of-type > svg {
+  fill: none;
+  color: #2464a6;
+}
+.era-2000 .brand-card {
+  padding: 10px 15px 12px 61px;
+  background: linear-gradient(#fff 0%, #f5faff 55%, #dcecfb);
+  border: 1px solid #76a4d6;
+  border-radius: 8px 8px 3px 3px;
+  min-width: 290px;
+}
+.era-2000 .brand-card:before {
+  content: "";
+  position: absolute;
+  top: 27px;
+  left: 15px;
+  width: 30px;
+  height: 34px;
+  border: 1px solid #619337;
+  border-radius: 10px 10px 7px 7px;
+  background:
+    radial-gradient(circle at 50% 31%, #f2ffe3 0 5px, transparent 6px),
+    radial-gradient(ellipse at 50% 100%, #efffde 0 11px, transparent 12px),
+    linear-gradient(#acd971, #579b27);
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 5px #b0cddf;
+}
+.era-2000 .brand-card:after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  left: 40px;
+  top: 57px;
+  background: #60ba29;
+  border: 2px solid white;
+}
+.era-2000 .brand-card > .brand-era-label {
+  font:
+    10px Tahoma,
+    sans-serif;
+  color: #416592;
+  letter-spacing: 0;
+  margin-bottom: 3px;
+}
+.era-2000 .brand-card h1 {
+  font:
+    bold italic 28px "Trebuchet MS",
+    sans-serif;
+  letter-spacing: -1.5px;
+  color: #245faa;
+  text-shadow: 1px 1px white;
+}
+.era-2000 .brand-card h1 > span {
+  color: #72b931;
+}
+.era-2000 .brand-card > span:last-child {
+  font:
+    10px Tahoma,
+    sans-serif;
+  color: #566b82;
+  margin-top: 2px;
+}
+.era-2000 .timeline {
+  border: 1px solid #85a7cf;
+  border-radius: 6px;
+  background: linear-gradient(#fefdf4, #e7e5d8);
+  box-shadow:
+    inset 0 1px white,
+    0 2px 8px #23548133;
+  padding: 9px 11px;
+}
+.era-2000 .decades button {
+  font:
+    bold 16px "Trebuchet MS",
+    sans-serif;
+  border-radius: 4px;
+  color: #315778;
+  padding: 9px 13px;
+}
+.era-2000 .decades .active {
+  background: linear-gradient(#65aaf0, #2368c1 48%, #1055b1 49%, #4c8dde);
+  color: white;
+  border: 1px solid #154f9e;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px #c8e8ff,
+    inset 1px 0 #8bb9f8,
+    0 1px white;
+  text-shadow: 0 1px #174076;
+}
+.era-2000 .year-picker {
+  border-color: #b2b6b9;
+}
+.era-2000 .year-picker select {
+  background: white;
+  border: 1px solid #7f9db9;
+  padding: 6px;
+  border-radius: 0;
+  width: 141px;
+  font:
+    11px Tahoma,
+    sans-serif;
+}
+.era-2000 .primary-button {
+  background: linear-gradient(#91d452, #4f9d2b 48%, #388017 49%, #67ac34);
+  border: 1px solid #326817;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px #e6ffc5,
+    0 2px 4px #173d2733;
+  font:
+    700 12px Tahoma,
+    sans-serif;
+  text-shadow: 0 1px #275615;
+}
+.era-2000 .filters {
+  background: linear-gradient(#fffffb, #e9e7dc);
+  border: 1px solid #aab9c9;
+  padding: 4px;
+  box-shadow:
+    inset 0 1px white,
+    0 2px 6px #22466d24;
+  gap: 3px;
+}
+.era-2000 .filters button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: none;
+  font:
+    11px Tahoma,
+    sans-serif;
+  padding: 6px 10px;
+  color: #203855;
+}
+.era-2000 .filters button:hover {
+  background: #fff4d2;
+  border-color: #cfad58;
+}
+.era-2000 .filters .active {
+  background: linear-gradient(#fff8dc, #f5d487);
+  color: #302710;
+  border-color: #c39132;
+  box-shadow: inset 0 1px white;
+}
+.era-2000 .filters button > span {
+  color: #3077b7;
+}
+.era-2000 .map-period {
+  border-radius: 3px;
+  background: #fffff3;
+  border: 1px solid #b6b2a1;
+  font:
+    10px Tahoma,
+    sans-serif;
+  box-shadow: 1px 2px 4px #314b6630;
+}
+.era-2000 :is(.stories-drawer, .era-fact-popup, .music-card, .memory-dialog) {
+  border: 1px solid #3675bd;
+  border-radius: 8px 8px 3px 3px;
+  background: #f3f6fc;
+  box-shadow:
+    0 4px 16px #1d487a4a,
+    inset 0 0 0 1px white;
+}
+.era-2000 :is(.drawer-heading, .fact-top, .music-heading, .dialog-heading) {
+  background: linear-gradient(#7eb6f9 0%, #3b82d6 10%, #1261bd 50%, #337dcf);
+  border: 0;
+  border-bottom: 1px solid #1f5a9e;
+  color: white;
+  padding: 6px 8px 6px 12px;
+  min-height: 30px;
+  text-shadow: 1px 1px #285788;
+}
+.era-2000 .drawer-heading .eyebrow,
+.era-2000 .fact-top > span,
+.era-2000 .music-heading .eyebrow,
+.era-2000 .dialog-heading .eyebrow {
+  font:
+    bold 11px Tahoma,
+    sans-serif;
+  letter-spacing: 0;
+}
+.era-2000 .fact-top > span svg {
+  color: #dcf4ff;
+}
+.era-2000
+  :is(.drawer-heading, .fact-top, .music-heading, .dialog-heading)
+  .icon-button {
+  width: 23px;
+  height: 23px;
+  border-radius: 4px;
+  background: linear-gradient(#f8b49a, #d85434 50%, #c34123);
+  border: 1px solid #fff;
+  box-shadow: inset 1px 1px #ffc9ac;
+  color: white;
+}
+.era-2000 .music-heading .icon-button {
+  background: linear-gradient(#9bcafa, #4387d4);
+  box-shadow: inset 1px 1px #ceeaff;
+}
+.era-2000
+  :is(.drawer-heading, .fact-top, .music-heading, .dialog-heading)
+  .icon-button
+  svg {
+  width: 16px;
+  height: 16px;
+}
+.era-2000 .side-panel {
+  background: linear-gradient(#e8f2fc 0, #fff 180px);
+}
+.era-2000
+  :is(.stories-content h2, .detail-title, .fact-body h2, .memory-dialog h2) {
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  font-weight: 700;
+  color: #245c96;
+}
+.era-2000 .fact-body p {
+  font-size: 11px;
+  line-height: 1.85;
+}
+.era-2000 .fact-source,
+.era-2000 .fact-meta {
+  font:
+    10px Tahoma,
+    sans-serif;
+}
+.era-2000 .fact-source a {
+  color: #0756b3;
+  text-decoration: underline;
+}
+.era-2000 .fact-art {
+  border: 1px solid #97bfdf;
+  border-radius: 4px;
+  background:
+    radial-gradient(ellipse at 10% 0%, #fff 0%, transparent 60%),
+    linear-gradient(135deg, #d5f0ff, #83bfe5);
+  color: #25689f;
+}
+.era-2000 .fact-art > span {
+  font:
+    bold italic 60px "Trebuchet MS",
+    sans-serif;
+  text-shadow: 1px 2px white;
+}
+.era-2000 .fact-art svg {
+  fill: #fff5;
+  filter: drop-shadow(1px 1px white);
+}
+.era-2000 .fact-pagination {
+  background: #e7eef8;
+  border-top-color: #c4d5e8;
+}
+.era-2000 .fact-pagination > span {
+  font:
+    10px Tahoma,
+    sans-serif;
+  letter-spacing: 0;
+}
+.era-2000 .fact-expand-button {
+  background: linear-gradient(white, #e0e9f7);
+  border: 1px solid #8ca8ca;
+  border-radius: 3px;
+  padding: 5px 9px;
+  text-decoration: none;
+  font:
+    11px Tahoma,
+    sans-serif;
+}
+.era-2000 .record-art {
+  border-radius: 6px;
+  color: #2572ba;
+  background: radial-gradient(circle at 30% 20%, #fff, #b1d4f1);
+  border: 1px solid #80abd5;
+  box-shadow: inset 0 1px white;
+}
+.era-2000 .track-open strong {
+  font:
+    bold 12px "Trebuchet MS",
+    sans-serif;
+}
+.era-2000 .track-open .eyebrow {
+  font:
+    9px Tahoma,
+    sans-serif;
+  letter-spacing: 0;
+}
+.era-2000 .track-open small {
+  font:
+    10px Tahoma,
+    sans-serif;
+}
+.era-2000 .listen-button {
+  background: linear-gradient(#dfffca, #8dca5d);
+  border: 1px solid #6fa541;
+  color: #315b15;
+  box-shadow: inset 0 1px white;
+}
+.era-2000 .memory-art {
+  background: linear-gradient(145deg, #f4fcff, #bfdcf4);
+  border: 1px solid #86acd5;
+  border-radius: 5px;
+  color: #346ba2;
+}
+.era-2000 .art-year {
+  font:
+    bold italic 40px "Trebuchet MS",
+    sans-serif;
+  text-shadow: 1px 1px white;
+}
+.era-2000 .list-symbol {
+  border-radius: 6px;
+  background: linear-gradient(white, #bcd9ef);
+  border: 1px solid #8db1ce;
+  color: #34698f;
+  box-shadow: inset 0 1px white;
+}
+.era-2000 .avatar {
+  background: linear-gradient(#bef18f, #64a936);
+  color: #fff;
+  font:
+    bold 19px "Trebuchet MS",
+    sans-serif;
+  border-radius: 7px;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #9fbf8a;
+}
+.era-2000 .source-note {
+  background: #ffffe2;
+  border: 1px solid #c4bf94;
+  border-radius: 3px;
+  color: #59603c;
+}
+.era-2000 .memory-marker {
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: none;
+  box-shadow:
+    0 0 0 1px #7097b5,
+    0 3px 7px #31527460,
+    inset 0 4px 8px #ffffff75;
+  text-shadow: 0 1px #0004;
+}
+.era-2000 .memory-marker.selected {
+  transform: scale(1.14);
+  outline: 3px solid #389cf5;
+}
+.era-2000 .memory-dialog {
+  padding-top: 0;
+}
+.era-2000 .dialog-heading {
+  margin: 0 -26px 20px;
+  border-radius: 7px 7px 0 0;
+}
+.era-2000 :is(input, textarea, select) {
+  border-radius: 0;
+  border: 1px solid #7f9db9;
+  background: #fff;
+  color: #263b50;
+  box-shadow: inset 1px 1px #cbd4df;
+}
+.era-2000 .secondary-button {
+  border: 1px solid #7892b4;
+  border-radius: 3px;
+  background: linear-gradient(white, #e0e8f2);
+}
+.era-2000 .system-taskbar {
+  background: linear-gradient(#428dea, #1963c7 15%, #1f69ce 85%, #1251a7);
+  color: #fff;
+  border-top: 1px solid #9cc6ff;
+}
+.era-2000 .system-taskbar button {
+  color: white;
+  background: linear-gradient(#5da0f2, #347acc);
+  border: 1px solid #1657a5;
+  border-radius: 4px;
+  box-shadow: inset 0 1px #90bdf4;
+  text-shadow: 0 1px #245490;
+}
+.era-2000 .system-taskbar .task-active {
+  background: linear-gradient(#1e54a7, #3069ba);
+  box-shadow: inset 1px 1px #164887;
+}
+.era-2000 .system-taskbar .start-button {
+  background: linear-gradient(#7cba4b, #3d8b2a 50%, #328022);
+  border-color: #397725;
+  border-radius: 0 9px 9px 0;
+  font:
+    bold italic 13px "Trebuchet MS",
+    sans-serif;
+  text-shadow: 1px 1px #286122;
+}
+.era-2000 .system-tray {
+  background: #0c8fe0;
+  border-left: 1px solid #79cbfa;
+  box-shadow: inset 0 1px #67bdf1;
+}
+.era-2000 .start-menu-2000 {
+  border: 1px solid #2a68b6;
+  border-radius: 8px 8px 0 0;
+  background: #f5f9ff;
+  color: #254266;
+  box-shadow: 0 3px 17px #15386277;
+}
+.era-2000 .start-menu-2000 .start-menu-brand {
+  background: linear-gradient(#5293e5, #286abc);
+  color: white;
+  border-radius: 6px 6px 0 0;
+  font:
+    bold 18px "Trebuchet MS",
+    sans-serif;
+}
+.era-2000 .start-menu-2000 nav button:hover,
+.era-2000 .start-menu-2000 nav button:focus-visible {
+  background: #d9ebfd;
+  color: #123d7a;
+}
+.era-2000 .start-menu-2000 .start-menu-footer {
+  background: #daeafa;
+}
+@media (min-width: 900px) and (max-width: 1150px) {
+  .era-2000 .brand-card {
+    min-width: 235px;
+    padding-left: 55px;
+  }
+  .era-2000 .year-picker select {
+    width: 121px;
+  }
+  .era-2000 .primary-button {
+    font-size: 11px;
+    padding: 12px;
+  }
+  .era-2000 .decades button {
+    padding: 9px 10px;
+  }
+}
+@media (max-width: 899px) {
+  .era-2000 .brand-card {
+    min-width: 0;
+    padding: 11px 8px 8px 43px;
+  }
+  .era-2000 .brand-card h1 {
+    font-size: 25px;
+  }
+  .era-2000 .brand-card > span:last-child {
+    font-size: 8px;
+  }
+  .era-2000 .brand-card:before {
+    top: 16px;
+    left: 10px;
+    width: 22px;
+    height: 29px;
+    box-shadow:
+      0 0 0 2px white,
+      0 0 0 3px #aac3dd;
+  }
+  .era-2000 .brand-card:after {
+    left: 28px;
+    top: 41px;
+  }
+  .era-2000 .primary-button {
+    font-size: 10px;
+    padding: 11px;
+  }
+  .era-2000 .timeline {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .era-2000 .decades button {
+    padding: 8px;
+    font-size: 15px;
+  }
+  .era-2000 .year-picker select {
+    font-size: 10px;
+    width: 126px;
+  }
+  .era-2000 .filters button {
+    font-size: 10px;
+    padding: 5px 9px;
+  }
+  .era-2000 .navigation-rail {
+    background: linear-gradient(#f7fbff, #c4dbf5);
+  }
+  .era-2000 .fact-top > span,
+  .era-2000 .drawer-heading .eyebrow {
+    font-size: 10px;
+  }
+  .era-2000 .fact-body h2 {
+    font-size: 21px;
+  }
+  .era-2000 .fact-meta {
+    font-size: 9px;
+  }
+  .era-2000 .fact-body p {
+    font-size: 11px;
+  }
+  .era-2000 .fact-pagination > span {
+    font-size: 9px;
+  }
+  .era-2000 .fact-expand-button {
+    font-size: 10px;
+    padding: 5px;
+  }
+  .era-2000 .track-open .eyebrow {
+    font-size: 8px;
+  }
+  .era-2000 .track-open strong {
+    font-size: 11px;
+  }
+  .era-2000 .track-open small {
+    font-size: 9px;
+  }
+  .era-2000 .dialog-heading {
+    margin: 0 -20px 18px;
+    padding: 7px 9px;
+  }
+  .era-2000 .dialog-heading .eyebrow {
+    font-size: 10px;
+  }
+  .era-2000 .memory-dialog {
+    padding-top: 0;
+  }
+}
+@media (max-width: 370px) {
+  .era-2000 .brand-card {
+    padding-left: 10px;
+  }
+  .era-2000 .brand-card:before,
+  .era-2000 .brand-card:after {
+    display: none;
+  }
+}
+.era-2000 .compact-menu summary {
+  background: linear-gradient(#fff, #dceafa);
+  color: #174875;
+  border-color: #85a7cf;
+  border-radius: 4px;
+}
+.app.era-2000 .device-2000 {
+  width: 238px;
+  border: 2px solid #adb8c3;
+  border-radius: 21px;
+  background: linear-gradient(110deg, #fff, #dbe1e8 65%, #fafafa);
+  box-shadow:
+    inset 2px 2px 3px #fff,
+    inset -3px -3px 6px #98a5b4,
+    0 5px 15px #0004;
+  padding: 12px;
+}
+.era-2000 .device-2000 .device-illustration {
+  display: flex;
+  justify-content: space-between;
+  color: #68727d;
+  font:
+    bold 10px Arial,
+    sans-serif;
+  padding: 1px 9px 8px;
+}
+.app.era-2000 .device-2000 .music-compact {
+  flex-direction: column;
+  padding: 0;
+  gap: 10px;
+}
+.app.era-2000 .device-2000 .track-open {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(#d4dfc7, #edf0dc);
+  border: 2px solid #8a9483;
+  border-radius: 5px;
+  box-shadow: inset 1px 2px 4px #61715e55;
+  color: #273322;
+}
+.app.era-2000 .device-2000 .track-open :is(strong, small, .eyebrow) {
+  color: #273322;
+}
+.app.era-2000 .device-2000 .music-buttons {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: linear-gradient(#fff, #e7ebf0);
+  border: 1px solid #bbc3cb;
+  justify-content: space-between;
+  padding: 5px;
+  box-shadow: 0 1px 3px #8997a4;
+}
+.app.era-2000 .device-2000 .listen-button {
+  position: absolute;
+  left: 33px;
+  top: 33px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin: 0;
+  background: linear-gradient(#e8ecf0, #c9d0d8);
+  border: 1px solid #a7b2bd;
+  color: #506579;
+}
+.app.era-2000 .device-2000 .music-buttons::before {
+  content: "MENU";
+  position: absolute;
+  top: 10px;
+  left: 34px;
+  font:
+    8px Arial,
+    sans-serif;
+  color: #738294;
+}
+.app.era-2000 .device-2000.expanded {
+  width: 350px;
+}
+@media (max-width: 899px) {
+  .app.era-2000 .device-2000 {
+    width: auto;
+    padding: 5px;
+    border-radius: 12px;
+  }
+  .app.era-2000 .device-2000 .music-compact {
+    flex-direction: row;
+    gap: 6px;
+  }
+  .app.era-2000 .device-2000 .track-open {
+    flex: 1;
+    min-width: 0;
+    padding: 6px;
+  }
+  .app.era-2000 .device-2000 .music-buttons {
+    width: 75px;
+    height: 60px;
+    flex-shrink: 0;
+  }
+  .app.era-2000 .device-2000 .listen-button {
+    left: 24px;
+    top: 17px;
+    width: 26px;
+    height: 26px;
+  }
+  .app.era-2000 .device-2000 .music-buttons::before {
+    top: 5px;
+    left: 25px;
+    font-size: 6px;
+  }
+}
+.era-2000 .feed-post {
+  border: 1px solid #95b4d9;
+  border-radius: 9px;
+  padding: 18px;
+  margin-top: 15px;
+  background: linear-gradient(#fff, #edf4fe);
+  box-shadow: 0 3px 8px #22487522;
+}
+.era-2000 .feed-heading,
+.era-2000 .profile-card {
+  background: linear-gradient(#edf7ff, #b7d8f7);
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #8fb2db;
+}
+.era-2000 .social-avatar {
+  background: linear-gradient(#b9e674, #4e9c21);
+  color: white;
+  border: 2px solid white;
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px #83ae69;
+}
+@media (min-width: 900px) and (max-height: 800px) {
+  .app.era-2000:is(.view-feed, .view-profile)
+    .device-2000:not(.expanded)
+    .music-compact {
+    flex-direction: row;
+  }
+  .app.era-2000:is(.view-feed, .view-profile)
+    .device-2000:not(.expanded)
+    .music-buttons {
+    width: 75px;
+    height: 60px;
+    flex-shrink: 0;
+  }
+  .app.era-2000:is(.view-feed, .view-profile)
+    .device-2000:not(.expanded)
+    .listen-button {
+    left: 24px;
+    top: 17px;
+    width: 26px;
+    height: 26px;
+  }
+  .app.era-2000:is(.view-feed, .view-profile)
+    .device-2000:not(.expanded)
+    .music-buttons::before {
+    top: 5px;
+    left: 25px;
+    font-size: 6px;
+  }
+}
+.era-2000 .personal-header {
+  background: linear-gradient(#dceeff, #f5f9ff);
+  border: 1px solid #88aad2;
+  border-top: 7px solid #2b72c2;
+}
+.era-2000 .profile-portrait {
+  border-radius: 12px;
+  background: linear-gradient(#b4e56a, #4d961e);
+  color: white;
+  border: 3px solid white;
+  box-shadow: 0 0 0 1px #87b46a;
+}
+.era-2000 .expanded-map-dialog > header {
+  background: linear-gradient(#3893eb, #1a58a9);
+  color: white;
+}
+.era-2000 .expanded-map-dialog small {
+  color: #eff7ff;
+}
