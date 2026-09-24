@@ -1,0 +1,636 @@
+@import url("https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;500;600;700&family=VT323&display=swap");
+.era-1980 .leaflet-tile-pane {
+  filter: invert(0.88) hue-rotate(170deg) saturate(0.45) brightness(0.9);
+}
+.era-1980 .fact-art {
+  background: #493354;
+  color: #f4bad6;
+}
+.era-1980 .vhs-status {
+  position: absolute;
+  bottom: 0;
+  left: 72px;
+  right: 0;
+  z-index: 550;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+.era-1980 .era-shell-top {
+  background: #120a22;
+  border-bottom: 1px solid #e739c7;
+  color: #70fffb;
+  font:
+    16px "VT323",
+    "Courier New",
+    monospace;
+  padding: 0 20px;
+  letter-spacing: 1.5px;
+}
+.era-1980 .shell-caption {
+  font-weight: 400;
+}
+.era-1980 .shell-caption svg {
+  display: none;
+}
+.era-1980 .vhs-signal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #f2d9ff;
+}
+.era-1980 .vhs-signal i {
+  width: 5px;
+  height: 5px;
+  background: #fe50cf;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #fe50cf;
+}
+.era-1980 .era-atmosphere {
+  display: block;
+  position: absolute;
+  inset: 27px 0 34px 72px;
+  z-index: 350;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 90% 5%, #9000ff15, transparent 55%),
+    radial-gradient(ellipse at 10% 100%, #ec00be25, transparent 55%);
+  box-shadow: inset 0 0 100px #19052965;
+}
+.era-1980 .era-atmosphere:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    #02000824 3px,
+    #02000824 4px
+  );
+}
+.era-1980 .vhs-horizon {
+  position: absolute;
+  bottom: -55px;
+  left: -10%;
+  right: -10%;
+  height: 230px;
+  transform: perspective(240px) rotateX(45deg);
+  transform-origin: bottom;
+  background-image:
+    linear-gradient(#f82ce470 1px, transparent 1px),
+    linear-gradient(90deg, #36eafa70 1px, transparent 1px);
+  background-size: 55px 35px;
+  mask-image: linear-gradient(transparent, #000 60%);
+}
+.era-1980 .vhs-tape {
+  position: absolute;
+  right: 30px;
+  top: 180px;
+  font:
+    20px/1.3 "VT323",
+    "Courier New",
+    monospace;
+  letter-spacing: 3px;
+  color: #8cfaf2;
+  text-shadow: 2px 2px #7c208b;
+  text-align: right;
+}
+.era-1980 .leaflet-tile-pane {
+  filter: invert(0.92) hue-rotate(185deg) saturate(0.65) brightness(1.05);
+}
+.era-1980 .navigation-rail {
+  background: linear-gradient(90deg, #190c2c, #241037);
+  border-right: 2px solid #ec39c6;
+  box-shadow: 3px 0 15px #e727ce30;
+}
+.era-1980 .rail-logo {
+  font-family: var(--font-display);
+  color: #70ffff;
+  text-shadow: 3px 2px #ec2bca;
+  border-color: #ec2bca;
+}
+.era-1980 .navigation-rail button {
+  border-radius: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #efcffa;
+  border: 1px solid transparent;
+}
+.era-1980 .navigation-rail button > svg {
+  color: #53fbf3;
+  filter: drop-shadow(2px 2px #d425be);
+}
+.era-1980 .navigation-rail :is(.rail-active, button[aria-expanded="true"]) {
+  background: #402049;
+  border: 1px solid #ec39c6;
+  box-shadow: inset 0 0 9px #e82fa71f;
+}
+.era-1980 .brand-card {
+  background: linear-gradient(155deg, #251035, #100d26);
+  border: 1px solid #fa3ecc;
+  border-left: 4px solid #fa3ecc;
+  padding: 13px 17px;
+}
+.era-1980 .brand-card h1 {
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #fff4ff;
+  text-shadow:
+    2px 2px 0 #ec21c4,
+    -1px -1px 0 #43f9fc,
+    0 0 12px #f227cb90;
+}
+.era-1980 .brand-card h1 > span {
+  display: none;
+}
+.era-1980 .brand-card > .brand-era-label {
+  font:
+    13px "VT323",
+    "Courier New",
+    monospace;
+  letter-spacing: 1px;
+  color: #57faf5;
+}
+.era-1980 .brand-card > span:last-child {
+  font:
+    12px "VT323",
+    "Courier New",
+    monospace;
+  letter-spacing: 1px;
+  margin-top: 7px;
+  color: #efb3e6;
+}
+.era-1980
+  :is(
+    .timeline,
+    .music-card,
+    .era-fact-popup,
+    .stories-drawer,
+    .memory-dialog,
+    .map-empty,
+    .map-notice
+  ) {
+  border: 1px solid #da49c6;
+  border-radius: 0;
+  background-color: #180e2c;
+}
+.era-1980 .timeline {
+  box-shadow: 3px 3px 0 #3af3e54d;
+  border-color: #45d7d8;
+}
+.era-1980 .decades button {
+  font-family: "VT323", "Courier New", monospace;
+  font-size: 26px;
+  font-weight: 400;
+  border-radius: 0;
+  padding: 6px 13px;
+  color: #bcacda;
+}
+.era-1980 .decades .active {
+  background: #fc3ac3;
+  color: #16051e;
+  border: 1px solid #ffbaf0;
+  box-shadow: 0 0 14px #ed1bb74a;
+}
+.era-1980 .year-picker select {
+  color: #71fcf6;
+  font-size: 12px;
+}
+.era-1980 :is(.primary-button, .secondary-button) {
+  background: #221035;
+  color: #66fff7;
+  border: 1px solid #48f9f0;
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  box-shadow: 3px 3px 0 #ff2cbb;
+}
+.era-1980 .primary-button:hover {
+  background: #3d174a;
+}
+.era-1980 .filters button {
+  border: 1px solid #9060a6;
+  border-radius: 0;
+  background: #1b0f2f;
+  box-shadow: 2px 2px #321644;
+  color: #ead8ff;
+  font-size: 12px;
+}
+.era-1980 .filters button.active {
+  background: #39ece1;
+  border-color: #9afff9;
+  color: #0e1821;
+  box-shadow: 2px 2px #ed30b9;
+}
+.era-1980 .map-period {
+  background: #170f2de8;
+  border: 1px solid #3ed9d4;
+  border-radius: 0;
+  box-shadow: 2px 2px #e92bb580;
+}
+.era-1980 .map-period strong {
+  color: #57fff2;
+  font:
+    17px "VT323",
+    "Courier New",
+    monospace;
+  letter-spacing: 1px;
+}
+.era-1980 :is(.drawer-heading, .fact-top, .music-heading, .dialog-heading) {
+  color: #72fff9;
+  background: #351338;
+  border-bottom: 1px solid #e33dbb;
+}
+.era-1980 .drawer-heading .eyebrow,
+.era-1980 .fact-top > span,
+.era-1980 .music-heading .eyebrow {
+  font:
+    14px "VT323",
+    "Courier New",
+    monospace;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+.era-1980 .dialog-heading {
+  margin: -26px -26px 20px;
+  padding: 9px 16px;
+}
+.era-1980 .dialog-heading .eyebrow {
+  font-family: "VT323", "Courier New", monospace;
+  font-size: 15px;
+  letter-spacing: 0.7px;
+}
+.era-1980
+  :is(.stories-content h2, .detail-title, .fact-body h2, .memory-dialog h2) {
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #ffbcec;
+}
+.era-1980 .fact-body p,
+.era-1980 .muted {
+  font-size: 12px;
+}
+.era-1980 .memory-story {
+  font-size: 15px;
+  color: #f1e2fc;
+}
+.era-1980 .fact-art {
+  background:
+    radial-gradient(circle at 70% 80%, #e51eba66, transparent 70%), #240d3d;
+  color: #6ffff3;
+  border: 1px solid #ae43c6;
+  border-radius: 0;
+}
+.era-1980 .fact-art:before {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 4px,
+    #b713bc50 5px,
+    #b713bc50 6px
+  );
+}
+.era-1980 .fact-art > span {
+  font:
+    400 53px "Audiowide",
+    "Courier New",
+    monospace;
+  letter-spacing: 0;
+  text-shadow: 3px 2px #f029c9;
+}
+.era-1980 .fact-art svg {
+  color: #f6a5ff;
+  filter: drop-shadow(2px 2px #aa12df);
+}
+.era-1980 :is(.fact-pagination, .music-provider-note, .source-note) {
+  border-color: #713c89;
+}
+.era-1980 .fact-pagination > span {
+  font:
+    14px "VT323",
+    "Courier New",
+    monospace;
+  color: #ccafde;
+  letter-spacing: 0.5px;
+}
+.era-1980 .fact-source,
+.era-1980 .fact-meta {
+  font-size: 10px;
+}
+.era-1980 :is(.icon-button, .listen-button) {
+  border-radius: 0;
+}
+.era-1980 .fact-top .icon-button,
+.era-1980 .drawer-heading .icon-button {
+  border: 1px solid #ea5ecd;
+  color: #ffbdeb;
+  width: 25px;
+  height: 25px;
+}
+.era-1980 .record-art {
+  border-radius: 2px;
+  background: #351b44;
+  color: #52fff1;
+  border: 1px solid #cd5ccb;
+  box-shadow: inset 0 0 10px #cf22cb30;
+}
+.era-1980 .track-open .eyebrow {
+  font:
+    12px "VT323",
+    "Courier New",
+    monospace;
+  color: #f09dd9;
+  letter-spacing: 0.7px;
+}
+.era-1980 .track-open strong {
+  color: #6bfff3;
+}
+.era-1980 .track-open small {
+  color: #dbc4ed;
+}
+.era-1980 .memory-art {
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 50% 50%, #87249870, transparent 75%), #1d1034;
+  border-color: #a839b1;
+  color: #7ffff8;
+}
+.era-1980 .art-grid {
+  background-image:
+    linear-gradient(#f12fcd40 1px, transparent 1px),
+    linear-gradient(90deg, #46fff43d 1px, transparent 1px);
+}
+.era-1980 .art-year {
+  font-size: 34px;
+  text-shadow: 2px 2px #eb23c2;
+}
+.era-1980 .list-symbol {
+  border: 1px solid #da37c3;
+  border-radius: 0;
+  color: #62fff1;
+  box-shadow: 2px 2px #7538a6;
+}
+.era-1980 .memory-marker {
+  border-radius: 2px;
+  transform: rotate(-8deg);
+  border: 2px solid #6bfff6;
+  box-shadow:
+    3px 3px #e21fc7,
+    0 0 12px #4bffed65;
+  font-family: "VT323", monospace;
+}
+.era-1980 .memory-marker.selected {
+  transform: scale(1.12) rotate(-8deg);
+  outline-color: #ff6ada;
+}
+.era-1980 :is(input, textarea, select) {
+  border-radius: 0;
+  border-color: #86469c;
+}
+.era-1980 .leaflet-control-zoom {
+  border-radius: 0 !important;
+  border-color: #56ebdf !important;
+}
+.era-1980 .vhs-status {
+  background: #160b23;
+  border-top: 1px solid #bf30bd;
+  color: #7bfdf4;
+  font:
+    15px "VT323",
+    "Courier New",
+    monospace;
+  letter-spacing: 2px;
+}
+@media (min-width: 900px) {
+  .era-1980 .vhs-status {
+    height: 30px;
+  }
+  .era-1980 .leaflet-bottom {
+    bottom: 30px !important;
+  }
+  .era-1980 .map-reset {
+    bottom: 142px;
+  }
+}
+@media (min-width: 900px) and (max-width: 1150px) {
+  .era-1980 .brand-card h1 {
+    font-size: 23px;
+  }
+  .era-1980 .brand-card {
+    min-width: 230px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .era-1980 .brand-card > span:last-child {
+    font-size: 10px;
+  }
+  .era-1980 .decades button {
+    padding: 7px 9px;
+  }
+}
+@media (max-width: 899px) {
+  .era-1980 .vhs-status {
+    display: none;
+  }
+  .era-1980 .brand-card {
+    padding: 13px 10px;
+  }
+  .era-1980 .brand-card h1 {
+    font-size: 19px;
+    letter-spacing: 0;
+  }
+  .era-1980 .brand-card > span:last-child {
+    font-size: 9px;
+    letter-spacing: 0;
+    margin-top: 6px;
+  }
+  .era-1980 .primary-button {
+    font-size: 10px;
+    padding: 10px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .era-1980 .timeline {
+    height: 56px;
+    padding: 7px;
+  }
+  .era-1980 .decades button {
+    font-size: 25px;
+    padding: 5px 7px;
+  }
+  .era-1980 .year-picker select {
+    font-size: 10px;
+  }
+  .era-1980 .filters button {
+    font-size: 11px;
+  }
+  .era-1980 .map-period strong {
+    font-size: 14px;
+  }
+  .era-1980 .navigation-rail {
+    padding: 4px 8px;
+    border-top: 1px solid #f03ac7;
+    border-right: 0;
+  }
+  .era-1980 .navigation-rail button {
+    font-size: 9px;
+  }
+  .era-1980 .era-atmosphere {
+    inset: 0 0 80px;
+  }
+  .era-1980 .vhs-tape {
+    display: none;
+  }
+  .era-1980 .vhs-horizon {
+    height: 140px;
+    bottom: -45px;
+    opacity: 0.65;
+  }
+  .era-1980 .fact-top > span,
+  .era-1980 .drawer-heading .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+  .era-1980 .fact-body h2 {
+    font-size: 17px;
+    line-height: 1.4;
+  }
+  .era-1980 .fact-body p {
+    font-size: 12px;
+  }
+  .era-1980 .fact-pagination > span {
+    font-size: 12px;
+  }
+  .era-1980 .track-open .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  .era-1980 .detail-title,
+  .era-1980 .stories-content h2 {
+    font-size: 19px;
+  }
+  .era-1980 .dialog-heading {
+    margin: -20px -20px 18px;
+    padding: 8px 10px;
+  }
+  .era-1980 .dialog-heading .eyebrow {
+    font-size: 13px;
+  }
+  .era-1980 .memory-dialog h2 {
+    font-size: 20px;
+  }
+}
+@media (max-width: 370px) {
+  .era-1980 .brand-card h1 {
+    font-size: 16px;
+  }
+  .era-1980 .brand-card > span:last-child {
+    font-size: 8px;
+  }
+}
+@media (min-width: 900px) and (max-height: 760px) {
+  .era-1980 .vhs-tape {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .era-1980 .era-atmosphere:after {
+    background: none;
+  }
+  .era-1980 .vhs-horizon {
+    transform: none;
+    opacity: 0.25;
+  }
+}
+.era-1980 .compact-menu summary {
+  background: #180e2c;
+  color: #44f3ed;
+  border-color: #db42c3;
+  font-family: "VT323", monospace;
+  font-size: 23px;
+}
+.app.era-1980 .device-1980 {
+  background: repeating-linear-gradient(
+    3deg,
+    #573522 0 3px,
+    #68442c 4px 7px,
+    #754e33 8px 9px
+  );
+  border: 3px solid #926d49;
+  border-radius: 5px;
+  box-shadow:
+    0 6px 20px #0007,
+    inset 0 0 0 2px #302017;
+}
+.era-1980 .device-1980 .device-illustration {
+  height: 100px;
+  margin: 10px 12px 0;
+  background: linear-gradient(135deg, #353633, #151717);
+  border: 3px solid #241a13;
+  box-shadow: inset 0 1px 4px #000;
+}
+.era-1980 .device-1980 .device-illustration > span {
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  font: 8px monospace;
+  color: #e1d1a5;
+}
+.app.era-1980 .device-1980 .music-compact {
+  margin: 8px;
+  background: #1b1d1c;
+  padding: 9px;
+  border: 1px solid #9a7950;
+  color: #f8e0ac;
+}
+@media (max-width: 899px) {
+  .app.era-1980 .device-1980 .music-compact {
+    margin: 3px;
+    padding: 5px;
+  }
+  .app.era-1980 .device-1980.expanded .device-illustration {
+    display: block;
+  }
+}
+.era-1980 .compact-menu summary {
+  font-family: "VT323", monospace;
+  font-size: 23px;
+}
+.era-1980 .feed-post {
+  background: #180e2ce6;
+  padding: 18px;
+  margin-top: 14px;
+  border: 1px solid #ae358c;
+  box-shadow: 3px 3px #2befea30;
+}
+.era-1980 .feed-heading h2 {
+  color: #57fff2;
+  text-shadow: 2px 2px #f135b9;
+}
+.era-1980 .personal-header {
+  border: 1px solid #fa3ecc;
+  box-shadow: 4px 4px #39ece155;
+}
+.era-1980 .personal-identity h2 {
+  color: #65fff1;
+  text-shadow: 2px 2px #ed30b9;
+}
+.era-1980 .personal-map {
+  border-color: #39ece1;
+}
+.era-1980 .expanded-map-dialog {
+  border-color: #f13bbf;
+  box-shadow: 0 0 25px #eb2dc34d;
+}
+
+@media (max-width: 899px) {
+  .app.era-1980 .music-card:not(.expanded) .device-illustration {
+    display: none;
+  }
+}
