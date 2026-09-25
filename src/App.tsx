@@ -15,7 +15,7 @@ import { eraContent, initialMemories } from "./data";
 import { loadMemories, saveMemories } from "./storage";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
-//import Profile from "./components/Profile";
+import Profile from "./components/Profile";
 import SocialFeed from "./components/SocialFeed";
 import Timeline from "./components/Timeline";
 import MemoryMap, { type Point } from "./components/MemoryMap";
@@ -403,7 +403,7 @@ export default function App() {
           onClose={() => setFactsOpen(false)}
         />
       )}
-      {/*view === "profile" && (
+      {view === "profile" && (
         <Profile
           memories={ownMemories}
           allMemories={local}
@@ -413,7 +413,7 @@ export default function App() {
           onSelect={(m) => setSelectedId(m?.id ?? null)}
           onAdd={startAdding}
         />
-      )*/}
+      )}
       <div hidden={view !== "feed"}>
         <SocialFeed
           memories={memories}
