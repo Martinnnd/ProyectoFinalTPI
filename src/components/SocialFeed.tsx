@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Heart, MapPin, MessageCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Bookmark,
+  Heart,
+  MapPin,
+  MessageCircle,
+  Repeat2,
+} from "lucide-react";
 import type { Memory } from "../types";
+
+function toggleId(ids: string[], id: string) {
+  return ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id];
+}
+
+const SCORES = [1, 2, 3, 4, 5] as const;
 
 export default function SocialFeed({
   memories,
@@ -20,6 +33,9 @@ export default function SocialFeed({
   onAdd: () => void;
 }) {
   const [likes, setLikes] = useState<string[]>([]);
+  const [reposts, setReposts] = useState<string[]>([]);
+  const [saves, setSaves] = useState<string[]>([]);
+  const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, string[]>>({});
   const [tab, setTab] = useState<"all" | "following">("all");
   const [comment, setComment] = useState("");
@@ -40,6 +56,14 @@ export default function SocialFeed({
       : memories;
   function follow(author: string) {
     onFollow(author);
+  }
+  function rate(id: string, value: number) {
+    setRatings((v) => {
+      const next = { ...v };
+      if (next[id] === value) delete next[id];
+      else next[id] = value;
+      return next;
+    });
   }
   function open(memory: Memory | null) {
     setComment("");
@@ -105,30 +129,66 @@ export default function SocialFeed({
                   </button>
                 )}
               </header>
-              <button className="post-content" onClick={() => open(memory)}>
-                <h3>{memory.title}</h3>
-                <p className={selected ? "" : "post-excerpt"}>
-                  {memory.description}
-                </p>
-                {!selected && (
-                  <span className="read-post">Leer recuerdo completo →</span>
+              <button
+                className={
+                  memory.image
+                    ? `post-content with-image${selected ? " is-open" : ""}`
+                    : "post-content"
+                }
+                onClick={() => open(memory)}
+              >
+                <span className="post-text">
+                  <h3>{memory.title}</h3>
+                  <p className={selected ? "" : "post-excerpt"}>
+                    {memory.description}
+                  </p>
+                  {!selected && (
+                    <span className="read-post">Leer recuerdo completo →</span>
+                  )}
+                </span>
+                {memory.image && (
+                  <img
+                    className="post-image"
+                    src={memory.image}
+                    alt={`Fotografía de ${memory.title} en ${memory.place}, ${memory.year}`}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      e.currentTarget.hidden = true;
+                    }}
+                  />
                 )}
               </button>
               <button className="post-place" onClick={() => onMap(memory)}>
                 <MapPin size={14} />
                 {memory.place} · {memory.year}
               </button>
+              <div
+                className="post-ratings"
+                role="group"
+                aria-label={`Puntuar publicación: ${memory.title}`}
+              >
+                {SCORES.map((value) => (
+                  <button
+                    key={value}
+                    aria-label={`Puntar ${value} de 5`}
+                    aria-pressed={ratings[memory.id] === value}
+                    onClick={() => rate(memory.id, value)}
+                  >
+                    {value}
+                  </button>
+                ))}
+                <small className="post-rating-value">
+                  {ratings[memory.id]
+                    ? `Puntaje: ${ratings[memory.id]} de 5`
+                    : "Sin puntuar"}
+                </small>
+              </div>
               <footer>
                 <button
                   aria-label={`Me gusta: ${memory.title}`}
                   aria-pressed={likes.includes(memory.id)}
-                  onClick={() =>
-                    setLikes((v) =>
-                      v.includes(memory.id)
-                        ? v.filter((id) => id !== memory.id)
-                        : [...v, memory.id],
-                    )
-                  }
+                  onClick={() => setLikes((v) => toggleId(v, memory.id))}
                 >
                   <Heart
                     size={17}
@@ -139,6 +199,25 @@ export default function SocialFeed({
                 <button onClick={() => open(memory)}>
                   <MessageCircle size={17} />
                   {comments[memory.id]?.length || ""} Comentar
+                </button>
+                <button
+                  aria-label={`Repostear: ${memory.title}`}
+                  aria-pressed={reposts.includes(memory.id)}
+                  onClick={() => setReposts((v) => toggleId(v, memory.id))}
+                >
+                  <Repeat2 size={17} />
+                  {reposts.includes(memory.id) ? "Reposteado" : "Repostear"}
+                </button>
+                <button
+                  aria-label={`Guardar: ${memory.title}`}
+                  aria-pressed={saves.includes(memory.id)}
+                  onClick={() => setSaves((v) => toggleId(v, memory.id))}
+                >
+                  <Bookmark
+                    size={17}
+                    fill={saves.includes(memory.id) ? "currentColor" : "none"}
+                  />
+                  {saves.includes(memory.id) ? "Guardado" : "Guardar"}
                 </button>
               </footer>
               {selected && (
@@ -178,8 +257,8 @@ export default function SocialFeed({
                     </button>
                   </form>
                   <small>
-                    Comentarios, me gusta y seguidos son de esta sesión de
-                    demostración.
+                    Comentarios, me gusta, repostes, guardados, puntajes y
+                    seguidos son de esta sesión de demostración.
                   </small>
                 </section>
               )}

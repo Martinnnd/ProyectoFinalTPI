@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator } from "@playwright/test";
 
 test("mapa a pantalla completa, filtros, historias y creación persistente", async ({
   page,
@@ -496,6 +496,375 @@ test("feed: epocas, detalle, seguir, comentar, perfil y regreso al mapa", async 
     ),
   ).toBe(true);
   await expect(page.locator(".feed-heading")).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("feed: miniatura a la derecha, imagen abierta a lo ancho y ocultas si fallan", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.addInitScript(() => {
+    const base = {
+      category: "Música",
+      author: "Vos",
+      source: "local",
+      lat: -34.5889,
+      lng: -58.43,
+    };
+    localStorage.setItem(
+      "nostalgia.memories.v1",
+      JSON.stringify([
+        {
+          ...base,
+          id: "local-foto",
+          title: "La disquetera plateada",
+          year: 1994,
+          place: "Palermo, Buenos Aires",
+          description: "Un verano entero con el mismo cassette.",
+          image:
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Crect width='80' height='60' fill='%23c96f3a'/%3E%3C/svg%3E",
+        },
+        {
+          ...base,
+          id: "local-panoramica",
+          title: "El horizonte del parquet",
+          year: 1991,
+          place: "Mar del Plata, Buenos Aires",
+          description: "Una tira de fotos pegada en la pared del living.",
+          image:
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2000' height='100'%3E%3Crect width='2000' height='100' fill='%234a7ba7'/%3E%3C/svg%3E",
+        },
+        {
+          ...base,
+          id: "local-rota",
+          title: "La foto que se perdio",
+          year: 1993,
+          place: "Caballito, Buenos Aires",
+          description: "Un disco rayado que nunca volvio a reproducirse.",
+          image: "/no-existe-1993.png",
+        },
+        {
+          ...base,
+          id: "local-sin-foto",
+          title: "Recuerdo sin foto",
+          year: 1992,
+          place: "Recoleta, Buenos Aires",
+          description: "Una descripcion de un recuerdo guardado sin imagen.",
+        },
+      ]),
+    );
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Feed", exact: true }).click();
+  const post = (title: string) =>
+    page.locator(".feed-post", { hasText: title });
+  const withImage = post("La disquetera plateada");
+  const wide = post("El horizonte del parquet");
+  const broken = post("La foto que se perdio");
+  const noImage = post("Recuerdo sin foto");
+  const thumb = withImage.locator(".post-image");
+  await expect(thumb).toBeVisible();
+  await expect(thumb).toHaveAttribute(
+    "alt",
+    "Fotografía de La disquetera plateada en Palermo, Buenos Aires, 1994",
+  );
+  await expect(thumb).toHaveAttribute("loading", "lazy");
+  await expect(thumb).toHaveAttribute("decoding", "async");
+  await expect(withImage.locator(".post-content > .post-image")).toHaveCount(1);
+  await broken.scrollIntoViewIfNeeded();
+  await expect(broken.locator(".post-image")).toBeHidden();
+  await expect(noImage.locator(".post-image")).toHaveCount(0);
+  await expect(page.locator(".post-text")).toHaveCount(
+    await page.locator(".feed-post").count(),
+  );
+  const text = await withImage.locator(".post-text").boundingBox();
+  const image = await thumb.boundingBox();
+  expect(image!.x).toBeGreaterThanOrEqual(text!.x + text!.width - 1);
+  expect(image!.width).toBe(108);
+  expect(await thumb.evaluate((el) => getComputedStyle(el).objectFit)).toBe(
+    "cover",
+  );
+  expect((await wide.locator(".post-image").boundingBox())!.width).toBe(108);
+  const openPost = page.locator(".post-content.is-open");
+  const openImage = page.locator(".post-content.is-open .post-image");
+  const back = page.getByRole("button", { name: "Volver a feed" });
+  const openBox = async () => {
+    await page.locator(".feed-post").scrollIntoViewIfNeeded();
+    const box = await openImage.boundingBox();
+    return {
+      image: box!,
+      post: (await openPost.boundingBox())!,
+      text: (await page
+        .locator(".post-content.is-open .post-text")
+        .boundingBox())!,
+    };
+  };
+  await withImage.locator(".post-content").click();
+  await expect(openPost).toHaveCount(1);
+  await expect(page.locator(".post-content.is-open.with-image > .post-image")).toHaveCount(1);
+  let box = await openBox();
+  expect(Math.abs(box.image.width - box.post.width)).toBeLessThanOrEqual(1);
+  expect(box.image.y).toBeGreaterThanOrEqual(box.text.y + box.text.height - 1);
+  expect(Math.abs(box.image.height - (box.image.width * 9) / 16)).toBeLessThanOrEqual(2);
+  expect(await openImage.evaluate((el) => getComputedStyle(el).objectFit)).toBe(
+    "cover",
+  );
+  await back.click();
+  expect((await thumb.boundingBox())!.width).toBe(108);
+  await wide.locator(".post-content").click();
+  box = await openBox();
+  expect(Math.abs(box.image.height - (box.image.width * 9) / 16)).toBeLessThanOrEqual(2);
+  await back.click();
+  await broken.locator(".post-content").click();
+  await page.locator(".feed-post").scrollIntoViewIfNeeded();
+  await expect(broken.locator(".post-image")).toBeHidden();
+  await back.click();
+  await withImage.locator(".post-content").click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  box = await openBox();
+  expect(Math.abs(box.image.width - box.post.width)).toBeLessThanOrEqual(1);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.setViewportSize({ width: 880, height: 900 });
+  box = await openBox();
+  expect(box.image.height).toBe(220);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test("feed: repostear y guardar cambian estado y sobreviven a la publicación", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "nostalgia.memories.v1",
+      JSON.stringify([
+        {
+          id: "local-acciones",
+          title: "La primera cinta del año",
+          year: 1995,
+          category: "Música",
+          description: "Una cinta regrabada que sonaba igual de nueva.",
+          place: "Belgrano, Buenos Aires",
+          author: "Vos",
+          lat: -34.5622,
+          lng: -58.4536,
+          source: "local",
+        },
+      ]),
+    ),
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Feed", exact: true }).click();
+  const post = page.locator(".feed-post", {
+    hasText: "La primera cinta del año",
+  });
+  const footer = post.locator("footer");
+  const like = footer.getByRole("button", {
+    name: "Me gusta: La primera cinta del año",
+  });
+  const comment = footer.getByRole("button", { name: "Comentar" });
+  const repost = footer.getByRole("button", {
+    name: "Repostear: La primera cinta del año",
+  });
+  const save = footer.getByRole("button", {
+    name: "Guardar: La primera cinta del año",
+  });
+  for (const button of [like, comment, repost, save])
+    await expect(button).toBeVisible();
+  await expect(footer.locator("button")).toHaveCount(4);
+  await expect(repost).toHaveText("Repostear");
+  await expect(save).toHaveText("Guardar");
+  await expect(repost).toHaveAttribute("aria-pressed", "false");
+  await expect(save).toHaveAttribute("aria-pressed", "false");
+  await repost.click();
+  await save.click();
+  await expect(page.locator(".post-comments")).toHaveCount(0);
+  await expect(repost).toHaveAttribute("aria-pressed", "true");
+  await expect(save).toHaveAttribute("aria-pressed", "true");
+  await expect(repost).toHaveText("Reposteado");
+  await expect(save).toHaveText("Guardado");
+  const read = (button: Locator) =>
+    button.evaluate((el) => ({
+      color: getComputedStyle(el).color,
+      fill: el.querySelector("svg")?.getAttribute("fill"),
+    }));
+  const [on, off] = [await read(save), await read(like)];
+  expect(on.color).not.toBe(off.color);
+  expect(on.fill).toBe("currentColor");
+  expect(off.fill).toBe("none");
+  await post.locator(".post-content").click();
+  await expect(page.locator(".post-comments")).toBeVisible();
+  await expect(repost).toHaveAttribute("aria-pressed", "true");
+  await expect(save).toHaveText("Guardado");
+  await page.getByRole("button", { name: "Volver a feed" }).click();
+  await expect(repost).toHaveAttribute("aria-pressed", "true");
+  await expect(save).toHaveText("Guardado");
+  await repost.click();
+  await expect(repost).toHaveAttribute("aria-pressed", "false");
+  await expect(repost).toHaveText("Repostear");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await post.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  const row = (await footer.boundingBox())!;
+  expect(row.x + row.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  expect(
+    await page.evaluate(() => {
+      const stream = document.querySelector(".social-stream")!;
+      return stream.scrollWidth <= stream.clientWidth;
+    }),
+  ).toBe(true);
+  await expect(footer.locator("button")).toHaveCount(4);
+  expect(errors).toEqual([]);
+});
+
+test("feed: puntuar la publicación de 1 a 5 fija, muestra y se puede borrar", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "nostalgia.memories.v1",
+      JSON.stringify([
+        {
+          id: "local-puntaje",
+          title: "La primera cinta del año",
+          year: 1995,
+          category: "Música",
+          description: "Una cinta regrabada que sonaba igual de nueva.",
+          place: "Belgrano, Buenos Aires",
+          author: "Vos",
+          lat: -34.5622,
+          lng: -58.4536,
+          source: "local",
+        },
+      ]),
+    ),
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Feed", exact: true }).click();
+  const post = page.locator(".feed-post", {
+    hasText: "La primera cinta del año",
+  });
+  await post.scrollIntoViewIfNeeded();
+  const group = post.getByRole("group", {
+    name: "Puntuar publicación: La primera cinta del año",
+  });
+  await expect(group).toBeVisible();
+  const buttons = group.locator("button");
+  await expect(buttons).toHaveCount(5);
+  await expect(buttons).toHaveText(["1", "2", "3", "4", "5"]);
+  const attrs = (name: string) =>
+    buttons.evaluateAll(
+      (els, n) => els.map((el) => el.getAttribute(n)),
+      name,
+    );
+  const allFalse = ["false", "false", "false", "false", "false"];
+  await expect(attrs("aria-label")).toEqual([
+    "Puntar 1 de 5",
+    "Puntar 2 de 5",
+    "Puntar 3 de 5",
+    "Puntar 4 de 5",
+    "Puntar 5 de 5",
+  ]);
+  await expect(attrs("aria-pressed")).toEqual(allFalse);
+  await expect(group.locator(".post-rating-value")).toHaveText("Sin puntuar");
+  const circle = await buttons.nth(3).boundingBox();
+  expect(circle!.width).toBe(28);
+  expect(circle!.height).toBe(28);
+  expect(
+    await buttons.nth(3).evaluate((el) => getComputedStyle(el).borderRadius),
+  ).toBe("50%");
+  const one = await buttons.nth(0).boundingBox();
+  const five = await buttons.nth(4).boundingBox();
+  expect(five!.x).toBeGreaterThan(one!.x);
+  expect(Math.abs(five!.y - one!.y)).toBeLessThanOrEqual(1);
+  const four = group.getByRole("button", { name: "Puntar 4 de 5" });
+  await four.click();
+  await expect(page.locator(".post-comments")).toHaveCount(0);
+  await expect(four).toHaveAttribute("aria-pressed", "true");
+  await expect(attrs("aria-pressed")).toEqual([
+    "false",
+    "false",
+    "false",
+    "true",
+    "false",
+  ]);
+  await expect(group.locator(".post-rating-value")).toHaveText(
+    "Puntaje: 4 de 5",
+  );
+  const token = (name: string) =>
+    page.evaluate((n) => {
+      const app = document.querySelector(".app")!;
+      return getComputedStyle(app).getPropertyValue(n).trim();
+    }, name);
+  const hexToRgb = (hex: string) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+  const tone = (target: Locator) =>
+    target.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { background: s.backgroundColor, color: s.color };
+    });
+  const active = await tone(four);
+  const idle = await tone(buttons.nth(0));
+  expect(active.background).toBe(hexToRgb(await token("--accent")));
+  expect(active.background).not.toBe(idle.background);
+  expect(active.color).toBe(hexToRgb(await token("--surface")));
+  await post.locator(".post-content").click();
+  await expect(page.locator(".post-content.is-open")).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: "Puntar 4 de 5" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Volver a feed" }).click();
+  await expect(page.locator(".post-content.is-open")).toHaveCount(0);
+  await expect(four).toHaveAttribute("aria-pressed", "true");
+  await expect(group.locator(".post-rating-value")).toHaveText(
+    "Puntaje: 4 de 5",
+  );
+  const two = group.getByRole("button", { name: "Puntar 2 de 5" });
+  await two.click();
+  await expect(two).toHaveAttribute("aria-pressed", "true");
+  await expect(four).toHaveAttribute("aria-pressed", "false");
+  await expect(group.locator(".post-rating-value")).toHaveText(
+    "Puntaje: 2 de 5",
+  );
+  await two.click();
+  await expect(attrs("aria-pressed")).toEqual(allFalse);
+  await expect(group.locator(".post-rating-value")).toHaveText("Sin puntuar");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await post.scrollIntoViewIfNeeded();
+  const small = await buttons.nth(0).boundingBox();
+  expect(small!.width).toBe(26);
+  expect(small!.height).toBe(26);
+  expect(
+    await page.evaluate(() => {
+      const stream = document.querySelector(".social-stream")!;
+      return {
+        document: document.documentElement.scrollWidth <= innerWidth,
+        stream: stream.scrollWidth <= stream.clientWidth,
+      };
+    }),
+  ).toEqual({ document: true, stream: true });
   expect(errors).toEqual([]);
 });
 

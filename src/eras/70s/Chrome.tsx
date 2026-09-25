@@ -1,6 +1,7 @@
 import { Map } from "lucide-react";
 import type { ChromeProps } from "../contracts";
 import { theme } from "./theme";
+
 export default function Chrome({ period, count }: ChromeProps) {
   const label = period.year ?? `${period.decade}–${period.decade + 9}`;
   return (
