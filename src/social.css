@@ -164,6 +164,38 @@
   margin-top: 9px;
   text-decoration: underline;
 }
+.post-content.with-image {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.post-text {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+.post-image {
+  flex-shrink: 0;
+  width: 108px;
+  height: 108px;
+  align-self: center;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.post-content.is-open {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.post-content.is-open .post-text {
+  flex: 0 0 auto;
+}
+.post-content.is-open .post-image {
+  width: auto;
+  height: auto;
+  max-height: 600px;
+}
 .post-place {
   display: flex;
   align-items: center;
@@ -178,9 +210,42 @@
 .post-place svg {
   flex-shrink: 0;
 }
+.post-ratings {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+.post-ratings button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.post-ratings button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+}
+.post-ratings .post-rating-value {
+  margin-left: 4px;
+  font-size: 10px;
+  color: var(--muted);
+}
 .feed-post > footer {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  column-gap: 20px;
+  row-gap: 8px;
 }
 .feed-post > footer button {
   display: flex;
@@ -386,6 +451,32 @@
   }
   .post-content p {
     font-size: 13px;
+  }
+  .post-content.with-image {
+    gap: 12px;
+  }
+  .post-image {
+    width: 76px;
+    height: 76px;
+  }
+  .post-content.is-open .post-image {
+    max-height: 220px;
+  }
+  .post-ratings {
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .post-ratings button {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+  .feed-post > footer {
+    column-gap: 12px;
+    row-gap: 6px;
+  }
+  .feed-post > footer button {
+    font-size: 10px;
   }
   .post-comments form {
     flex-wrap: wrap;

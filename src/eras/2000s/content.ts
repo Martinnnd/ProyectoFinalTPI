@@ -16,6 +16,7 @@ export const content = {
       year: 2007,
       category: "Personales",
       author: "Cami",
+      image: "https://quehacerenba.com/wp-content/uploads/2023/07/img_0845.jpg",
       description:
         "Nos juntamos en el Parque Centenario después de rendir la última materia. Llevé una cámara digital plateada que usaba dos pilas y una tarjeta donde casi no quedaba espacio. Elegimos el lago de fondo y sacamos la misma foto ocho veces: siempre alguien cerraba los ojos. Esa noche subí una al Fotolog con un marco negro y un texto larguísimo. Mi mejor amiga comentó antes de que terminara de avisarle por Messenger.",
       source: "demo",
@@ -29,6 +30,7 @@ export const content = {
       year: 2005,
       category: "Música",
       author: "Agus",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3GEJYv0JMgPY0DBqGcrZxIh-xW6JtHZ4uIuUi3L9U-BgzePheBjJleVlQ&s=10",
       description:
         "Después de mi primera entrevista de trabajo fui con mi novia al Monumento a la Bandera. Nos sentamos en la parte baja de las escalinatas, mirando el Paraná. En mi MP3 de 128 MB entraban pocas canciones, así que las conocíamos de memoria. Compartimos los auriculares y una gaseosa tibia mientras le contaba todas las cosas que creía haber contestado mal. A la semana me llamaron. Para festejar volvimos al mismo lugar.",
       source: "demo",
@@ -42,6 +44,7 @@ export const content = {
       year: 2004,
       category: "Lugares",
       author: "Flor",
+      image: "https://upload.wikimedia.org/wikipedia/commons/b/bf/Plaza_San_Mart%C3%ADn_C%C3%B3rdoba_2011-03-06.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original",
       description:
         "Mis amigas y yo quedamos en la Plaza San Martín de Córdoba para intercambiar las fotos de una salida del colegio. Llevé las copias impresas en un sobre de laboratorio; algunas tenían los dedos tapando el lente. Nos repartimos las mejores junto a la Catedral y prometimos escanear las otras. Esa noche la conversación siguió por Messenger: cada una se puso una foto distinta y nos mandamos zumbidos hasta que nos mandaron a dormir.",
       source: "demo",
@@ -55,6 +58,7 @@ export const content = {
       year: 2009,
       category: "Acontecimientos",
       author: "Juan",
+      image: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWn9bl_UQY-Raa2UYVIC1xJkykrqXqxRFmmr6O7yfKzjQL6Y3wg_mC7pMyTvNmpkFIgSodBffPei509n5RnigPMdE5ZFyBYV3jU61DpgjFjmhhNXx-ZHHiaM07dOiNNrITwFL-U=s1360-w1360-h1020-rw",
       description:
         "Armamos un grupo para reencontrarnos cinco años después de terminar el colegio. Elegimos el lago del Parque General San Martín, en Mendoza, porque todos sabíamos llegar. Cada uno llevó algo para el picnic; yo aparecí con el álbum de la fiesta de egresados. Nos pasamos las fotos de mano en mano y repetimos una, en el mismo orden en que estábamos en el colegio. Esta vez entramos todos en el encuadre.",
       source: "demo",
@@ -68,6 +72,7 @@ export const content = {
       year: 2002,
       category: "Cine",
       author: "Vero",
+      image: "https://pbs.twimg.com/media/Fkg5KUrWYAA8pcZ?format=jpg&name=medium",  
       description:
         "Salimos del departamento con la sombrilla y llegamos hasta Plaza Colón, en Mar del Plata, antes de que empezara a llover. Nos refugiamos con mis primos y decidimos volver a buscar una película para la tarde. Terminamos viendo Shrek, que habíamos conseguido en video, sentados en colchones en el living. Afuera seguía lloviendo; adentro repartíamos pochoclos en tazas porque no había suficientes bowls. Fue el día de vacaciones que más recordamos.",
       source: "demo",
