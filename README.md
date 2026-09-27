@@ -89,3 +89,11 @@ tests/                      Recorridos de interfaz y Mapbox real
 ## Datos locales al cambiar de proyecto
 
 localhost:5173, localhost:3000 y localhost:3001 son orígenes distintos: no comparten localStorage. Los recuerdos de tu navegador anterior no desaparecen, pero no se trasladan copiando archivos. Se conserva la clave nostalgia.memories.v1 y su formato. Para pasar recuerdos propios, copiar su JSON desde Application → Local Storage del origen anterior al mismo nombre en el nuevo origen y recargar. Hacerlo solo con datos propios; no usar localStorage.clear(). Los 28 ejemplos vienen con el código.
+
+### Reproductores detallados por época
+
+Los equipos se migraron desde TPIMockFront manteniendo el resto de esta aplicación Next.js: tocadiscos y vitrina de vinilos (70s), rockola y fichas (80s), radio y cassettes (90s), iPod y biblioteca (2000s). Cada `src/eras/<época>/content.ts` contiene cinco canciones. El diseño pertenece a `Player.tsx` y `theme.css` dentro de cada época.
+
+La interacción común está en `src/eras/shared/PlayerFrame.tsx`, `SongPicker.tsx`, `deviceSound.ts` y `SpotifyEmbed.tsx`. Permite selección por clic/toque, arrastre al equipo en escritorio, efectos mecánicos silenciables y animaciones. La API de Spotify Embed informa reproducción/pausa para activar o detener las animaciones, sin modificar la duración disponible de las muestras. Si falla la API se ofrece el iframe básico sin simular reproducción. Se respeta movimiento reducido.
+
+Validación: `npm run check`, `npm test`, `npm run build` y `npx playwright test --config playwright.players.config.ts`. Las pruebas de estado de Spotify simulan sus eventos; las pruebas de biblioteca verifican selección, cinco pistas, arrastre y comportamiento móvil.

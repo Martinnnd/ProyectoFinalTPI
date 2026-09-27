@@ -138,19 +138,40 @@ export const content = {
     },
   ],
   music: [
-    {
-      title: "Sweet Child O' Mine",
-      artist: "Guns N' Roses",
-      year: 1987,
-      spotifyId: "5r9AgnhkPQXeKG1w5rauDq",
-      reference: "https://open.spotify.com/track/5r9AgnhkPQXeKG1w5rauDq",
-    },
-    {
-      title: "Welcome to the Jungle",
-      artist: "Guns N' Roses",
-      year: 1987,
-      spotifyId: "5NIPsWpDjJTFBoPxCUUeXp",
-      reference: "https://open.spotify.com/track/5NIPsWpDjJTFBoPxCUUeXp",
-    },
-  ],
+  {
+    "title": "Sweet Child O' Mine",
+    "artist": "Guns N' Roses",
+    "year": 1987,
+    "spotifyId": "5r9AgnhkPQXeKG1w5rauDq",
+    "reference": "https://open.spotify.com/track/5r9AgnhkPQXeKG1w5rauDq"
+  },
+  {
+    "title": "Welcome to the Jungle",
+    "artist": "Guns N' Roses",
+    "year": 1987,
+    "spotifyId": "5NIPsWpDjJTFBoPxCUUeXp",
+    "reference": "https://open.spotify.com/track/5NIPsWpDjJTFBoPxCUUeXp"
+  },
+  {
+    "title": "Take on Me",
+    "artist": "a-ha",
+    "year": 1985,
+    "spotifyId": "2fsl9JbUqYmOGRvv06USem",
+    "reference": "https://open.spotify.com/track/2fsl9JbUqYmOGRvv06USem"
+  },
+  {
+    "title": "Billie Jean",
+    "artist": "Michael Jackson",
+    "year": 1982,
+    "spotifyId": "5ChkMS8OtdzJeqyybCc9R5",
+    "reference": "https://open.spotify.com/track/5ChkMS8OtdzJeqyybCc9R5"
+  },
+  {
+    "title": "Livin' on a Prayer",
+    "artist": "Bon Jovi",
+    "year": 1986,
+    "spotifyId": "0J6mQxEZnlRt9ymzFntA6z",
+    "reference": "https://open.spotify.com/track/0J6mQxEZnlRt9ymzFntA6z"
+  }
+],
 } satisfies EraContent;

@@ -138,19 +138,40 @@ export const content = {
     },
   ],
   music: [
-    {
-      title: "Dancing Queen",
-      artist: "ABBA",
-      year: 1976,
-      spotifyId: "01topnfXJFjW4iQMVAXAo8",
-      reference: "https://open.spotify.com/track/01topnfXJFjW4iQMVAXAo8",
-    },
-    {
-      title: "Bohemian Rhapsody",
-      artist: "Queen",
-      year: 1975,
-      spotifyId: "1yslmgUcM2AOkOPS4sl3QV",
-      reference: "https://open.spotify.com/track/1yslmgUcM2AOkOPS4sl3QV",
-    },
-  ],
+  {
+    "title": "Dancing Queen",
+    "artist": "ABBA",
+    "year": 1976,
+    "spotifyId": "01topnfXJFjW4iQMVAXAo8",
+    "reference": "https://open.spotify.com/track/01topnfXJFjW4iQMVAXAo8"
+  },
+  {
+    "title": "Bohemian Rhapsody",
+    "artist": "Queen",
+    "year": 1975,
+    "spotifyId": "1yslmgUcM2AOkOPS4sl3QV",
+    "reference": "https://open.spotify.com/track/1yslmgUcM2AOkOPS4sl3QV"
+  },
+  {
+    "title": "September",
+    "artist": "Earth, Wind & Fire",
+    "year": 1978,
+    "spotifyId": "0yrCNC1tKhMlmtvl3sKXp3",
+    "reference": "https://open.spotify.com/track/0yrCNC1tKhMlmtvl3sKXp3"
+  },
+  {
+    "title": "Stayin' Alive",
+    "artist": "Bee Gees",
+    "year": 1977,
+    "spotifyId": "2xSXw1EqGSAKc1e4TPaQvV",
+    "reference": "https://open.spotify.com/track/2xSXw1EqGSAKc1e4TPaQvV"
+  },
+  {
+    "title": "Hotel California",
+    "artist": "Eagles",
+    "year": 1976,
+    "spotifyId": "4Vn7TykT27PIygBiZjTR2s",
+    "reference": "https://open.spotify.com/track/4Vn7TykT27PIygBiZjTR2s"
+  }
+],
 } satisfies EraContent;

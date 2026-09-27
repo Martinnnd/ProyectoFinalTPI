@@ -43,6 +43,8 @@ export interface PlayerViewProps {
   decade: Decade;
   expanded: boolean;
   track: MusicTrack;
+  tracks: MusicTrack[];
+  onSelect: (index: number) => void;
   failed: boolean;
   onToggle: () => void;
   onPrevious: () => void;
@@ -50,6 +52,7 @@ export interface PlayerViewProps {
   onError: () => void;
 }
 export interface PlayerFrameProps extends PlayerViewProps {
+  pickerTitle: string;
   title: string;
   label: string;
   children: ReactNode;

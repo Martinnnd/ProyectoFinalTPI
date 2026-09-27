@@ -1583,3 +1583,40 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/* Song library: native dialog provides keyboard focus and Escape dismissal. */
+.app .song-picker-trigger { display:flex; align-items:center; gap:8px; width:100%; padding:9px 12px; border:0; border-top:1px solid var(--ink); background:var(--surface); color:var(--ink); font:inherit; font-size:12px; cursor:pointer; }
+.app .song-picker-trigger small { margin-left:auto; white-space:nowrap; }
+.app .song-picker { position:fixed; inset:auto; margin:0; width:350px; max-width:calc(100vw - 24px); max-height:calc(100dvh - 24px); padding:0; overflow:auto; color:var(--ink); background:var(--surface); border:2px solid var(--ink); box-shadow:0 14px 40px #0008; font-family:var(--font-body); }
+.app .song-picker::backdrop { background:#0003; }
+.app .song-picker-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px; border-bottom:1px solid currentColor; }
+.app .song-picker-heading small { font-size:9px; letter-spacing:2px; }
+.app .song-picker-heading h2 { margin:5px 0 0; font-size:20px; line-height:1.2; }
+.app .song-collection { display:grid; gap:8px; padding:12px; }
+.app .song-choice { display:flex; align-items:center; gap:12px; width:100%; min-height:65px; padding:9px; border:1px solid currentColor; text-align:left; font:inherit; color:inherit; background:transparent; cursor:pointer; }
+.app .song-choice:hover { filter:brightness(1.1); }
+.app .song-choice:focus-visible, .app .song-picker-trigger:focus-visible { outline:3px solid var(--accent); outline-offset:-3px; }
+.app .song-label { display:grid; gap:3px; flex:1; min-width:0; }
+.app .song-label strong { font-size:13px; line-height:1.25; overflow-wrap:anywhere; }
+.app .song-label small { font-size:11px; line-height:1.3; }
+.app .song-label em { font-size:10px; font-style:normal; opacity:.8; }
+.app .song-object { position:relative; display:grid; place-items:center; width:46px; height:46px; flex-shrink:0; }
+.app .song-object b { font-size:11px; position:relative; z-index:1; }
+.app .song-selected { display:grid; place-items:center; flex-shrink:0; }
+.app .song-picker footer { padding:10px 14px; font-size:10px; text-align:center; }
+@media(max-width:900px) { .app .song-picker { width:350px; } }
+
+.app .song-picker { z-index:10000; }
+.app .device-dragging .device-body { outline:3px dashed var(--accent); outline-offset:4px; }
+.app .song-choice[draggable=true] { cursor:grab; }
+.app .song-choice[draggable=true]:active { cursor:grabbing; }
+.device-change-status { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.app .device-sound-toggle { width:100%; border:0; background:var(--surface); color:var(--ink); padding:5px; font:10px var(--font-body); cursor:pointer; }
+.app .device-visualizer { display:none; }
+@keyframes device-spin { to { transform:rotate(360deg); } }
+@keyframes device-pulse { 50% { transform:scale(1.055); } }
+@keyframes device-bars { 50% { transform:scaleY(.25); } }
+@keyframes device-slide { from { opacity:.4; transform:translateX(12px); } to { opacity:1; transform:translateX(0); } }
+@keyframes device-glow { 50% { filter:brightness(1.5) saturate(1.3); } }
+@keyframes device-arm { 40%,80% { transform:rotate(42deg); } }
+@media(prefers-reduced-motion:reduce) { .app :is(.device-changing,.device-playing) *, .app :is(.device-changing,.device-playing) *::before { animation:none!important; } }

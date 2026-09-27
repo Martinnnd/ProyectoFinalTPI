@@ -138,19 +138,40 @@ export const content = {
     },
   ],
   music: [
-    {
-      title: "Black or White",
-      artist: "Michael Jackson",
-      year: 1991,
-      spotifyId: "6bsCZtBsAvu4u2ueA7saDo",
-      reference: "https://open.spotify.com/track/6bsCZtBsAvu4u2ueA7saDo",
-    },
-    {
-      title: "De música ligera",
-      artist: "Soda Stereo",
-      year: 1990,
-      spotifyId: "5jVvwEH4nsTrDf2pU3IW2i",
-      reference: "https://open.spotify.com/track/5jVvwEH4nsTrDf2pU3IW2i",
-    },
-  ],
+  {
+    "title": "Black or White",
+    "artist": "Michael Jackson",
+    "year": 1991,
+    "spotifyId": "6bsCZtBsAvu4u2ueA7saDo",
+    "reference": "https://open.spotify.com/track/6bsCZtBsAvu4u2ueA7saDo"
+  },
+  {
+    "title": "De música ligera",
+    "artist": "Soda Stereo",
+    "year": 1990,
+    "spotifyId": "5jVvwEH4nsTrDf2pU3IW2i",
+    "reference": "https://open.spotify.com/track/5jVvwEH4nsTrDf2pU3IW2i"
+  },
+  {
+    "title": "Wonderwall",
+    "artist": "Oasis",
+    "year": 1995,
+    "spotifyId": "1qPbGZqppFwLwcBC1JQ6Vr",
+    "reference": "https://open.spotify.com/track/1qPbGZqppFwLwcBC1JQ6Vr"
+  },
+  {
+    "title": "Smells Like Teen Spirit",
+    "artist": "Nirvana",
+    "year": 1991,
+    "spotifyId": "7MYHci3U9oUSwipkN31dsZ",
+    "reference": "https://open.spotify.com/track/7MYHci3U9oUSwipkN31dsZ"
+  },
+  {
+    "title": "I Want It That Way",
+    "artist": "Backstreet Boys",
+    "year": 1999,
+    "spotifyId": "7x6ZiOAwR4DAUF8zvTugmX",
+    "reference": "https://open.spotify.com/track/7x6ZiOAwR4DAUF8zvTugmX"
+  }
+],
 } satisfies EraContent;
