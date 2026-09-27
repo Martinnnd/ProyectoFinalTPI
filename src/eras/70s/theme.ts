@@ -1,32 +1,27 @@
-import { Map, Newspaper, BookOpen, Radio } from "lucide-react";
-import type { EraTheme } from "../contracts";
+import { Map, Newspaper, BookOpen, Radio } from 'lucide-react';
+import type { EraTheme } from '../contracts';
 export const theme = {
-  brand: "Nostalgia",
-  subtitle: "CRÓNICAS DE UNA DÉCADA INOLVIDABLE",
-  windowTitle: "La revista de nuestros recuerdos",
-  storiesTitle: "Crónicas & correspondencia",
-  factsTitle: "Cultura / Archivo de época",
-  musicTitle: "La discoteca / Selección musical",
-  brandLabel: "EDICIÓN ESPECIAL / 1970–1979",
-  shortLabel: "70s",
-  tokens: {
-    "--font-body": "Georgia,'Times New Roman',serif",
-    "--font-display": "Georgia,'Times New Roman',serif",
-    "--bg": "#e6d5a7",
-    "--surface": "#f2e7c9",
-    "--ink": "#243c4e",
-    "--muted": "#625944",
-    "--accent": "#b44222",
-    "--soft": "#e5d4aa",
-    "--line": "#9c8b67",
-    "--radius": "0px",
-    "--shadow": "2px 3px 0 #77664b35",
-  },
+  "brand": "Nostalgia",
+  "subtitle": "RECUERDOS EN BLANCO Y NEGRO",
+  "windowTitle": "Nostalgia TV / Canal 70",
+  "storiesTitle": "Historias en pantalla",
+  "factsTitle": "Archivo de televisión",
+  "musicTitle": "Sonidos de los setenta",
+  "brandLabel": "CANAL 70 / EN EL AIRE",
+  "shortLabel": "70s",
+  "tokens": {
+    "--font-body": "Arial,Helvetica,sans-serif",
+    "--font-display": "'Courier New',monospace",
+    "--bg": "#242424",
+    "--surface": "#e0e0da",
+    "--ink": "#202120",
+    "--muted": "#555752",
+    "--accent": "#343a35",
+    "--soft": "#bfc1b9",
+    "--line": "#858780",
+    "--radius": "8px",
+    "--shadow": "0 3px 12px #0005"
+  }
 } satisfies EraTheme;
 
-export const icons = {
-  map: Map,
-  stories: Newspaper,
-  facts: BookOpen,
-  music: Radio,
-};
+export const icons = { map: Map, stories: Newspaper, facts: BookOpen, music: Radio };
