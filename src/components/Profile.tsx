@@ -1,6 +1,8 @@
-import { MapPin, Plus, UserRound, X } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Grid3x3, Lock, MapPin, Plus, UserRound, X } from "lucide-react";
 import MemoryMap from "./MemoryMap";
-import type { Memory, Period } from "../types";
+import { resolveAchievements } from "../data";
+import type { Achievement, Memory, Period } from "../types";
 
 export default function Profile({
   memories,
@@ -8,6 +10,7 @@ export default function Profile({
   following,
   period,
   selected,
+  earned,
   onSelect,
   onAdd,
 }: {
@@ -16,9 +19,22 @@ export default function Profile({
   following: string[];
   period: Period;
   selected: Memory | null;
+  earned: Achievement[];
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
 }) {
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const catalogueDialog = useRef<HTMLDialogElement>(null);
+  const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
+  const unlocked = catalogue.filter((achievement) => achievement.unlocked);
+  function openCatalogue() {
+    setAchievementsOpen(true);
+    catalogueDialog.current?.showModal();
+  }
+  function closeCatalogue() {
+    setAchievementsOpen(false);
+    catalogueDialog.current?.close();
+  }
   return (
     <main id="explore" className="personal-profile" aria-label="Mi perfil">
       <header className="personal-header">
@@ -26,17 +42,53 @@ export default function Profile({
           <UserRound size={44} />
         </div>
         <div className="personal-identity">
-          <span className="eyebrow">MI ARCHIVO PERSONAL</span>
-          <h2>Mi perfil</h2>
-          <p>Los lugares cambian. Tus historias quedan.</p>
-          <small className="profile-note">
-            Visitante · recuerdos guardados en este navegador
-          </small>
-        </div>
-        <button className="primary-button" onClick={onAdd}>
-          <Plus size={18} />
-          Crear un recuerdo
-        </button>
+          <div className="personal-identity-text">
+            <span className="eyebrow">MI ARCHIVO PERSONAL</span>
+            <h2>Mi perfil</h2>
+            <p>Los lugares cambian. Tus historias quedan.</p>
+            <small className="profile-note">
+              Visitante · recuerdos guardados en este navegador
+            </small>
+          </div>
+          <div className="achievements">
+            <div className="achievements-heading">
+              <h3>Logros</h3>
+              <span className="achievements-count">
+                {unlocked.length}/{catalogue.length}
+              </span>
+            </div>
+            {unlocked.length ? (
+              <ul className="achievement-rail">
+                {unlocked.map((achievement) => (
+                  <li key={achievement.id}>
+                    <img
+                      src={achievement.image}
+                      alt={achievement.name}
+                      title={achievement.name}
+                      width={40}
+                      height={40}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="achievements-empty">
+                Todavía no conseguiste ninguna insignia.
+              </p>
+            )}
+            <button
+              className="achievements-browse"
+              onClick={openCatalogue}
+              aria-haspopup="dialog"
+              aria-expanded={achievementsOpen}
+            >
+              <Grid3x3 size={14} />
+              Ver todas
+            </button>
+          </div>
+        </div>  
+       
+        
         <dl className="personal-counts">
           <div>
             <dt>Recuerdos</dt>
@@ -52,7 +104,9 @@ export default function Profile({
           </div>
           <div>
             <dt>Lugares</dt>
-            <dd>{new Set(allMemories.map((m) => `${m.lat},${m.lng}`)).size}</dd>
+            <dd>
+              {new Set(allMemories.map((m) => `${m.lat},${m.lng}`)).size}
+            </dd>
           </div>
         </dl>
         <small className="personal-demo-note">
@@ -145,6 +199,69 @@ export default function Profile({
           </div>
         )}
       </section>
+      
+      <dialog
+        ref={catalogueDialog}
+        className="achievement-dialog"
+        onCancel={(event) => {
+          event.preventDefault();
+          closeCatalogue();
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) closeCatalogue();
+        }}
+        aria-labelledby="achievements-title"
+      >
+        <header>
+          <div>
+            <h2 id="achievements-title">Todas las insignias</h2>
+            <small>
+              {unlocked.length} de {catalogue.length} conseguidas
+            </small>
+          </div>
+          <button
+            className="icon-button"
+            onClick={closeCatalogue}
+            aria-label="Cerrar catálogo de logros"
+          >
+            <X size={20} />
+          </button>
+        </header>
+        <div className="achievement-dialog-content">
+          <ul className="achievement-list">
+            {catalogue.map((achievement) => (
+              <li
+                key={achievement.id}
+                className={`achievement-card ${
+                  achievement.unlocked ? "is-unlocked" : "is-locked"
+                }`}
+              >
+                <span className="achievement-media">
+                  <img
+                    src={achievement.image}
+                    alt=""
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                  />
+                  {!achievement.unlocked && (
+                    <span className="achievement-lock">
+                      <Lock size={14} />
+                    </span>
+                  )}
+                </span>
+                <span className="achievement-body">
+                  <strong>{achievement.name}</strong>
+                  <p>{achievement.description}</p>
+                  <span className="achievement-state">
+                    {achievement.unlocked ? "Conseguida" : "Bloqueada"}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </dialog>
     </main>
   );
 }

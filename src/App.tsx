@@ -6,13 +6,15 @@ import {
   categories,
   filterMemories,
   symbols,
+  type Achievement,
   type Category,
   type Decade,
   type Memory,
   type Period,
 } from "./types";
-import { eraContent, initialMemories } from "./data";
+import { achievements, eraContent, initialMemories } from "./data";
 import { loadMemories, saveMemories } from "./storage";
+import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
 import Profile from "./components/Profile";
@@ -48,6 +50,11 @@ export default function App() {
   const [picking, setPicking] = useState(false);
   const [draft, setDraft] = useState<Point | null>(null);
   const [notice, setNotice] = useState("");
+  const [celebrating, setCelebrating] = useState<Achievement | null>(null);
+  // Badge 01 means "you published a first memory", so it is derived from the
+  // visitor's own data instead of being stored again. That way it survives a
+  // reload with no extra storage key, and dismissing the banner cannot revoke it.
+  const earned: Achievement[] = local.length > 0 ? [achievements[0]] : [];
   const [panelOpen, setPanelOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(true);
   const [musicOpen, setMusicOpen] = useState(false);
@@ -142,6 +149,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handler);
   }, [picking, panelOpen, draft, mapExpanded]);
   function save(memory: Memory) {
+    const isFirstMemory = local.length === 0;
     const next = [...local, memory];
     try {
       if (!saveMemories(next, window.localStorage))
@@ -163,6 +171,9 @@ export default function App() {
       setPanelOpen(false);
     }
     setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
+    // Hardcoded unlock: the very first memory the visitor creates earns badge 01.
+    // It only sets this state, so the popup never moves them off the current view.
+    if (isFirstMemory) setCelebrating(achievements[0]);
     window.setTimeout(() => addButton.current?.focus(), 0);
     return null;
   }
@@ -410,6 +421,7 @@ export default function App() {
           following={following}
           period={period}
           selected={selected}
+          earned={earned}
           onSelect={(m) => setSelectedId(m?.id ?? null)}
           onAdd={startAdding}
         />
@@ -459,6 +471,13 @@ export default function App() {
             <X size={17} />
           </button>
         </div>
+      )}
+      {celebrating && (
+        <AchievementToast
+          key={celebrating.id}
+          achievement={celebrating}
+          onDismiss={() => setCelebrating(null)}
+        />
       )}
       {mapExpanded && view === "feed" && (
         <MapModal

@@ -27,6 +27,13 @@ export interface Period {
   decade: Decade;
   year: number | null;
 }
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  unlocked: boolean;
+}
 export const symbols: Record<Category, string> = {
   Lugares: "⌂",
   Música: "♫",

@@ -533,6 +533,10 @@
   color: var(--accent);
   border-radius: 50%;
 }
+.personal-identity{
+  display: flex;
+  justify-content: space-between;
+}
 .personal-identity h2 {
   font: 700 32px/1.15 var(--font-display);
   margin: 7px 0;
@@ -887,4 +891,330 @@
 }
 .app .expanded-map-dialog .map-reset {
   bottom: 82px;
+}
+
+/* Achievement popup: an Xbox-style banner that slides in from the right edge and
+   sits just under the era selector. It is a polite live region rendered at the
+   app root, so it shows on any view and never steals focus. */
+.achievement-toast {
+  position: absolute;
+  /* Clears the tallest era selector block (era-1980 measures 161px at the
+     desktop breakpoint). Re-measure before changing it. */
+  top: 172px;
+  right: 24px;
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(330px, calc(100vw - 48px));
+  padding: 12px 14px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  animation: achievement-toast-in 420ms cubic-bezier(0.16, 0.9, 0.24, 1) both;
+}
+.achievement-toast.is-leaving {
+  animation: achievement-toast-out 400ms ease-in both;
+}
+.achievement-toast-badge {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+.achievement-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.achievement-toast-kicker {
+  font: 700 9px/1 var(--font-display);
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.achievement-toast-body strong {
+  font: 700 15px/1.25 var(--font-display);
+}
+.achievement-toast-body small {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.achievement-toast-timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--accent);
+  transform-origin: left center;
+  animation: achievement-toast-drain var(--achievement-lifetime, 5000ms) linear
+    forwards;
+}
+@keyframes achievement-toast-in {
+  from {
+    transform: translateX(calc(100% + 32px));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes achievement-toast-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(calc(100% + 32px));
+    opacity: 0;
+  }
+}
+@keyframes achievement-toast-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .achievement-toast {
+    animation: achievement-toast-fade 200ms ease-out both;
+  }
+  .achievement-toast.is-leaving {
+    animation: achievement-toast-fade 200ms ease-in reverse both;
+  }
+}
+@keyframes achievement-toast-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 899px) {
+  /* The era selector moves to a full-width row up here, so the banner drops to
+     the bottom corner to avoid covering the brand and the selector itself. */
+  .achievement-toast {
+    top: auto;
+    right: 12px;
+    left: 12px;
+    bottom: 71px;
+    width: auto;
+  }
+}
+
+/* Achievements: a compact rail of earned badges beside the identity block, plus
+   the full catalogue dialog. Built only from shared custom-property tokens, so no
+   per-era selector ever appears here. */
+.achievements {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+  text-align: right;
+}
+.achievements-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.achievements-heading h3 {
+  font: 700 13px/1.2 var(--font-display);
+  margin: 0;
+}
+.achievements-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 5px 9px;
+  font: 700 11px/1 var(--font-display);
+  color: var(--accent);
+  background: var(--soft);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.achievement-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 240px;
+}
+.achievement-rail img {
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+.achievements-empty {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: right;
+}
+.achievements-browse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 600;
+}
+.achievement-dialog {
+  margin: auto;
+  padding: 0;
+  width: min(920px, calc(100vw - 40px));
+  max-width: none;
+  max-height: calc(100dvh - 48px);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 20px 70px #0007;
+  overflow: hidden;
+}
+.achievement-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.achievement-dialog::backdrop {
+  background: #101823a6;
+  backdrop-filter: blur(3px);
+}
+.achievement-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+}
+.achievement-dialog h2 {
+  font: 700 20px/1.2 var(--font-display);
+  margin: 0 0 5px;
+}
+.achievement-dialog small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.achievement-dialog-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 20px;
+  scrollbar-width: thin;
+}
+.achievement-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+.achievement-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.achievement-card.is-unlocked {
+  background: var(--soft);
+  border-color: var(--accent);
+}
+.achievement-card.is-locked {
+  border-style: dashed;
+}
+.achievement-media {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+}
+.achievement-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+.achievement-card.is-locked .achievement-media img {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.achievement-lock {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.achievement-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.achievement-body strong {
+  font: 700 14px/1.3 var(--font-display);
+}
+.achievement-body p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.achievement-state {
+  font: 700 10px/1 var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.achievement-card.is-locked .achievement-state {
+  color: var(--muted);
+}
+@media (max-width: 899px) {
+  .achievement-rail {
+    justify-content: flex-start;
+    max-width: none;
+  }
+  .achievement-dialog {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 40px);
+  }
+  .achievement-dialog > header {
+    padding: 12px;
+  }
+  .achievement-dialog h2 {
+    font-size: 16px;
+  }
+  .achievement-list {
+    grid-template-columns: 1fr;
+  }
 }
