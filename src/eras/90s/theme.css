@@ -1,4 +1,4 @@
-.era-1990 .decades .active {
+﻿.era-1990 .decades .active {
   border-radius: 3px;
   box-shadow: 2px 2px 0 #153d2b40;
 }
@@ -1038,3 +1038,14 @@
 @media(max-width:899px) { .era-1990 .detail-maximized { left:12px; right:12px; } .era-1990 .transition-menu { font-size:10px; } }
 
 .era-1990 .transition-window-controls button { background:#c0c0c0; color:#111; border:2px outset white; border-radius:0; }
+
+/* Community directory and filters. */
+.era-1990 .community-controls { background:#c0c0c0; border:2px solid; border-color:#fff #404040 #404040 #fff; border-radius:0; box-shadow:1px 1px 0 #000; }
+.era-1990 .community-heading { background:#000080; color:white; padding:8px; margin:-14px -14px 0; }
+.era-1990 .community-heading-icon { width:30px; height:30px; color:white; background:transparent; border:0; }
+.era-1990 .community-heading small { color:#d6d6ff; }
+.era-1990 .community-heading strong { font:bold 14px Tahoma,Arial,sans-serif; }
+.era-1990 .community-controls button { background:#c0c0c0; color:#111; border:2px solid; border-color:#fff #555 #555 #fff; border-radius:0; }
+.era-1990 .community-controls :is(input,select), .era-1990 .community-emblem { background:white; color:#111; border:2px solid; border-color:#555 #fff #fff #555; border-radius:0; }
+.era-1990 .community-cards button { background:#e6e6e6; }
+

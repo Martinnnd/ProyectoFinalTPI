@@ -1046,3 +1046,12 @@
 
 .era-2000 .transition-window-controls button { border:1px solid #d9eeff; border-radius:4px; color:white; background:linear-gradient(#b5ddff,#337ac4); }
 .era-2000 .transition-window-controls button:last-child { background:linear-gradient(#f5ad87,#c84d29); }
+
+/* Community directory and filters. */
+.era-2000 .community-controls { background:linear-gradient(#f9fdff,#e4f0ff); border:1px solid #8db5df; border-radius:9px; box-shadow:0 3px 8px #26518020,inset 0 1px white; }
+.era-2000 .community-heading-icon { border-radius:10px; background:linear-gradient(#c6ed9e,#6cb538); color:white; border:2px solid white; box-shadow:0 0 0 1px #87ad65; }
+.era-2000 .community-heading small { color:#5b84a8; }
+.era-2000 .community-heading strong { color:#245a91; }
+.era-2000 .community-controls .community-create { background:linear-gradient(#fff,#d9e9fb); border:1px solid #93b3d8; border-radius:5px; color:#245a91; }
+.era-2000 .community-cards button { background:linear-gradient(#fff,#edf5ff); border:1px solid #afc9e5; border-radius:7px; box-shadow:inset 0 1px white; }
+.era-2000 .community-emblem { border:3px solid white; border-radius:9px; background:linear-gradient(#d8efb9,#8bc753); box-shadow:0 0 0 1px #98bc80; }

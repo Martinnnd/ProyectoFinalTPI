@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import "../styles.css";
 import "../themes.css";
 import "../social.css";
+import "../components/community.css";
 import "../components/mapbox.css";
 import "../eras/70s/theme.css";
 import "../eras/80s/theme.css";

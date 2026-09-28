@@ -331,3 +331,11 @@
 .era-1970.view-feed .paper-turn-reverse .paper-turn-fold { right:auto; left:0; transform-origin:left center; background:linear-gradient(270deg,#ae9d7470,#d7c79f 8%,#f7edd0 35%,#e9dbb7 67%,#a49164 95%,#5e4c2b99); }
 .era-1970.view-feed .paper-turn-reverse .paper-turn-shadow { right:auto; left:-4%; }
 @media(prefers-reduced-motion:reduce) { .era-1970.view-feed .paper-turn-overlay { display:none; } }
+
+/* Community directory and filters. */
+.era-1970 .community-controls { background:#e7dbb9; border:1px solid #807558; border-block:3px double #514a38; border-radius:0; box-shadow:2px 3px 0 #2c261d20; }
+.era-1970 .community-heading { border-bottom:1px solid #807558; padding-bottom:12px; }
+.era-1970 .community-heading strong { font-family:Georgia,serif; font-size:20px; }
+.era-1970 .community-heading-icon { border:1px solid #807558; background:transparent; color:#332e24; }
+.era-1970 .community-controls :is(button,input,select) { border-radius:0; background:#f4ebd2; color:#302b22; border-color:#918468; }
+.era-1970 .community-card-copy strong { font-family:Georgia,serif; }

@@ -760,3 +760,11 @@
 .era-1980 .arcade-transition-meter { display:flex; gap:5px; padding:8px; border:2px solid #36e5db; box-shadow:4px 4px #b128a0; }
 .era-1980 .arcade-transition-meter i { width:10px; height:14px; background:#5ffff0; }
 .era-1980 .arcade-transition-meter i:nth-child(3n) { background:#ff5dd9; }
+
+/* Community directory and filters. */
+.era-1980 .community-controls { background:linear-gradient(130deg,#1c1032,#100c21); border:1px solid #cf47e5; box-shadow:3px 3px 0 #36cdd74d,inset 0 0 24px #c339e50b; }
+.era-1980 .community-heading-icon { color:#40f5ef; border-color:#40f5ef; box-shadow:0 0 10px #40f5ef26; }
+.era-1980 .community-heading small { color:#fa72df; }
+.era-1980 .community-controls .community-create { border-color:#43dfe2; color:#43f3ed; background:#18223d; }
+.era-1980 .community-cards button { background:linear-gradient(110deg,#29143b,#171329); border-color:#754f9a; }
+.era-1980 .community-emblem { border-color:#d650cb; background:#0b1222; }
