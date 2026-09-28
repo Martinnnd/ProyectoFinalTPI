@@ -428,6 +428,7 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
+          decade={period.decade}
           memories={memories}
           following={following}
           onFollow={(author) =>

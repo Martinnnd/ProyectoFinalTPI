@@ -747,3 +747,16 @@
 
 .era-1980 .device-playing .jukebox { animation:device-glow 1.8s ease infinite; }
 .era-1980 .device-playing .jukebox-record { animation:device-spin 1.8s linear infinite; }
+
+.era-1980.view-feed .social-stream { --feed-transition:arcade; }
+.era-1980 .transition-arcade .transition-window { position:absolute; inset:0 0 auto; height:70px; background:linear-gradient(transparent,#38fff015 35%,#38fff0aa 48%,#fff 50%,#f829d688 53%,transparent); box-shadow:0 0 30px #29fff344; }
+.era-1980 .transition-arcade .transition-title { display:none; }
+
+.era-1980 .transition-arcade .transition-window { inset:0; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; background:none; box-shadow:none; z-index:2; text-align:center; padding:20px; }
+.era-1980 .arcade-transition-stripe { position:absolute; left:0; width:100%; background:repeating-linear-gradient(#170c29 0 3px,#10091c 3px 6px); border-block:1px solid #422555; box-shadow:0 2px 0 #26eeee; }
+.era-1980 .arcade-transition-kicker { color:#41eceb; font:15px 'VT323',monospace; letter-spacing:3px; }
+.era-1980 .arcade-transition-title { color:#fff; font:clamp(25px,3vw,40px) 'Audiowide',monospace; text-shadow:3px 3px #bd20a4,-2px -2px #26ddd4; }
+.era-1980 .arcade-transition-subtitle { color:#ffb5ee; font:17px 'VT323',monospace; letter-spacing:2px; }
+.era-1980 .arcade-transition-meter { display:flex; gap:5px; padding:8px; border:2px solid #36e5db; box-shadow:4px 4px #b128a0; }
+.era-1980 .arcade-transition-meter i { width:10px; height:14px; background:#5ffff0; }
+.era-1980 .arcade-transition-meter i:nth-child(3n) { background:#ff5dd9; }

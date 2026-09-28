@@ -254,3 +254,80 @@
  .era-1970 .personal-header { padding:12px; border-width:3px; }
 }
 .era-1970 .feed-tabs button.active,.era-1970 .feed-tabs button[aria-pressed=true] { background:#343d30; color:#f3f5ed; border:2px inset #9da78f; }
+
+/* The social destinations are printed pages; the map remains a CRT television. */
+.era-1970 .newspaper-edition { display:none; }
+.era-1970:is(.view-feed,.view-profile) { --surface:#eee4c8; --ink:#29291f; --muted:#66604e; --accent:#414335; --line:#948b70; --soft:#ded2b0; --font-body:Georgia,'Times New Roman',serif; --font-display:Georgia,'Times New Roman',serif; color:#29291f; font-family:Georgia,'Times New Roman',serif; background:radial-gradient(ellipse at 15% 20%,#fbf1d05c,transparent 60%),repeating-linear-gradient(0deg,#5c512309 0 1px,transparent 1px 4px),linear-gradient(95deg,#cfc19b,#eee4c8 12%,#e2d6b4 65%,#cabb95); }
+.era-1970:is(.view-feed,.view-profile) :is(.tv-console,.era-atmosphere,.era-shell-top) { display:none; }
+.era-1970:is(.view-feed,.view-profile) .newspaper-edition { display:flex; position:absolute; left:72px; right:0; top:0; height:27px; align-items:center; justify-content:space-between; padding:0 20px; border-bottom:3px double #686550; font:10px Georgia,serif; letter-spacing:1px; }
+.era-1970:is(.view-feed,.view-profile) .press-footer { background:#dbcfac; border:0; border-top:3px double #686550; color:#3b3b2f; }
+.era-1970:is(.view-feed,.view-profile) .press-footer>span:first-child { font-size:0; }
+.era-1970:is(.view-feed,.view-profile) .press-footer>span:first-child::after { content:'HEMEROTECA NOSTALGIA'; font-size:10px; }
+.era-1970:is(.view-feed,.view-profile) .navigation-rail { background:#d9cda9; color:#373a2e; border-right:3px double #77725b; }
+.era-1970:is(.view-feed,.view-profile) .navigation-rail button { color:#373a2e; font-family:Georgia,serif; border-radius:0; }
+.era-1970:is(.view-feed,.view-profile) .navigation-rail .rail-active { background:#c2b68e; border:1px solid #7e775e; box-shadow:inset 0 0 0 3px #ddd1ae; }
+.era-1970:is(.view-feed,.view-profile) :is(.rail-logo,.rail-footer) { color:#414335; text-shadow:none; }
+.era-1970:is(.view-feed,.view-profile) .brand-card { background:transparent; color:#30342b; border:0; border-block:4px double #565b49; border-radius:0; box-shadow:none; padding:8px 14px; }
+.era-1970:is(.view-feed,.view-profile) .brand-card h1 { font:bold 37px/1 Georgia,serif; color:#30342b; text-shadow:1px 1px #fff4d4; letter-spacing:-2px; }
+.era-1970:is(.view-feed,.view-profile) .brand-card>.brand-era-label { font-size:0; color:#474b3c; }
+.era-1970:is(.view-feed,.view-profile) .brand-card>.brand-era-label::after { content:'DIARIO INDEPENDIENTE · 1970–1979'; font:8px Georgia,serif; letter-spacing:1px; }
+.era-1970:is(.view-feed,.view-profile) .brand-card>span:last-child { font-size:0; color:#474b3c; }
+.era-1970:is(.view-feed,.view-profile) .brand-card>span:last-child::after { content:'CADA VIDA MERECE SER CONTADA'; font:8px Georgia,serif; letter-spacing:1px; }
+.era-1970:is(.view-feed,.view-profile) :is(.timeline,.map-period,.compact-menu summary,.primary-button,.secondary-button,.feed-tabs button,.social-aside button,.post-follow,.category-options,.compact-menu .decades) { background:#e9dfbf; color:#34362b; border:1px solid #8c856b; border-radius:0; box-shadow:2px 2px #746e5126; font-family:Georgia,serif; }
+.era-1970:is(.view-feed,.view-profile) .year-picker select { background:#e9dfbf; color:#34362b; }
+.era-1970:is(.view-feed,.view-profile) .map-period strong { color:#34362b; font-family:Georgia,serif; }
+.era-1970.view-feed .map-canvas,.era-1970.view-profile .personal-map { border:5px double #77765e; border-radius:0; box-shadow:none; filter:sepia(.35); }
+.era-1970.view-feed .social-stream { border:0; border-inline:1px solid #8c856b; background:transparent; border-radius:0; box-shadow:none; padding:0 20px 24px; }
+.era-1970.view-feed .feed-heading { display:flex; flex-wrap:wrap; border-block:4px double #4c5242; padding:10px 0; }
+.era-1970.view-feed .feed-heading::before { content:'LA VOZ DE LOS RECUERDOS'; display:block; flex:0 0 100%; text-align:center; font:900 clamp(25px,3vw,44px)/1.05 Georgia,serif; letter-spacing:-1.5px; padding-bottom:12px; border-bottom:1px solid #70725a; }
+.era-1970.view-feed .feed-heading h2 { font:small-caps bold 19px Georgia,serif; }
+.era-1970.view-feed .feed-post { background:transparent; border:0; border-bottom:2px solid #74715b; border-radius:0; box-shadow:none; margin:0; padding:22px 0; }
+.era-1970.view-feed .feed-post h3 { font:900 29px/1.05 Georgia,serif; text-transform:uppercase; letter-spacing:-.8px; color:#394133; }
+.era-1970.view-feed .feed-post p { font:16px/1.55 Georgia,serif; text-align:justify; }
+.era-1970.view-feed .social-aside>section,.era-1970.view-feed .social-aside>div { background:transparent; border:3px double #7e7d63; border-radius:0; box-shadow:none; }
+.era-1970.view-feed .social-aside h3 { font:bold 23px Georgia,serif; text-transform:uppercase; }
+.era-1970.view-feed .feed-tabs button.active { background:#444a3b; color:#fff2d2; }
+.era-1970:is(.view-feed,.view-profile) :is(.post-avatar,.profile-portrait) { background:#d0c6a8; border:3px double #7b7c64; color:#444b3d; border-radius:0; }
+.era-1970.view-profile .personal-profile { background:transparent; border:0; border-top:5px double #4c5242; border-radius:0; padding:18px 24px; box-shadow:none; }
+.era-1970.view-profile .personal-header { background:transparent; color:#363d30; border:0; border-bottom:4px double #636950; border-radius:0; box-shadow:none; padding:0 0 20px; }
+.era-1970.view-profile .personal-header::before { content:'HISTORIAS CON NOMBRE PROPIO'; grid-column:1/-1; text-align:center; border-bottom:1px solid #797d63; padding-bottom:14px; font:900 clamp(25px,4vw,52px)/1.1 Georgia,serif; letter-spacing:-1.5px; }
+.era-1970.view-profile .personal-identity h2 { font:bold 35px Georgia,serif; color:#363d30; text-shadow:none; }
+.era-1970.view-profile .personal-header :is(p,small,.eyebrow,dt) { color:#555b47; }
+.era-1970.view-profile .personal-counts { border-block:1px solid #8d9075; padding-block:14px; }
+.era-1970.view-profile .personal-counts dd { color:#363d30; font-family:Georgia,serif; }
+.era-1970.view-profile .personal-section-title h3 { font:bold 26px Georgia,serif; text-transform:uppercase; }
+.era-1970.view-profile :is(.personal-memory,.personal-empty) { background:#e5dbbc; border:3px double #898b70; border-radius:0; color:#363d30; }
+@media(min-width:900px) {
+ .era-1970:is(.view-feed,.view-profile) .map-toolbar { right:24px; left:94px; }
+ .era-1970.view-feed .social-layout { right:24px; grid-template-columns:minmax(0,1fr) 245px; }
+ .era-1970.view-profile .personal-profile { right:24px; }
+}
+@media(min-width:900px) and (max-width:1200px) { .era-1970.view-feed .social-layout { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:899px) {
+ .era-1970:is(.view-feed,.view-profile) .newspaper-edition { display:none; }
+ .era-1970:is(.view-feed,.view-profile) .brand-card h1 { font-size:27px; }
+ .era-1970:is(.view-feed,.view-profile) .brand-card>span:last-child::after { font-size:6px; }
+ .era-1970.view-feed .social-stream { padding:0 10px 20px; }
+ .era-1970.view-feed .feed-heading::before { font-size:27px; }
+ .era-1970.view-feed .feed-post h3 { font-size:24px; }
+ .era-1970.view-profile .personal-profile { padding:12px; }
+}
+.era-1970.view-feed .feed-sidebar>section { background:transparent; border:3px double #7e7d63; border-radius:0; box-shadow:none; }
+.era-1970.view-feed .feed-sidebar h3 { font:bold 23px Georgia,serif; text-transform:uppercase; }
+.era-1970.view-feed .social-avatar { background:#d0c6a8; border:3px double #7b7c64; color:#444b3d; border-radius:0; }
+.era-1970.view-feed .follow-button { background:#e9dfbf; color:#34362b; border:1px solid #8c856b; border-radius:0; font-family:Georgia,serif; }
+@media(min-width:900px) and (max-width:1200px) { .era-1970.view-feed .feed-sidebar { display:none; } }
+@media(max-width:899px) { .era-1970.view-feed .feed-post p { text-align:left; } }
+
+
+/* A rolling fold exposes the next page under a snapshot of the printed page. */
+.era-1970.view-feed .social-stream { --paper-turn:1; }
+.era-1970.view-feed .paper-turn-overlay { position:fixed; z-index:510; overflow:hidden; pointer-events:none; perspective:1400px; }
+.era-1970.view-feed .paper-turn-face { position:absolute; inset:0; overflow:hidden; background:#e5d9b7; }
+.era-1970.view-feed .paper-turn-snapshot { position:absolute; left:0; top:0; margin:0; max-height:none; overflow:hidden; background:repeating-linear-gradient(0deg,#5c512309 0 1px,transparent 1px 4px),#e5d9b7; }
+.era-1970.view-feed .paper-turn-fold { position:absolute; top:-3%; right:0; width:22%; height:106%; overflow:hidden; transform-origin:right center; border-radius:5% 45% 45% 5% / 2% 9% 9% 2%; background:linear-gradient(90deg,#ae9d7470,#d7c79f 8%,#f7edd0 35%,#e9dbb7 67%,#a49164 95%,#5e4c2b99); box-shadow:10px 0 18px #3b291d40; }
+.era-1970.view-feed .paper-turn-ink { opacity:.1; transform:scaleX(-1); filter:blur(.5px); }
+.era-1970.view-feed .paper-turn-shadow { position:absolute; top:0; right:-4%; height:100%; width:30%; background:linear-gradient(90deg,transparent,#30201040 60%,transparent); }
+.era-1970.view-feed .paper-turn-reverse .paper-turn-fold { right:auto; left:0; transform-origin:left center; background:linear-gradient(270deg,#ae9d7470,#d7c79f 8%,#f7edd0 35%,#e9dbb7 67%,#a49164 95%,#5e4c2b99); }
+.era-1970.view-feed .paper-turn-reverse .paper-turn-shadow { right:auto; left:-4%; }
+@media(prefers-reduced-motion:reduce) { .era-1970.view-feed .paper-turn-overlay { display:none; } }

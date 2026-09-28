@@ -1010,3 +1010,39 @@
 .era-2000 .device-changing .music-buttons::before { content:''; position:absolute; inset:2px; border-radius:50%; border:3px solid transparent; border-top-color:#839db8; pointer-events:none; animation:device-spin .6s ease 3; }
 
 .era-2000 .device-playing .device-visualizer { display:flex; }
+
+.era-2000.view-feed .social-stream { --feed-transition:messenger; }
+.era-2000 .transition-messenger .transition-window { position:absolute; inset:0; transform-origin:top left; border:2px solid #4384d4; border-radius:9px; box-shadow:0 0 18px #bde8ffbb,inset 0 0 0 2px #fff9; background:linear-gradient(130deg,#ffffff33,transparent 45%); }
+.era-2000 .transition-messenger .transition-title { background:linear-gradient(#b0dbff,#3b8be2 40%,#1762bb); color:white; font:bold 13px Tahoma,sans-serif; text-shadow:0 1px #174678; border-radius:7px 7px 0 0; padding:8px; display:flex; justify-content:space-between; }
+.era-2000 .transition-messenger .transition-title span { color:#fff; letter-spacing:3px; }
+
+.era-2000 .transition-messenger .transition-window { display:flex; flex-direction:column; background:linear-gradient(#e3f3ff,#fff 50%,#e9f2fb); border:2px solid #4084c8; box-shadow:0 9px 25px #15466c80,inset 0 0 0 1px #fff; }
+.era-2000 .transition-messenger .transition-title { display:flex; align-items:center; gap:8px; padding:7px; }
+.era-2000 .transition-caption { flex:1; font:bold 14px Tahoma,sans-serif; }
+.era-2000 .transition-window-controls { display:flex; gap:3px; }
+.era-2000 .transition-window-controls span { display:grid; place-items:center; width:22px; height:22px; border:1px solid #d9eeff; border-radius:4px; background:linear-gradient(#b5ddff,#337ac4); letter-spacing:0; }
+.era-2000 .transition-window-controls span:last-child { background:linear-gradient(#f5ad87,#c84d29); }
+.era-2000 .transition-menu { padding:7px 12px; color:#345679; font:11px Tahoma,sans-serif; white-space:pre-wrap; }
+.era-2000 .transition-contact { display:grid; grid-template-columns:54px 1fr; gap:4px 12px; padding:14px; background:linear-gradient(120deg,#fff,#bbdff5); border-block:1px solid #a1c6df; color:#28597d; }
+.era-2000 .transition-contact-avatar { grid-row:span 2; display:grid; place-items:center; font:32px Arial; color:white; background:linear-gradient(#c6ef91,#56a92d); border:3px solid white; border-radius:10px; box-shadow:0 0 0 1px #7aaf4c; }
+.era-2000 .transition-contact-name { font:bold 16px Tahoma,sans-serif; align-self:end; }
+.era-2000 .transition-contact-status { color:#396b2d; font:11px Tahoma,sans-serif; }
+.era-2000 .transition-chat-tools { font:12px Tahoma,sans-serif; color:#376b9c; padding:10px; border-bottom:1px solid #bcd5e9; }
+.era-2000 .transition-content { flex:1; min-height:0; margin:10px; padding:12px; overflow:hidden; background:#fff; border:1px solid #a7c6df; border-radius:6px; }
+.era-2000 .transition-status { margin:0 10px 10px; padding:17px 10px; background:white; border:1px solid #a7c6df; border-radius:5px; color:#617b92; font:12px Tahoma,sans-serif; }
+
+/* The detail and its transition now use the same window. */
+.era-2000 .social-stream.detail-mode { min-height:0; padding:0; border:0; background:transparent; overflow:visible; box-shadow:none; border-radius:0; }
+.era-2000 .social-stream .detail-window { position:relative; inset:auto; height:100%; width:100%; transform-origin:top left; box-sizing:border-box; }
+.era-2000 .detail-mode .feed-heading { display:none; }
+.era-2000 .detail-mode .transition-content { overflow-y:auto; overscroll-behavior:contain; }
+.era-2000 .detail-mode .feed-back { margin:0 0 12px; }
+.era-2000 .detail-mode .feed-post { margin:0; }
+.era-2000 .transition-window-controls button { display:grid; place-items:center; width:23px; height:22px; padding:0; font:12px Arial,sans-serif; cursor:pointer; }
+.era-2000 .transition-caption { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.era-2000 .detail-maximized { left:94px; right:24px; grid-template-columns:minmax(0,1fr); z-index:530; }
+.era-2000 .detail-maximized .feed-sidebar { display:none; }
+@media(max-width:899px) { .era-2000 .detail-maximized { left:12px; right:12px; } .era-2000 .transition-menu { font-size:10px; } }
+
+.era-2000 .transition-window-controls button { border:1px solid #d9eeff; border-radius:4px; color:white; background:linear-gradient(#b5ddff,#337ac4); }
+.era-2000 .transition-window-controls button:last-child { background:linear-gradient(#f5ad87,#c84d29); }
