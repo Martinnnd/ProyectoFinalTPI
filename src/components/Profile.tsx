@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Grid3x3, Lock, MapPin, Plus, UserRound, X } from "lucide-react";
+import { Grid3x3, Link2, Lock, MapPin, Plus, Send, Share2, UserRound, X } from "lucide-react";
 import MemoryMap from "./MemoryMap";
 import { resolveAchievements } from "../data";
 import type { Achievement, Memory, Period } from "../types";
@@ -23,6 +23,9 @@ export default function Profile({
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
 }) {
+  const [detailShareOpen, setDetailShareOpen] = useState(false);
+  const [collectionShareOpen, setCollectionShareOpen] = useState<string | null>(null);
+  const [copiedShare, setCopiedShare] = useState<string | null>(null);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const catalogueDialog = useRef<HTMLDialogElement>(null);
   const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
@@ -86,9 +89,9 @@ export default function Profile({
               Ver todas
             </button>
           </div>
-        </div>  
-       
-        
+        </div>
+
+
         <dl className="personal-counts">
           <div>
             <dt>Recuerdos</dt>
@@ -131,20 +134,70 @@ export default function Profile({
             selected={selected}
             onSelect={onSelect}
             picking={false}
-            onPick={() => {}}
+            onPick={() => { }}
             draft={null}
-            onCancel={() => {}}
+            onCancel={() => { }}
           />
         </div>
         {selected && (
           <article className="personal-detail">
-            <button
-              className="icon-button"
-              aria-label="Cerrar mi recuerdo"
-              onClick={() => onSelect(null)}
-            >
-              <X size={18} />
-            </button>
+            <div className="personal-detail-actions">
+              <div className="share-menu">
+                <button
+                  className="icon-button"
+                  aria-label="Compartir recuerdo"
+                  aria-expanded={detailShareOpen}
+                  onClick={() => setDetailShareOpen((open) => !open)}
+                >
+                  <Share2 size={18} />
+                </button>
+
+                {detailShareOpen && (
+                  <div className="share-menu-panel" role="menu">
+                    <span>Compartir recuerdo</span>
+
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Send size={15} /> WhatsApp
+                    </a>
+
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Link2 size={15} /> Facebook
+                    </a>
+
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <span aria-hidden="true">𝕏</span> X
+                    </a>
+
+                    <button
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(window.location.href);
+                        setCopiedShare("detail");
+                      }}
+                    >
+                      <Link2 size={15} />
+                      {copiedShare === "detail" ? "Enlace copiado" : "Copiar enlace"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <button
+                className="icon-button"
+                aria-label="Cerrar mi recuerdo"
+                onClick={() => onSelect(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
             <span className="eyebrow">
               {selected.year} / {selected.category}
             </span>
@@ -171,7 +224,67 @@ export default function Profile({
                 aria-pressed={selected?.id === memory.id}
                 onClick={() => onSelect(memory)}
               >
-                <span className="album-year">{memory.year}</span>
+                <div className="memory-card-top">
+                  <span className="album-year">{memory.year}</span>
+
+                  <div className="share-menu">
+                    <button
+                      className="icon-button"
+                      aria-label={`Compartir ${memory.title}`}
+                      aria-expanded={collectionShareOpen === memory.id}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setCollectionShareOpen((open) =>
+                          open === memory.id ? null : memory.id
+                        );
+                      }}
+                    >
+                      <Share2 size={18} />
+                    </button>
+
+                    {collectionShareOpen === memory.id && (
+                      <div
+                        className="share-menu-panel"
+                        role="menu"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <span>Compartir recuerdo</span>
+
+                        <a
+                        >
+                          <Send size={15} /> WhatsApp
+                        </a>
+
+                        <a
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <Link2 size={15} /> Facebook
+                        </a>
+
+                        <a
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <span aria-hidden="true">𝕏</span> X
+                        </a>
+
+                        <button
+                          onClick={async (event) => {
+                            event.stopPropagation();
+                            await navigator.clipboard.writeText(window.location.href);
+                            setCopiedShare(memory.id);
+                          }}
+                        >
+                          <Link2 size={15} />
+                          {copiedShare === memory.id
+                            ? "Enlace copiado"
+                            : "Copiar enlace"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <span className="eyebrow">{memory.category}</span>
                 <strong>{memory.title}</strong>
                 <small>
@@ -199,7 +312,7 @@ export default function Profile({
           </div>
         )}
       </section>
-      
+
       <dialog
         ref={catalogueDialog}
         className="achievement-dialog"
@@ -232,9 +345,8 @@ export default function Profile({
             {catalogue.map((achievement) => (
               <li
                 key={achievement.id}
-                className={`achievement-card ${
-                  achievement.unlocked ? "is-unlocked" : "is-locked"
-                }`}
+                className={`achievement-card ${achievement.unlocked ? "is-unlocked" : "is-locked"
+                  }`}
               >
                 <span className="achievement-media">
                   <img
