@@ -1218,3 +1218,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+.community-controls { padding:14px; margin-bottom:16px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--radius); display:grid; gap:10px; font-family:var(--font-body); }
+.community-controls > strong { font-size:15px; }
+.community-controls label { display:grid; gap:5px; font-size:12px; }
+.community-controls :is(input,select) { width:100%; min-width:0; padding:8px; background:var(--surface); color:var(--ink); border:1px solid var(--line); font:inherit; }
+.community-controls button { padding:8px 10px; background:var(--soft); color:var(--ink); border:1px solid var(--line); font:inherit; cursor:pointer; }
+.community-controls :is(button,input,select):focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.community-controls p { margin:0; font-size:13px; line-height:1.5; }
+.community-local,.community-controls form small { font-size:11px; color:var(--muted); }
+.community-cards { display:grid; gap:8px; }
+.community-cards button { display:grid; grid-template-columns:32px 1fr; text-align:left; gap:5px; }
+.community-cards button > span { grid-row:span 2; font-size:23px; }
+.community-cards small { font-size:11px; }
+.community-controls form { display:grid; gap:10px; border-top:1px solid var(--line); padding-top:10px; }
+.map-community { position:absolute; z-index:505; left:94px; top:235px; width:350px; max-height:calc(100dvh - 585px); overflow-y:auto; min-height:110px; scrollbar-width:thin; }
+.map-community .community-controls { margin:0; }
+.app.stories-open .map-community { display:none; }
+@media(max-height:850px) and (min-width:900px) { .map-community { left:461px; top:155px; max-height:calc(100dvh - 240px); width:300px; } }
+@media(max-width:899px) {
+ .map-community { left:12px; top:280px; width:calc(100% - 24px); max-height:calc(100dvh - 510px); min-height:100px; }
+ .community-controls { padding:10px; }
+}
+
+/* One shared map symbol identifies every community, regardless of its topic. */
+.app .memory-marker.community-marker { background:transparent; border:0; box-shadow:none; border-radius:0; overflow:visible; transform:none; }
+.app .memory-marker.community-marker img { display:block; max-width:none; filter:drop-shadow(0 2px 3px #0008); }
+.app .memory-marker.community-marker.selected img { filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 8px var(--accent)); }

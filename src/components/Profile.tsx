@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
 import { Grid3x3, Lock, MapPin, Plus, UserRound, X } from "lucide-react";
 import MemoryMap from "./MemoryMap";
@@ -5,6 +6,7 @@ import { resolveAchievements } from "../data";
 import type { Achievement, Memory, Period } from "../types";
 
 export default function Profile({
+  community,
   memories,
   allMemories,
   following,
@@ -14,6 +16,7 @@ export default function Profile({
   onSelect,
   onAdd,
 }: {
+  community?: ReactNode;
   memories: Memory[];
   allMemories: Memory[];
   following: string[];
@@ -37,6 +40,7 @@ export default function Profile({
   }
   return (
     <main id="explore" className="personal-profile" aria-label="Mi perfil">
+      {community}
       <header className="personal-header">
         <div className="profile-portrait" aria-hidden="true">
           <UserRound size={44} />

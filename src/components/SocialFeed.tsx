@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { transitionFeed } from "../eras/shared/transitionFeed";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -17,6 +18,8 @@ function toggleId(ids: string[], id: string) {
 const SCORES = [1, 2, 3, 4, 5] as const;
 
 export default function SocialFeed({
+  groupName,
+  community,
   memories,
   decade,
   selected,
@@ -29,6 +32,8 @@ export default function SocialFeed({
   decade: number;
   following: string[];
   onFollow: (author: string) => void;
+  groupName?: string;
+  community?: ReactNode;
   memories: Memory[];
   selected: Memory | null;
   onSelect: (memory: Memory | null) => void;
@@ -98,8 +103,9 @@ export default function SocialFeed({
           {decade === 2000 && <><div className="transition-contact"><span className="transition-contact-avatar">{selected.author.slice(0,1)}</span><div className="transition-contact-name">{selected.author} — Conversación</div><small className="transition-contact-status">Recuerdo de {selected.year}</small></div><div className="transition-chat-tools">☺ Recuerdos compartidos · ♫ Nostalgia</div></>}
         </>}
         <div className={desktopDetail ? 'transition-content' : undefined}>
+        {!selected && community}
         <header className="feed-heading">
-          <h2>Feed</h2>
+          <h2>{groupName ?? "Feed"}</h2>
           <div className="feed-tabs" role="group" aria-label="Publicaciones">
             <button
               aria-pressed={tab === "all"}

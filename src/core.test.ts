@@ -8,7 +8,7 @@ describe("Exploración temporal", () => {
   it("ofrece siete escenas por década en lugares distintos", () => {
     for (const decade of [1970, 1980, 1990, 2000] as const) {
       const memories = filterMemories(
-        initialMemories,
+        initialMemories.filter(m => !m.groupId),
         { decade, year: null },
         "Todas",
       );

@@ -20,6 +20,7 @@ export interface Memory {
   lat: number;
   lng: number;
   source: "demo" | "local";
+  groupId?: string;
   image?: string;
   reference?: string;
 }
@@ -56,3 +57,5 @@ export function filterMemories(
       (category === "Todas" || m.category === category),
   );
 }
+
+export interface CommunityGroup { id: string; name: string; decade: Decade; description: string; }

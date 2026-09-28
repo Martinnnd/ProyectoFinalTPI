@@ -479,3 +479,18 @@
 .map-toolbar:has(.compact-menu[open]) {
   z-index: 560;
 }
+
+/* A compact index beside the player, with full stories in the feed. */
+.app.view-map .stories-drawer.stories-index { left:461px; right:auto; top:220px; bottom:60px; width:320px; max-height:440px; margin-top:auto; }
+.stories-index .side-panel { min-height:0; }
+.stories-index .stories-content { padding:12px 16px; }
+.stories-index .list-heading { margin-top:0; }
+.stories-index .stories-hint { font-size:12px; color:var(--muted); margin:10px 0 0; }
+.stories-index .memory-list button { align-items:center; justify-content:space-between; padding:12px 0; gap:14px; }
+.stories-index .memory-list button > svg { margin-top:0; }
+.stories-index .memory-list strong { font-size:14px; }
+.stories-index .memory-list button[aria-current="true"] { color:var(--accent); }
+@media(max-width:899px) {
+ .app.view-map .stories-drawer.stories-index { left:12px; right:12px; top:280px; bottom:220px; width:auto; max-height:none; margin:0; }
+ .app.view-map.stories-open > .music-card { max-height:150px; bottom:65px; overflow-y:auto; }
+}

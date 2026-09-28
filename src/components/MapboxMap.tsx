@@ -153,7 +153,14 @@ export default function MapboxMap(
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
       symbol.className = `memory-marker marker-${category} ${props.selected?.id === memory.id ? "selected" : ""}`;
-      symbol.textContent = symbols[memory.category];
+      if (memory.groupId) {
+        symbol.classList.add('community-marker');
+        const icon = document.createElement('img');
+        icon.src = '/groups/community-pin.svg'; icon.alt = ''; icon.width = 36; icon.height = 44;
+        symbol.append(icon);
+        button.setAttribute('aria-label', `${memory.title}, ${memory.year}, grupos en común`);
+        button.title = `${memory.title} · Grupos en común`;
+      } else symbol.textContent = symbols[memory.category];
       button.append(symbol);
       button.addEventListener("click", (event) => {
         event.stopPropagation();

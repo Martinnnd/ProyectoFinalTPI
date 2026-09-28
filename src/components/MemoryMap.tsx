@@ -76,7 +76,9 @@ function MapActions({
   return null;
 }
 function icon(memory?: Memory, selected = false) {
-  const symbol = memory ? symbols[memory.category] : "+";
+  const symbol = memory?.groupId
+    ? '<img src="/groups/community-pin.svg" width="36" height="44" alt="" />'
+    : memory ? symbols[memory.category] : "+";
   const category = memory
     ? memory.category
         .toLowerCase()
@@ -85,7 +87,7 @@ function icon(memory?: Memory, selected = false) {
     : "provisional";
   return L.divIcon({
     className: "memory-marker-wrapper",
-    html: `<span class="memory-marker marker-${category} ${selected ? "selected" : ""}">${symbol}</span>`,
+    html: `<span class="memory-marker marker-${category} ${memory?.groupId ? "community-marker" : ""} ${selected ? "selected" : ""}">${symbol}</span>`,
     iconSize: [36, 42],
     iconAnchor: [18, 40],
     tooltipAnchor: [0, -38],

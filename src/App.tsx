@@ -1,5 +1,8 @@
 "use client";
 
+import CommunityControls from "./components/CommunityControls";
+import { demoGroup, loadGroups, filterCommunity } from "./groups";
+import type { CommunityGroup } from "./types";
 import { useEffect, useRef, useState } from "react";
 import { Compass, Plus, X, Newspaper, UserRound } from "lucide-react";
 import {
@@ -30,6 +33,10 @@ import { availableDecades } from "./eras/registry";
 import { eraThemes } from "./themes";
 
 export default function App() {
+  const [groups,setGroups] = useState<CommunityGroup[]>([demoGroup]);
+  const [scope,setScope] = useState('general');
+  const [query,setQuery] = useState('');
+  useEffect(()=>setGroups(loadGroups()),[]);
   const mapExpandButton = useRef<HTMLButtonElement>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
   const [following, setFollowing] = useState<string[]>([]);
@@ -92,15 +99,29 @@ export default function App() {
     };
   }, []);
   const memories = filterMemories(
-    [...initialMemories, ...local],
+    filterCommunity([...initialMemories, ...local],scope,groups,query),
     period,
     category,
   );
   const ownMemories = filterMemories(local, period, category);
   const visibleMemories = view === "profile" ? ownMemories : memories;
   const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
+  function chooseScope(value:string) {
+    setScope(value);setQuery('');setSelectedId(null);
+    const group=groups.find(g=>g.id===value);
+    if(group){setPeriod({decade:group.decade,year:null});setCategory('Todas');}
+    setPanelOpen(false);
+  }
+  function createGroup(group:CommunityGroup) {
+    if(groups.some(g=>g.name.toLocaleLowerCase()===group.name.toLocaleLowerCase())) return 'Ya existe un grupo con ese nombre.';
+    const next=[...groups,group];
+    try {localStorage.setItem('nostalgia.groups.v1',JSON.stringify(next.filter(g=>g.id!==demoGroup.id)));} catch {return 'No se pudo guardar el grupo. Revisá el espacio del navegador.';}
+    setGroups(next);setScope(group.id);setSelectedId(null);setQuery('');setCategory('Todas');setPeriod({decade:group.decade,year:null});return null;
+  }
+  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile)setView('feed');}} onCreate={createGroup}/>;
   function changePeriod(next: Period) {
     setPeriod(next);
+    if(groups.some(g=>g.id===scope && g.decade!==next.decade)) setScope("general");
     setSelectedId(null);
     setFactsOpen(view === "map");
     setPanelOpen(false);
@@ -149,6 +170,11 @@ export default function App() {
     return () => window.removeEventListener("keydown", handler);
   }, [picking, panelOpen, draft, mapExpanded]);
   function save(memory: Memory) {
+    const destinationGroup=groups.find(g=>g.id===scope);
+    if(destinationGroup) {
+      if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
+      memory={...memory,groupId:scope};
+    }
     const isFirstMemory = local.length === 0;
     const next = [...local, memory];
     try {
@@ -379,6 +405,7 @@ export default function App() {
         </button>
       </header>
 
+      {view === "map" && !picking && !draft && <div className="map-community">{communityControls()}</div>}
       <div className="map-period">
         <Compass size={17} />
         <strong>{eraContent[period.decade].label}</strong>
@@ -387,7 +414,7 @@ export default function App() {
         <span>{memories.length} recuerdos</span>
       </div>
       {view === "map" && panelOpen && (
-        <div className="stories-drawer">
+        <div className="stories-drawer stories-index">
           <div className="drawer-heading">
             <span className="eyebrow">{theme.storiesTitle}</span>
             <button
@@ -399,11 +426,13 @@ export default function App() {
             </button>
           </div>
           <SidePanel
-            period={period}
             selected={selected}
-            onBack={() => setSelectedId(null)}
             memories={memories}
-            onSelect={select}
+            onSelect={(memory) => {
+              setSelectedId(memory.id);
+              setPanelOpen(false);
+              setView("feed");
+            }}
           />
         </div>
       )}
@@ -416,6 +445,7 @@ export default function App() {
       )}
       {view === "profile" && (
         <Profile
+          community={communityControls(true)}
           memories={ownMemories}
           allMemories={local}
           following={following}
@@ -428,6 +458,8 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
+          community={communityControls()}
+          groupName={groups.find(g=>g.id===scope)?.name}
           decade={period.decade}
           memories={memories}
           following={following}
@@ -493,6 +525,7 @@ export default function App() {
       )}
       {draft && (
         <MemoryForm
+          groupName={groups.find(g=>g.id===scope)?.name}
           point={draft}
           decade={period.decade}
           onCancel={cancel}

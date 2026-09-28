@@ -3,11 +3,13 @@
   import { categories, type Memory, type Decade } from "../types";
   import type { Point } from "./MemoryMap";
   export default function MemoryForm({
+    groupName,
     point,
     decade,
     onCancel,
     onSave,
   }: {
+    groupName?: string;
     point: Point;
     decade: Decade;
     onCancel: () => void;
@@ -79,6 +81,7 @@
           </button>
         </div>
         <h2 id="form-title">¿Qué pasó en este lugar?</h2>
+        <p>Publicar en: <strong>{groupName ?? "Recuerdos generales"}</strong></p>
         <p className="muted">Los pequeños recuerdos también merecen un pin.</p>
         <div className="coordinate-label">
           <MapPin size={16} /> Ubicación elegida: {point.lat.toFixed(4)},{" "}
