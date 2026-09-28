@@ -1,3 +1,5 @@
+import PostMedia, { PostMusic } from "./PostMedia";
+import VhsCover from "../eras/80s/VhsCover";
 import type { ReactNode } from "react";
 import { transitionFeed } from "../eras/shared/transitionFeed";
 import { useEffect, useRef, useState } from "react";
@@ -91,7 +93,7 @@ export default function SocialFeed({
   }
   return (
     <section className={`social-layout${desktopDetail && maximized ? " detail-maximized" : ""}`} aria-label="Feed de recuerdos">
-      <div className={`social-stream${desktopDetail ? ` detail-mode transition-${decade === 1990 ? 'win95' : 'messenger'}` : ''}`} ref={stream}>
+      <div className={`social-stream${decade === 1980 ? (selected ? ' vhs-playing' : ' vhs-catalogue') : ''}${desktopDetail ? ` detail-mode transition-${decade === 1990 ? 'win95' : 'messenger'}` : ''}`} ref={stream}>
         <div className={desktopDetail ? 'transition-window detail-window' : undefined}>
         {desktopDetail && <>
           <div className="transition-title"><span className="transition-app-icon">{decade === 1990 ? '▣' : '♟'}</span><strong className="transition-caption">{decade === 1990 ? 'Recuerdo — Nostalgia 95' : 'Nostalgia Messenger'}</strong><div className="transition-window-controls">
@@ -103,9 +105,10 @@ export default function SocialFeed({
           {decade === 2000 && <><div className="transition-contact"><span className="transition-contact-avatar">{selected.author.slice(0,1)}</span><div className="transition-contact-name">{selected.author} — Conversación</div><small className="transition-contact-status">Recuerdo de {selected.year}</small></div><div className="transition-chat-tools">☺ Recuerdos compartidos · ♫ Nostalgia</div></>}
         </>}
         <div className={desktopDetail ? 'transition-content' : undefined}>
+        {decade === 1980 && <div className="videoclub-marquee"><span>ABIERTO · 1980—1989</span><strong>NOSTALGIA <em>video club</em></strong><small>{selected ? 'SALA DE REPRODUCCIÓN · PLAY ▶' : 'Historias para volver a ver. Elegí una cinta.'}</small></div>}
         {!selected && community}
         <header className="feed-heading">
-          <h2>{groupName ?? "Feed"}</h2>
+          <h2>{groupName ?? (decade === 1980 ? "El videoclub" : "Feed")}</h2>
           <div className="feed-tabs" role="group" aria-label="Publicaciones">
             <button
               aria-pressed={tab === "all"}
@@ -161,6 +164,7 @@ export default function SocialFeed({
                   </button>
                 )}
               </header>
+              <PostMusic key={memory.id} music={memory.music}/>
               <button
                 className={
                   memory.image
@@ -169,6 +173,7 @@ export default function SocialFeed({
                 }
                 onClick={() => open(memory)}
               >
+                {decade === 1980 && !selected && <VhsCover memory={memory}/> }
                 <span className="post-text">
                   <h3>{memory.title}</h3>
                   <p className={selected ? "" : "post-excerpt"}>
@@ -178,19 +183,8 @@ export default function SocialFeed({
                     <span className="read-post">Leer recuerdo completo →</span>
                   )}
                 </span>
-                {memory.image && (
-                  <img
-                    className="post-image"
-                    src={memory.image}
-                    alt={`Fotografía de ${memory.title} en ${memory.place}, ${memory.year}`}
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      e.currentTarget.hidden = true;
-                    }}
-                  />
-                )}
               </button>
+              <PostMedia key={memory.id} memory={memory}/>
               <button className="post-place" onClick={() => onMap(memory)}>
                 <MapPin size={14} />
                 {memory.place} · {memory.year}

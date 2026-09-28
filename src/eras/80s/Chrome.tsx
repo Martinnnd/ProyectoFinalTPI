@@ -4,6 +4,9 @@ export default function Chrome({ period, count }: ChromeProps) {
   const label = period.year ?? `${period.decade}–${period.decade + 9}`;
   return (
     <div className="era-chrome">
+      <div className="c64-hardware">
+        <div className="c64-monitor-label"><span className="c64-rainbow"/><strong>commodore</strong><span>64 · PERSONAL COMPUTER</span><span className="c64-monitor-vents" aria-hidden="true"/><span className="c64-monitor-dials" aria-hidden="true"><b/><b/></span><i/> POWER</div>
+      </div>
       <div className="era-shell-top">
         <span className="shell-caption">{theme.windowTitle}</span>
         <span className="vhs-signal" aria-hidden="true">

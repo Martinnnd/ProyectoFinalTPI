@@ -18,7 +18,7 @@ export function transitionFeed(stream: HTMLElement, backwards: boolean, origin?:
   const frame=element('div','transition-window');
   const animations:Animation[]=[];
   const duration=1100;
-    frame.append(element('span','arcade-transition-kicker','NOSTALGIA · MEMORY SYSTEM'),element('strong','arcade-transition-title',backwards?'SELECT MEMORY':'MEMORY UNLOCKED'),element('span','arcade-transition-subtitle',backwards?'VOLVIENDO A LA SELECCIÓN':'ENTRANDO AL RECUERDO'));
+    frame.append(element('span','arcade-transition-kicker',effect==='vhs'?'NOSTALGIA · VIDEO CLUB':'NOSTALGIA · MEMORY SYSTEM'),element('strong','arcade-transition-title',effect==='vhs'?(backwards?'◀◀ REWIND':'▶ PLAY'):(backwards?'SELECT MEMORY':'MEMORY UNLOCKED')),element('span','arcade-transition-subtitle',effect==='vhs'?(backwards?'DEVOLVIENDO LA CINTA':'AJUSTANDO TRACKING · VHS / PAL'):(backwards?'VOLVIENDO A LA SELECCIÓN':'ENTRANDO AL RECUERDO')));
     const meter=element('div','arcade-transition-meter');for(let i=0;i<12;i++)meter.append(element('i',''));frame.append(meter);
     for(let i=0;i<8;i++) {const stripe=element('div','arcade-transition-stripe');Object.assign(stripe.style,{top:`${i*12.5}%`,height:'12.6%'});layer.append(stripe);animations.push(stripe.animate([{transform:`translateX(${i%2?-101:101}%)`},{transform:'translateX(0)',offset:.3},{transform:'translateX(0)',offset:.65},{transform:`translateX(${i%2?101:-101}%)`}],{duration:duration-140,delay:i*18,easing:'steps(10,end)',fill:'both'}));}
     animations.push(frame.animate([{opacity:0,transform:'scale(.94)'},{opacity:1,transform:'scale(1)',offset:.32},{opacity:1,offset:.66},{opacity:0,transform:'scale(1.03)'}],{duration,fill:'both'}));

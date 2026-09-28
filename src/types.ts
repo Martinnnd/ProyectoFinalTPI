@@ -22,6 +22,9 @@ export interface Memory {
   source: "demo" | "local";
   groupId?: string;
   image?: string;
+  imageCaption?: string;
+  media?: { kind: "image" | "video" | "youtube"; url: string };
+  music?: { spotifyId: string; title: string; artist: string };
   reference?: string;
 }
 export interface Period {

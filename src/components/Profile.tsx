@@ -1,3 +1,5 @@
+import PostMedia, { PostMusic } from "./PostMedia";
+import VhsCover from "../eras/80s/VhsCover";
 import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
 import { Grid3x3, Link2, Lock, MapPin, Plus, Send, Share2, UserRound, X } from "lucide-react";
@@ -43,15 +45,17 @@ export default function Profile({
   }
   return (
     <main id="explore" className="personal-profile" aria-label="Mi perfil">
-      {community}
+      {period.decade === 1980 && <div className="videoclub-marquee"><span>VIDEO CLUB · NOSTALGIA</span><strong>Mi colección privada</strong><small>Cada recuerdo merece una nueva función.</small></div>}
+      {period.decade !== 1980 && community}
       <header className="personal-header">
+        {period.decade === 1980 && <div className="vhs-membership-heading"><strong>NOSTALGIA VIDEO CLUB</strong><span>CARNET DE SOCIO · EDICIÓN LOCAL</span></div>}
         <div className="profile-portrait" aria-hidden="true">
           <UserRound size={44} />
         </div>
         <div className="personal-identity">
           <div className="personal-identity-text">
             <span className="eyebrow">MI ARCHIVO PERSONAL</span>
-            <h2>Mi perfil</h2>
+            <h2>{period.decade === 1980 ? "Mi carnet de socio" : "Mi perfil"}</h2>
             <p>Los lugares cambian. Tus historias quedan.</p>
             <small className="profile-note">
               Visitante · recuerdos guardados en este navegador
@@ -120,7 +124,9 @@ export default function Profile({
           Perfil local sin inicio de sesión. Los seguidos corresponden a esta
           sesión; todavía no recibís seguidores.
         </small>
+        {period.decade === 1980 && <div className="vhs-membership-footer"><span className="vhs-barcode" aria-hidden="true"/><span>MIEMBRO LOCAL · NO TRANSFERIBLE</span><span>REBOBINÁ TUS RECUERDOS ↶</span></div>}
       </header>
+      {period.decade === 1980 && community}
       <section className="personal-atlas">
         <div className="personal-section-title">
           <div>
@@ -205,12 +211,14 @@ export default function Profile({
             <span className="eyebrow">
               {selected.year} / {selected.category}
             </span>
+            <PostMusic key={selected.id} music={selected.music}/>
             <h3>{selected.title}</h3>
             <p className="personal-place">
               <MapPin size={14} />
               {selected.place}
             </p>
             <p>{selected.description}</p>
+            <PostMedia key={selected.id} memory={selected}/>
           </article>
         )}
       </section>
@@ -289,6 +297,7 @@ export default function Profile({
                     )}
                   </div>
                 </div>
+                {period.decade === 1980 && <VhsCover memory={memory}/>}
                 <span className="eyebrow">{memory.category}</span>
                 <strong>{memory.title}</strong>
                 <small>

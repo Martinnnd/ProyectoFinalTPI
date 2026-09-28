@@ -36,3 +36,22 @@
 @media(max-height:850px) and (min-width:900px) { .map-community { left:461px; top:155px; max-height:calc(100dvh - 240px); width:300px; } }
 @media(max-width:1100px) { .community-filters { grid-template-columns:1fr; } .community-heading { flex-wrap:wrap; } }
 @media(max-width:899px) { .community-controls { padding:12px; } .community-heading strong { font-size:14px; } .community-cards button { padding:12px; gap:10px; } .map-community { left:12px; top:280px; width:calc(100% - 24px); max-height:calc(100dvh - 510px); min-height:100px; } }
+
+.post-attachment { margin:16px 0; width:100%; overflow:hidden; border:1px solid var(--line); border-radius:var(--radius); }
+.post-attachment :is(img,video) { display:block; width:100%; max-height:420px; object-fit:contain; background:#14171b; }
+.post-attachment iframe { display:block; width:100%; aspect-ratio:16/9; min-height:200px; border:0; }
+.post-attachment a { display:block; padding:8px; font-size:12px; }
+.post-music { margin:10px 0 16px; border:1px solid var(--line); padding:8px; background:var(--soft); border-radius:var(--radius); }
+.post-music > button { display:flex; align-items:center; gap:12px; width:100%; padding:4px; background:transparent; color:var(--ink); border:0; text-align:left; cursor:pointer; }
+.post-music > button > span:first-child { font-size:25px; }
+.post-music > button > span:nth-child(2) { display:grid; gap:4px; flex:1; }
+.post-music strong { font-size:13px; }
+.post-music small,.post-music > button > span:last-child { font-size:11px; }
+.post-music iframe { border:0; display:block; width:100%; margin-top:8px; }
+.media-fields { display:grid; gap:12px; padding:14px; border:1px solid var(--line); min-width:0; }
+.media-fields legend { padding:0 6px; font-size:14px; }
+.media-fields small { font-size:11px; line-height:1.5; }
+.media-fields input[type=file] { font-size:12px; padding:8px; }
+.attachment-preview { max-width:100%; max-height:160px; object-fit:contain; }
+
+.attachment-caption { display:block; padding:8px; font-size:11px; line-height:1.5; }
