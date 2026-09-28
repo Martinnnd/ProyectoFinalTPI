@@ -1,3 +1,4 @@
+import { youtubeId, safeMediaUrl } from "./media";
 import { categories, type Memory } from "./types";
 export const STORAGE_KEY = "nostalgia.memories.v1";
 export function isMemory(value: unknown): value is Memory {
@@ -10,6 +11,8 @@ export function isMemory(value: unknown): value is Memory {
         (m[k] as string).trim().length > 0 &&
         (m[k] as string).length <= 3000,
     ) &&
+    (m.media === undefined || validMedia(m.media)) &&
+    (m.music === undefined || validMusic(m.music)) &&
     typeof m.year === "number" &&
     Number.isInteger(m.year) &&
     m.year >= 1970 &&
@@ -62,4 +65,15 @@ export function saveMemories(
   } catch {
     return false;
   }
+}
+
+function validMedia(value:unknown):boolean {
+ if(!value||typeof value!=='object')return false;
+ const m=value as Record<string,unknown>;
+ return typeof m.url==='string' && (m.kind==='youtube'?!!youtubeId(m.url):(m.kind==='image'||m.kind==='video')&&safeMediaUrl(m.url,m.kind));
+}
+function validMusic(value:unknown):boolean {
+ if(!value||typeof value!=='object')return false;
+ const m=value as Record<string,unknown>;
+ return typeof m.spotifyId==='string' && /^[A-Za-z0-9]{22}$/.test(m.spotifyId) && typeof m.title==='string' && m.title.length>0 && m.title.length<=120 && typeof m.artist==='string' && m.artist.length>0 && m.artist.length<=120;
 }

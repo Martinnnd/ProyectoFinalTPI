@@ -1,3 +1,5 @@
+import { youtubeId } from "../media";
+import PostMedia, { PostMusic } from "./PostMedia";
 import type { ReactNode } from "react";
 import { transitionFeed } from "../eras/shared/transitionFeed";
 import { useEffect, useRef, useState } from "react";
@@ -161,9 +163,10 @@ export default function SocialFeed({
                   </button>
                 )}
               </header>
+              <PostMusic key={`music-${memory.id}`} music={memory.music}/>
               <button
                 className={
-                  memory.image
+                  memory.image && !memory.media && !youtubeId(memory.image)
                     ? `post-content with-image${selected ? " is-open" : ""}`
                     : "post-content"
                 }
@@ -178,7 +181,7 @@ export default function SocialFeed({
                     <span className="read-post">Leer recuerdo completo →</span>
                   )}
                 </span>
-                {memory.image && (
+                {memory.image && !memory.media && !youtubeId(memory.image) && (
                   <img
                     className="post-image"
                     src={memory.image}
@@ -191,6 +194,7 @@ export default function SocialFeed({
                   />
                 )}
               </button>
+              {(memory.media || (memory.image && youtubeId(memory.image))) && <PostMedia key={`media-${memory.id}`} memory={memory}/>}
               <button className="post-place" onClick={() => onMap(memory)}>
                 <MapPin size={14} />
                 {memory.place} · {memory.year}

@@ -1,3 +1,4 @@
+import PostMedia, { PostMusic } from "./PostMedia";
 import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
 import { Grid3x3, Link2, Lock, MapPin, Plus, Send, Share2, UserRound, X } from "lucide-react";
@@ -205,12 +206,14 @@ export default function Profile({
             <span className="eyebrow">
               {selected.year} / {selected.category}
             </span>
+            <PostMusic key={`music-${selected.id}`} music={selected.music}/>
             <h3>{selected.title}</h3>
             <p className="personal-place">
               <MapPin size={14} />
               {selected.place}
             </p>
             <p>{selected.description}</p>
+            <PostMedia key={`media-${selected.id}`} memory={selected}/>
           </article>
         )}
       </section>
@@ -222,11 +225,10 @@ export default function Profile({
         {memories.length ? (
           <div className="personal-grid">
             {memories.map((memory) => (
-              <button
+              <article
                 key={memory.id}
                 className="personal-memory"
-                aria-pressed={selected?.id === memory.id}
-                onClick={() => onSelect(memory)}
+                data-selected={selected?.id === memory.id}
               >
                 <div className="memory-card-top">
                   <span className="album-year">{memory.year}</span>
@@ -289,13 +291,15 @@ export default function Profile({
                     )}
                   </div>
                 </div>
+                <button className="personal-memory-open" aria-pressed={selected?.id === memory.id} onClick={() => onSelect(memory)}>
                 <span className="eyebrow">{memory.category}</span>
                 <strong>{memory.title}</strong>
                 <small>
                   <MapPin size={13} />
                   {memory.place}
                 </small>
-              </button>
+                </button>
+              </article>
             ))}
           </div>
         ) : (

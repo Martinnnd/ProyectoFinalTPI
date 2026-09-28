@@ -752,7 +752,7 @@
   box-shadow: var(--shadow);
 }
 
-.personal-memory[aria-pressed="true"] {
+.personal-memory[data-selected="true"] {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -1512,3 +1512,6 @@
     grid-template-columns: 1fr;
   }
 }
+
+.personal-memory-open { display:flex; flex-direction:column; gap:8px; width:100%; padding:8px 0 0; background:transparent; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.personal-memory-open:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
