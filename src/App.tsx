@@ -1,7 +1,7 @@
 "use client";
 
 import CommunityControls from "./components/CommunityControls";
-import { demoGroup, loadGroups, filterCommunity } from "./groups";
+import { demoGroups, loadGroups, filterCommunity } from "./groups";
 import type { CommunityGroup } from "./types";
 import { useEffect, useRef, useState } from "react";
 import { Compass, Plus, X, Newspaper, UserRound } from "lucide-react";
@@ -33,8 +33,8 @@ import { availableDecades } from "./eras/registry";
 import { eraThemes } from "./themes";
 
 export default function App() {
-  const [groups,setGroups] = useState<CommunityGroup[]>([demoGroup]);
-  const [scope,setScope] = useState('general');
+  const [groups,setGroups] = useState<CommunityGroup[]>(demoGroups);
+  const [scope,setScope] = useState('all');
   const [query,setQuery] = useState('');
   useEffect(()=>setGroups(loadGroups()),[]);
   const mapExpandButton = useRef<HTMLButtonElement>(null);
@@ -99,7 +99,7 @@ export default function App() {
     };
   }, []);
   const memories = filterMemories(
-    filterCommunity([...initialMemories, ...local],scope,groups,query),
+    filterCommunity([...initialMemories, ...local],view === "map" ? "all" : scope,groups,query),
     period,
     category,
   );
@@ -115,13 +115,13 @@ export default function App() {
   function createGroup(group:CommunityGroup) {
     if(groups.some(g=>g.name.toLocaleLowerCase()===group.name.toLocaleLowerCase())) return 'Ya existe un grupo con ese nombre.';
     const next=[...groups,group];
-    try {localStorage.setItem('nostalgia.groups.v1',JSON.stringify(next.filter(g=>g.id!==demoGroup.id)));} catch {return 'No se pudo guardar el grupo. Revisá el espacio del navegador.';}
+    try {localStorage.setItem('nostalgia.groups.v1',JSON.stringify(next.filter(g=>!demoGroups.some(d=>d.id===g.id))));} catch {return 'No se pudo guardar el grupo. Revisá el espacio del navegador.';}
     setGroups(next);setScope(group.id);setSelectedId(null);setQuery('');setCategory('Todas');setPeriod({decade:group.decade,year:null});return null;
   }
   const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile)setView('feed');}} onCreate={createGroup}/>;
   function changePeriod(next: Period) {
     setPeriod(next);
-    if(groups.some(g=>g.id===scope && g.decade!==next.decade)) setScope("general");
+    if(groups.some(g=>g.id===scope && g.decade!==next.decade)) setScope("all");
     setSelectedId(null);
     setFactsOpen(view === "map");
     setPanelOpen(false);
@@ -458,6 +458,7 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
+          groupIds={groups.map(group => group.id)}
           community={communityControls()}
           groupName={groups.find(g=>g.id===scope)?.name}
           decade={period.decade}

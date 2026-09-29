@@ -20,6 +20,7 @@ function toggleId(ids: string[], id: string) {
 const SCORES = [1, 2, 3, 4, 5] as const;
 
 export default function SocialFeed({
+  groupIds,
   groupName,
   community,
   memories,
@@ -34,6 +35,7 @@ export default function SocialFeed({
   decade: number;
   following: string[];
   onFollow: (author: string) => void;
+  groupIds: string[];
   groupName?: string;
   community?: ReactNode;
   memories: Memory[];
@@ -49,7 +51,7 @@ export default function SocialFeed({
   const [saves, setSaves] = useState<string[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, string[]>>({});
-  const [tab, setTab] = useState<"all" | "following">("all");
+  const [tab, setTab] = useState<"all" | "following" | "groups">("all");
   const openingRect = useRef<DOMRect | undefined>(undefined);
   const cancelTurn = useRef<() => void>(() => {});
   useEffect(() => () => cancelTurn.current(), []);
@@ -68,7 +70,7 @@ export default function SocialFeed({
   const posts =
     tab === "following"
       ? memories.filter((m) => following.includes(m.author))
-      : memories;
+      : tab === "groups" ? memories.filter(m => !!m.groupId && groupIds.includes(m.groupId)) : memories;
   function follow(author: string) {
     onFollow(author);
   }
@@ -109,6 +111,7 @@ export default function SocialFeed({
         <header className="feed-heading">
           <h2>{groupName ?? "Feed"}</h2>
           <div className="feed-tabs" role="group" aria-label="Publicaciones">
+
             <button
               aria-pressed={tab === "all"}
               onClick={() => {
@@ -127,6 +130,7 @@ export default function SocialFeed({
             >
               Seguidos
             </button>
+            <button aria-pressed={tab === "groups"} onClick={() => {setTab("groups");open(null);}}>Mis grupos</button>
           </div>
         </header>
         {selected && (
@@ -305,7 +309,7 @@ export default function SocialFeed({
               <h3>
                 {tab === "following"
                   ? "Todavía no hay publicaciones de tus seguidos"
-                  : "No hay recuerdos con estos filtros"}
+                  : tab === "groups" ? "No hay publicaciones de tus grupos para esta época y categoría" : "No hay recuerdos con estos filtros"}
               </h3>
               <p>
                 {

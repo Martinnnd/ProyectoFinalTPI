@@ -26,7 +26,7 @@ describe("Exploración temporal", () => {
       ),
     ).toHaveLength(1);
     expect(
-      filterMemories(initialMemories, { decade: 1990, year: 1997 }, "Música"),
+      filterMemories(initialMemories.filter(m => !m.groupId), { decade: 1990, year: 1997 }, "Música"),
     ).toEqual([]);
     expect(
       filterMemories(initialMemories, { decade: 1980, year: null }, "Cine"),

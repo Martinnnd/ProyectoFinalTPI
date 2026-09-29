@@ -7,6 +7,45 @@ export const content = {
       "Videoclubes, pilas de repuesto y encuentros sin mensajes de aviso.",
   },
   memories: [
+{
+    "id": "grunge-90-1",
+    "groupId": "grunge-90",
+    "title": "El cassette de Nirvana que no volvía nunca",
+    "year": 1993,
+    "author": "Nico",
+    "place": "Plaza Sarmiento, San Justo, Buenos Aires",
+    "lat": -34.676,
+    "lng": -58.56,
+    "description": "Llevé un cassette de Nirvana para prestárselo a un compañero después del colegio. Terminó recorriendo medio curso: cada semana alguien distinto decía que lo tenía en su casa. Cuando volvió, la cajita estaba rajada y la etiqueta tenía nombres escritos con birome. Lo puse en el walkman camino a la plaza y sonaba igual de gastado que siempre. En este grupo quiero encontrar a los que también armaban cadenas de préstamos.",
+    "category": "Música",
+    "source": "demo"
+},
+{
+    "id": "grunge-90-2",
+    "groupId": "grunge-90",
+    "title": "Pearl Jam en el cuarto de mi amigo",
+    "year": 1995,
+    "author": "Vero",
+    "place": "Ramos Mejía, Buenos Aires",
+    "lat": -34.644,
+    "lng": -58.565,
+    "description": "Mi amigo había conseguido un disco de Pearl Jam y nos invitó a escucharlo después de merendar. Bajamos la persiana, corrimos los cuadernos y subimos el volumen hasta que su mamá golpeó la puerta. Nos turnábamos para mirar el librito y adivinar las letras. Volví a casa con una copia en cassette y una lista de canciones anotada en la mochila. Cada vez que las escucho vuelvo a ese cuarto lleno de pósters.",
+    "category": "Música",
+    "source": "demo"
+},
+{
+    "id": "grunge-90-3",
+    "groupId": "grunge-90",
+    "title": "Nuestra banda ensayaba en un garaje",
+    "year": 1997,
+    "author": "Marcos",
+    "place": "Morón, Buenos Aires",
+    "lat": -34.65,
+    "lng": -58.619,
+    "description": "Teníamos una guitarra prestada, una batería bastante incompleta y muchas ganas de tocar temas de Soundgarden y Nirvana. El garaje quedaba tan chico que el cantante casi no podía moverse. Grabábamos los ensayos con un equipo apoyado sobre una caja y después nos reíamos de lo mal que se escuchaba. Nunca salimos de ese barrio, pero los sábados de ensayo eran el mejor momento de la semana.",
+    "category": "Música",
+    "source": "demo"
+},
     {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,

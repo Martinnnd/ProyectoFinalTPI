@@ -58,3 +58,5 @@
 
 .post-attachment.post-attachment-youtube { width:min(100%, 400px); box-sizing:border-box; }
 .post-attachment-youtube iframe { height:auto; min-height:0; aspect-ratio:16/9; }
+
+.community-filters { grid-template-columns:minmax(0,1fr); }

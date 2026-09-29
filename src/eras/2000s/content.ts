@@ -7,6 +7,45 @@ export const content = {
       "Fotos digitales, zumbidos y canciones que entraban en el bolsillo.",
   },
   memories: [
+{
+    "id": "cine-2000-1",
+    "groupId": "cine-2000",
+    "title": "La fila para ver El retorno del rey",
+    "year": 2004,
+    "author": "Pablo",
+    "place": "Abasto, Buenos Aires",
+    "lat": -34.6035,
+    "lng": -58.4108,
+    "description": "Fuimos con mis amigos a ver El retorno del rey y llegamos mucho antes para conseguir lugar juntos. En la fila discutimos nuestras escenas favoritas de las películas anteriores, cuidando de no contar nada a quienes no las habían visto. Salimos hablando todos a la vez y terminamos comiendo una pizza mientras repasábamos el final. Guardé la entrada dentro de un libro; todavía tiene una mancha del vaso de gaseosa.",
+    "category": "Cine",
+    "source": "demo"
+},
+{
+    "id": "cine-2000-2",
+    "groupId": "cine-2000",
+    "title": "Harry Potter y una salida después del colegio",
+    "year": 2005,
+    "author": "Carla",
+    "place": "Cine de San Justo, Buenos Aires",
+    "lat": -34.682,
+    "lng": -58.557,
+    "description": "Habíamos organizado toda la semana la salida para ver Harry Potter y el cáliz de fuego. Uno compró las entradas, otro juntó la plata y yo llevé una cámara digital para la foto antes de entrar. Compartimos un balde de pochoclos que se terminó demasiado rápido. A la salida discutimos las diferencias con el libro hasta perder el colectivo. La película era la excusa perfecta para estar juntos un rato más.",
+    "category": "Cine",
+    "source": "demo"
+},
+{
+    "id": "cine-2000-3",
+    "groupId": "cine-2000",
+    "title": "Shrek en DVD y el sillón lleno",
+    "year": 2002,
+    "author": "Luciano",
+    "place": "Villa Luzuriaga, La Matanza, Buenos Aires",
+    "lat": -34.657,
+    "lng": -58.584,
+    "description": "Alquilamos Shrek en DVD para una noche de películas en casa. Éramos tantos que hubo que traer sillas de la cocina y dejar a dos en el piso. Antes de empezar nos entretuvimos recorriendo los menús, algo que todavía nos parecía una novedad. Terminamos repitiendo los chistes durante semanas y prometiendo otra función para el sábado siguiente. Me acuerdo más de las risas del living que de cualquier otra cosa de esa noche.",
+    "category": "Cine",
+    "source": "demo"
+},
     {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,

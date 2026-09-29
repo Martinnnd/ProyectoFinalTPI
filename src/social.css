@@ -1515,3 +1515,31 @@
 
 .personal-memory-open { display:flex; flex-direction:column; gap:8px; width:100%; padding:8px 0 0; background:transparent; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer; }
 .personal-memory-open:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+
+/* Feed workspace: keep time controls in the left column and free the top. */
+.app.view-feed .feed-tabs { flex-wrap:wrap; }
+@media(min-width:900px) {
+ .app.view-feed .social-layout { top:43px; }
+ .app.view-feed .map-toolbar { inset:43px 24px auto 94px; }
+ .app.view-feed .map-toolbar .brand-card { width:265px; box-sizing:border-box; }
+ .app.view-feed .compact-selectors { position:absolute; top:110px; left:0; right:auto; width:265px; gap:6px; }
+ .app.view-feed .compact-selectors .timeline { padding:6px; gap:6px; width:265px; box-sizing:border-box; min-height:0; }
+ .app.view-feed .compact-selectors .timeline-clock { display:none; }
+ .app.view-feed .compact-selectors summary { font-size:12px; padding:7px 9px; min-height:0; }
+ .app.view-feed .compact-selectors .year-picker { min-width:0; flex:1; padding-left:6px; }
+ .app.view-feed .compact-selectors select { width:100%; font-size:11px; padding:5px; }
+ .app.view-feed .compact-selectors .filters { position:relative; inset:auto; }
+ .app.view-feed .map-canvas { top:250px; height:180px; }
+ .app.view-feed .map-period { top:442px; }
+ .app.view-feed .map-toolbar .add-button { position:absolute; right:0; top:0; padding:9px 12px; font-size:12px; }
+ .app.view-feed .feed-sidebar { padding-top:58px; }
+ .app.view-feed .social-stream > div > div > .community-controls { padding:12px; gap:10px; margin-bottom:12px; }
+ .app.view-feed .community-controls .community-heading-icon { width:30px; height:30px; }
+ .app.view-feed .community-controls .community-local { padding-top:6px; }
+}
+@media(max-width:899px) {
+ .app.view-feed .feed-heading { flex-wrap:wrap; gap:10px; }
+ .app.view-feed .feed-tabs button { padding:7px 10px; font-size:12px; }
+}
+
+@media(min-width:900px) { .app.view-feed .map-toolbar .brand-card { min-width:0; max-width:265px; } }

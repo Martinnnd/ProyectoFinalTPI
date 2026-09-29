@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { filterCommunity, demoGroup } from './groups';
+import { filterCommunity, demoGroup, demoGroups } from './groups';
 import { initialMemories } from './data';
 import { loadMemories, saveMemories } from './storage';
 describe('Grupos en común',()=>{
@@ -15,4 +15,21 @@ describe('Grupos en común',()=>{
   expect(saveMemories([memory],storage)).toBe(true);
   expect(loadMemories(storage).memories[0].groupId).toBe('autos-80');
  });
+});
+
+it('muestra recuerdos generales y de grupos juntos en la vista completa',()=>{
+ const all=filterCommunity(initialMemories,'all',[demoGroup]);
+ expect(all).toHaveLength(initialMemories.length);
+ expect(all.some(m=>m.groupId===demoGroup.id)).toBe(true);
+ expect(all.some(m=>!m.groupId)).toBe(true);
+});
+
+it('cada grupo de demostración tiene tres recuerdos de su década',()=>{
+ expect(demoGroups).toHaveLength(4);
+ for(const group of demoGroups){
+  const posts=filterCommunity(initialMemories,group.id,demoGroups);
+  expect(posts).toHaveLength(3);
+  expect(posts.every(p=>p.year>=group.decade&&p.year<group.decade+10)).toBe(true);
+ }
+ expect(new Set(initialMemories.map(m=>m.id)).size).toBe(initialMemories.length);
 });

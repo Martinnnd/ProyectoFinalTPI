@@ -6,6 +6,45 @@ export const content = {
     description: "Revistas, discos de vinilo y viajes con el mapa desplegado.",
   },
   memories: [
+{
+    "id": "vinilos-70-1",
+    "groupId": "vinilos-70",
+    "title": "El vinilo que escuchábamos de principio a fin",
+    "year": 1973,
+    "author": "Miguel",
+    "place": "Caballito, Buenos Aires",
+    "lat": -34.618,
+    "lng": -58.441,
+    "description": "Nos juntábamos en el living de un amigo con un disco de Sui Generis. Antes de apoyar la púa, alguien pedía silencio y otro acomodaba los almohadones en el piso. Leíamos la funda mientras sonaba el lado A y discutíamos quién daba vuelta el disco. No teníamos una colección grande: por eso conocíamos hasta los pequeños ruidos de cada vinilo. ¿Qué disco escuchaban sin saltarse un tema?",
+    "category": "Música",
+    "source": "demo"
+},
+{
+    "id": "vinilos-70-2",
+    "groupId": "vinilos-70",
+    "title": "La bolsa de discos de la avenida Corrientes",
+    "year": 1976,
+    "author": "Susana",
+    "place": "Avenida Corrientes y Callao, Buenos Aires",
+    "lat": -34.6045,
+    "lng": -58.392,
+    "description": "Salimos a recorrer disquerías con unas monedas juntadas durante el mes. Mi hermano buscaba rock y yo miraba las portadas como si fueran cuadros. Volvimos con un disco usado y la promesa de prestarlo el fin de semana. En el colectivo llevé la bolsa contra el pecho para que no se doblara la funda. Al llegar a casa despejamos la mesa y armamos nuestra pequeña ceremonia alrededor del tocadiscos.",
+    "category": "Música",
+    "source": "demo"
+},
+{
+    "id": "vinilos-70-3",
+    "groupId": "vinilos-70",
+    "title": "Un domingo para intercambiar vinilos",
+    "year": 1978,
+    "author": "Héctor",
+    "place": "Plaza San Martín, Ramos Mejía, Buenos Aires",
+    "lat": -34.644,
+    "lng": -58.565,
+    "description": "Nos encontramos en la plaza con los discos envueltos en papel. Cada uno había escrito su nombre en una esquina de la funda para acordarnos de devolverlos. Cambié uno de mis favoritos por un álbum que no había escuchado nunca. Esa tarde fui directo al equipo de música y me quedé siguiendo las letras hasta que oscureció. Todavía recuerdo la emoción de descubrir canciones gracias a los amigos.",
+    "category": "Música",
+    "source": "demo"
+},
     {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,
