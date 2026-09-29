@@ -190,6 +190,20 @@ export default function MapboxMap(
         duration: duration(),
       });
   }, [props.selected?.id, ready]);
+  useEffect(() => {
+    const map=instance.current;
+    const memory=props.selected;
+    if(!map || !ready || !memory || props.picking)return;
+    const content=document.createElement('div');
+    const meta=document.createElement('small');meta.textContent=`${memory.author} · ${memory.year}`;
+    const title=document.createElement('strong');title.textContent=memory.title;
+    const excerpt=document.createElement('p');excerpt.textContent=memory.description.length>140?memory.description.slice(0,140)+'…':memory.description;
+    content.append(meta,title,excerpt);
+    if(props.onOpen){const open=document.createElement('button');open.textContent='Ver publicación →';open.addEventListener('click',()=>latest.current.onOpen?.(memory));content.append(open);}
+    const preview=new mapboxgl.Popup({className:'pin-message-preview',anchor:'left',offset:25,maxWidth:'230px',closeButton:true,closeOnClick:false,focusAfterOpen:false})
+      .setLngLat([memory.lng,memory.lat]).setDOMContent(content).addTo(map);
+    return ()=>{preview.remove();};
+  }, [props.selected, props.picking, ready]);
   function satellite(value: boolean) {
     const next = { ...options, satellite: value };
     optionsRef.current = next;

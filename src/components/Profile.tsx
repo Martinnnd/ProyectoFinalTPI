@@ -15,6 +15,7 @@ export default function Profile({
   selected,
   earned,
   onSelect,
+  onOpen,
   onAdd,
 }: {
   community?: ReactNode;
@@ -24,6 +25,7 @@ export default function Profile({
   period: Period;
   selected: Memory | null;
   earned: Achievement[];
+  onOpen?: (memory: Memory) => void;
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
 }) {
@@ -138,6 +140,7 @@ export default function Profile({
             memories={memories}
             selected={selected}
             onSelect={onSelect}
+            onOpen={onOpen}
             picking={false}
             onPick={() => { }}
             draft={null}

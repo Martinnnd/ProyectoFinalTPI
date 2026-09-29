@@ -97,6 +97,7 @@ export default function MemoryMap({
   memories,
   selected,
   onSelect,
+  onOpen,
   picking,
   onPick,
   draft,
@@ -105,6 +106,7 @@ export default function MemoryMap({
   memories: Memory[];
   selected: Memory | null;
   onSelect: (m: Memory) => void;
+  onOpen?: (m: Memory) => void;
   picking: boolean;
   onPick: (p: Point) => void;
   draft: Point | null;
@@ -178,11 +180,10 @@ export default function MemoryMap({
                 },
               }}
             >
-              <Tooltip direction="top">
-                {m.title} · {m.year}
-              </Tooltip>
+              <Tooltip direction="top">{m.title} · {m.year}</Tooltip>
             </Marker>
           ))}
+          {selected && !picking && <Tooltip key={selected.id} position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div><small>{selected.author} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip>}
           {draft && (
             <Marker
               position={[draft.lat, draft.lng]}

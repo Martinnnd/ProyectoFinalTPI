@@ -127,6 +127,9 @@ export default function App() {
     setPanelOpen(false);
     if (next.decade !== period.decade) setMusicOpen(false);
   }
+  function openPublication(memory: Memory) {
+    setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
+  }
   function select(memory: Memory) {
     setSelectedId(memory.id);
     setPanelOpen(view === "map");
@@ -235,6 +238,7 @@ export default function App() {
             memories={memories}
             selected={selected}
             onSelect={select}
+            onOpen={openPublication}
             picking={picking}
             onPick={(point) => {
               setDraft(point);
@@ -445,6 +449,7 @@ export default function App() {
       )}
       {view === "profile" && (
         <Profile
+          onOpen={openPublication}
           community={communityControls(true)}
           memories={ownMemories}
           allMemories={local}
@@ -515,6 +520,7 @@ export default function App() {
       )}
       {mapExpanded && view === "feed" && (
         <MapModal
+          onOpen={openPublication}
           memories={memories}
           selected={selected}
           onSelect={(m) => setSelectedId(m.id)}

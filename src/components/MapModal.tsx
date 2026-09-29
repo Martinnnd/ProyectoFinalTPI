@@ -7,10 +7,12 @@ export default function MapModal({
   memories,
   selected,
   onSelect,
+  onOpen,
   onClose,
 }: {
   memories: Memory[];
   selected: Memory | null;
+  onOpen?: (memory: Memory) => void;
   onSelect: (memory: Memory) => void;
   onClose: () => void;
 }) {
@@ -63,6 +65,7 @@ export default function MapModal({
           memories={memories}
           selected={selected}
           onSelect={onSelect}
+            onOpen={onOpen}
           picking={false}
           onPick={() => {}}
           draft={null}
