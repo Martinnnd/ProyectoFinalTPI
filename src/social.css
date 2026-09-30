@@ -650,9 +650,37 @@
   font-size: 14px;
 }
 
-.personal-identity small {
+.personal-identity small,
+.personal-identity .profile-note {
   color: var(--muted);
   font-size: 11px;
+}
+
+/* The badge became a button so the tiers dialog can open from it, which means
+   it no longer inherits the <small> element defaults for free. */
+.personal-identity .profile-note {
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+  margin: 0;
+  padding: 3px 9px;
+  font-family: inherit;
+  line-height: 1.4;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.personal-identity .profile-note:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.personal-identity .profile-note:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .personal-counts {
@@ -1351,7 +1379,9 @@
   font-weight: 600;
 }
 
-.achievement-dialog {
+/* The tiers dialog shares the achievement shell so both read as one family. */
+.achievement-dialog,
+.tier-dialog {
   margin: auto;
   padding: 0;
   width: min(920px, calc(100vw - 40px));
@@ -1365,17 +1395,20 @@
   overflow: hidden;
 }
 
-.achievement-dialog[open] {
+.achievement-dialog[open],
+.tier-dialog[open] {
   display: flex;
   flex-direction: column;
 }
 
-.achievement-dialog::backdrop {
+.achievement-dialog::backdrop,
+.tier-dialog::backdrop {
   background: #101823a6;
   backdrop-filter: blur(3px);
 }
 
-.achievement-dialog>header {
+.achievement-dialog>header,
+.tier-dialog>header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1385,17 +1418,20 @@
   background: var(--soft);
 }
 
-.achievement-dialog h2 {
+.achievement-dialog h2,
+.tier-dialog h2 {
   font: 700 20px/1.2 var(--font-display);
   margin: 0 0 5px;
 }
 
-.achievement-dialog small {
+.achievement-dialog small,
+.tier-dialog small {
   font-size: 11px;
   color: var(--muted);
 }
 
-.achievement-dialog-content {
+.achievement-dialog-content,
+.tier-dialog-content {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -1491,13 +1527,77 @@
   color: var(--muted);
 }
 
+.tier-dialog {
+  width: min(560px, calc(100vw - 40px));
+}
+
+.tier-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.tier-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 15px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.tier-card.is-current {
+  background: var(--soft);
+  border-color: var(--accent);
+}
+
+.tier-card.is-locked {
+  border-style: dashed;
+}
+
+.tier-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tier-body strong {
+  font: 700 14px/1.3 var(--font-display);
+}
+
+.tier-body p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.tier-state {
+  flex-shrink: 0;
+  font: 700 10px/1 var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.tier-card.is-reached .tier-state,
+.tier-card.is-locked .tier-state {
+  color: var(--muted);
+}
+
 @media (max-width: 899px) {
   .achievement-rail {
     justify-content: flex-start;
     max-width: none;
   }
 
-  .achievement-dialog {
+  .achievement-dialog,
+  .tier-dialog {
     width: calc(100vw - 20px);
     max-height: calc(100dvh - 40px);
   }

@@ -15,6 +15,7 @@ import {
   type Decade,
   type Memory,
   type Period,
+  type TierProgress,
 } from "./types";
 import { achievements, eraContent, initialMemories } from "./data";
 import { loadMemories, saveMemories } from "./storage";
@@ -63,6 +64,14 @@ export default function App() {
   // visitor's own data instead of being stored again. That way it survives a
   // reload with no extra storage key, and dismissing the banner cannot revoke it.
   const earned: Achievement[] = local.length > 0 ? [achievements[0]] : [];
+  // Nostalgia points and monthly subscriptions have no data source yet, so
+  // Aedo and Mnemosine stay locked: their rules are declared, their inputs are
+  // not. Wire the real values here and both tiers unlock with no other change.
+  const tierProgress: TierProgress = {
+    memories: local.length,
+    points: 0,
+    subscribed: false,
+  };
   const [panelOpen, setPanelOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(true);
   const [musicOpen, setMusicOpen] = useState(false);
@@ -450,6 +459,7 @@ export default function App() {
           community={communityControls(true)}
           memories={ownMemories}
           allMemories={local}
+          tierProgress={tierProgress}
           following={following}
           period={period}
           selected={selected}
