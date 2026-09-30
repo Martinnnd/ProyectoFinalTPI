@@ -1,9 +1,9 @@
 import { Map, Newspaper, BookOpen, Radio } from 'lucide-react';
 import type { EraTheme } from '../contracts';
 export const theme = {
-  "brand": "Nostalgia",
+  "brand": "Nostalgiar",
   "subtitle": "RECUERDOS EN BLANCO Y NEGRO",
-  "windowTitle": "Nostalgia TV / Canal 70",
+  "windowTitle": "Nostalgiar TV / Canal 70",
   "storiesTitle": "Historias en pantalla",
   "factsTitle": "Archivo de televisión",
   "musicTitle": "Sonidos de los setenta",

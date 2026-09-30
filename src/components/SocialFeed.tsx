@@ -98,13 +98,13 @@ export default function SocialFeed({
       <div className={`social-stream${desktopDetail ? ` detail-mode transition-${decade === 1990 ? 'win95' : 'messenger'}` : ''}`} ref={stream}>
         <div className={desktopDetail ? 'transition-window detail-window' : undefined}>
         {desktopDetail && <>
-          <div className="transition-title"><span className="transition-app-icon">{decade === 1990 ? '▣' : '♟'}</span><strong className="transition-caption">{decade === 1990 ? 'Recuerdo — Nostalgia 95' : 'Nostalgia Messenger'}</strong><div className="transition-window-controls">
+          <div className="transition-title"><span className="transition-app-icon">{decade === 1990 ? '▣' : '♟'}</span><strong className="transition-caption">{decade === 1990 ? 'Recuerdo — Nostalgiar 95' : 'Nostalgiar Messenger'}</strong><div className="transition-window-controls">
             <button aria-label="Minimizar publicación" onClick={() => open(null)}>_</button>
             <button aria-label={maximized ? 'Restaurar ventana' : 'Maximizar ventana'} onClick={() => setMaximized(v => !v)}>□</button>
             <button aria-label="Cerrar publicación" onClick={() => open(null)}>×</button>
           </div></div>
           <div className="transition-menu">Archivo · Recuerdos · Conversación</div>
-          {decade === 2000 && <><div className="transition-contact"><span className="transition-contact-avatar">{selected.author.slice(0,1)}</span><div className="transition-contact-name">{selected.author} — Conversación</div><small className="transition-contact-status">Recuerdo de {selected.year}</small></div><div className="transition-chat-tools">☺ Recuerdos compartidos · ♫ Nostalgia</div></>}
+          {decade === 2000 && <><div className="transition-contact"><span className="transition-contact-avatar">{selected.author.slice(0,1)}</span><div className="transition-contact-name">{selected.author} — Conversación</div><small className="transition-contact-status">Recuerdo de {selected.year}</small></div><div className="transition-chat-tools">☺ Recuerdos compartidos · ♫ Nostalgiar</div></>}
         </>}
         <div className={desktopDetail ? 'transition-content' : undefined}>
         {!selected && community}
@@ -320,7 +320,7 @@ export default function SocialFeed({
           )}
         </div>
         </div>
-        {desktopDetail && <div className="transition-status">{decade === 1990 ? 'Listo · Mi PC · Archivo de recuerdos' : 'Nostalgia Messenger · Conversación sobre este recuerdo'}</div>}
+        {desktopDetail && <div className="transition-status">{decade === 1990 ? 'Listo · Mi PC · Archivo de recuerdos' : 'Nostalgiar Messenger · Conversación sobre este recuerdo'}</div>}
         </div>
       </div>
       <aside className="feed-sidebar">

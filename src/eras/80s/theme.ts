@@ -1,7 +1,7 @@
 import { Gamepad2, CassetteTape, Sparkles, Radio } from "lucide-react";
 import type { EraTheme } from "../contracts";
 export const theme = {
-  brand: "NOSTALGIA",
+  brand: "Nostalgiar",
   subtitle: "VIDEO CLUB · REBOBINÁ TUS RECUERDOS",
   windowTitle: "VHS / ARCHIVO DE RECUERDOS",
   storiesTitle: "MEMORY SELECT / HISTORIAS",

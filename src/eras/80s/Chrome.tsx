@@ -23,7 +23,7 @@ export default function Chrome({ period, count }: ChromeProps) {
         <span>
           ✦ {count.toString().padStart(2, "0")} RECUERDOS · {label} ✦
         </span>
-        <span>VHS / NOSTALGIA</span>
+        <span>VHS / NOSTALGIAR</span>
       </div>
     </div>
   );

@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Ananda';
+  src: url('../../../fonts/AnandaBlack.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .era-2000 .primary-button {
   color: white;
   background: linear-gradient(#4794cc, #266da6);
@@ -40,8 +47,8 @@
   box-shadow: inset -1px 0 white;
 }
 .era-2000 .rail-logo {
-  font-family: "Trebuchet MS", sans-serif;
-  font-style: italic;
+  font-family: "Ananda", sans-serif;
+  font-size: 30px;
   color: #1765b7;
   border-color: #70ba33;
   text-shadow: 1px 1px white;
@@ -122,10 +129,9 @@
   margin-bottom: 3px;
 }
 .era-2000 .brand-card h1 {
-  font:
-    bold italic 28px "Trebuchet MS",
-    sans-serif;
-  letter-spacing: -1.5px;
+  font-family: 'Ananda', 'Courier New', Courier, monospace;
+  font-size: 33px;
+  letter-spacing: .5px;
   color: #245faa;
   text-shadow: 1px 1px white;
 }

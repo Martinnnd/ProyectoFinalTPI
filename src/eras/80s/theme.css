@@ -1,4 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;500;600;700&family=VT323&display=swap");
+@font-face {
+  font-family: 'MyFont';
+  src: url('../../../fonts/AnandaBlack.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .era-1980 .leaflet-tile-pane {
   filter: invert(0.88) hue-rotate(170deg) saturate(0.45) brightness(0.9);
 }
@@ -107,8 +114,8 @@
   box-shadow: 3px 0 15px #e727ce30;
 }
 .era-1980 .rail-logo {
-  font-family: var(--font-display);
   color: #70ffff;
+  font-size: 30px;
   text-shadow: 3px 2px #ec2bca;
   border-color: #ec2bca;
 }
@@ -135,9 +142,10 @@
   padding: 13px 17px;
 }
 .era-1980 .brand-card h1 {
-  font-size: 28px;
+  font-size: 33px;
   font-weight: 400;
-  letter-spacing: 0;
+  font-family: 'Ananda', 'Courier New', Courier, monospace;
+  letter-spacing: 0.5;
   color: #fff4ff;
   text-shadow:
     2px 2px 0 #ec21c4,

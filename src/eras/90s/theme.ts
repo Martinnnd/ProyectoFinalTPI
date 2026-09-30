@@ -1,9 +1,9 @@
 import { Monitor, FolderOpen, Newspaper, Music2 } from "lucide-react";
 import type { EraTheme } from "../contracts";
 export const theme = {
-  brand: "Nostalgia 95",
+  brand: "Nostalgiar",
   subtitle: "Mi PC > Argentina > Mis recuerdos",
-  windowTitle: "Nostalgia 95 — Explorador de recuerdos",
+  windowTitle: "Nostalgiar 95 — Explorador de recuerdos",
   storiesTitle: "Mis recuerdos — Explorador",
   factsTitle: "Datos de época — Bloc de notas",
   musicTitle: "Reproductor multimedia",

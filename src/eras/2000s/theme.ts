@@ -1,13 +1,13 @@
 import { Globe2, Users, BookOpen, Music2 } from "lucide-react";
 import type { EraTheme } from "../contracts";
 export const theme = {
-  brand: "nostalgia",
+  brand: "Nostalgiar",
   subtitle: "Mi estado: volviendo a esos días",
-  windowTitle: "Nostalgia — Internet Explorer",
-  storiesTitle: "Mis recuerdos — Nostalgia Messenger",
+  windowTitle: "Nostalgiar — Internet Explorer",
+  storiesTitle: "Mis recuerdos — Nostalgiar Messenger",
   factsTitle: "La época — Internet Explorer",
   musicTitle: "Mi música · Compartiendo recuerdos",
-  brandLabel: "Nostalgia Messenger",
+  brandLabel: "",
   shortLabel: "2000",
   tokens: {
     "--bg": "#e8f3ff",

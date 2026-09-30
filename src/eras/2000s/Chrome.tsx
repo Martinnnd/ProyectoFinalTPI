@@ -9,7 +9,7 @@ export default function Chrome(props: ChromeProps) {
       icons={icons}
       startLabel="Mis espacios"
       storiesLabel="Messenger"
-      menuTitle="Nostalgia Messenger"
+      menuTitle="Nostalgiar Messenger"
     />
   );
 }
