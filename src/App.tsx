@@ -348,11 +348,7 @@ export default function App() {
           <UserRound />
           <span>Perfil</span>
         </button>
-        <span className="rail-footer">
-          UNLaM
-          <br />
-          <strong>DEMO</strong>
-        </span>
+        
       </nav>
       <header className="map-toolbar">
         <div className="brand-card">

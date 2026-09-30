@@ -1,4 +1,9 @@
-
+@font-face {
+  font-family: 'Ananda';
+  src: url('../../../fonts/AnandaBlack.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* Canal 70: CRT glass inside a wood and brushed-metal television. */
 .era-1970 .leaflet-tile-pane,.era-1970 .mapboxgl-canvas { filter:grayscale(1) contrast(.9) brightness(.83); }
@@ -270,7 +275,7 @@
 .era-1970:is(.view-feed,.view-profile) .navigation-rail .rail-active { background:#c2b68e; border:1px solid #7e775e; box-shadow:inset 0 0 0 3px #ddd1ae; }
 .era-1970:is(.view-feed,.view-profile) :is(.rail-logo,.rail-footer) { color:#414335; text-shadow:none; }
 .era-1970:is(.view-feed,.view-profile) .brand-card { background:transparent; color:#30342b; border:0; border-block:4px double #565b49; border-radius:0; box-shadow:none; padding:8px 14px; }
-.era-1970:is(.view-feed,.view-profile) .brand-card h1 { font:bold 37px/1 Georgia,serif; color:#30342b; text-shadow:1px 1px #fff4d4; letter-spacing:-2px; }
+.era-1970:is(.view-feed,.view-profile) .brand-card h1 { font-family: 'Ananda'; letter-spacing: .5px; color:#30342b; text-shadow:1px 1px #fff4d4; }
 .era-1970:is(.view-feed,.view-profile) .brand-card>.brand-era-label { font-size:0; color:#474b3c; }
 .era-1970:is(.view-feed,.view-profile) .brand-card>.brand-era-label::after { content:'DIARIO INDEPENDIENTE · 1970–1979'; font:8px Georgia,serif; letter-spacing:1px; }
 .era-1970:is(.view-feed,.view-profile) .brand-card>span:last-child { font-size:0; color:#474b3c; }

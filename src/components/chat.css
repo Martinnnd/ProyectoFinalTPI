@@ -1,5 +1,5 @@
 
-.app .navigation-rail .rail-profile { margin-top:auto; }
+
 .app .navigation-rail .rail-footer { margin-top:0; }
 @media(min-width:1201px) { .app.view-feed .map-toolbar .add-button { display:none; } }
 .app.view-feed .feed-sidebar { padding-top:0; }
