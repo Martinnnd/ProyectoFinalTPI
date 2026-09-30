@@ -61,6 +61,20 @@ export const content = {
       source: "demo",
     },
     {
+      place: "Bajada Gral. Paz Crovara",
+      lat: -34.673563442734945, 
+      lng: -58.5034528673788,
+      id: "demo-33",
+      title: "Chicago campeón B Nacional",
+      year: 2001,
+      category: "Acontecimientos",
+      author: "Sergio",
+      image: "https://www.soloascenso.com.ar/Noticias/nchicago2001inedito.jpg",
+      description:
+        "No me olvido mas de ese dia, nos juntamos todos a la altura de Liniers a esperar al micro con los jugadores que volvian de Cordoba, en el renault 12 que se ve estabamos mis hermanos y yo, estuvimos festejando en la cancha por horas, ya volveran esos tiempos chicago querido",
+      source: "demo",
+    },
+    {
       place: "Monumento Nacional a la Bandera, Rosario",
       lat: -32.9475,
       lng: -60.6304,

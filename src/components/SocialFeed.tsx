@@ -152,9 +152,9 @@ export default function SocialFeed({
                   </strong>
                   <small>
                     {memory.source === "demo"
-                      ? "Relato ficticio de demostración"
+                      ? ""
                       : "Recuerdo local"}{" "}
-                    · {memory.year}
+                     {memory.year}
                   </small>
                 </div>
                 {memory.source === "demo" && (
@@ -296,10 +296,6 @@ export default function SocialFeed({
                       Comentar
                     </button>
                   </form>
-                  <small>
-                    Comentarios, me gusta, repostes, guardados, puntajes y
-                    seguidos son de esta sesión de demostración.
-                  </small>
                 </section>
               )}
             </article>
