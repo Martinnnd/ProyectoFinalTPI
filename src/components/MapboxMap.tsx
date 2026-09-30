@@ -10,6 +10,23 @@ const overview = {
   pitch: 0,
   bearing: 0,
 };
+const intro = {
+  center: [-58.5622, -34.6702] as [number, number], // UNLaM, San Justo
+  zoom: 17,
+  pitch: 45,
+  bearing: -20, // opcional: rotar un poco da mejor perspectiva
+};
+type Camera = {
+  center: [number, number];
+  zoom: number;
+  pitch: number;
+  bearing: number;
+};
+// The map remounts every time the visitor leaves the map view, so both facts
+// have to outlive the component: the camera they left behind, and whether the
+// intro already played. A module binding survives the remount, a ref does not.
+let introSeen = false;
+let savedCamera: Camera | null = null;
 const duration = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1000;
 type Options = {
@@ -69,7 +86,7 @@ export default function MapboxMap(
         accessToken: props.token,
         style: "mapbox://styles/mapbox/standard",
         projection: "globe",
-        ...overview,
+        ...(savedCamera ?? overview),
         minZoom: 0.5,
         maxZoom: 19,
         attributionControl: true,
@@ -89,10 +106,24 @@ export default function MapboxMap(
     });
     map.on("webglcontextlost", () => latest.current.onFallback());
     map.on("load", () => {
-      loaded = true;
-      clearTimeout(timeout);
-      setReady(true);
+  loaded = true;
+  clearTimeout(timeout);
+  setReady(true);
+
+  // intro: del globo completo al destino, solo la primera vez
+  if (introSeen) return;
+  introSeen = true;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) {
+    map.jumpTo(intro);
+  } else {
+    map.flyTo({
+      ...intro,
+      duration: 6000,
+      essential: true,
     });
+  }
+});
     map.on("error", () => setError(true));
     map.on("click", (event) => {
       if (latest.current.picking)
@@ -121,6 +152,21 @@ export default function MapboxMap(
       clearTimeout(timeout);
       observer.disconnect();
       canvas.removeEventListener("keydown", key);
+      const hadCamera = savedCamera !== null;
+      if (!map.isMoving()) {
+        const center = map.getCenter();
+        savedCamera = {
+          center: [center.lng, center.lat],
+          zoom: map.getZoom(),
+          pitch: map.getPitch(),
+          bearing: map.getBearing(),
+        };
+      } else if (!hadCamera) {
+        // The camera never settled, so an intro may have been cut off before it
+        // reached its destination. Let it play again next time instead of
+        // reopening on the globe with nothing left to set it off.
+        introSeen = false;
+      }
       map.remove();
       instance.current = null;
       styleReady.current = false;
