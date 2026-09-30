@@ -11,7 +11,7 @@ import "../eras/80s/theme.css";
 import "../eras/90s/theme.css";
 import "../eras/2000s/theme.css";
 export const metadata: Metadata = {
-  title: "Nostalgia",
+  title: "Nostalgiar",
   description: "Historias, lugares y musica de nuestras epocas",
 };
 export default function RootLayout({

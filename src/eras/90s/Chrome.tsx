@@ -9,7 +9,7 @@ export default function Chrome(props: ChromeProps) {
       icons={icons}
       startLabel="Inicio"
       storiesLabel="Mis recuerdos"
-      menuTitle="Nostalgia 95"
+      menuTitle="Nostalgiar 95"
     />
   );
 }

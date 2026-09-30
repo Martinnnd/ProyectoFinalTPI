@@ -270,7 +270,7 @@ export default function App() {
       />
       <nav className="navigation-rail" aria-label="Navegación principal">
         <span className="rail-logo" aria-hidden="true">
-          n<span>✳</span>
+          N
         </span>
         <button
           aria-label="Explorar mapa"

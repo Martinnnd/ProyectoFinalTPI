@@ -5,8 +5,8 @@ import type { Decade } from "../types";
 const themes: Record<Decade, {title: string; group: string; topic: string}> = {
   1970: {title: "Correspondencia", group: "Rock y vinilos", topic: "ese vinilo que escuchábamos toda la tarde"},
   1980: {title: "CHAT CLUB · 80", group: "Fierros de los 80", topic: "las fotos del auto de tu familia"},
-  1990: {title: "Nostalgia Chat — Conectados", group: "Grunge de los 90", topic: "el cassette que llevábamos a todos lados"},
-  2000: {title: "Nostalgia Messenger", group: "Cine de los 2000", topic: "aquella salida al cine con todo el grupo"},
+  1990: {title: "Nostalgiar Chat — Conectados", group: "Grunge de los 90", topic: "el cassette que llevábamos a todos lados"},
+  2000: {title: "Nostalgiar Messenger", group: "Cine de los 2000", topic: "aquella salida al cine con todo el grupo"},
 };
 
 export default function Chat({decade, fullPage, onOpenPage, hidden}: {decade: Decade; fullPage: boolean; onOpenPage: () => void; hidden: boolean}) {
