@@ -10,6 +10,7 @@ import "../eras/70s/theme.css";
 import "../eras/80s/theme.css";
 import "../eras/90s/theme.css";
 import "../eras/2000s/theme.css";
+import "../mobile.css";
 export const metadata: Metadata = {
   title: "Nostalgiar",
   description: "Historias, lugares y musica de nuestras epocas",

@@ -5,7 +5,7 @@ import CommunityControls from "./components/CommunityControls";
 import { demoGroups, loadGroups, filterCommunity } from "./groups";
 import type { CommunityGroup } from "./types";
 import { useEffect, useRef, useState } from "react";
-import { Compass, Plus, X, Newspaper, UserRound, MessageCircle } from "lucide-react";
+import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
 import {
   categories,
   filterMemories,
@@ -39,6 +39,8 @@ export default function App() {
   const [scope,setScope] = useState('all');
   const [query,setQuery] = useState('');
   useEffect(()=>setGroups(loadGroups()),[]);
+  const mobileOptions = useRef<HTMLDialogElement>(null);
+  const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
   const mapExpandButton = useRef<HTMLButtonElement>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
   const [following, setFollowing] = useState<string[]>([]);
@@ -73,8 +75,11 @@ export default function App() {
     subscribed: false,
   };
   const [panelOpen, setPanelOpen] = useState(false);
-  const [factsOpen, setFactsOpen] = useState(true);
+  const [factsOpen, setFactsOpen] = useState(() => window.innerWidth >= 900);
   const [musicOpen, setMusicOpen] = useState(false);
+  useEffect(() => {
+    if (window.innerWidth < 900 && view !== "map") setMusicOpen(false);
+  }, [view]);
   const addButton = useRef<HTMLButtonElement>(null);
   const storiesButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -133,7 +138,7 @@ export default function App() {
     setPeriod(next);
     if(groups.some(g=>g.id===scope && g.decade!==next.decade)) setScope("all");
     setSelectedId(null);
-    setFactsOpen(view === "map");
+    setFactsOpen(view === "map" && window.innerWidth >= 900);
     setPanelOpen(false);
     if (next.decade !== period.decade) setMusicOpen(false);
   }
@@ -239,6 +244,18 @@ export default function App() {
       style={theme.tokens}
       className={`app map-app view-${view} era-${period.decade} ${panelOpen ? "stories-open" : ""} ${musicOpen ? "music-open" : ""}`}
     >
+      <div className="mobile-appbar">
+        <div className="mobile-page-title"><span>Nostalgiar</span><strong>{view === 'map' ? 'Explorar' : view === 'feed' ? 'Feed' : view === 'chat' ? 'Chat' : 'Mi perfil'}</strong></div>
+        <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir épocas y opciones"><span className="mobile-era-dot" aria-hidden="true"/><strong>{period.decade === 2000 ? '2000s' : `${String(period.decade).slice(2)}s`}</strong><ChevronDown size={15}/></button>
+        <button className="mobile-add-button" aria-label="Sumar mi recuerdo" onClick={startAdding} disabled={picking || !!draft}><Plus size={23}/></button>
+      </div>
+      <dialog ref={mobileOptions} className="mobile-options" onClick={e=>{if(e.target===e.currentTarget)mobileOptions.current?.close();}} onClose={()=>mobileOptionsTrigger.current?.focus()} aria-labelledby="mobile-options-title">
+        <header><h2 id="mobile-options-title">Tu viaje en el tiempo</h2><button className="icon-button" aria-label="Cerrar opciones" onClick={()=>mobileOptions.current?.close()}><X/></button></header>
+        <Timeline period={period} onChange={changePeriod}/>
+        <label className="mobile-category">Categoría<select value={category} onChange={e=>{setCategory(e.target.value as Category | 'Todas');setSelectedId(null);}}>{['Todas',...categories].map(c=><option key={c}>{c}</option>)}</select></label>
+        <div className="mobile-tools">{(['stories','facts','music'] as const).map(destination=><button key={destination} onClick={()=>{mobileOptions.current?.close();navigate(destination);}}><EraIcon decade={period.decade} destination={destination}/><span>{destination==='stories'?'Recuerdos':destination==='facts'?'Efemérides':'Música'}</span></button>)}</div>
+        <button className="primary-button mobile-options-done" onClick={()=>mobileOptions.current?.close()}>Ver selección</button>
+      </dialog>
       <a className="skip-link" href="#explore">
         Saltar al mapa
       </a>
@@ -306,6 +323,7 @@ export default function App() {
         <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);}}><MessageCircle/><span>Chat</span></button>
         <button
           ref={storiesButton}
+          data-mobile-secondary="true"
           aria-expanded={panelOpen}
           aria-controls="stories"
           className={panelOpen ? "rail-active" : ""}
@@ -316,6 +334,7 @@ export default function App() {
         </button>
         <button
           aria-expanded={factsOpen}
+          data-mobile-secondary="true"
           aria-controls="era-facts"
           onClick={() => {
             setView("map");
@@ -331,6 +350,7 @@ export default function App() {
         </button>
         <button
           aria-expanded={musicOpen}
+          data-mobile-secondary="true"
           aria-controls="music-player"
           onClick={() => {
             setMusicOpen(!musicOpen);

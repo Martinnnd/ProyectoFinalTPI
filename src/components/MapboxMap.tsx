@@ -27,6 +27,7 @@ type Camera = {
 // intro already played. A module binding survives the remount, a ref does not.
 let introSeen = false;
 let savedCamera: Camera | null = null;
+const responsiveOverview = () => ({ ...overview, zoom: window.innerWidth < 900 ? 0.8 : overview.zoom });
 const duration = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1000;
 type Options = {
@@ -86,7 +87,7 @@ export default function MapboxMap(
         accessToken: props.token,
         style: "mapbox://styles/mapbox/standard",
         projection: "globe",
-        ...(savedCamera ?? overview),
+        ...(savedCamera ?? responsiveOverview()),
         minZoom: 0.5,
         maxZoom: 19,
         attributionControl: true,
@@ -266,10 +267,10 @@ export default function MapboxMap(
       aria-label="Globo Mapbox de recuerdos de Argentina"
     >
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
-      <div className="globe-tools">
+      <details className="globe-tools" open={window.innerWidth >= 900 ? true : undefined}><summary>Opciones del mapa</summary><div className="globe-tool-buttons">
         <button
           onClick={() =>
-            instance.current?.flyTo({ ...overview, duration: duration() })
+            instance.current?.flyTo({ ...responsiveOverview(), duration: duration() })
           }
         >
           Ver globo
@@ -294,7 +295,7 @@ export default function MapboxMap(
         >
           Estilo del mapa
         </button>
-      </div>
+      </div></details>
       {controls && (
         <aside
           id="mapbox-settings"

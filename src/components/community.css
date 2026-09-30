@@ -37,8 +37,8 @@
 @media(max-width:1100px) { .community-filters { grid-template-columns:1fr; } .community-heading { flex-wrap:wrap; } }
 @media(max-width:899px) { .community-controls { padding:12px; } .community-heading strong { font-size:14px; } .community-cards button { padding:12px; gap:10px; } .map-community { left:12px; top:280px; width:calc(100% - 24px); max-height:calc(100dvh - 510px); min-height:100px; } }
 
-.post-attachment { margin:16px 0; width:100%; overflow:hidden; border:1px solid var(--line); border-radius:var(--radius); }
-.post-attachment :is(img,video) { display:block; width:100%; max-height:420px; object-fit:contain; background:#14171b; }
+.post-attachment { margin:16px 0; width:100%; max-width:100%; min-width:0; box-sizing:border-box; overflow:hidden; border:1px solid var(--line); border-radius:var(--radius); }
+.post-attachment :is(img,video) { display:block; width:100%; max-width:100%; height:auto; max-height:420px; object-fit:contain; background:#14171b; }
 .post-attachment iframe { display:block; width:100%; aspect-ratio:16/9; min-height:200px; border:0; }
 .post-attachment a { display:block; padding:8px; font-size:12px; }
 .post-music { margin:10px 0 16px; border:1px solid var(--line); padding:8px; background:var(--soft); border-radius:var(--radius); }

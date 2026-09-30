@@ -226,8 +226,11 @@
 
 .post-content.is-open .post-image {
   width: auto;
+  max-width: 100%;
+  min-width: 0;
   height: auto;
   max-height: 600px;
+  object-fit: contain;
 }
 
 .post-place {
@@ -1645,3 +1648,8 @@
 }
 
 @media(min-width:900px) { .app.view-feed .map-toolbar .brand-card { min-width:0; max-width:265px; } }
+
+/* Let content shrink inside narrow desktop columns and detail windows. */
+.social-stream,.social-stream .detail-window,.social-stream .transition-content,
+.feed-post,.post-content,.personal-detail { min-width:0; }
+.post-content { box-sizing:border-box; max-width:100%; overflow-wrap:anywhere; }
