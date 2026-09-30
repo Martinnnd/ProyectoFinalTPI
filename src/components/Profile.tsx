@@ -46,18 +46,21 @@ export default function Profile({
   }
   return (
     <main id="explore" className="personal-profile" aria-label="Mi perfil">
-      {community}
+      
       <header className="personal-header">
         <div className="profile-portrait" aria-hidden="true">
-          <UserRound size={44} />
+          <img
+            src="https://static.wikia.nocookie.net/universalstudios/images/1/10/Michael_J._Fox_as_Marty_McFly_%28BTTF%29.jpg/revision/latest?cb=20241030235532"
+            alt="Marty McFly"
+          />
         </div>
         <div className="personal-identity">
           <div className="personal-identity-text">
             <span className="eyebrow">MI ARCHIVO PERSONAL</span>
-            <h2>Mi perfil</h2>
+            <h2>Marty McFly</h2>
             <p>Los lugares cambian. Tus historias quedan.</p>
             <small className="profile-note">
-              Visitante · recuerdos guardados en este navegador
+              Errante
             </small>
           </div>
           <div className="achievements">
@@ -119,11 +122,8 @@ export default function Profile({
             </dd>
           </div>
         </dl>
-        <small className="personal-demo-note">
-          Perfil local sin inicio de sesión. Los seguidos corresponden a esta
-          sesión; todavía no recibís seguidores.
-        </small>
       </header>
+      {community}
       <section className="personal-atlas">
         <div className="personal-section-title">
           <div>
