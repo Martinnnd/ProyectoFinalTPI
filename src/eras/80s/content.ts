@@ -6,9 +6,9 @@ export const content = {
       "Cassettes, cámaras con rollo y tardes que parecían no terminar.",
   },
   memories: [
-{"id": "autos80-0", "groupId": "autos-80", "title": "El Renault 12 de los domingos", "year": 1982, "author": "Ricardo", "place": "San Justo, La Matanza", "lat": -34.676, "lng": -58.56, "description": "Cada domingo lavábamos el Renault 12 de papá antes de salir. Yo alcanzaba el balde y mi hermana elegía el cassette. Todavía recuerdo los asientos calientes por el sol y el ruido de la puerta del garaje. Parábamos en la plaza de San Justo a comprar algo fresco antes de volver. ¿Qué auto los llevaba de paseo en esa época?", "category": "Personales", "source": "demo"},
-{"id": "autos80-1", "groupId": "autos-80", "title": "Mi primer viaje en un Fiat 128", "year": 1985, "author": "Mariela", "place": "Ramos Mejía, Buenos Aires", "lat": -34.644, "lng": -58.565, "description": "Compramos un Fiat 128 usado entre ahorros y ayuda de la familia. Tenía el volante gastado y una radio que había que acomodar con paciencia. Ese primer viaje con amigos fue inolvidable. Salimos de Ramos Mejía con un mapa de papel y una bolsa de sándwiches. Nos perdimos un par de veces y volvimos de noche, cansados pero felices de tener nuestra propia aventura.", "category": "Personales", "source": "demo"},
-{"id": "autos80-2", "groupId": "autos-80", "title": "El Falcon y las reuniones del barrio", "year": 1987, "author": "Daniel", "place": "Morón, Buenos Aires", "lat": -34.65, "lng": -58.619, "description": "Los sábados nos juntábamos a charlar de autos en la esquina. El Falcon de mi tío siempre terminaba con el capó abierto y todo el mundo dando consejos. Después cerrábamos el capó y nos quedábamos hablando hasta que anochecía en Morón. A veces aparecía algún vecino con fotos de su último viaje y las pasábamos de mano en mano. Compartan qué modelo recuerdan de su barrio.", "category": "Personales", "source": "demo"},
+{"id": "autos80-0", "groupId": "autos-80", "title": "El Renault 12 de los domingos", "year": 1982, "author": "Ricardo", "place": "San Justo, La Matanza", "lat": -34.676, "lng": -58.56,image:"https://www.testdelayer.com.ar/industria/renault-12-l.JPG", "description": "Cada domingo lavábamos el Renault 12 de papá antes de salir. Yo alcanzaba el balde y mi hermana elegía el cassette. Todavía recuerdo los asientos calientes por el sol y el ruido de la puerta del garaje. Parábamos en la plaza de San Justo a comprar algo fresco antes de volver. ¿Qué auto los llevaba de paseo en esa época?", "category": "Personales", "source": "demo"},
+{"id": "autos80-1", "groupId": "autos-80", "title": "Mi primer viaje en un Fiat 128", "year": 1985, "author": "Mariela", "place": "Ramos Mejía, Buenos Aires", "lat": -34.644, "lng": -58.565, image: "https://www.carrosyclasicos.com/imagenes/cronicas/fiat_128/1970.jpg", "description": "Compramos un Fiat 128 usado entre ahorros y ayuda de la familia. Tenía el volante gastado y una radio que había que acomodar con paciencia. Ese primer viaje con amigos fue inolvidable. Salimos de Ramos Mejía con un mapa de papel y una bolsa de sándwiches. Nos perdimos un par de veces y volvimos de noche, cansados pero felices de tener nuestra propia aventura.", "category": "Personales", "source": "demo"},
+{"id": "autos80-2", "groupId": "autos-80", "title": "El Falcon y las reuniones del barrio", "year": 1987, "author": "Daniel", "place": "Morón, Buenos Aires", "lat": -34.65, "lng": -58.619,image:"https://www.infobae.com/resizer/v2/VUXHXB5EHFGJFCAYE4325BPSLI.jpg?auth=2a99706702c8c5f0adf0ce3e15940db0c784b3b86474c537a3d5041407d44c27&smart=true&width=350&height=197&quality=85", "description": "Los sábados nos juntábamos a charlar de autos en la esquina. El Falcon de mi tío siempre terminaba con el capó abierto y todo el mundo dando consejos. Después cerrábamos el capó y nos quedábamos hablando hasta que anochecía en Morón. A veces aparecía algún vecino con fotos de su último viaje y las pasábamos de mano en mano. Compartan qué modelo recuerdan de su barrio.", "category": "Personales", "source": "demo"},
     {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,
@@ -18,6 +18,7 @@ export const content = {
       year: 1985,
       category: "Música",
       author: "Leo",
+      image: "https://ichef.bbci.co.uk/ace/ws/640/amz/worldservice/live/assets/images/2009/06/29/090629181016_sp_walkman_226.jpg.webp",
       description:
         "Fuimos un domingo de septiembre al Parque Centenario, en Caballito. Mi hermano llevaba su walkman en una riñonera y me prestó un auricular mientras dábamos la vuelta al lago. Había grabado canciones de la radio: entre tema y tema se escuchaba al locutor. Nos sentamos en el pasto, compartimos una mandarina y anotamos en la cajita qué canciones queríamos conseguir completas. Cada vez que veo un cassette me acuerdo de esa caminata.",
       source: "demo",
@@ -31,6 +32,7 @@ export const content = {
       year: 1983,
       category: "Lugares",
       author: "Clara",
+      image: "https://planaxia.com/wp-content/uploads/2020/06/monumento-3-300x297.jpeg",
       description:
         "La seño nos llevó al Monumento a la Bandera, en Rosario, en una salida de cuarto grado. Mi mamá me había preparado dos sanguchitos envueltos en una servilleta y una naranja. Subimos los escalones en fila, buscamos el río entre las columnas y después dibujamos el monumento sentados en nuestros abrigos. En mi dibujo la torre quedó torcida. Todavía está pegado en el cuaderno de ese año.",
       source: "demo",
@@ -44,6 +46,7 @@ export const content = {
       year: 1987,
       category: "Personales",
       author: "Marina",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbPKUdeZs1zxPT0uKsmYYfQz45mv8auZA-LqKJ6k24ywF_i5RaRTdwZQ&s=100",
       description:
         "Mi papá nos citó en la Plaza San Martín, frente a la Catedral, para empezar las vacaciones con una foto de los cuatro. Mi hermana y yo teníamos el mismo pulóver tejido por la abuela. Cuando levantó la cámara, una paloma pasó tan cerca que nos agachamos. Gastó otra foto, pero al revelar el rollo elegimos la primera: estábamos muertos de risa. Fue nuestra postal familiar de Córdoba.",
       source: "demo",
@@ -57,6 +60,7 @@ export const content = {
       year: 1988,
       category: "Acontecimientos",
       author: "Gustavo",
+      image: "https://media.losandes.com.ar/adjuntos/368/migration/resizer/v2/HE2GGNLGMFQTAYZTMMZTGYLCGI.jpg?auth=b1f853a1f331b171644b38fc350f2b985dd873d56ac7c0da01bb51cb48cd83c6&width=768&height=327",
       description:
         "Festejamos los sesenta de mi abuela al lado del lago del Parque General San Martín, en Mendoza. Mi tío llegó en bicicleta con el pan atado al portaequipaje y mi mamá llevó una torta en una caja de zapatos. Pusimos el mantel a cuadros bajo un árbol y sujetamos las esquinas con cuatro piedras. Cuando sopló las velitas, el viento apagó la mitad antes que ella. La seguimos cargando durante años.",
       source: "demo",
@@ -70,6 +74,7 @@ export const content = {
       year: 1986,
       category: "Cine",
       author: "Paula",
+      image: "https://cloudfront-us-east-1.images.arcpublishing.com/infobae/KYMFDUWD5FGM3OG3SWLS7QBO5E.jpg",
       description:
         "Ese enero nos alojábamos a dos cuadras de Plaza Colón, en Mar del Plata. Una noche salimos del cine y nos quedamos en un banco de la plaza, con los abrigos encima de las rodillas, discutiendo el final de Volver al futuro. Mi primo juraba que algún día los autos iban a volar. Mamá nos compró maní y dejamos que hablara hasta terminar la bolsita. No me acuerdo de la sala, pero sí de esa conversación.",
       source: "demo",
@@ -83,6 +88,7 @@ export const content = {
       year: 1989,
       category: "Televisión",
       author: "Nico",
+      image: "https://www.patagoniaandina.com/wp-content/uploads/2019/07/centro-civico-bariloche.jpg",
       description:
         "En nuestro primer viaje a Bariloche, mi hermana tenía miedo de perderse su programa de la tarde. Durante la parada en el Centro Cívico, papá hizo de narrador e inventó un capítulo con nosotros como protagonistas. La torre del reloj era un castillo y el lago, un lugar secreto. Nos sacó una foto actuando frente a los arcos. Terminamos olvidándonos de pedir que prendieran la tele en el hotel.",
       source: "demo",
@@ -96,6 +102,7 @@ export const content = {
       year: 1984,
       category: "Videojuegos",
       author: "Ana",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiMwHTiHGgUzMCfRINBT99rwTTzaglYFjl2HJybwE53zLuE8z3wHxph5c&s=100", 
       description:
         "Mi primo vino de visita a Salta con una maquinita electrónica de un solo juego. La llevó a la Plaza 9 de Julio después del almuerzo. Elegimos un banco a la sombra, frente al Cabildo, porque al sol no se veía la pantalla. Anotábamos los puntajes en el reverso de un boleto y cada uno tenía tres intentos. Mi abuela nos encontró ahí dos horas después: no habíamos caminado ni una cuadra.",
       source: "demo",
