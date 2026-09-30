@@ -107,7 +107,7 @@ export default function SocialFeed({
           {decade === 2000 && <><div className="transition-contact"><span className="transition-contact-avatar">{selected.author.slice(0,1)}</span><div className="transition-contact-name">{selected.author} — Conversación</div><small className="transition-contact-status">Recuerdo de {selected.year}</small></div><div className="transition-chat-tools">☺ Recuerdos compartidos · ♫ Nostalgiar</div></>}
         </>}
         <div className={desktopDetail ? 'transition-content' : undefined}>
-        {!selected && community}
+        {!selected && community && <details className="feed-community" open={window.innerWidth >= 900 ? true : undefined}><summary>Buscar recuerdos y grupos</summary>{community}</details>}
         <header className="feed-heading">
           <h2>{groupName ?? "Feed"}</h2>
           <div className="feed-tabs" role="group" aria-label="Publicaciones">
