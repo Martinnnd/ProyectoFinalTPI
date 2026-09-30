@@ -1,0 +1,74 @@
+[
+  {
+    "id": "shrek",
+    "url": "https://www.dreamworks.com/storage/movies/shrek/shrek-hero-image.jpg",
+    "caption": "Shrek · imagen promocional",
+    "source": "https://www.dreamworks.com/movies/shrek/"
+  },
+  {
+    "id": "athens",
+    "url": "https://res.cloudinary.com/ddsbdyeyj/image/upload/w_2000/f_auto/q_auto/v1710946019/728a0359-9d05-4374-afbc-43899cfc04f0.jpg",
+    "caption": "Manu Ginóbili con la selección argentina · FIBA",
+    "source": "https://www.fiba.basketball/en/news/remembering-ginobilis-top-10-argentina-games-ahead-of-hall-of-fame-enshrinement"
+  },
+  {
+    "id": "hybrid",
+    "url": "https://i.scdn.co/image/ab67616d0000b273e2f039481babe23658fc719a",
+    "caption": "Portada del álbum · Spotify · créditos del álbum",
+    "source": "https://open.spotify.com/track/60a0Rd6pjrkxjPbaKzXjfq"
+  },
+  {
+    "id": "starwars",
+    "url": "https://lumiere-a.akamaihd.net/v1/images/Star-Wars-New-Hope-IV-Poster_c217085b.jpeg?region=43%2C231%2C583%2C328",
+    "caption": "Imagen promocional · Star Wars · sitio oficial",
+    "source": "https://www.starwars.com/films/star-wars-episode-iv-a-new-hope"
+  },
+  {
+    "id": "voyager",
+    "url": "https://assets.science.nasa.gov/content/dam/science/cds/general/images/2024/04/pia17462.jpg/jcr:content/renditions/cq5dam.web.1280.1280.jpeg",
+    "caption": "Ilustración de la misión Voyager · NASA",
+    "source": "https://science.nasa.gov/mission/voyager/fact-sheet/"
+  },
+  {
+    "id": "arrival",
+    "url": "https://abbasite.com/uploads/2018/04/ABBA_-_Arrival.jpg",
+    "caption": "Portada del álbum · ABBA · sitio oficial",
+    "source": "https://abbasite.com/articles/in-focus-arrival-the-making-of-a-classic-pop-album/"
+  },
+  {
+    "id": "bttf",
+    "url": "https://amblin.com/wp-content/uploads/2018/06/backtothefuture_1985_photo_1920x1080-6-1024x576.jpg",
+    "caption": "Imagen promocional · Amblin",
+    "source": "https://amblin.com/movie/back-to-the-future/"
+  },
+  {
+    "id": "democracy",
+    "url": "https://www.argentina.gob.ar/sites/default/files/2023/12/10-12_democracia2023-web.jpg",
+    "caption": "Restauración de la democracia · Argentina.gob.ar",
+    "source": "https://www.argentina.gob.ar/noticias/10-de-diciembre-dia-de-la-restauracion-de-la-democracia-2"
+  },
+  {
+    "id": "appetite",
+    "url": "https://i.scdn.co/image/ab67616d0000b273c8e5391a619e9e8ea2162073",
+    "caption": "Portada del álbum · Spotify · créditos del álbum",
+    "source": "https://open.spotify.com/track/5NIPsWpDjJTFBoPxCUUeXp"
+  },
+  {
+    "id": "toystory",
+    "url": "https://thewaltdisneycompany.com/app/uploads/2025/09/1920_t7_still11.pub8_.1.jpg",
+    "caption": "Imagen promocional · The Walt Disney Company",
+    "source": "https://thewaltdisneycompany.com/news/toy-story-pixar-history/"
+  },
+  {
+    "id": "web",
+    "url": "https://home.cern/wp-content/uploads/2026/05/9001001_01.jpg",
+    "caption": "El navegador World Wide Web en una computadora NeXT · CERN",
+    "source": "https://home.cern/science/computing/the-birth-of-the-web/"
+  },
+  {
+    "id": "dangerous",
+    "url": "https://cdn-p.smehost.net/sites/b216384857054ba4a3f60f1ed1d26488/wp-content/uploads/2025/10/album-cover_dangerous.jpg",
+    "caption": "Portada del álbum · Michael Jackson · sitio oficial",
+    "source": "https://www.michaeljackson.com/albums/dangerous/"
+  }
+]

@@ -104,6 +104,7 @@ export const content = {
   facts: [
     {
       id: "bttf",
+      media: {"url": "/facts/bttf.jpg", "caption": "Imagen promocional · Amblin", "source": "https://amblin.com/movie/back-to-the-future/"},
       year: 1985,
       kind: "Cine",
       title: "Un DeLorean nos llevó al futuro",
@@ -116,6 +117,7 @@ export const content = {
     },
     {
       id: "democracy",
+      media: {"url": "/facts/democracy.jpg", "caption": "Restauración de la democracia · Argentina.gob.ar", "source": "https://www.argentina.gob.ar/noticias/10-de-diciembre-dia-de-la-restauracion-de-la-democracia-2"},
       year: 1983,
       kind: "Acontecimientos",
       title: "Argentina recuperó la democracia",
@@ -129,6 +131,7 @@ export const content = {
     },
     {
       id: "appetite",
+      media: {"url": "/facts/appetite.jpg", "caption": "Portada del álbum · Spotify · créditos del álbum", "source": "https://open.spotify.com/track/5NIPsWpDjJTFBoPxCUUeXp"},
       year: 1987,
       kind: "Música",
       title: "El debut de los Guns",

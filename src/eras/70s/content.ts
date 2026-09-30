@@ -140,6 +140,7 @@ export const content = {
   facts: [
     {
       id: "starwars",
+      media: {"url": "/facts/starwars.jpg", "caption": "Imagen promocional · Star Wars · sitio oficial", "source": "https://www.starwars.com/films/star-wars-episode-iv-a-new-hope"},
       year: 1977,
       kind: "Cine",
       title: "Una galaxia llegó a las salas",
@@ -152,6 +153,7 @@ export const content = {
     },
     {
       id: "voyager",
+      media: {"url": "/facts/voyager.jpg", "caption": "Ilustración de la misión Voyager · NASA", "source": "https://science.nasa.gov/mission/voyager/fact-sheet/"},
       year: 1977,
       kind: "Tecnología",
       title: "Dos viajeras rumbo a los planetas",
@@ -164,6 +166,7 @@ export const content = {
     },
     {
       id: "arrival",
+      media: {"url": "/facts/arrival.jpg", "caption": "Portada del álbum · ABBA · sitio oficial", "source": "https://abbasite.com/articles/in-focus-arrival-the-making-of-a-classic-pop-album/"},
       year: 1976,
       kind: "Música",
       title: "ABBA invitó a todos a bailar",

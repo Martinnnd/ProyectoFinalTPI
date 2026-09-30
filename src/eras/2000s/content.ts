@@ -146,6 +146,7 @@ export const content = {
   facts: [
     {
       id: "shrek",
+      media: {"url": "/facts/shrek.jpg", "caption": "Shrek · imagen promocional", "source": "https://www.dreamworks.com/movies/shrek/"},
       year: 2001,
       kind: "Cine",
       title: "Un ogro se robó la película",
@@ -158,6 +159,7 @@ export const content = {
     },
     {
       id: "athens",
+      media: {"url": "/facts/athens.jpg", "caption": "Manu Ginóbili con la selección argentina · FIBA", "source": "https://www.fiba.basketball/en/news/remembering-ginobilis-top-10-argentina-games-ahead-of-hall-of-fame-enshrinement"},
       year: 2004,
       kind: "Deportes",
       title: "Una generación bañada en oro",
@@ -171,6 +173,7 @@ export const content = {
     },
     {
       id: "hybrid",
+      media: {"url": "/facts/hybrid.jpg", "caption": "Portada del álbum · Spotify · créditos del álbum", "source": "https://open.spotify.com/track/60a0Rd6pjrkxjPbaKzXjfq"},
       year: 2000,
       kind: "Música",
       title: "El comienzo de Linkin Park",

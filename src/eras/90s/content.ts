@@ -141,6 +141,7 @@ export const content = {
   facts: [
     {
       id: "toystory",
+      media: {"url": "/facts/toystory.jpg", "caption": "Imagen promocional · The Walt Disney Company", "source": "https://thewaltdisneycompany.com/news/toy-story-pixar-history/"},
       year: 1995,
       kind: "Cine",
       title: "Los juguetes cobraron vida",
@@ -153,6 +154,7 @@ export const content = {
     },
     {
       id: "web",
+      media: {"url": "/facts/web.jpg", "caption": "El navegador World Wide Web en una computadora NeXT · CERN", "source": "https://home.cern/science/computing/the-birth-of-the-web/"},
       year: 1993,
       kind: "Tecnología",
       title: "La Web se abrió al mundo",
@@ -165,6 +167,7 @@ export const content = {
     },
     {
       id: "dangerous",
+      media: {"url": "/facts/dangerous.jpg", "caption": "Portada del álbum · Michael Jackson · sitio oficial", "source": "https://www.michaeljackson.com/albums/dangerous/"},
       year: 1991,
       kind: "Música",
       title: "Michael Jackson lanzó Dangerous",

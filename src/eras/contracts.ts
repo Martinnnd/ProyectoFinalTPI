@@ -29,6 +29,7 @@ export interface MusicTrack {
   reference: string;
 }
 export interface EraFact {
+  media?: { url: string; caption: string; source: string };
   id: string;
   year: number;
   kind: "Cine" | "Música" | "Acontecimientos" | "Tecnología" | "Deportes";
