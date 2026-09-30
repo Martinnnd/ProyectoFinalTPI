@@ -99,7 +99,7 @@ export default function App() {
     };
   }, []);
   const memories = filterMemories(
-    filterCommunity([...initialMemories, ...local],view === "map" ? "all" : scope,groups,query),
+    filterCommunity([...initialMemories, ...local],view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
     period,
     category,
   );
@@ -409,7 +409,6 @@ export default function App() {
         </button>
       </header>
 
-      {view === "map" && !picking && !draft && <div className="map-community">{communityControls()}</div>}
       <div className="map-period">
         <Compass size={17} />
         <strong>{eraContent[period.decade].label}</strong>
