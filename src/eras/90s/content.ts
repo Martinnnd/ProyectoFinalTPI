@@ -64,6 +64,20 @@ export const content = {
       source: "demo",
     },
     {
+      place: "universidad Nacional De La Matanza",
+      lat: -34.67077213671422, 
+      lng: -58.562816626446505,
+      id: "demo-33",
+      title: "Primer dia en la Universidad",
+      year: 1991,
+      category: "Personales",
+      author: "Fernando",
+      image: "https://i.postimg.cc/QdMKq3ZV/0f7ca658-ec73-40e1-98fa-39d9e501e3da.png",
+      description:
+        "Todavia me acuerdo de aquel 15 de abril, empecé a estudiar en La Matanza y marcó un antes y un despues en mi vida",
+      source: "demo",
+    },
+    {
       place: "Monumento Nacional a la Bandera, Rosario",
       lat: -32.9475,
       lng: -60.6304,
