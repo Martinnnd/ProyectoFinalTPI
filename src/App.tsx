@@ -1,10 +1,11 @@
 "use client";
 
+import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
 import { demoGroups, loadGroups, filterCommunity } from "./groups";
 import type { CommunityGroup } from "./types";
 import { useEffect, useRef, useState } from "react";
-import { Compass, Plus, X, Newspaper, UserRound } from "lucide-react";
+import { Compass, Plus, X, Newspaper, UserRound, MessageCircle } from "lucide-react";
 import {
   categories,
   filterMemories,
@@ -41,7 +42,7 @@ export default function App() {
   const [mapExpanded, setMapExpanded] = useState(false);
   const [following, setFollowing] = useState<string[]>([]);
   const creationOrigin = useRef(false);
-  const [view, setView] = useState<"map" | "feed" | "profile">("map");
+  const [view, setView] = useState<"map" | "feed" | "profile" | "chat">("map");
   const [period, setPeriod] = useState<Period>(() => {
     const requested = Number(
       new URLSearchParams(window.location.search).get("era"),
@@ -232,7 +233,7 @@ export default function App() {
       <a className="skip-link" href="#explore">
         Saltar al mapa
       </a>
-      {view !== "profile" && (
+      {view !== "profile" && view !== "chat" && (
         <main id="explore" className="map-canvas">
           <ActiveMap
             memories={memories}
@@ -293,20 +294,7 @@ export default function App() {
           <Newspaper />
           <span>Feed</span>
         </button>
-        <button
-          aria-current={view === "profile" ? "page" : undefined}
-          className={view === "profile" ? "rail-active" : ""}
-          onClick={() => {
-            setView("profile");
-            setSelectedId(null);
-            setPanelOpen(false);
-            setFactsOpen(false);
-            setPicking(false);
-          }}
-        >
-          <UserRound />
-          <span>Perfil</span>
-        </button>
+        <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);}}><MessageCircle/><span>Chat</span></button>
         <button
           ref={storiesButton}
           aria-expanded={panelOpen}
@@ -345,6 +333,20 @@ export default function App() {
         >
           <EraIcon decade={period.decade} destination="music" />
           <span>Música</span>
+        </button>
+        <button
+          aria-current={view === "profile" ? "page" : undefined}
+          className={`rail-profile ${view === "profile" ? "rail-active" : ""}`}
+          onClick={() => {
+            setView("profile");
+            setSelectedId(null);
+            setPanelOpen(false);
+            setFactsOpen(false);
+            setPicking(false);
+          }}
+        >
+          <UserRound />
+          <span>Perfil</span>
         </button>
         <span className="rail-footer">
           UNLaM
@@ -405,7 +407,7 @@ export default function App() {
           disabled={picking || !!draft}
         >
           <Plus size={18} />
-          <span>Agregar un recuerdo</span>
+          <span>Sumar mi recuerdo</span>
         </button>
       </header>
 
@@ -486,6 +488,7 @@ export default function App() {
           onAdd={startAdding}
         />
       </div>
+      <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft}/>
       <Player
         key={period.decade}
         decade={period.decade}

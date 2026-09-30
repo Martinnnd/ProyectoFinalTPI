@@ -1049,3 +1049,8 @@
 .era-1990 .community-controls :is(input,select), .era-1990 .community-emblem { background:white; color:#111; border:2px solid; border-color:#555 #fff #fff #555; border-radius:0; }
 .era-1990 .community-cards button { background:#e6e6e6; }
 
+
+.era-1990 .chat-window,.era-1990 .chat-launcher { background:#c0c0c0; border:3px outset #eee; border-radius:0; box-shadow:3px 3px 0 #0005; }
+.era-1990 .chat-titlebar { background:#000080; color:white; padding:7px 10px; }
+.era-1990 .chat-conversation,.era-1990 .chat-list { background:white; color:#111; }
+.era-1990 .chat-bubble { border-radius:0; background:#eee; border-color:#999; }

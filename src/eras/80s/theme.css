@@ -768,3 +768,8 @@
 .era-1980 .community-controls .community-create { border-color:#43dfe2; color:#43f3ed; background:#18223d; }
 .era-1980 .community-cards button { background:linear-gradient(110deg,#29143b,#171329); border-color:#754f9a; }
 .era-1980 .community-emblem { border-color:#d650cb; background:#0b1222; }
+
+.era-1980 .chat-window { border-color:#ff2cbb; box-shadow:3px 3px 0 #ff2cbb66,0 0 18px #ff2cbb22; }
+.era-1980 .chat-titlebar { background:linear-gradient(90deg,#381240,#180e2c); color:#4ff7f3; }
+.era-1980 .chat-bubble { border-radius:0; }
+.era-1980 .chat-avatar { border-radius:0; box-shadow:2px 2px 0 #ff2cbb; }

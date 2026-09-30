@@ -324,14 +324,7 @@ export default function SocialFeed({
         </div>
       </div>
       <aside className="feed-sidebar">
-        <section>
-          <span className="eyebrow">CADA LUGAR TIENE UNA HISTORIA</span>
-          <h3>Volvé a esos días</h3>
-          <p>Elegí una época, encontrá un lugar y compartí lo que viviste.</p>
-          <button className="primary-button" onClick={onAdd}>
-            Sumar mi recuerdo
-          </button>
-        </section>
+        <button className="primary-button feed-add-memory" onClick={onAdd}><span aria-hidden="true">＋</span> Sumar mi recuerdo</button>
         <section>
           <h3>A quién seguir</h3>
           {authors.slice(0, 4).map((author) => (
