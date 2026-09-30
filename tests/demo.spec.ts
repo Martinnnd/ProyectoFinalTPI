@@ -488,6 +488,14 @@ test("feed: epocas, detalle, seguir, comentar, perfil y regreso al mapa", async 
   await page.getByRole("button", { name: "Perfil", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Mi perfil" })).toBeVisible();
   await expect(page.locator(".profile-note")).toBeVisible();
+  await expect(page.locator(".profile-note")).toHaveText("Errante");
+  await page.locator(".profile-note").click();
+  const tierDialog = page.getByRole("dialog", { name: "Tu categoría" });
+  await expect(tierDialog).toBeVisible();
+  await expect(tierDialog.locator(".tier-card")).toHaveCount(4);
+  await expect(tierDialog.locator(".tier-card.is-current")).toContainText("Errante");
+  await page.keyboard.press("Escape");
+  await expect(tierDialog).toBeHidden();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Feed", exact: true }).click();
   expect(
@@ -907,6 +915,7 @@ test("perfil propio: mapa privado, contadores, coleccion y creacion", async ({
   await page.getByRole("button", { name: "Feed", exact: true }).click();
   await page.locator(".feed-post .follow-button").first().click();
   await page.getByRole("button", { name: "Perfil", exact: true }).click();
+  await expect(page.locator(".profile-note")).toHaveText("Nostálgico");
   await expect(page.locator(".personal-counts dd")).toHaveText([
     "2",
     "0",

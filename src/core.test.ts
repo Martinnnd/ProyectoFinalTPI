@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { filterMemories, type Memory } from "./types";
-import { initialMemories } from "./data";
+import { filterMemories, type Memory, type TierProgress } from "./types";
+import { describeTiers, initialMemories, resolveUserCategory } from "./data";
 import { eraFacts, factsForPeriod, musicByDecade } from "./eraData";
 import { isMemory, loadMemories, saveMemories } from "./storage";
 const local: Memory = { ...initialMemories[0], id: "local-1", source: "local" };
@@ -66,6 +66,29 @@ describe("Contenido de época", () => {
         (m) => m.description.length > 300 && m.place.includes(","),
       ),
     ).toBe(true);
+  });
+});
+describe("Categoría del visitante", () => {
+  const progress = (patch: Partial<TierProgress> = {}): TierProgress => ({
+    memories: 0,
+    points: 0,
+    subscribed: false,
+    ...patch,
+  });
+  it("pasa de Errante a Nostálgico con el primer recuerdo", () => {
+    expect(resolveUserCategory(progress())).toBe("Errante");
+    for (const memories of [1, 4, 250])
+      expect(resolveUserCategory(progress({ memories }))).toBe("Nostálgico");
+  });
+  it("exige 30 puntos para Aedo y una suscripción para Mnemosine", () => {
+    expect(resolveUserCategory(progress({ memories: 12, points: 29 }))).toBe("Nostálgico");
+    expect(resolveUserCategory(progress({ memories: 12, points: 30 }))).toBe("Aedo");
+    expect(resolveUserCategory(progress({ subscribed: true }))).toBe("Mnemosine");
+  });
+  it("marca en el diálogo la categoría actual y las que faltan", () => {
+    expect(
+      describeTiers(progress({ memories: 3 })).map((tier) => tier.state),
+    ).toEqual(["reached", "current", "locked", "locked"]);
   });
 });
 describe("Persistencia resistente a errores", () => {

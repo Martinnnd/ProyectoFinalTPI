@@ -31,6 +31,28 @@ export interface Period {
   decade: Decade;
   year: number | null;
 }
+export type UserCategory = "Errante" | "Nostálgico" | "Aedo" | "Mnemosine";
+/** Each tier is unlocked by a different kind of evidence, not only by a count. */
+export type TierRule =
+  | { kind: "memories"; min: number }
+  | { kind: "points"; min: number }
+  | { kind: "subscription" };
+export interface TierProgress {
+  memories: number;
+  /** Highest nostalgia points reached by a single memory. */
+  points: number;
+  subscribed: boolean;
+}
+export interface UserTier {
+  name: UserCategory;
+  rule: TierRule;
+  /** Plain-language rule shown in the tiers dialog. */
+  requirement: string;
+}
+export type TierState = "current" | "reached" | "locked";
+export interface DescribedTier extends UserTier {
+  state: TierState;
+}
 export interface Achievement {
   id: string;
   name: string;

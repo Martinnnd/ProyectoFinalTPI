@@ -3,13 +3,14 @@ import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
 import { Grid3x3, Link2, Lock, MapPin, Plus, Send, Share2, UserRound, X } from "lucide-react";
 import MemoryMap from "./MemoryMap";
-import { resolveAchievements } from "../data";
-import type { Achievement, Memory, Period } from "../types";
+import { describeTiers, resolveAchievements, resolveUserCategory } from "../data";
+import type { Achievement, Memory, Period, TierProgress } from "../types";
 
 export default function Profile({
   community,
   memories,
   allMemories,
+  tierProgress,
   following,
   period,
   selected,
@@ -21,6 +22,7 @@ export default function Profile({
   community?: ReactNode;
   memories: Memory[];
   allMemories: Memory[];
+  tierProgress: TierProgress;
   following: string[];
   period: Period;
   selected: Memory | null;
@@ -33,9 +35,13 @@ export default function Profile({
   const [collectionShareOpen, setCollectionShareOpen] = useState<string | null>(null);
   const [copiedShare, setCopiedShare] = useState<string | null>(null);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [tiersOpen, setTiersOpen] = useState(false);
   const catalogueDialog = useRef<HTMLDialogElement>(null);
+  const tiersDialog = useRef<HTMLDialogElement>(null);
   const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
+  const userCategory = resolveUserCategory(tierProgress);
+  const tiers = useMemo(() => describeTiers(tierProgress), [tierProgress]);
   function openCatalogue() {
     setAchievementsOpen(true);
     catalogueDialog.current?.showModal();
@@ -43,6 +49,14 @@ export default function Profile({
   function closeCatalogue() {
     setAchievementsOpen(false);
     catalogueDialog.current?.close();
+  }
+  function openTiers() {
+    setTiersOpen(true);
+    tiersDialog.current?.showModal();
+  }
+  function closeTiers() {
+    setTiersOpen(false);
+    tiersDialog.current?.close();
   }
   return (
     <main id="explore" className="personal-profile" aria-label="Mi perfil">
@@ -59,9 +73,14 @@ export default function Profile({
             <span className="eyebrow">MI ARCHIVO PERSONAL</span>
             <h2>Marty McFly</h2>
             <p>Los lugares cambian. Tus historias quedan.</p>
-            <small className="profile-note">
-              Errante
-            </small>
+            <button
+              className="profile-note"
+              onClick={openTiers}
+              aria-haspopup="dialog"
+              aria-expanded={tiersOpen}
+            >
+              {userCategory}
+            </button>
           </div>
           <div className="achievements">
             <div className="achievements-heading">
@@ -379,6 +398,51 @@ export default function Profile({
                   <span className="achievement-state">
                     {achievement.unlocked ? "Conseguida" : "Bloqueada"}
                   </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </dialog>
+      <dialog
+        ref={tiersDialog}
+        className="tier-dialog"
+        onCancel={(event) => {
+          event.preventDefault();
+          closeTiers();
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) closeTiers();
+        }}
+        aria-labelledby="tiers-title"
+      >
+        <header>
+          <div>
+            <h2 id="tiers-title">Tu categoría</h2>
+            <small>Así avanzás en Nostalgiar</small>
+          </div>
+          <button
+            className="icon-button"
+            onClick={closeTiers}
+            aria-label="Cerrar categorías"
+          >
+            <X size={20} />
+          </button>
+        </header>
+        <div className="tier-dialog-content">
+          <ul className="tier-list">
+            {tiers.map((tier) => (
+              <li key={tier.name} className={`tier-card is-${tier.state}`}>
+                <span className="tier-body">
+                  <strong>{tier.name}</strong>
+                  <p>{tier.requirement}</p>
+                </span>
+                <span className="tier-state">
+                  {tier.state === "current"
+                    ? "Tu categoría"
+                    : tier.state === "reached"
+                      ? "Alcanzada"
+                      : "Bloqueada"}
                 </span>
               </li>
             ))}
