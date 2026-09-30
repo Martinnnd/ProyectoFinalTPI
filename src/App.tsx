@@ -75,7 +75,7 @@ export default function App() {
     subscribed: false,
   };
   const [panelOpen, setPanelOpen] = useState(false);
-  const [factsOpen, setFactsOpen] = useState(() => window.innerWidth >= 900);
+  const [factsOpen, setFactsOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
   useEffect(() => {
     if (window.innerWidth < 900 && view !== "map") setMusicOpen(false);
@@ -138,7 +138,7 @@ export default function App() {
     setPeriod(next);
     if(groups.some(g=>g.id===scope && g.decade!==next.decade)) setScope("all");
     setSelectedId(null);
-    setFactsOpen(view === "map" && window.innerWidth >= 900);
+    setFactsOpen(false);
     setPanelOpen(false);
     if (next.decade !== period.decade) setMusicOpen(false);
   }
