@@ -15,6 +15,7 @@ export const content = {
     "place": "Caballito, Buenos Aires",
     "lat": -34.618,
     "lng": -58.441,
+    "image": "https://http2.mlstatic.com/D_NQ_NP_954569-MLA110576128820_052026-O.webp",
     "description": "Nos juntábamos en el living de un amigo con un disco de Sui Generis. Antes de apoyar la púa, alguien pedía silencio y otro acomodaba los almohadones en el piso. Leíamos la funda mientras sonaba el lado A y discutíamos quién daba vuelta el disco. No teníamos una colección grande: por eso conocíamos hasta los pequeños ruidos de cada vinilo. ¿Qué disco escuchaban sin saltarse un tema?",
     "category": "Música",
     "source": "demo"
