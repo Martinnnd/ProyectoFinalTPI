@@ -1,5 +1,7 @@
 "use client";
 
+import HourglassLogo from "./components/HourglassLogo";
+import EraTransition from "./components/EraTransition";
 import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
 import { demoGroups, loadGroups, filterCommunity } from "./groups";
@@ -39,6 +41,8 @@ export default function App() {
   const [scope,setScope] = useState('all');
   const [query,setQuery] = useState('');
   useEffect(()=>setGroups(loadGroups()),[]);
+  const [eraJourney, setEraJourney] = useState<Period | null>(null);
+  const journeyLock = useRef(false);
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
   const mapExpandButton = useRef<HTMLButtonElement>(null);
@@ -135,6 +139,13 @@ export default function App() {
   }
   const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile)setView('feed');}} onCreate={createGroup}/>;
   function changePeriod(next: Period) {
+    if(journeyLock.current)return;
+    if(next.decade === period.decade || window.matchMedia('(prefers-reduced-motion: reduce)').matches){applyPeriod(next);return;}
+    mobileOptions.current?.close();
+    journeyLock.current=true;
+    setEraJourney(next);
+  }
+  function applyPeriod(next: Period) {
     setPeriod(next);
     if(groups.some(g=>g.id===scope && g.decade!==next.decade)) setScope("all");
     setSelectedId(null);
@@ -245,7 +256,7 @@ export default function App() {
       className={`app map-app view-${view} era-${period.decade} ${panelOpen ? "stories-open" : ""} ${musicOpen ? "music-open" : ""}`}
     >
       <div className="mobile-appbar">
-        <div className="mobile-page-title"><span>Nostalgiar</span><strong>{view === 'map' ? 'Explorar' : view === 'feed' ? 'Feed' : view === 'chat' ? 'Chat' : 'Mi perfil'}</strong></div>
+        <span className="mobile-brand-logo" data-era-logo><HourglassLogo/></span><div className="mobile-page-title"><span>Nostalgiar</span><strong>{view === 'map' ? 'Explorar' : view === 'feed' ? 'Feed' : view === 'chat' ? 'Chat' : 'Mi perfil'}</strong></div>
         <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir épocas y opciones"><span className="mobile-era-dot" aria-hidden="true"/><strong>{period.decade === 2000 ? '2000s' : `${String(period.decade).slice(2)}s`}</strong><ChevronDown size={15}/></button>
         <button className="mobile-add-button" aria-label="Sumar mi recuerdo" onClick={startAdding} disabled={picking || !!draft}><Plus size={23}/></button>
       </div>
@@ -256,6 +267,7 @@ export default function App() {
         <div className="mobile-tools">{(['stories','facts','music'] as const).map(destination=><button key={destination} onClick={()=>{mobileOptions.current?.close();navigate(destination);}}><EraIcon decade={period.decade} destination={destination}/><span>{destination==='stories'?'Recuerdos':destination==='facts'?'Efemérides':'Música'}</span></button>)}</div>
         <button className="primary-button mobile-options-done" onClick={()=>mobileOptions.current?.close()}>Ver selección</button>
       </dialog>
+      {eraJourney && <EraTransition next={eraJourney} onCommit={()=>applyPeriod(eraJourney)} onDone={()=>{journeyLock.current=false;setEraJourney(null);}}/>}
       <a className="skip-link" href="#explore">
         Saltar al mapa
       </a>
@@ -295,9 +307,7 @@ export default function App() {
         onNavigate={navigate}
       />
       <nav className="navigation-rail" aria-label="Navegación principal">
-        <span className="rail-logo" aria-hidden="true">
-          N
-        </span>
+        <span className="rail-logo brand-hourglass" data-era-logo role="img" aria-label="Nostalgiar"><HourglassLogo/></span>
         <button
           aria-label="Explorar mapa"
           className={view === "map" && !panelOpen ? "rail-active" : ""}
