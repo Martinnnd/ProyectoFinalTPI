@@ -6,7 +6,7 @@
 .era-travel::backdrop { background:#101119b8; backdrop-filter:blur(9px); animation:travel-veil 450ms ease both; }
 .era-travel-logo { position:absolute; top:0; left:0; width:180px; height:200px; transform-origin:0 0; will-change:transform; filter:drop-shadow(0 15px 24px #0005); }
 .era-travel-logo svg { transform-origin:50% 50%; }
-.era-travel-glow { position:absolute; left:50%; top:50%; width:min(70vw,480px); aspect-ratio:1; transform:translate(-50%,-50%); background:radial-gradient(ellipse,#d49d352c,transparent 68%); opacity:0; transition:opacity .6s; }
+.era-travel-glow { position:absolute; left:50%; top:50%; width:min(70vw,480px); aspect-ratio:1; transform:translate(-50%,-50%); background:radial-gradient(ellipse,color-mix(in srgb,var(--travel-hue,#d49d35) 22%,transparent),transparent 68%); opacity:0; transition:opacity .6s; }
 .time-flowing .era-travel-glow { opacity:1; }
 .era-travel-caption { position:absolute; top:calc(50% + 115px); width:100%; text-align:center; opacity:0; transform:translateY(12px); transition:opacity .3s,transform .5s; font-family:Arial,sans-serif; }
 .time-flowing .era-travel-caption { opacity:1; transform:none; }
@@ -18,7 +18,7 @@
 .sand-running .real-hourglass .flow-sand { opacity:1; }
 
 .real-hourglass .glass-detail { opacity:0; }
-.era-travel.time-returning::backdrop { animation:travel-veil-out 760ms ease both; }
+.era-travel.time-returning::backdrop { animation:travel-veil-out 530ms ease both; }
 .era-travel.time-returning .era-travel-glow { opacity:0; }
 @keyframes travel-veil { from { opacity:0; } to { opacity:1; } }
 @keyframes travel-veil-out { from { opacity:1; } to { opacity:0; } }

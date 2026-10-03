@@ -256,7 +256,7 @@ export default function App() {
       className={`app map-app view-${view} era-${period.decade} ${panelOpen ? "stories-open" : ""} ${musicOpen ? "music-open" : ""}`}
     >
       <div className="mobile-appbar">
-        <span className="mobile-brand-logo" data-era-logo><HourglassLogo/></span><div className="mobile-page-title"><span>Nostalgiar</span><strong>{view === 'map' ? 'Explorar' : view === 'feed' ? 'Feed' : view === 'chat' ? 'Chat' : 'Mi perfil'}</strong></div>
+        <span className="mobile-brand-logo" data-era-logo><HourglassLogo decade={period.decade}/></span><div className="mobile-page-title"><span>Nostalgiar</span><strong>{view === 'map' ? 'Explorar' : view === 'feed' ? 'Feed' : view === 'chat' ? 'Chat' : 'Mi perfil'}</strong></div>
         <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir épocas y opciones"><span className="mobile-era-dot" aria-hidden="true"/><strong>{period.decade === 2000 ? '2000s' : `${String(period.decade).slice(2)}s`}</strong><ChevronDown size={15}/></button>
         <button className="mobile-add-button" aria-label="Sumar mi recuerdo" onClick={startAdding} disabled={picking || !!draft}><Plus size={23}/></button>
       </div>
@@ -267,7 +267,7 @@ export default function App() {
         <div className="mobile-tools">{(['stories','facts','music'] as const).map(destination=><button key={destination} onClick={()=>{mobileOptions.current?.close();navigate(destination);}}><EraIcon decade={period.decade} destination={destination}/><span>{destination==='stories'?'Recuerdos':destination==='facts'?'Efemérides':'Música'}</span></button>)}</div>
         <button className="primary-button mobile-options-done" onClick={()=>mobileOptions.current?.close()}>Ver selección</button>
       </dialog>
-      {eraJourney && <EraTransition next={eraJourney} onCommit={()=>applyPeriod(eraJourney)} onDone={()=>{journeyLock.current=false;setEraJourney(null);}}/>}
+      {eraJourney && <EraTransition from={period.decade} next={eraJourney} onCommit={()=>applyPeriod(eraJourney)} onDone={()=>{journeyLock.current=false;setEraJourney(null);}}/>}
       <a className="skip-link" href="#explore">
         Saltar al mapa
       </a>
@@ -307,7 +307,7 @@ export default function App() {
         onNavigate={navigate}
       />
       <nav className="navigation-rail" aria-label="Navegación principal">
-        <span className="rail-logo brand-hourglass" data-era-logo role="img" aria-label="Nostalgiar"><HourglassLogo/></span>
+        <span className="rail-logo brand-hourglass" data-era-logo role="img" aria-label="Nostalgiar"><HourglassLogo decade={period.decade}/></span>
         <button
           aria-label="Explorar mapa"
           className={view === "map" && !panelOpen ? "rail-active" : ""}

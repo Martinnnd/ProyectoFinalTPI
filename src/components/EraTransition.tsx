@@ -1,8 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import HourglassLogo from "./HourglassLogo";
-import type { Period } from "../types";
+import { logoThemes, mixColor, rgb } from "./logoThemes";
+import type { Decade, Period } from "../types";
 
-export default function EraTransition({next, onCommit, onDone}: {next:Period; onCommit:()=>void; onDone:()=>void}) {
+export default function EraTransition({from, next, onCommit, onDone}: {from:Decade; next:Period; onCommit:()=>void; onDone:()=>void}) {
+  const source = useRef(from).current;
+  const [logoDecade,setLogoDecade] = useState(source);
   const dialog = useRef<HTMLDialogElement>(null);
   const traveler = useRef<HTMLDivElement>(null);
   const callbacks = useRef({onCommit,onDone});
@@ -24,6 +27,17 @@ export default function EraTransition({next, onCommit, onDone}: {next:Period; on
     const lowerEmpty=[46,174,60,174,77,173,90,172,103,173,120,174,134,174,46,174];
     const lowerFull=[46,174,46,145,68,135,90,120,112,135,134,145,134,174,46,174];
     const sandPath=(a:number[],b:number[],t:number)=>{const v=a.map((n,i)=>n+(b[i]-n)*t);return `M${v[0]} ${v[1]} C${v.slice(2,8).join(' ')} C${v.slice(8,14).join(' ')} L${v[14]} ${v[15]}Z`;};
+    const sourceTheme=logoThemes[source], targetTheme=logoThemes[next.decade];
+    const paint=(frame:number[],sand:number[],depth:number)=>{
+      const drawing=logo.querySelector('.real-hourglass')!;
+      const shades=[mixColor(frame,[255,255,255],.32*depth),frame,mixColor(frame,[0,0,0],.3*depth)];
+      drawing.querySelectorAll('#travel-gold stop').forEach((stop,i)=>stop.setAttribute('stop-color',rgb(shades[i])));
+      drawing.querySelector('.glass-diagonal')!.setAttribute('stroke',rgb(frame));
+      drawing.querySelector('.morph-sand')!.setAttribute('fill',rgb(sand));
+      drawing.querySelectorAll('.sand-grain').forEach(el=>el.setAttribute('fill',rgb(mixColor(sand,[255,255,255],.4))));
+      drawing.querySelectorAll('.glass-detail').forEach(el=>el.setAttribute('stroke',rgb(mixColor(sand,[255,255,255],.6))));
+      modal.style.setProperty('--travel-hue',rgb(frame));
+    };
     // Rotate first, then reshape the same gold bars and sand silhouettes in place.
     const morph=async(reverse=false)=>{
       const drawing=logo.querySelector<SVGElement>('.real-hourglass')!;
@@ -38,7 +52,7 @@ export default function EraTransition({next, onCommit, onDone}: {next:Period; on
         const start=performance.now();
         const tick=(now:number)=>{
           if(cancelled){resolve();return;}
-          const progress=Math.min(1,(now-start)/1000);
+          const progress=Math.min(1,(now-start)/700);
           const eased=progress*progress*progress*(progress*(progress*6-15)+10),t=reverse?1-eased:eased;
           drawing.style.opacity='1';
           svgLogo.style.opacity='0';
@@ -49,8 +63,8 @@ export default function EraTransition({next, onCommit, onDone}: {next:Period; on
           diagonal.setAttribute('opacity',String(Math.pow(1-t,1.5)));
           upper.setAttribute('d',sandPath(upperFrom,upperTo,t));lower.setAttribute('d',sandPath(lowerFrom,lowerTo,t));
           drawing.querySelectorAll<SVGElement>('.glass-detail').forEach(el=>el.style.opacity=String(t*t));
-          const gold=[[215,174,88],[166,115,33],[130,82,14]];
-          drawing.querySelectorAll('#travel-gold stop').forEach((stop,i)=>stop.setAttribute('stop-color',`rgb(${[156,104,22].map((c,j)=>Math.round(c+(gold[i][j]-c)*t)).join(',')})`));
+          const theme=reverse?targetTheme:sourceTheme;
+          paint(theme.frame,theme.sand,t);
           if(progress<1)sandFrame=requestAnimationFrame(tick);else resolve();
         };
         sandFrame=requestAnimationFrame(tick);
@@ -74,8 +88,8 @@ export default function EraTransition({next, onCommit, onDone}: {next:Period; on
         const svg=logo.querySelector('.hourglass-logo')!;
         modal.classList.add('time-flowing');
         await Promise.all([
-          animate(logo,flight({x:r.left,y:r.top,s:r.width/180},{x:cx,y:cy,s:1}),800),
-          animate(svg,[{transform:'rotate(0deg)'},{transform:'rotate(-96deg)',offset:.78},{transform:'rotate(-90deg)'}],900)
+          animate(logo,flight({x:r.left,y:r.top,s:r.width/180},{x:cx,y:cy,s:1}),580),
+          animate(svg,[{transform:'rotate(0deg)'},{transform:'rotate(-96deg)',offset:.78},{transform:'rotate(-90deg)'}],650)
         ]);
         if(cancelled)return;
         modal.classList.add('morphing');
@@ -83,12 +97,16 @@ export default function EraTransition({next, onCommit, onDone}: {next:Period; on
         if(cancelled)return;
         modal.classList.add('sand-running');
         const top=logo.querySelector('.morph-upper')!,bottom=logo.querySelector('.morph-lower')!;
+        const clock=logo.querySelector<SVGElement>('.real-hourglass')!;
         const grains=Array.from(logo.querySelectorAll('.sand-grain'));
         await new Promise<void>(resolve=>{
           const start=performance.now();
           const tick=(now:number)=>{
             if(cancelled){resolve();return;}
-            const t=Math.min(1,(now-start)/1650);
+            const t=Math.min(1,(now-start)/1400);
+            const blend=t*t*(3-2*t);
+            paint(mixColor(sourceTheme.frame,targetTheme.frame,blend),mixColor(sourceTheme.sand,targetTheme.sand,blend),1);
+            clock.style.transform=`perspective(650px) rotateY(${360*blend}deg)`;
             top.setAttribute('d',sandPath(upperFull,upperEmpty,t));
             bottom.setAttribute('d',sandPath(lowerEmpty,lowerFull,t));
             const floor=174-49*t;
@@ -104,18 +122,19 @@ export default function EraTransition({next, onCommit, onDone}: {next:Period; on
           sandFrame=requestAnimationFrame(tick);
         });
         if(cancelled)return;
+        setLogoDecade(next.decade);
         modal.classList.add('time-arrived');
         modal.classList.remove('sand-running');
         await morph(true);
         if(cancelled)return;
         logo.querySelector<SVGElement>('.real-hourglass')!.style.opacity='0';
         svgLogo.style.opacity='1';
-        await animate(svg,[{transform:'rotate(-90deg)'},{transform:'rotate(3deg)',offset:.8},{transform:'rotate(0deg)'}],480);
+        await animate(svg,[{transform:'rotate(-90deg)'},{transform:'rotate(3deg)',offset:.8},{transform:'rotate(0deg)'}],320);
         if(cancelled)return;
         modal.classList.remove('time-flowing');
         modal.classList.add('time-returning');
         const end=bounds();
-        await animate(logo,flight({x:cx,y:cy,s:1},{x:end.left,y:end.top,s:end.width/180}),760);
+        await animate(logo,flight({x:cx,y:cy,s:1},{x:end.left,y:end.top,s:end.width/180}),530);
         if(!cancelled)finish();
       } catch { if(!cancelled)finish(); }
     };
@@ -126,7 +145,7 @@ export default function EraTransition({next, onCommit, onDone}: {next:Period; on
     void run();
     return ()=>{cancelled=true;cancelAnimationFrame(sandFrame);animations.forEach(a=>a.cancel());modal.removeEventListener('cancel',skip);window.removeEventListener('resize',resize);modal.close();origins.forEach(el=>el.classList.remove('logo-in-transit'));};
   },[]);
-  return <dialog ref={dialog} className="era-travel" aria-label={`Viajando a los ${next.decade}`}><div className="era-travel-glow"/><div ref={traveler} className="era-travel-logo"><HourglassLogo/>
+  return <dialog ref={dialog} className="era-travel" aria-label={`Viajando a los ${next.decade}`}><div className="era-travel-glow"/><div ref={traveler} className="era-travel-logo"><HourglassLogo decade={logoDecade}/>
       <svg className="real-hourglass" viewBox="0 0 180 200" fill="none" aria-hidden="true">
         <defs>
           <clipPath id="travel-upper"><path d="M47 38H133C133 69 111 87 93 98H87C69 87 47 69 47 38Z"/></clipPath>
