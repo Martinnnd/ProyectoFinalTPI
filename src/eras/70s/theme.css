@@ -350,3 +350,11 @@
 .era-1970 .chat-window { background:#eee3c5; border:3px double #62543e; box-shadow:4px 5px 0 #40332240; }
 .era-1970 .chat-titlebar { background:#d4c5a1; color:#393123; font-family:Georgia,serif; border-bottom:3px double #62543e; }
 .era-1970 .chat-bubble { border-radius:0; background:#f5edd8; color:#393123; font-family:Georgia,serif; }
+
+/* Paper curl: coherent moving edge, translucent reverse print and a soft cast shadow. */
+.era-1970.view-feed .paper-turn-fold { background:linear-gradient(90deg,#85704b 0%,#cdbd94 8%,#eee1ba 26%,#f6edce 48%,#e1d0a8 72%,#b39c70 94%,#76603e 100%); box-shadow:inset 1px 0 #fff8,inset -1px 0 #66502d66,5px 3px 9px #30241526; will-change:width,left,transform; }
+.era-1970.view-feed .paper-turn-fold::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(2deg,#64543309 0 1px,transparent 1px 4px); pointer-events:none; }
+.era-1970.view-feed .paper-turn-reverse .paper-turn-fold { background:linear-gradient(270deg,#85704b,#eee1ba 26%,#f6edce 48%,#e1d0a8 72%,#76603e); }
+.era-1970.view-feed .paper-turn-ink { height:100%; opacity:.14; filter:blur(.35px); transform-origin:center; }
+.era-1970.view-feed .paper-turn-shadow { background:linear-gradient(90deg,transparent,#34230d70 40%,#34230d38 62%,transparent); }
+.era-1970.view-feed .paper-turn-face { will-change:clip-path; }

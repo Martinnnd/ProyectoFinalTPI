@@ -1,4 +1,5 @@
-﻿// Snapshot only the visible paper. It is inert, temporary, and never owns state.
+import { paperSound } from "./paperSound";
+// Snapshot only the visible paper. It is inert, temporary, and never owns state.
 export function turnNewspaperPage(stream: HTMLElement, backwards: boolean): () => void {
   if (getComputedStyle(stream).getPropertyValue('--paper-turn').trim() !== '1' || matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
   const app = stream.closest('.app');
@@ -23,27 +24,43 @@ export function turnNewspaperPage(stream: HTMLElement, backwards: boolean): () =
   const reverse = document.createElement('div'); reverse.className = 'paper-turn-ink'; reverse.append(snapshot()); fold.append(reverse);
   const shadow = document.createElement('div'); shadow.className = 'paper-turn-shadow';
   layer.append(shadow, face, fold); app.append(layer);
-  const duration = 1050;
-  const options = { duration, easing: 'cubic-bezier(.32,.04,.2,1)', fill: 'forwards' as const };
-  const cuts = backwards ? ['inset(0 0 0 0)', 'inset(0 0 0 12%)','inset(0 0 0 65%)','inset(0 0 0 100%)'] : ['inset(0 0 0 0)', 'inset(0 12% 0 0)','inset(0 65% 0 0)','inset(0 100% 0 0)'];
-  const animations = [face.animate(cuts.map((clipPath, i) => ({ clipPath, offset:[0,.2,.7,1][i] })), options)];
-  const direction = backwards ? 1 : -1;
-  for (const element of [fold, shadow]) animations.push(element.animate([
-    { transform:`translateX(${backwards ? -100 : 100}%) scaleX(.04) skewY(0deg)`, opacity:0, offset:0 },
-    { transform:`translateX(${direction * box.width * .12}px) scaleX(.75) skewY(${direction * 3}deg)`, opacity:1, offset:.2 },
-    { transform:`translateX(${direction * box.width * .65}px) scaleX(1) skewY(${direction * -2}deg)`, opacity:1, offset:.7 },
-    { transform:`translateX(${direction * box.width}px) scaleX(.1) skewY(0deg)`, opacity:0, offset:1 }
-  ],options));
+  const duration = 1000;
+  const stopSound=paperSound(duration);
+  let raf=0;
+  const start=performance.now();
+  const draw=(now:number)=>{
+    if(done)return;
+    const t=Math.min(1,(now-start)/duration);
+    // Gentle lift, accelerating sweep, then a short settling of the trailing edge.
+    const progress=t*t*(3-2*t);
+    const lift=Math.sin(Math.PI*t);
+    const width=Math.max(1,box.width*.22*Math.pow(lift,.75));
+    const edge=box.width*(1-progress);
+    const skew=box.height*.045*lift*Math.cos(t*Math.PI);
+    const curve=box.width*.018*lift;
+    const points=Array.from({length:17},(_,i)=>{
+      const y=i/16, x=edge+skew*(y-.5)+curve*Math.sin(Math.PI*y);
+      return `${backwards?box.width-x:x}px ${y*box.height}px`;
+    });
+    face.style.clipPath=backwards?`polygon(100% 0,${points.join(',')},100% 100%)`:`polygon(0 0,${points.join(',')},0 100%)`;
+    const left=backwards?box.width-edge-width:edge;
+    Object.assign(fold.style,{left:`${left}px`,right:'auto',width:`${width}px`,top:'0',height:'100%',opacity:String(Math.min(1,lift*9)),transform:`skewY(${(backwards?-1:1)*skew/box.height*35}deg)`,borderRadius:`${8+lift*12}% ${8+lift*16}% ${8+lift*10}% ${8+lift*8}% / 3% 5% 4% 3%`});
+    // The old page bleeds through the reverse side, moving with the printed fold.
+    reverse.style.width=`${box.width}px`;
+    reverse.style.transform=`translateX(${backwards?-edge:-edge+width}px) scaleX(-1)`;
+    Object.assign(shadow.style,{left:`${left-width*.3}px`,right:'auto',width:`${width*1.8+12}px`,opacity:String(lift*.8),transform:`skewY(${skew/box.height*35}deg)`,filter:`blur(${3+lift*8}px)`});
+    if(t<1)raf=requestAnimationFrame(draw);else cleanup();
+  };
   let done = false;
   function cleanup() {
     if(done) return; done = true;
-    animations.forEach(animation => animation.cancel()); layer.remove();
+    cancelAnimationFrame(raf); stopSound(); layer.remove();
     window.removeEventListener('resize', cleanup); observer.disconnect(); clearTimeout(timer);
   }
   const observer = new MutationObserver(cleanup);
   observer.observe(app,{attributes:true,attributeFilter:['class']});
   window.addEventListener('resize',cleanup);
   const timer = setTimeout(cleanup,duration+100);
-  void animations[0].finished.then(cleanup).catch(() => {});
+  raf=requestAnimationFrame(draw);
   return cleanup;
 }
