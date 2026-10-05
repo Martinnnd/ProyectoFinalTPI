@@ -350,3 +350,8 @@
 .era-1970 .chat-window { background:#eee3c5; border:3px double #62543e; box-shadow:4px 5px 0 #40332240; }
 .era-1970 .chat-titlebar { background:#d4c5a1; color:#393123; font-family:Georgia,serif; border-bottom:3px double #62543e; }
 .era-1970 .chat-bubble { border-radius:0; background:#f5edd8; color:#393123; font-family:Georgia,serif; }
+
+.era-1970 .memory-owner-actions .icon-button { border-radius:0; background:#e9dfc1; border-color:#91866b; box-shadow:inset 0 0 0 2px #f3ebd4; }
+
+.era-1970 .delete-memory-dialog { background:#e9dfc1; border:3px double #72674b; }
+.era-1970 .delete-memory-heading { background:#ded1ab; color:#302a20; border-bottom:3px double #72674b; }

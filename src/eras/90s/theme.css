@@ -1056,3 +1056,10 @@
 .era-1990 .chat-titlebar { background:#000080; color:white; padding:7px 10px; }
 .era-1990 .chat-conversation,.era-1990 .chat-list { background:white; color:#111; }
 .era-1990 .chat-bubble { border-radius:0; background:#eee; border-color:#999; }
+
+.era-1990 .memory-owner-actions .icon-button { border-radius:0; background:#c0c0c0; border:2px outset #eee; color:#161616; }
+.era-1990 .memory-owner-actions .icon-button:active { border-style:inset; }
+
+.era-1990 .delete-memory-dialog { background:#c0c0c0; border:3px outset #eee; border-radius:0; }
+.era-1990 .delete-memory-heading { background:#000080; color:#fff; margin:2px; }
+.era-1990 .delete-memory-heading .icon-button { background:#c0c0c0; border:2px outset #eee; color:#111; width:24px; height:24px; border-radius:0; }

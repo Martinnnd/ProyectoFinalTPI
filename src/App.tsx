@@ -1,4 +1,5 @@
 "use client";
+import DeleteMemoryDialog from "./components/DeleteMemoryDialog";
 
 import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
@@ -45,6 +46,7 @@ export default function App() {
   const [mapExpanded, setMapExpanded] = useState(false);
   const [following, setFollowing] = useState<string[]>([]);
   const creationOrigin = useRef(false);
+  const [profileAuthor, setProfileAuthor] = useState<string | null>(null);
   const [view, setView] = useState<"map" | "feed" | "profile" | "chat">("map");
   const [period, setPeriod] = useState<Period>(() => {
     const requested = Number(
@@ -59,6 +61,8 @@ export default function App() {
   const [local, setLocal] = useState<Memory[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
+  const [deleting, setDeleting] = useState<Memory | null>(null);
+  const [editing, setEditing] = useState<Memory | null>(null);
   const [draft, setDraft] = useState<Point | null>(null);
   const [notice, setNotice] = useState("");
   const [celebrating, setCelebrating] = useState<Achievement | null>(null);
@@ -118,7 +122,8 @@ export default function App() {
     period,
     category,
   );
-  const ownMemories = filterMemories(local, period, category);
+  const profileMemories = profileAuthor === null ? local : initialMemories.filter(m => m.author === profileAuthor);
+  const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? ownMemories : memories;
   const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
@@ -142,6 +147,12 @@ export default function App() {
     setPanelOpen(false);
     if (next.decade !== period.decade) setMusicOpen(false);
   }
+  function openProfile(memory: Memory) {
+    setProfileAuthor(memory.source === "local" ? null : memory.author);
+    setSelectedId(null); setPanelOpen(false); setFactsOpen(false); setPicking(false);
+    setCategory("Todas"); setPeriod(p => ({...p, year: null}));
+    setView("profile");
+  }
   function openPublication(memory: Memory) {
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
   }
@@ -160,6 +171,7 @@ export default function App() {
   }
   function startAdding() {
     creationOrigin.current = view === "profile";
+    setProfileAuthor(null);
     setView("map");
     setPicking(true);
     setSelectedId(null);
@@ -187,6 +199,36 @@ export default function App() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [picking, panelOpen, draft, mapExpanded]);
+  function editMemory(memory: Memory) {
+    if (local.some(m => m.id === memory.id)) setEditing(memory);
+  }
+  function deleteMemory(memory: Memory) {
+    if (!local.some(m => m.id === memory.id)) return;
+    setDeleting(memory);
+  }
+  function confirmDelete(memory: Memory): string | null {
+    if (!local.some(m => m.id === memory.id)) return "Este recuerdo ya no está disponible.";
+    const next = local.filter(m => m.id !== memory.id);
+    if (!saveMemories(next, window.localStorage)) return "No se pudo eliminar el recuerdo. Intentá nuevamente.";
+    setLocal(next);
+    if (selectedId === memory.id) setSelectedId(null);
+    setDeleting(null);
+    setNotice("Recuerdo eliminado.");
+    return null;
+  }
+  function saveEdit(memory: Memory): string | null {
+    const original = local.find(m => m.id === editing?.id);
+    if (!original) return "Este recuerdo ya no está disponible.";
+    const group = groups.find(g => g.id === original.groupId);
+    if (group && (memory.year < group.decade || memory.year > group.decade + 9)) return `Elegí un año entre ${group.decade} y ${group.decade + 9} para este grupo.`;
+    const updated = {...memory, id: original.id, groupId: original.groupId, source: original.source, author: original.author};
+    const next = local.map(m => m.id === original.id ? updated : m);
+    if (!saveMemories(next, window.localStorage)) return "No se pudo guardar. Revisá el espacio del navegador e intentá nuevamente.";
+    setLocal(next);setEditing(null);
+    setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");setQuery("");
+    setNotice("Recuerdo actualizado.");
+    return null;
+  }
   function save(memory: Memory) {
     const destinationGroup=groups.find(g=>g.id===scope);
     if(destinationGroup) {
@@ -367,6 +409,7 @@ export default function App() {
           aria-current={view === "profile" ? "page" : undefined}
           className={`rail-profile ${view === "profile" ? "rail-active" : ""}`}
           onClick={() => {
+            setProfileAuthor(null);
             setView("profile");
             setSelectedId(null);
             setPanelOpen(false);
@@ -475,10 +518,15 @@ export default function App() {
       )}
       {view === "profile" && (
         <Profile
+          onEdit={editMemory}
+          onDelete={deleteMemory}
           onOpen={openPublication}
-          community={communityControls(true)}
+          key={profileAuthor ?? "own"}
+          author={profileAuthor ?? undefined}
+          onBack={() => {setSelectedId(null);setView("feed");}}
+          community={profileAuthor === null ? communityControls(true) : undefined}
           memories={ownMemories}
-          allMemories={local}
+          allMemories={profileMemories}
           tierProgress={tierProgress}
           following={following}
           period={period}
@@ -490,6 +538,9 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
+          onEdit={editMemory}
+          onDelete={deleteMemory}
+          onProfile={openProfile}
           groupIds={groups.map(group => group.id)}
           community={communityControls()}
           groupName={groups.find(g=>g.id===scope)?.name}
@@ -558,6 +609,8 @@ export default function App() {
           }}
         />
       )}
+      {deleting && <DeleteMemoryDialog memory={deleting} onCancel={() => setDeleting(null)} onConfirm={() => confirmDelete(deleting)}/>}
+      {editing && <MemoryForm key={editing.id} initial={editing} point={{lat:editing.lat,lng:editing.lng}} decade={Math.floor(editing.year / 10) * 10 as Decade} groupName={groups.find(g => g.id === editing.groupId)?.name} onCancel={() => setEditing(null)} onSave={saveEdit}/>}
       {draft && (
         <MemoryForm
           groupName={groups.find(g=>g.id===scope)?.name}

@@ -1,3 +1,4 @@
+import MemoryOwnerActions from "./MemoryOwnerActions";
 import PostMedia, { PostMusic } from "./PostMedia";
 import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
@@ -7,6 +8,10 @@ import { describeTiers, resolveAchievements, resolveUserCategory } from "../data
 import type { Achievement, Memory, Period, TierProgress } from "../types";
 
 export default function Profile({
+  onEdit,
+  onDelete,
+  author,
+  onBack,
   community,
   memories,
   allMemories,
@@ -19,6 +24,10 @@ export default function Profile({
   onOpen,
   onAdd,
 }: {
+  onEdit: (memory: Memory) => void;
+  onDelete: (memory: Memory) => void;
+  author?: string;
+  onBack?: () => void;
   community?: ReactNode;
   memories: Memory[];
   allMemories: Memory[];
@@ -59,30 +68,31 @@ export default function Profile({
     tiersDialog.current?.close();
   }
   return (
-    <main id="explore" className="personal-profile" aria-label="Mi perfil">
+    <main id="explore" className="personal-profile" aria-label={author ? `Perfil de ${author}` : "Mi perfil"}>
       
+      {author && <button className="feed-back" onClick={onBack}>← Volver al feed</button>}
       <header className="personal-header">
         <div className="profile-portrait" aria-hidden="true">
-          <img
+          {author ? <span className="visitor-initial">{author.slice(0,1)}</span> : <img
             src="https://static.wikia.nocookie.net/universalstudios/images/1/10/Michael_J._Fox_as_Marty_McFly_%28BTTF%29.jpg/revision/latest?cb=20241030235532"
             alt="Marty McFly"
-          />
+          />}
         </div>
         <div className="personal-identity">
           <div className="personal-identity-text">
-            <span className="eyebrow">MI ARCHIVO PERSONAL</span>
-            <h2>Marty McFly</h2>
-            <p>Los lugares cambian. Tus historias quedan.</p>
-            <button
+            <span className="eyebrow">{author ? "ARCHIVO PERSONAL" : "MI ARCHIVO PERSONAL"}</span>
+            <h2>{author ?? "Marty McFly"}</h2>
+            <p>{author ? `Los lugares y recuerdos de ${author}.` : "Los lugares cambian. Tus historias quedan."}</p>
+            {!author && <button
               className="profile-note"
               onClick={openTiers}
               aria-haspopup="dialog"
               aria-expanded={tiersOpen}
             >
               {userCategory}
-            </button>
+            </button>}
           </div>
-          <div className="achievements">
+          {!author && <div className="achievements">
             <div className="achievements-heading">
               <h3>Logros</h3>
               <span className="achievements-count">
@@ -117,7 +127,7 @@ export default function Profile({
               <Grid3x3 size={14} />
               Ver todas
             </button>
-          </div>
+          </div>}
         </div>
 
 
@@ -126,14 +136,14 @@ export default function Profile({
             <dt>Recuerdos</dt>
             <dd>{allMemories.length}</dd>
           </div>
-          <div>
+          {!author && <><div>
             <dt>Seguidores</dt>
             <dd>0</dd>
           </div>
           <div>
             <dt>Seguidos</dt>
             <dd>{following.length}</dd>
-          </div>
+          </div></>}
           <div>
             <dt>Lugares</dt>
             <dd>
@@ -146,8 +156,8 @@ export default function Profile({
       <section className="personal-atlas">
         <div className="personal-section-title">
           <div>
-            <span className="eyebrow">MI GEOGRAFÍA DE RECUERDOS</span>
-            <h3>Los lugares de mi historia</h3>
+            <span className="eyebrow">{author ? "GEOGRAFÍA DE RECUERDOS" : "MI GEOGRAFÍA DE RECUERDOS"}</span>
+            <h3>{author ? `Los lugares de ${author}` : "Los lugares de mi historia"}</h3>
           </div>
           <span>
             {period.year ?? `${period.decade}–${period.decade + 9}`} ·{" "}
@@ -168,7 +178,9 @@ export default function Profile({
         </div>
         {selected && (
           <article className="personal-detail">
+            
             <div className="personal-detail-actions">
+              <MemoryOwnerActions memory={selected} onEdit={onEdit} onDelete={onDelete}/>
               <div className="share-menu">
                 <button
                   className="icon-button"
@@ -241,7 +253,7 @@ export default function Profile({
       </section>
       <section className="personal-album">
         <div className="personal-section-title">
-          <h3>Mi colección</h3>
+          <h3>{author ? `Recuerdos de ${author}` : "Mi colección"}</h3>
           <span>Elegí un recuerdo para verlo en el mapa</span>
         </div>
         {memories.length ? (
@@ -252,8 +264,10 @@ export default function Profile({
                 className="personal-memory"
                 data-selected={selected?.id === memory.id}
               >
+                
                 <div className="memory-card-top">
                   <span className="album-year">{memory.year}</span>
+                  <MemoryOwnerActions memory={memory} onEdit={onEdit} onDelete={onDelete}/>
 
                   <div className="share-menu">
                     <button
@@ -327,18 +341,18 @@ export default function Profile({
         ) : (
           <div className="personal-empty">
             <h3>
-              {allMemories.length
+              {author ? "No hay recuerdos de esta persona con estos filtros" : allMemories.length
                 ? "No hay recuerdos tuyos con estos filtros"
                 : "Tu primer recuerdo merece un lugar"}
             </h3>
             <p>
-              {allMemories.length
+              {author ? "Probá otra época o categoría para ver sus recuerdos." : allMemories.length
                 ? "Cambiá la época o la categoría para recorrer tu colección."
                 : "Marcá un lugar en el mapa y contá qué viviste allí. Tus publicaciones aparecerán en este archivo."}
             </p>
-            <button className="primary-button" onClick={onAdd}>
+            {!author && <button className="primary-button" onClick={onAdd}>
               Crear un recuerdo
-            </button>
+            </button>}
           </div>
         )}
       </section>

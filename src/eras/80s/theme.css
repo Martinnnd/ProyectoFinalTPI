@@ -781,3 +781,8 @@
 .era-1980 .chat-titlebar { background:linear-gradient(90deg,#381240,#180e2c); color:#4ff7f3; }
 .era-1980 .chat-bubble { border-radius:0; }
 .era-1980 .chat-avatar { border-radius:0; box-shadow:2px 2px 0 #ff2cbb; }
+
+.era-1980 .memory-owner-actions .icon-button { border-radius:2px; border-color:var(--accent); box-shadow:2px 2px 0 var(--accent); }
+
+.era-1980 .delete-memory-dialog { border:2px solid #ff39dc; box-shadow:6px 6px 0 #00dce766,0 20px 70px #0009; }
+.era-1980 .delete-memory-heading { background:#341235; color:#00ffff; border-bottom:1px solid #ff39dc; }
