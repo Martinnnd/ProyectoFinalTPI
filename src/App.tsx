@@ -212,7 +212,6 @@ export default function App() {
     if (!saveMemories(next, window.localStorage)) return "No se pudo eliminar el recuerdo. Intentá nuevamente.";
     setLocal(next);
     if (selectedId === memory.id) setSelectedId(null);
-    setDeleting(null);
     setNotice("Recuerdo eliminado.");
     return null;
   }

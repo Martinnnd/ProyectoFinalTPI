@@ -1721,3 +1721,54 @@
 
 .personal-profile .profile-portrait > * { grid-area:1 / 1; }
 .personal-profile .profile-portrait img[hidden] { display:none; }
+
+.delete-memory-dialog { width:min(480px,calc(100vw - 28px)); animation:delete-dialog-in .2s ease-out; }
+.delete-scene { height:182px; margin:18px 20px 0; position:relative; overflow:hidden; border:1px solid var(--line); background:var(--soft); }
+.delete-scene-caption { position:absolute; top:10px; left:12px; font-size:10px; letter-spacing:1px; }
+.delete-item { position:absolute; left:13%; top:49px; width:80px; height:94px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; transform-origin:center; z-index:2; }
+.delete-item small,.delete-bin small { font-size:10px; text-align:center; }
+.delete-bin { position:absolute; right:9%; top:69px; display:flex; align-items:center; flex-direction:column; gap:8px; width:108px; }
+.delete-path { position:absolute; left:44%; top:86px; color:var(--muted); letter-spacing:4px; }
+.delete-scene-result { position:absolute; bottom:8px; left:0; width:100%; text-align:center; opacity:0; font-size:10px; letter-spacing:1px; }
+.delete-memory-dialog.is-deleting .scene-desktop .delete-item { animation:file-to-bin 1.15s cubic-bezier(.45,0,.35,1) forwards; }
+.delete-memory-dialog.is-deleting .delete-bin { animation:bin-land 1.2s ease forwards; }
+.delete-memory-dialog.is-deleting .delete-scene-result { animation:delete-result 1.4s forwards; }
+.delete-memory-dialog.is-deleting .delete-path { opacity:0; }
+.delete-memory-dialog button:disabled { cursor:default; opacity:.6; }
+@keyframes delete-dialog-in { from {opacity:0;transform:translateY(8px) scale(.97)} to {opacity:1;transform:none} }
+@keyframes file-to-bin { 0%,12% {transform:none;opacity:1} 45% {transform:translate(85px,-28px) rotate(12deg) scale(.85)} 85%,100% {transform:translate(195px,33px) rotate(23deg) scale(.08);opacity:0} }
+@keyframes bin-land { 0%,65%,100% {transform:none} 76% {transform:translateY(4px) scale(1.08,.9)} 86% {transform:translateY(-2px)} }
+@keyframes delete-result { 0%,78% {opacity:0} 100% {opacity:1} }
+@media(max-width:480px) { .delete-scene { margin:12px 12px 0; } .delete-item { left:7%; } .delete-bin { right:4%; } }
+@media(prefers-reduced-motion:reduce) { .delete-memory-dialog,.delete-memory-dialog.is-deleting .delete-item,.delete-memory-dialog.is-deleting .delete-bin,.delete-memory-dialog.is-deleting .delete-scene-result { animation:none!important; } .delete-memory-dialog.is-deleting .delete-item { opacity:0; } .delete-memory-dialog.is-deleting .delete-scene-result { opacity:1; } }
+
+/* Deletion scenes: spatially aligned objects and a complete landing phase. */
+.delete-scene { height:224px; perspective:700px; }
+.delete-item { top:67px; }
+.delete-bin { top:90px; right:8%; width:80px; z-index:3; }
+.scene-bin-art { overflow:visible; }
+.bin-paper { opacity:0; }
+.is-deleting .bin-paper { animation:bin-fill 2s forwards; }
+.delete-scene-result { bottom:34px; }
+.delete-memory-dialog.is-deleting .delete-scene-result { animation-duration:2s; }
+.delete-memory-dialog.is-deleting .delete-bin { animation:none; }
+.desktop-file { position:relative; display:block; width:36px; height:45px; background:linear-gradient(110deg,#fff,#dfeaf3); border:1px solid #66849a; box-shadow:2px 3px 2px #0004; padding:13px 6px 0; }
+.desktop-file::before { content:''; position:absolute; top:-1px; right:-1px; width:10px; height:10px; background:linear-gradient(45deg,#afc7d9 49%,#fff 50%); border-left:1px solid #66849a; border-bottom:1px solid #66849a; }
+.desktop-file i { display:block; border-top:1px solid #7896ad; margin-bottom:4px; }
+.delete-cursor { position:absolute; left:calc(13% + 52px); top:115px; color:white; -webkit-text-stroke:1px #111; transform:rotate(-105deg); font-size:26px; z-index:6; }
+.desktop-taskbar { position:absolute; bottom:0; left:0; right:0; height:25px; display:flex; gap:8px; align-items:center; background:#c0c0c0; color:#111; border-top:2px outset white; font:10px Arial,sans-serif; }
+.desktop-taskbar b { padding:3px 8px; border:2px outset white; }
+.desktop-taskbar span { border:1px inset #eee; padding:3px 12px; }
+.desktop-taskbar small { margin-left:auto; padding:4px; }
+.delete-transfer { position:absolute; top:30px; left:25%; right:10%; font:10px Arial,sans-serif; opacity:0; }
+.delete-transfer i { display:block; height:7px; margin-top:5px; border:1px inset #eee; background:repeating-linear-gradient(90deg,#000080 0 8px,#ccc 8px 10px); transform:scaleX(0); transform-origin:left; }
+.is-deleting .delete-transfer { animation:transfer-show 2s forwards; }
+.is-deleting .delete-transfer i { animation:transfer-fill 2s forwards; }
+.delete-memory-dialog.is-deleting .scene-desktop .delete-item { animation:desktop-drag 2s ease-in-out forwards; }
+.is-deleting .delete-cursor { animation:cursor-drag 2s ease-in-out forwards; }
+@keyframes desktop-drag { 0%,12% {left:13%;transform:none;opacity:1} 55% {left:calc(92% - 80px);transform:translateY(8px);opacity:.8} 68% {left:calc(92% - 80px);transform:translateY(16px) scale(.7);opacity:.7} 82%,100% {left:calc(92% - 80px);transform:translateY(34px) scale(.08);opacity:0} }
+@keyframes cursor-drag { 0%,12% {left:calc(13% + 52px);top:115px} 55%,70% {left:calc(92% - 28px);top:123px} 100% {left:calc(92% - 5px);top:155px;opacity:0} }
+@keyframes bin-fill { 0%,76% {opacity:0;transform:translateY(6px)} 88%,100% {opacity:1;transform:none} }
+@keyframes transfer-show { 0%,18%,90%,100% {opacity:0} 25%,85% {opacity:1} }
+@keyframes transfer-fill { 0%,20% {transform:scaleX(0)} 80%,100% {transform:scaleX(1)} }
+@media(prefers-reduced-motion:reduce) { .delete-memory-dialog.is-deleting * { animation:none!important; transition:none!important; } .is-deleting .bin-paper { opacity:1; } }

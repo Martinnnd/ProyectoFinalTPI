@@ -1086,3 +1086,18 @@
 .era-2000 .memory-owner-actions .icon-button { border-color:transparent; background:transparent; box-shadow:none; }
 .era-2000 .memory-owner-actions .icon-button:hover { border-color:#88acd1; background:linear-gradient(#fff,#c5e5ff); }
 .era-2000 .memory-owner-actions .memory-delete:hover { background:linear-gradient(#ffe6dc,#f3b49d); border-color:#c88671; color:#87341f; }
+
+ .era-2000 .delete-scene { border-radius:7px; background:radial-gradient(ellipse at 25% 5%,#fff9,transparent 50%),linear-gradient(160deg,#489bd7 0%,#a8d8ed 60%,#80b850 61%,#4d873b); border:1px solid #83b4d7; box-shadow:inset 0 1px 4px #fff9; color:#fff; }
+.era-2000 .delete-scene-caption { text-shadow:0 1px 2px #215782; }
+.era-2000 .delete-item svg { fill:#fff; color:#559ad0; filter:drop-shadow(2px 3px 2px #16477555); }
+.era-2000 .delete-item small,.era-2000 .delete-bin small { text-shadow:0 1px 3px #000; }
+.era-2000 .delete-bin svg { fill:#e7f8ff99; color:#f7ffff; filter:drop-shadow(2px 3px 2px #16477555); }
+.era-2000 .delete-path { color:#fff9; }
+.era-2000 .delete-scene-result { text-shadow:0 1px 3px #174700; }
+
+ .era-2000 .desktop-taskbar { background:linear-gradient(#6aabf5,#2264d3 20%,#235ac7 85%,#1247a6);color:#fff;border:0; }
+.era-2000 .desktop-taskbar b { background:linear-gradient(#99ce71,#3c942e 45%,#25821e);border:0;border-radius:0 10px 10px 0;height:100%;font-style:italic;text-shadow:1px 1px #286324; }
+.era-2000 .desktop-taskbar span { background:#347de0;border:1px solid #80b1f3; }
+.era-2000 .delete-transfer i { background:repeating-linear-gradient(90deg,#63c73e 0 8px,#dfebdc 8px 10px);border-color:#66a6d6; }
+.era-2000 .delete-transfer { color:#154c80; }
+.era-2000 .scene-bin-art { filter:drop-shadow(2px 4px 3px #11365d55); }
