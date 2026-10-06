@@ -6,7 +6,7 @@ test("mapa a pantalla completa, filtros, historias y creación persistente", asy
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await page.goto("/explorar");
   const map = await page.locator(".memory-map").boundingBox();
   expect(map!.y).toBe(0);
   expect(map!.height).toBe(1000);
@@ -109,7 +109,7 @@ test("mapa a pantalla completa, filtros, historias y creación persistente", asy
 test("datos culturales verificables, navegación y filtrado por año", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/explorar");
   await expect(
     page.getByRole("heading", { name: "Los juguetes cobraron vida" }),
   ).toBeVisible();
@@ -157,7 +157,7 @@ test("música real: carga explícita, pistas por década y cierre que detiene el
       body: '<html lang="es"><body>Proveedor de música aislado para la prueba</body></html>',
     }),
   );
-  await page.goto("/");
+  await page.goto("/explorar");
   await expect(page.locator(".spotify-player")).toHaveCount(0);
   await expect(page.locator(".music-card")).toContainText("Michael Jackson");
   await page
@@ -210,7 +210,7 @@ test("móvil: mapa ocupa el fondo, paneles excluyentes, atribución visible y fo
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("/explorar");
   const map = await page.locator(".memory-map").boundingBox();
   expect(map!.y).toBe(0);
   expect(map!.width).toBe(390);
@@ -257,7 +257,7 @@ test("mapa bloqueado, datos corruptos y almacenamiento lleno mantienen la app ut
   await page.addInitScript(() =>
     localStorage.setItem("nostalgia.memories.v1", "{bad"),
   );
-  await page.goto("/");
+  await page.goto("/explorar");
   await expect(
     page.getByText(
       "No pudimos recuperar los recuerdos de este navegador. Podés seguir explorando.",
@@ -295,7 +295,7 @@ test("identidades de época, menú Inicio y cambios sin ventanas duplicadas", as
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await page.goto("/explorar");
   const systemFont = await page
     .locator("h1")
     .evaluate((e) => getComputedStyle(e).fontFamily);
@@ -376,7 +376,7 @@ test("identidades de época, menú Inicio y cambios sin ventanas duplicadas", as
 test("selectores compactos: opciones ocultas, cierre y dispositivos por epoca", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/explorar");
   await expect(page.locator(".decades")).toBeHidden();
   await expect(page.locator(".category-options")).toBeHidden();
   const timeline = await page.locator(".timeline").boundingBox();
@@ -408,7 +408,7 @@ test("selectores compactos: opciones ocultas, cierre y dispositivos por epoca", 
 test("1970: revista, datos, musica y recuerdo persistente", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/explorar");
   await page.locator(".decade-menu summary").click();
   await page.locator(".decades button").first().click();
   await expect(page.locator(".app")).toHaveClass(/era-1970/);
@@ -449,7 +449,7 @@ test("feed: epocas, detalle, seguir, comentar, perfil y regreso al mapa", async 
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await page.goto("/explorar");
   await page.getByRole("button", { name: "Feed", exact: true }).click();
   await expect(page.locator(".feed-post")).toHaveCount(7);
   const mini = await page.locator(".memory-map").boundingBox();
@@ -564,7 +564,7 @@ test("feed: miniatura a la derecha, imagen abierta a lo ancho y ocultas si falla
       ]),
     );
   });
-  await page.goto("/");
+  await page.goto("/explorar");
   await page.getByRole("button", { name: "Feed", exact: true }).click();
   const post = (title: string) =>
     page.locator(".feed-post", { hasText: title });
@@ -674,7 +674,7 @@ test("feed: repostear y guardar cambian estado y sobreviven a la publicación", 
       ]),
     ),
   );
-  await page.goto("/");
+  await page.goto("/explorar");
   await page.getByRole("button", { name: "Feed", exact: true }).click();
   const post = page.locator(".feed-post", {
     hasText: "La primera cinta del año",
@@ -767,7 +767,7 @@ test("feed: puntuar la publicación de 1 a 5 fija, muestra y se puede borrar", a
       ]),
     ),
   );
-  await page.goto("/");
+  await page.goto("/explorar");
   await page.getByRole("button", { name: "Feed", exact: true }).click();
   const post = page.locator(".feed-post", {
     hasText: "La primera cinta del año",
@@ -911,7 +911,7 @@ test("perfil propio: mapa privado, contadores, coleccion y creacion", async ({
     ),
   );
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await page.goto("/explorar");
   await page.getByRole("button", { name: "Feed", exact: true }).click();
   await page.locator(".feed-post .follow-button").first().click();
   await page.getByRole("button", { name: "Perfil", exact: true }).click();
@@ -969,7 +969,7 @@ test("perfil propio: mapa privado, contadores, coleccion y creacion", async ({
 test("mapa ampliado del feed: dialogo, pines, cierre y teclado", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/explorar");
   await page.getByRole("button", { name: "Feed", exact: true }).click();
   const trigger = page.getByRole("button", {
     name: "Ampliar mapa",

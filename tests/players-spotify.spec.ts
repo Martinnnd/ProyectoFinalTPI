@@ -8,7 +8,7 @@ for(const era of [1970,1980,1990,2000]) {
     window.spotifyTestUpdate=data=>listeners.playback_update?.({data});
     callback({addListener(name,fn){listeners[name]=fn},destroy(){iframe.remove()}});
    }});`}));
-  await page.goto('/?era='+era);
+  await page.goto('/explorar?era='+era);
   await page.getByRole('button',{name:'Abrir reproductor',exact:true}).click();
   await expect(page.locator('.spotify-player')).toHaveCount(1);
   const player=page.locator('.music-card');
