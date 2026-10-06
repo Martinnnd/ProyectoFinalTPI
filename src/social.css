@@ -1682,3 +1682,42 @@
 #delete-memory-description { margin:20px 0 0; line-height:1.6; }
 .delete-memory-footer { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; padding:16px 24px; border-top:1px solid var(--line); }
 .delete-memory-footer button { min-height:40px; }
+
+/* Shared profile structure; each era supplies its own materials and chrome. */
+.profile-era-bar { display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--accent); color:var(--surface); border:1px solid var(--line); }
+.profile-era-mark { display:grid; place-items:center; flex-shrink:0; }
+.profile-era-bar strong { flex:1; min-width:0; font-size:14px; }
+.profile-edition { font-size:11px; white-space:nowrap; letter-spacing:1px; }
+.personal-profile .personal-header { grid-template-columns:104px minmax(0,1fr); gap:24px; }
+.personal-profile .personal-identity { min-width:0; gap:24px; flex-wrap:wrap; align-items:center; }
+.personal-profile .personal-identity-text { min-width:0; flex:1 1 220px; overflow-wrap:anywhere; }
+.personal-profile .profile-portrait { width:100px; height:110px; }
+.personal-profile .visitor-initial { min-height:0; }
+.personal-profile[data-visitor="true"] .personal-counts { grid-template-columns:repeat(2,1fr); }
+.profile-shortcuts { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px 16px; margin-bottom:20px; background:var(--surface); border:1px solid var(--line); }
+.profile-shortcuts button { display:flex; align-items:center; gap:8px; padding:9px 12px; font:inherit; font-size:12px; color:var(--ink); background:var(--soft); border:1px solid var(--line); cursor:pointer; }
+.profile-shortcuts button > span { padding:2px 6px; border:1px solid var(--line); font-size:10px; }
+.profile-shortcuts button:hover { color:var(--accent); }
+.profile-shortcuts button:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.profile-motto { margin-left:auto; color:var(--muted); font-size:11px; }
+.personal-profile :is(.personal-atlas,.personal-album) { scroll-margin-top:14px; }
+.personal-profile .personal-memory { position:relative; }
+.memory-owner-actions { padding:3px; border:1px solid var(--line); background:var(--soft); gap:4px; }
+.memory-owner-actions .icon-button { transition:background .15s, color .15s, box-shadow .15s; }
+.memory-owner-actions .icon-button svg { stroke-width:1.8; }
+.memory-owner-actions .icon-button:active { transform:translateY(1px); }
+@media(max-width:899px) {
+ .personal-profile .personal-header { grid-template-columns:72px minmax(0,1fr); padding:16px; gap:14px; }
+ .personal-profile .profile-portrait { width:70px; height:82px; }
+ .personal-profile .personal-identity h2 { font-size:26px; }
+ .personal-profile .personal-identity { gap:14px; }
+ .profile-era-bar { padding:10px; }
+ .profile-era-bar strong { font-size:12px; }
+ .profile-edition { font-size:9px; }
+ .profile-shortcuts { padding:10px; gap:8px; }
+ .profile-motto { flex-basis:100%; margin:4px 0 0; }
+ .personal-profile .memory-card-top { flex-wrap:wrap; }
+}
+
+.personal-profile .profile-portrait > * { grid-area:1 / 1; }
+.personal-profile .profile-portrait img[hidden] { display:none; }

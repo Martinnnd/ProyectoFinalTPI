@@ -786,3 +786,16 @@
 
 .era-1980 .delete-memory-dialog { border:2px solid #ff39dc; box-shadow:6px 6px 0 #00dce766,0 20px 70px #0009; }
 .era-1980 .delete-memory-heading { background:#341235; color:#00ffff; border-bottom:1px solid #ff39dc; }
+
+/* Videoclub membership and tape catalogue. */
+.era-1980 .profile-era-bar { background:#14111f; border:1px solid #a66eac; color:#fff1bd; text-transform:uppercase; letter-spacing:2px; border-bottom:5px solid #ef56b6; }
+.era-1980 .profile-edition { color:#6cf5e4; }
+.era-1980 .personal-profile .personal-header { background:repeating-linear-gradient(0deg,#ffffff03 0 1px,transparent 1px 4px),linear-gradient(115deg,#29203b,#110f1d); border-top:0; box-shadow:4px 4px #39ece133; }
+.era-1980 .personal-profile .profile-portrait { border:5px solid #e9dcbe; border-radius:2px; background:#262131; box-shadow:3px 4px #0008; color:#6cf5e4; }
+.era-1980 .profile-shortcuts { background:#181324; border-color:#a66eac; }
+.era-1980 .profile-shortcuts button { background:#2a1d38; color:#6cf5e4; border-color:#906b9b; }
+.era-1980 .personal-profile .personal-memory { border:2px solid #716076; border-left:8px solid #ed51b6; border-radius:5px; background:linear-gradient(110deg,#241e31,#15121e); box-shadow:inset 0 0 0 3px #ffffff08,3px 4px #0004; }
+.era-1980 .personal-profile .album-year { color:#ffe0a1; font-family:monospace; }
+.era-1980 .memory-owner-actions { background:#14111d; border:1px solid #63536f; border-radius:4px; }
+.era-1980 .memory-owner-actions .icon-button { background:#30223e; border:1px solid #94749c; box-shadow:inset 0 1px #ffffff20,0 2px #090711; color:#7bf5e6; }
+.era-1980 .memory-owner-actions .memory-delete:hover { color:#ff90cb; border-color:#ff90cb; }

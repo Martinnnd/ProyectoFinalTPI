@@ -40,6 +40,15 @@ export default function Profile({
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
 }) {
+  const atlas = useRef<HTMLElement>(null);
+  const album = useRef<HTMLElement>(null);
+  const presentation = {
+    1970: {title: "Historias con nombre propio", label: "Suplemento personal", collection: "La hemeroteca", map: "Lugares de una vida", footer: "Cada vida merece ser contada"},
+    1980: {title: "Archivo de videoclub", label: "Colección personal · VHS", collection: "Mis cintas", map: "Locaciones", footer: "Rebobiná. Volvé a esos días."},
+    1990: {title: "Archivo personal — Nostalgiar 95", label: "Mi PC / Personas / Archivo personal", collection: "Recuerdos", map: "Mapa de lugares", footer: "Archivo de recuerdos"},
+    2000: {title: "Mi espacio — Nostalgiar Messenger", label: "Un espacio para volver a conectar", collection: "Álbum de recuerdos", map: "Mis lugares", footer: "Historias que nos conectan"},
+  }[period.decade];
+  const jumpTo = (target: HTMLElement | null) => target?.scrollIntoView({block: "start", behavior: "instant"});
   const [detailShareOpen, setDetailShareOpen] = useState(false);
   const [collectionShareOpen, setCollectionShareOpen] = useState<string | null>(null);
   const [copiedShare, setCopiedShare] = useState<string | null>(null);
@@ -68,19 +77,22 @@ export default function Profile({
     tiersDialog.current?.close();
   }
   return (
-    <main id="explore" className="personal-profile" aria-label={author ? `Perfil de ${author}` : "Mi perfil"}>
+    <main id="explore" className="personal-profile" data-visitor={!!author} aria-label={author ? `Perfil de ${author}` : "Mi perfil"}>
       
       {author && <button className="feed-back" onClick={onBack}>← Volver al feed</button>}
+      <div className="profile-era-bar"><span className="profile-era-mark" aria-hidden="true"><UserRound size={18}/></span><strong>{presentation.title}</strong><span className="profile-edition">{period.decade}—{period.decade + 9}</span></div>
       <header className="personal-header">
         <div className="profile-portrait" aria-hidden="true">
-          {author ? <span className="visitor-initial">{author.slice(0,1)}</span> : <img
+          <span className="visitor-initial">{(author ?? "Marty").slice(0,1)}</span>
+          {!author && <img
             src="https://static.wikia.nocookie.net/universalstudios/images/1/10/Michael_J._Fox_as_Marty_McFly_%28BTTF%29.jpg/revision/latest?cb=20241030235532"
             alt="Marty McFly"
+            onError={event => {event.currentTarget.hidden = true;}}
           />}
         </div>
         <div className="personal-identity">
           <div className="personal-identity-text">
-            <span className="eyebrow">{author ? "ARCHIVO PERSONAL" : "MI ARCHIVO PERSONAL"}</span>
+            <span className="eyebrow">{presentation.label}</span>
             <h2>{author ?? "Marty McFly"}</h2>
             <p>{author ? `Los lugares y recuerdos de ${author}.` : "Los lugares cambian. Tus historias quedan."}</p>
             {!author && <button
@@ -152,8 +164,13 @@ export default function Profile({
           </div>
         </dl>
       </header>
+      <nav className="profile-shortcuts" aria-label="Secciones del perfil">
+        <button onClick={() => jumpTo(album.current)}><Grid3x3 size={16}/>{author ? "Su colección" : presentation.collection}<span>{memories.length}</span></button>
+        <button onClick={() => jumpTo(atlas.current)}><MapPin size={16}/>{presentation.map}</button>
+        <span className="profile-motto">{presentation.footer}</span>
+      </nav>
       {community}
-      <section className="personal-atlas">
+      <section ref={atlas} className="personal-atlas">
         <div className="personal-section-title">
           <div>
             <span className="eyebrow">{author ? "GEOGRAFÍA DE RECUERDOS" : "MI GEOGRAFÍA DE RECUERDOS"}</span>
@@ -251,7 +268,7 @@ export default function Profile({
           </article>
         )}
       </section>
-      <section className="personal-album">
+      <section ref={album} className="personal-album">
         <div className="personal-section-title">
           <h3>{author ? `Recuerdos de ${author}` : "Mi colección"}</h3>
           <span>Elegí un recuerdo para verlo en el mapa</span>

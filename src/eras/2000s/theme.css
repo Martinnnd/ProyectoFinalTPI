@@ -1072,3 +1072,17 @@
 
 .era-2000 .delete-memory-dialog { border:1px solid #3279b6; border-radius:9px; background:linear-gradient(#fff,#eaf4ff); }
 .era-2000 .delete-memory-heading { background:linear-gradient(#66b5f1,#257bc8 48%,#1663b0); color:white; text-shadow:0 1px #164779; }
+
+/* Messenger personal space. */
+.era-2000 .profile-era-bar { border-radius:9px 9px 0 0; background:linear-gradient(#71bfee,#2e8ad0 48%,#1768b4); color:white; text-shadow:0 1px #18558e; box-shadow:inset 0 1px #fff8; }
+.era-2000 .personal-profile .personal-header { border-top:0; border-radius:0; background:radial-gradient(ellipse at 90% 0,#b9e4ff99,transparent 65%),linear-gradient(#edf8ff,#fff); }
+.era-2000 .personal-profile .profile-portrait { border:4px solid white; border-radius:14px; box-shadow:0 0 0 1px #84bb60,0 4px 10px #386e9828; }
+.era-2000 .personal-profile .personal-identity-text > p { color:#577696; font-style:italic; }
+.era-2000 .personal-profile .personal-counts { background:#deedfc88; border:1px solid #aec9e3; border-radius:8px; padding:16px 0; }
+.era-2000 .profile-shortcuts { border-radius:0 0 9px 9px; background:linear-gradient(#fff,#daebfb); border-top:0; box-shadow:0 3px 8px #27628d18; }
+.era-2000 .profile-shortcuts button { border-radius:5px; background:linear-gradient(#fff,#e0edfc); border-color:#92b5db; color:#245887; }
+.era-2000 .personal-profile .personal-memory { background:linear-gradient(135deg,#fff,#edf6ff); border-color:#b2cce5; box-shadow:0 3px 8px #35648818; border-radius:10px; }
+.era-2000 .memory-owner-actions { border-radius:9px; background:linear-gradient(#eef7ff,#d7e7f7); border-color:#b7cde4; box-shadow:inset 0 1px white; }
+.era-2000 .memory-owner-actions .icon-button { border-color:transparent; background:transparent; box-shadow:none; }
+.era-2000 .memory-owner-actions .icon-button:hover { border-color:#88acd1; background:linear-gradient(#fff,#c5e5ff); }
+.era-2000 .memory-owner-actions .memory-delete:hover { background:linear-gradient(#ffe6dc,#f3b49d); border-color:#c88671; color:#87341f; }

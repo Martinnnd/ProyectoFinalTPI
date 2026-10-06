@@ -355,3 +355,21 @@
 
 .era-1970 .delete-memory-dialog { background:#e9dfc1; border:3px double #72674b; }
 .era-1970 .delete-memory-heading { background:#ded1ab; color:#302a20; border-bottom:3px double #72674b; }
+
+/* Personal newspaper edition. */
+.era-1970.view-profile .personal-header::before { content:none; }
+.era-1970 .profile-era-bar { padding:20px 8px 14px; border:0; border-bottom:4px double #61593e; background:transparent; color:#363d30; flex-wrap:wrap; }
+.era-1970 .profile-era-bar strong { font:900 clamp(24px,3vw,42px)/1 Georgia,serif; text-align:center; }
+.era-1970 .profile-era-mark { display:none; }
+.era-1970 .profile-edition { font-family:Georgia,serif; }
+.era-1970.view-profile .personal-header { padding:24px 12px; background:repeating-linear-gradient(0deg,#69521e05 0 1px,transparent 1px 4px); }
+.era-1970.view-profile .profile-portrait { border:4px double #665e43; background:#d6c9a5; border-radius:0; transform:rotate(-2deg); box-shadow:3px 4px 0 #73634125; }
+.era-1970 .profile-portrait img { filter:sepia(.75) grayscale(.35) contrast(.9); }
+.era-1970 .profile-shortcuts { background:transparent; border:0; border-bottom:3px double #61593e; padding-inline:0; }
+.era-1970 .profile-shortcuts button { background:transparent; border:0; border-right:1px solid #8c8062; font-family:Georgia,serif; text-transform:uppercase; }
+.era-1970.view-profile .personal-memory { background:#eee3c5; border:1px solid #928366; box-shadow:2px 3px 0 #66562e20; }
+.era-1970 .memory-owner-actions { background:#ded1b2; border:1px solid #a39373; }
+.era-1970 .memory-owner-actions .icon-button { border:0; box-shadow:none; background:transparent; color:#51472f; }
+.era-1970 .memory-owner-actions .icon-button:hover { background:#f6edda; }
+
+.era-1970.view-profile .personal-header .achievements h3 { color:#363d30; }

@@ -1063,3 +1063,18 @@
 .era-1990 .delete-memory-dialog { background:#c0c0c0; border:3px outset #eee; border-radius:0; }
 .era-1990 .delete-memory-heading { background:#000080; color:#fff; margin:2px; }
 .era-1990 .delete-memory-heading .icon-button { background:#c0c0c0; border:2px outset #eee; color:#111; width:24px; height:24px; border-radius:0; }
+
+/* Explorer window, inset panels and compact system tools. */
+.era-1990 .profile-era-bar { background:linear-gradient(90deg,#000080,#2864a3); color:white; border:3px outset #eee; padding:7px 10px; }
+.era-1990 .personal-profile .personal-header { border-top:0; border-radius:0; border:2px outset #eee; background:#c0c0c0; padding:22px; }
+.era-1990 .personal-profile .profile-portrait { border:3px inset #eee; border-radius:0; background:white; color:#000080; }
+.era-1990 .personal-profile .personal-identity .eyebrow { background:#fff; border:2px inset #eee; padding:5px 9px; display:inline-block; letter-spacing:0; }
+.era-1990 .personal-profile .personal-counts { border:2px inset #eee; background:#d2d2d2; padding:14px 0; }
+.era-1990 .profile-shortcuts { background:#c0c0c0; border:2px outset #eee; border-top:0; }
+.era-1990 .profile-shortcuts button { border:2px outset #eee; background:#c0c0c0; }
+.era-1990 .profile-shortcuts button:active { border-style:inset; }
+.era-1990 .personal-profile .personal-section-title { border-bottom:1px solid #808080; padding-bottom:10px; }
+.era-1990 .personal-profile .personal-memory { border:2px inset #eee; background:#fff; }
+.era-1990 .memory-owner-actions { padding:3px; background:#c0c0c0; border:1px solid #808080; box-shadow:inset 1px 1px #fff; }
+.era-1990 .memory-owner-actions .icon-button { box-shadow:1px 1px #404040; }
+.era-1990 .memory-owner-actions .memory-delete:hover { background:#e7cccc; color:#800000; }
