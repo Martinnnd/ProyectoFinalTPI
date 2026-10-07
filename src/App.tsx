@@ -24,7 +24,7 @@ import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
 import Profile from "./components/Profile";
-import SocialFeed from "./components/SocialFeed";
+import SocialFeed from "./components/social/SocialFeed";
 import Timeline from "./components/Timeline";
 import MemoryMap, { type Point } from "./components/MemoryMap";
 import MemoryForm from "./components/MemoryForm";
