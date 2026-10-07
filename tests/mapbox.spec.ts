@@ -6,7 +6,7 @@ test("globo real, publicaciones y opciones de estilo", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await page.goto("/explorar");
   await expect(page.locator('[data-mapbox-ready="true"]')).toBeVisible({
     timeout: 60000,
   });
@@ -66,7 +66,7 @@ test("globo real, publicaciones y opciones de estilo", async ({ page }) => {
 });
 
 test("crear con teclado en Mapbox, perfil y persistencia", async ({ page }) => {
-  await page.goto("/?era=1980");
+  await page.goto("/explorar?era=1980");
   await expect(page.locator('[data-mapbox-ready="true"]')).toBeVisible({
     timeout: 60000,
   });
@@ -110,7 +110,7 @@ test("alternativa 2D sin WebGL", async ({ page }) => {
       return original.apply(this, args);
     } as typeof original;
   });
-  await page.goto("/");
+  await page.goto("/explorar");
   await expect(page.locator(".leaflet-marker-icon")).toHaveCount(7);
   await expect(page.locator(".mapbox-status")).toContainText(
     "Mapbox no pudo cargar",

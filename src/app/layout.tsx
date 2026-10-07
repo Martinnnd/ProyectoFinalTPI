@@ -1,20 +1,11 @@
 import type { Metadata } from "next";
-import "leaflet/dist/leaflet.css";
-import "../styles.css";
-import "../themes.css";
-import "../social.css";
-import "../components/community.css";
-import "../components/chat.css";
-import "../components/mapbox.css";
-import "../eras/70s/theme.css";
-import "../eras/80s/theme.css";
-import "../eras/90s/theme.css";
-import "../eras/2000s/theme.css";
-import "../mobile.css";
+import "./globals.css";
+
 export const metadata: Metadata = {
   title: "Nostalgiar",
-  description: "Historias, lugares y musica de nuestras epocas",
+  description: "Historias, lugares y música de nuestras épocas",
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

@@ -1,3 +1,4 @@
+import MemoryOwnerActions from "./MemoryOwnerActions";
 import { youtubeId } from "../media";
 import PostMedia, { PostMusic } from "./PostMedia";
 import type { ReactNode } from "react";
@@ -20,6 +21,9 @@ function toggleId(ids: string[], id: string) {
 const SCORES = [1, 2, 3, 4, 5] as const;
 
 export default function SocialFeed({
+  onEdit,
+  onDelete,
+  onProfile,
   groupIds,
   groupName,
   community,
@@ -32,6 +36,9 @@ export default function SocialFeed({
   following,
   onFollow,
 }: {
+  onEdit: (memory: Memory) => void;
+  onDelete: (memory: Memory) => void;
+  onProfile: (memory: Memory) => void;
   decade: number;
   following: string[];
   onFollow: (author: string) => void;
@@ -143,13 +150,13 @@ export default function SocialFeed({
           {(selected ? [selected] : posts).map((memory) => (
             <article className="feed-post" key={memory.id}>
               <header>
-                <span className="social-avatar" aria-hidden="true">
+                <button className="social-avatar author-avatar" aria-label={`Ver perfil de ${memory.source === "local" ? "Vos" : memory.author}`} onClick={() => onProfile(memory)}>
                   {memory.author.slice(0, 1)}
-                </span>
+                </button>
                 <div>
-                  <strong>
-                    {memory.source === "local" ? "Vos" : memory.author}
-                  </strong>
+                  <button className="author-name" onClick={() => onProfile(memory)}>
+                    <strong>{memory.source === "local" ? "Vos" : memory.author}</strong>
+                  </button>
                   <small>
                     {memory.source === "demo"
                       ? ""
@@ -166,7 +173,9 @@ export default function SocialFeed({
                     {following.includes(memory.author) ? "Siguiendo" : "Seguir"}
                   </button>
                 )}
+                <MemoryOwnerActions memory={memory} onEdit={onEdit} onDelete={onDelete}/>
               </header>
+              
               <PostMusic key={`music-${memory.id}`} music={memory.music}/>
               <button
                 className={

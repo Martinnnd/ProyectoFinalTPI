@@ -5,25 +5,32 @@ import { eraRegistry } from "../eras/registry";
   import { categories, type Memory, type Decade } from "../types";
   import type { Point } from "./MemoryMap";
   export default function MemoryForm({
+    initial,
     groupName,
     point,
     decade,
     onCancel,
     onSave,
   }: {
+    initial?: Memory;
     groupName?: string;
     point: Point;
     decade: Decade;
     onCancel: () => void;
     onSave: (m: Memory) => string | null;
   }) {
+    const dirty = useRef(false);
+    function requestClose() {
+      if (dirty.current && !window.confirm("¿Descartar los cambios sin guardar?")) return;
+      onCancel();
+    }
     const dialog = useRef<HTMLDialogElement>(null);
     const titleInput = useRef<HTMLInputElement>(null);
-    const [mediaKind,setMediaKind]=useState<'image'|'video'|'youtube'>('image');
-    const [mediaUrl,setMediaUrl]=useState('');
+    const [mediaKind,setMediaKind]=useState<'image'|'video'|'youtube'>(initial?.media?.kind ?? (youtubeId(initial?.image ?? '') ? 'youtube' : 'image'));
+    const [mediaUrl,setMediaUrl]=useState(initial?.media?.url ?? initial?.image ?? '');
     const [loadingFile,setLoadingFile]=useState(false);
     const fileVersion=useRef(0);
-    const [musicChoice,setMusicChoice]=useState('');
+    const [musicChoice,setMusicChoice]=useState(initial?.music ? 'custom' : '');
     const tracks=eraRegistry[decade].content.music;
     async function readFile(file:File|undefined){
       const version=++fileVersion.current;
@@ -74,10 +81,13 @@ import { eraRegistry } from "../eras/registry";
         music={spotifyId:id,title,artist};
       }else if(musicChoice){const track=tracks.find(t=>t.spotifyId===musicChoice);if(track)music={spotifyId:track.spotifyId,title:track.title,artist:track.artist};}
       const result = onSave({
+        ...initial,
+        image: undefined,
+        music: undefined,
         media:normalizeAttachment({kind:mediaKind,url:mediaUrl}),
         ...(mediaKind==='image'&&!youtubeId(mediaUrl)?{image:mediaUrl}:{}),
         ...(music?{music}:{}),
-        id: crypto.randomUUID(),
+        id: initial?.id ?? crypto.randomUUID(),
         title,
         place,
         year,
@@ -95,36 +105,35 @@ import { eraRegistry } from "../eras/registry";
         className="memory-dialog"
         onCancel={(e) => {
           e.preventDefault();
-          onCancel();
+          e.stopPropagation();
+          requestClose();
         }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onCancel();
-        }}
+        onKeyDown={(e) => e.stopPropagation()}
         aria-labelledby="form-title"
       >
         <div className="dialog-heading">
           <span className="eyebrow">UNA HISTORIA MÁS EN EL MAPA</span>
           <button
             className="icon-button"
-            onClick={onCancel}
+            onClick={requestClose}
             aria-label="Cerrar formulario"
           >
             <X size={20} />
           </button>
         </div>
-        <h2 id="form-title">¿Qué pasó en este lugar?</h2>
+        <h2 id="form-title">{initial ? "Editar mi recuerdo" : "¿Qué pasó en este lugar?"}</h2>
         <p>Publicar en: <strong>{groupName ?? "Recuerdos generales"}</strong></p>
         <p className="muted">Los pequeños recuerdos también merecen un pin.</p>
         <div className="coordinate-label">
           <MapPin size={16} /> Ubicación elegida: {point.lat.toFixed(4)},{" "}
           {point.lng.toFixed(4)}
         </div>
-        <form onSubmit={submit}>
+        <form onSubmit={submit} onChange={() => {dirty.current = true;}}>
           <label>
             Título del recuerdo
             <input
               ref={titleInput}
-              name="title"
+              name="title" defaultValue={initial?.title}
               autoFocus
               required
               maxLength={90}
@@ -140,12 +149,12 @@ import { eraRegistry } from "../eras/registry";
                 required
                 min="1970"
                 max="2009"
-                defaultValue={decade + 5}
+                defaultValue={initial?.year ?? decade + 5}
               />
             </label>
             <label>
               Categoría
-              <select name="category" defaultValue="Personales">
+              <select name="category" defaultValue={initial?.category ?? "Personales"}>
                 {categories.map((c) => (
                   <option key={c}>{c}</option>
                 ))}
@@ -155,7 +164,7 @@ import { eraRegistry } from "../eras/registry";
           <label>
             Nombre del lugar
             <input
-              name="place"
+              name="place" defaultValue={initial?.place}
               required
               maxLength={120}
               placeholder="Una plaza, tu barrio, aquel café…"
@@ -164,7 +173,7 @@ import { eraRegistry } from "../eras/registry";
           <label>
             Tu historia
             <textarea
-              name="description"
+              name="description" defaultValue={initial?.description}
               required
               minLength={1}
               maxLength={1800}
@@ -181,7 +190,7 @@ import { eraRegistry } from "../eras/registry";
             {mediaKind==='image'&&safeMediaUrl(mediaUrl,'image')&&<img className="attachment-preview" src={mediaUrl} alt="Vista previa del adjunto"/>}
           </fieldset>
           <fieldset className="media-fields"><legend>Música de fondo · opcional</legend><label>Elegir canción<select value={musicChoice} onChange={e=>setMusicChoice(e.target.value)}><option value="">Sin música</option>{tracks.map(track=><option key={track.spotifyId} value={track.spotifyId}>{track.title} — {track.artist}</option>)}<option value="custom">Otra canción de Spotify…</option></select></label>
-          {musicChoice==='custom'&&<><label>Enlace de Spotify<input name="spotifyUrl" type="url" required placeholder="https://open.spotify.com/track/…"/></label><label>Tema<input name="songTitle" required maxLength={120}/></label><label>Artista<input name="songArtist" required maxLength={120}/></label></>}
+          {musicChoice==='custom'&&<><label>Enlace de Spotify<input name="spotifyUrl" defaultValue={initial?.music ? `https://open.spotify.com/track/${initial.music.spotifyId}` : ""} type="url" required placeholder="https://open.spotify.com/track/…"/></label><label>Tema<input name="songTitle" defaultValue={initial?.music?.title} required maxLength={120}/></label><label>Artista<input name="songArtist" defaultValue={initial?.music?.artist} required maxLength={120}/></label></>}
           <small>El tema y el artista aparecerán arriba del recuerdo. Tocá Escuchar para reproducir desde Spotify.</small></fieldset>
           {error && (
             <p className="form-error" role="alert">
@@ -193,7 +202,7 @@ import { eraRegistry } from "../eras/registry";
             dispositivos.
           </p>
           <div className="dialog-actions">
-            <button type="button" className="secondary-button" onClick={onCancel}>
+            <button type="button" className="secondary-button" onClick={requestClose}>
               Cancelar
             </button>
             <button className="primary-button" type="submit">

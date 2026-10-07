@@ -1,0 +1,23 @@
+import type { Metadata } from "next";
+import "leaflet/dist/leaflet.css";
+import "../../styles.css";
+import "../../themes.css";
+import "../../social.css";
+import "../../components/community.css";
+import "../../components/chat.css";
+import "../../components/mapbox.css";
+import "../../eras/70s/theme.css";
+import "../../eras/80s/theme.css";
+import "../../eras/90s/theme.css";
+import "../../eras/2000s/theme.css";
+import "../../mobile.css";
+
+export const metadata: Metadata = {
+  title: "Explorar | Nostalgiar",
+};
+
+export default function ExploreLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return children;
+}

@@ -1056,3 +1056,38 @@
 .era-1990 .chat-titlebar { background:#000080; color:white; padding:7px 10px; }
 .era-1990 .chat-conversation,.era-1990 .chat-list { background:white; color:#111; }
 .era-1990 .chat-bubble { border-radius:0; background:#eee; border-color:#999; }
+
+.era-1990 .memory-owner-actions .icon-button { border-radius:0; background:#c0c0c0; border:2px outset #eee; color:#161616; }
+.era-1990 .memory-owner-actions .icon-button:active { border-style:inset; }
+
+.era-1990 .delete-memory-dialog { background:#c0c0c0; border:3px outset #eee; border-radius:0; }
+.era-1990 .delete-memory-heading { background:#000080; color:#fff; margin:2px; }
+.era-1990 .delete-memory-heading .icon-button { background:#c0c0c0; border:2px outset #eee; color:#111; width:24px; height:24px; border-radius:0; }
+
+/* Explorer window, inset panels and compact system tools. */
+.era-1990 .profile-era-bar { background:linear-gradient(90deg,#000080,#2864a3); color:white; border:3px outset #eee; padding:7px 10px; }
+.era-1990 .personal-profile .personal-header { border-top:0; border-radius:0; border:2px outset #eee; background:#c0c0c0; padding:22px; }
+.era-1990 .personal-profile .profile-portrait { border:3px inset #eee; border-radius:0; background:white; color:#000080; }
+.era-1990 .personal-profile .personal-identity .eyebrow { background:#fff; border:2px inset #eee; padding:5px 9px; display:inline-block; letter-spacing:0; }
+.era-1990 .personal-profile .personal-counts { border:2px inset #eee; background:#d2d2d2; padding:14px 0; }
+.era-1990 .profile-shortcuts { background:#c0c0c0; border:2px outset #eee; border-top:0; }
+.era-1990 .profile-shortcuts button { border:2px outset #eee; background:#c0c0c0; }
+.era-1990 .profile-shortcuts button:active { border-style:inset; }
+.era-1990 .personal-profile .personal-section-title { border-bottom:1px solid #808080; padding-bottom:10px; }
+.era-1990 .personal-profile .personal-memory { border:2px inset #eee; background:#fff; }
+.era-1990 .memory-owner-actions { padding:3px; background:#c0c0c0; border:1px solid #808080; box-shadow:inset 1px 1px #fff; }
+.era-1990 .memory-owner-actions .icon-button { box-shadow:1px 1px #404040; }
+.era-1990 .memory-owner-actions .memory-delete:hover { background:#e7cccc; color:#800000; }
+
+ .era-1990 .delete-scene { background:#008080; border:3px inset #eee; color:white; }
+.era-1990 .delete-scene-caption { background:#000080; top:0; left:0; right:0; padding:5px 8px; letter-spacing:0; }
+.era-1990 .delete-item svg { color:#fff; fill:#eee; stroke:#000080; filter:drop-shadow(2px 2px #004747); }
+.era-1990 .delete-item small { background:#000080; padding:2px 4px; border:1px dotted white; }
+.era-1990 .delete-bin svg { color:#eee; fill:#c0c0c0; stroke:#444; filter:drop-shadow(2px 2px #004747); }
+.era-1990 .delete-path { color:#fff; }
+.era-1990 .delete-memory-dialog.is-deleting .delete-item { animation-timing-function:steps(12,end); }
+
+ .era-1990 .scene-bin-art { filter:contrast(1.25); shape-rendering:crispEdges; }
+.era-1990 .desktop-file { background:#fff;border:2px solid #333;box-shadow:2px 2px #003b3b; }
+.era-1990 .delete-memory-dialog.is-deleting .scene-desktop .delete-item,.era-1990 .is-deleting .delete-cursor { animation-timing-function:steps(14,end); }
+.era-1990 .delete-transfer { color:#fff; }
