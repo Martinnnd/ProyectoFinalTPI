@@ -154,6 +154,7 @@ export default function App() {
     setView("profile");
   }
   function openPublication(memory: Memory) {
+    setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
   }
   function select(memory: Memory) {

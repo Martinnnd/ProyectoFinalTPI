@@ -1,3 +1,4 @@
+import ProfileTimeline from "./ProfileTimeline";
 import MemoryOwnerActions from "./MemoryOwnerActions";
 import PostMedia, { PostMusic } from "./PostMedia";
 import type { ReactNode } from "react";
@@ -169,6 +170,7 @@ export default function Profile({
         <button onClick={() => jumpTo(atlas.current)}><MapPin size={16}/>{presentation.map}</button>
         <span className="profile-motto">{presentation.footer}</span>
       </nav>
+      <ProfileTimeline memories={allMemories} author={author} onOpen={onOpen} onAdd={onAdd}/>
       {community}
       <section ref={atlas} className="personal-atlas">
         <div className="personal-section-title">

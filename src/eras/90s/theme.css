@@ -1091,3 +1091,9 @@
 .era-1990 .desktop-file { background:#fff;border:2px solid #333;box-shadow:2px 2px #003b3b; }
 .era-1990 .delete-memory-dialog.is-deleting .scene-desktop .delete-item,.era-1990 .is-deleting .delete-cursor { animation-timing-function:steps(14,end); }
 .era-1990 .delete-transfer { color:#fff; }
+
+.era-1990 .profile-timeline { background:#c0c0c0; border:3px outset #eee; border-radius:0; }
+
+.era-1990 .timeline-drawer { background:#c0c0c0; border:3px outset #eee; }
+.era-1990 .timeline-drawer-header { background:linear-gradient(90deg,#000080,#2564a0); color:#fff; margin:3px; }
+.era-1990 .timeline-drawer-header .eyebrow { color:#fff; }

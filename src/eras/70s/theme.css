@@ -397,3 +397,8 @@
 .era-1970 .delete-scene-result { bottom:8px; }
 @keyframes paper-physical { 0% {transform:rotate(-8deg);clip-path:polygon(0 0,100% 0,100% 100%,0 100%)} 18% {transform:rotate(-12deg) rotateY(22deg) scale(.8,.9);clip-path:polygon(8% 5%,87% 0,100% 83%,17% 100%)} 36% {transform:rotate(12deg) rotateY(-25deg) scale(.52,.62);clip-path:polygon(20% 0,75% 8%,100% 35%,87% 90%,55% 100%,5% 78%,0 32%)} 48% {left:13%;top:63px;transform:rotate(-15deg) scale(.4,.35);border-radius:38%;box-shadow:inset 8px 8px 10px #fff9,inset -8px -5px 15px #4d3d26aa,3px 6px 8px #0004} 68% {left:50%;top:16px;transform:rotate(140deg) scale(.38,.35);border-radius:38%;opacity:1} 84% {left:calc(92% - 86px);top:98px;transform:rotate(245deg) scale(.3);opacity:1} 93%,100% {left:calc(92% - 86px);top:133px;transform:rotate(275deg) scale(.2);opacity:0;border-radius:38%} }
 @keyframes paper-shadow { 0% {transform:scale(1);opacity:.5} 48% {left:13%;transform:scale(.4);opacity:.6} 68% {left:50%;transform:scale(.5);opacity:.15} 90%,100% {left:72%;transform:scale(.3);opacity:0} }
+
+.era-1970 .profile-timeline { background:#e8ddbc; border:3px double #807458; border-radius:0; }
+
+.era-1970 .timeline-drawer { background:#e9ddba; border:4px double #847552; }
+.era-1970 .timeline-drawer-header { border-bottom:4px double #847552; }

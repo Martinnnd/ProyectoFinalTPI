@@ -1101,3 +1101,9 @@
 .era-2000 .delete-transfer i { background:repeating-linear-gradient(90deg,#63c73e 0 8px,#dfebdc 8px 10px);border-color:#66a6d6; }
 .era-2000 .delete-transfer { color:#154c80; }
 .era-2000 .scene-bin-art { filter:drop-shadow(2px 4px 3px #11365d55); }
+
+.era-2000 .profile-timeline { background:linear-gradient(#fff,#eaf4ff); border:1px solid #92b9df; border-radius:10px; }
+
+.era-2000 .timeline-drawer { background:linear-gradient(#fff,#e3effd); border:2px solid #7aaad1; }
+.era-2000 .timeline-drawer-header { background:linear-gradient(#72bbef,#216abe); color:#fff; }
+.era-2000 .timeline-drawer-header .eyebrow { color:#fff; }
