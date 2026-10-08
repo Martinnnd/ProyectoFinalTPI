@@ -18,6 +18,7 @@ export interface ChromeProps {
   period: Period;
   count: number;
   panelOpen: boolean;
+  factsOpen?: boolean;
   musicOpen: boolean;
   onNavigate: (destination: Destination) => void;
 }

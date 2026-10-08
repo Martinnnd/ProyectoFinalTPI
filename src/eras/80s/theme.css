@@ -857,3 +857,10 @@
 
 .era-1980 .place-search-panel,.era-1980 .place-search-trigger { border:1px solid #ff3deb; border-radius:0; box-shadow:3px 3px 0 #48f5ff55; }
 .era-1980 .place-search-panel header { border-bottom:1px solid #48f5ff; color:#48f5ff; }
+
+.era-1980 .era-activity-dock { background:linear-gradient(#261034,#0c071a); border:2px solid #f540d3; border-radius:12px 12px 4px 4px; box-shadow:0 0 0 3px #161126,0 0 18px #ed24cb40; }
+.era-1980 .activity-dock-heading { color:#54ffff; }
+.era-1980 .activity-dock-heading>span { color:#ff62d9; }
+.era-1980 .activity-dock-options button { background:linear-gradient(#342044,#170d25); border:1px solid #985798; color:#f4e5fb; border-bottom:4px solid #090413; border-radius:5px; }
+.era-1980 .activity-dock-options button svg { color:#54ffff; }
+.era-1980 .activity-dock-options button:hover,.era-1980 .activity-dock-options button[aria-expanded="true"] { background:#43214e; border-color:#54ffff; box-shadow:inset 0 0 14px #fa44cc22; }

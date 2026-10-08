@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { FolderOpen, Map, Music2 } from "lucide-react";
+import { FolderOpen, BookOpen, Music2 } from "lucide-react";
 import type {
   ChromeProps,
   Destination,
@@ -18,6 +18,7 @@ export default function DesktopChrome({
   period,
   count,
   panelOpen,
+  factsOpen,
   musicOpen,
   onNavigate,
   theme,
@@ -71,26 +72,14 @@ export default function DesktopChrome({
           {startLabel}
         </button>
         <span className="taskbar-separator" />
-        <button
-          className={!panelOpen ? "task-active" : ""}
-          onClick={() => navigate("map")}
-        >
-          <Map size={14} />
-          Argentina
+        <button className={panelOpen ? "task-active" : ""} aria-expanded={panelOpen} aria-controls="stories" onClick={() => navigate("stories")} title="Historias: recorrer recuerdos">
+          <FolderOpen size={15}/> Historias
         </button>
-        <button
-          className={panelOpen ? "task-active" : ""}
-          onClick={() => navigate("stories")}
-        >
-          <FolderOpen size={15} />
-          {storiesLabel}
+        <button className={factsOpen ? "task-active" : ""} aria-expanded={!!factsOpen} aria-controls="era-facts" onClick={() => navigate("facts")} title="La época: efemérides y cultura">
+          <BookOpen size={15}/> La época
         </button>
-        <button
-          className={musicOpen ? "task-active" : ""}
-          onClick={() => navigate("music")}
-        >
-          <Music2 size={14} />
-          Mi música
+        <button className={musicOpen ? "task-active" : ""} aria-expanded={musicOpen} aria-controls="music-player" onClick={() => navigate("music")} title="Música: abrir el reproductor">
+          <Music2 size={15}/> Música
         </button>
         <span className="system-tray">
           <span className="connection-dot" />

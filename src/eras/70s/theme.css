@@ -417,3 +417,11 @@
 
 .era-1970 .place-search-panel,.era-1970 .place-search-trigger { background:#f5eddc; border:1px solid #857456; border-radius:2px; box-shadow:3px 4px 0 #392b2029; }
 .era-1970 .place-search-panel header { background:#e9dec6; border-bottom:3px double #857456; }
+
+.era-1970 .era-activity-dock { background:linear-gradient(100deg,#705338,#3c2c1d); border:3px ridge #a98a5f; border-radius:10px; padding:10px; color:#f7edcc; }
+.era-1970 .activity-dock-heading { color:#f1e6c8; }
+.era-1970 .activity-dock-heading>span { color:#c9df84; }
+.era-1970 .activity-dock-options button { background:linear-gradient(#f2ead4,#cbc3ad); color:#302c23; border:1px solid #9b927c; border-bottom:4px solid #82745c; border-radius:4px; box-shadow:inset 0 1px #fff9; }
+.era-1970 .activity-dock-options button:hover { background:#fff1cb; }
+.era-1970 .activity-dock-options button[aria-expanded="true"] { background:#b7c0a0; border-bottom-width:1px; box-shadow:inset 1px 2px 5px #0005; }
+.era-1970 .tv-console .tv-dial { cursor:default; display:grid; place-items:center; }
