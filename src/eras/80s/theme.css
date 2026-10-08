@@ -838,3 +838,19 @@
 
 .era-1980 .timeline-drawer { background:#171024; border:2px solid #ca43ac; box-shadow:5px 0 #46d8d344,14px 0 60px #0008; }
 .era-1980 .timeline-drawer-header { background:#26152e; color:#67f6e7; }
+
+/* Arcade marquee, deep screen bezel and a physical control deck. */
+.era-1980 .profile-era-device { padding:12px 14px 0; border:5px ridge #694674; background:linear-gradient(90deg,#25132c,#17111e 45%,#32203c); border-radius:12px 12px 5px 5px; box-shadow:4px 7px 12px #0006; }
+.era-1980 .profile-device-top { padding:16px 12px; margin-bottom:12px; border:3px ridge #9a5394; background:radial-gradient(ellipse,#682b67,#21102a); color:#ffdc84; text-shadow:2px 2px #ad317b,0 0 12px #ff72d955; letter-spacing:3px; }
+.era-1980 .profile-device-top strong { font-size:clamp(15px,2vw,24px); }
+.era-1980 .profile-era-device .profile-atlas-screen { padding:6px; border:12px solid #080b13; border-radius:18px; background:#343340; box-shadow:0 0 0 2px #99559f,inset 0 0 10px #000; }
+.era-1980 .profile-era-device .personal-map { border-radius:9px; border:1px solid #4d445a; }
+.era-1980 .profile-device-bottom { min-height:76px; margin-top:10px; padding:8px 18px; background:linear-gradient(#4b3051,#25162c); border-top:3px solid #ab599e; color:#68ffeb; }
+.era-1980 .profile-device-knob { position:relative; margin-left:auto; width:36px; height:18px; border-radius:50%; background:#0f0918; border:2px solid #76547b; }
+.era-1980 .profile-device-knob::before { content:''; position:absolute; bottom:8px; left:14px; width:7px; height:23px; background:linear-gradient(90deg,#9d93a2,#e5dce9,#6c6474); }
+.era-1980 .profile-device-knob::after { content:''; position:absolute; left:6px; bottom:25px; width:22px; height:22px; border-radius:50%; background:radial-gradient(circle at 35% 25%,#ffadce,#e02c78 60%,#831345); }
+.era-1980 .profile-device-buttons { gap:12px; margin-left:20px; }
+.era-1980 .profile-device-buttons i { width:22px; height:22px; background:radial-gradient(circle at 35% 25%,#a0ffee,#26bda9); border:3px outset #5bdcc8; box-shadow:0 3px #102a28; }
+.era-1980 .profile-device-buttons i:nth-child(2) { background:#f254bd; border-color:#e68ccc; }
+.era-1980 .profile-device-buttons i:nth-child(3) { background:#f2c75c; border-color:#f5dc8d; }
+@media(max-width:700px) { .era-1980 .profile-era-device { padding:8px 8px 0; } .era-1980 .profile-era-device .profile-atlas-screen { border-width:6px; } .era-1980 .profile-device-brand { font-size:8px; } .era-1980 .profile-device-buttons { gap:6px; margin-left:8px; } .era-1980 .profile-device-buttons i { width:16px; height:16px; } }

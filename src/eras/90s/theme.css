@@ -1097,3 +1097,20 @@
 .era-1990 .timeline-drawer { background:#c0c0c0; border:3px outset #eee; }
 .era-1990 .timeline-drawer-header { background:linear-gradient(90deg,#000080,#2564a0); color:#fff; margin:3px; }
 .era-1990 .timeline-drawer-header .eyebrow { color:#fff; }
+
+/* Personal map displayed inside a desktop monitor. */
+.era-1990 .profile-computer { padding:18px 18px 0; background:linear-gradient(125deg,#e7e3d7,#bfbeb4 65%,#d7d4c8); border:3px outset #eeebdf; border-radius:18px 18px 8px 8px; box-shadow:inset 0 0 0 3px #9c9d9355,4px 7px 12px #0003; }
+.era-1990 .profile-computer-title { display:flex; justify-content:space-between; gap:8px; background:linear-gradient(90deg,#000080,#2864a3); color:white; padding:7px 10px; border:6px solid #4b4e48; border-bottom:0; border-radius:8px 8px 0 0; font:bold 12px Arial,sans-serif; }
+.era-1990 .profile-computer-title small { font-weight:normal; font-size:10px; }
+.era-1990 .profile-computer .profile-atlas-screen { padding:8px; border:6px solid #4b4e48; border-top:0; background:#c0c0c0; gap:8px; border-radius:0 0 9px 9px; }
+.era-1990 .profile-computer .profile-map-list { border:2px inset #eee; background:#fff; }
+.era-1990 .profile-computer .profile-map-list > header { background:#c0c0c0; border-bottom:2px outset #eee; }
+.era-1990 .profile-computer-chin { display:flex; align-items:center; gap:10px; min-height:52px; padding:8px 12px; color:#454940; font:9px Arial,sans-serif; }
+.era-1990 .profile-computer-chin strong { font-size:12px; letter-spacing:1px; }
+.era-1990 .profile-computer-chin small { display:block; font-size:7px; font-weight:normal; margin-top:3px; }
+.era-1990 .profile-computer-vents { margin-left:auto; width:70px; height:20px; background:repeating-linear-gradient(0deg,#646a5c 0 1px,transparent 1px 4px); }
+.era-1990 .profile-computer-chin i { width:6px; height:6px; border-radius:50%; background:#7cbf3f; box-shadow:0 0 4px #5e9e25; }
+@media(max-width:700px) { .era-1990 .profile-computer { padding:9px 9px 0; } .era-1990 .profile-computer-title small { display:none; } .era-1990 .profile-computer .profile-atlas-screen { padding:4px; border-width:4px; } }
+
+.era-1990 .profile-atlas-workspace > .profile-map-list { border:3px outset #eee; background:#fff; }
+.era-1990 .profile-atlas-workspace > .profile-map-list > header { background:linear-gradient(90deg,#000080,#2864a3); color:#fff; margin:2px; border-bottom:0; }

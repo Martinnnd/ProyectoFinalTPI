@@ -402,3 +402,15 @@
 
 .era-1970 .timeline-drawer { background:#e9ddba; border:4px double #847552; }
 .era-1970 .timeline-drawer-header { border-bottom:4px double #847552; }
+
+/* Wood cabinet television with inset curved glass and tuning controls. */
+.era-1970 .profile-era-device { background:repeating-linear-gradient(2deg,#29170c20 0 2px,transparent 2px 8px),linear-gradient(100deg,#694428,#996740 40%,#56351f); border:5px ridge #a68155; border-radius:23px; padding:16px 18px 0; box-shadow:inset 0 0 0 3px #32261e,4px 7px 13px #0004; }
+.era-1970 .profile-device-top { color:#efddab; padding:0 4px 12px; font:bold 11px Georgia,serif; }
+.era-1970 .profile-era-device .profile-atlas-screen { border:9px solid #302e29; border-radius:34px; padding:4px; background:#888673; box-shadow:inset 0 2px 6px #000; }
+.era-1970 .profile-era-device .personal-map { border-radius:24px; border:2px solid #141b17; }
+.era-1970 .profile-device-bottom { color:#efdcac; min-height:66px; }
+.era-1970 .profile-device-grille { margin-left:auto; width:90px; height:28px; background:repeating-linear-gradient(0deg,#161915 0 2px,#8d8063 2px 5px); border:2px solid #443d2f; }
+.era-1970 .profile-device-knob { width:30px; height:30px; border-radius:50%; border:3px ridge #b5ad8f; background:linear-gradient(90deg,#2c2b23 43%,#c7bd97 45% 52%,#2c2b23 55%); box-shadow:1px 3px 3px #0008; }
+.era-1970 .profile-device-buttons i { background:#302e22; border:1px solid #bca77b; }
+.era-1970 .profile-device-led { background:#ecc16c; box-shadow:0 0 4px #eb9c3f; }
+@media(max-width:700px) { .era-1970 .profile-era-device { padding:10px 8px 0; } .era-1970 .profile-era-device .profile-atlas-screen { border-width:5px; border-radius:22px; } .era-1970 .profile-device-grille { width:42px; } .era-1970 .profile-device-buttons { display:none; } }

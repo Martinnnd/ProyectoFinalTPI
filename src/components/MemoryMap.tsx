@@ -1,3 +1,4 @@
+import { memoryThumbnail } from "./memoryThumbnail";
 import { useEffect, useState } from "react";
 import {
   MapContainer,
@@ -17,11 +18,13 @@ function MapActions({
   onPick,
   selected,
   reset,
+  fitPoints,
 }: {
   picking: boolean;
   onPick: (p: Point) => void;
   selected: Memory | null;
   reset: number;
+  fitPoints?: string;
 }) {
   const map = useMapEvents({
     click(e) {
@@ -37,13 +40,24 @@ function MapActions({
   }, [map]);
   useEffect(() => {
     if (selected)
-      map.setView([selected.lat, selected.lng], Math.max(map.getZoom(), 6), {
-        animate: false,
+      map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
+        animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
       });
   }, [selected, map]);
   useEffect(() => {
-    map.setView(center, 4);
-  }, [reset, map]);
+    const fit = () => {
+      if (!fitPoints) {map.setView(center, 4);return;}
+      const points = JSON.parse(fitPoints) as [number, number][];
+      map.invalidateSize({animate:false});
+      if (points.length) map.fitBounds(L.latLngBounds(points), {padding:[50,50], maxZoom:13, animate:false});
+      else map.setView(center,4);
+    };
+    fit();
+    if (fitPoints === undefined) return;
+    const observer = new ResizeObserver(fit);
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [reset, map, fitPoints]);
   useEffect(() => {
     map.getContainer().style.cursor = picking ? "crosshair" : "";
   }, [picking, map]);
@@ -94,6 +108,7 @@ function icon(memory?: Memory, selected = false) {
   });
 }
 export default function MemoryMap({
+  fitMemories = false,
   memories,
   selected,
   onSelect,
@@ -103,6 +118,7 @@ export default function MemoryMap({
   draft,
   onCancel,
 }: {
+  fitMemories?: boolean;
   memories: Memory[];
   selected: Memory | null;
   onSelect: (m: Memory) => void;
@@ -125,13 +141,13 @@ export default function MemoryMap({
   return (
     <section
       className="map-section"
-      aria-label="Mapa de recuerdos de Argentina"
+      aria-label={fitMemories ? "Mapa personal de recuerdos" : "Mapa de recuerdos de Argentina"}
     >
       <div className="map-frame">
         <MapContainer
           center={center}
           zoom={4}
-          minZoom={3}
+          minZoom={fitMemories ? 1 : 3}
           maxZoom={18}
           scrollWheelZoom
           className="memory-map"
@@ -157,6 +173,7 @@ export default function MemoryMap({
             onPick={onPick}
             selected={selected}
             reset={reset}
+            fitPoints={fitMemories ? JSON.stringify(memories.map(m => [m.lat,m.lng])) : undefined}
           />
           {memories.map((m) => (
             <Marker
@@ -183,7 +200,7 @@ export default function MemoryMap({
               <Tooltip direction="top">{m.title} · {m.year}</Tooltip>
             </Marker>
           ))}
-          {selected && !picking && <Tooltip key={selected.id} position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div><small>{selected.author} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip>}
+          {selected && !picking && <Tooltip key={selected.id} position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{selected.author} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip>}
           {draft && (
             <Marker
               position={[draft.lat, draft.lng]}
@@ -195,9 +212,9 @@ export default function MemoryMap({
         <button
           className="map-reset"
           onClick={() => setReset((r) => r + 1)}
-          aria-label="Volver a la vista de Argentina"
+          aria-label={fitMemories ? "Encuadrar todos los recuerdos" : "Volver a la vista de Argentina"}
         >
-          <LocateFixed size={18} /> <span>Ver Argentina</span>
+          <LocateFixed size={18} /> <span>{fitMemories ? "Ver todos los recuerdos" : "Ver Argentina"}</span>
         </button>
         {picking && (
           <div className="map-notice picking" role="status">

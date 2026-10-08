@@ -1,3 +1,4 @@
+import { memoryThumbnail } from "./memoryThumbnail";
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -233,7 +234,7 @@ export default function MapboxMap(
     if (ready && props.selected)
       instance.current?.flyTo({
         center: [props.selected.lng, props.selected.lat],
-        zoom: Math.max(instance.current.getZoom(), 8),
+        zoom: Math.max(instance.current.getZoom(), 14),
         duration: duration(),
       });
   }, [props.selected?.id, ready]);
@@ -245,6 +246,8 @@ export default function MapboxMap(
     const meta=document.createElement('small');meta.textContent=`${memory.author} · ${memory.year}`;
     const title=document.createElement('strong');title.textContent=memory.title;
     const excerpt=document.createElement('p');excerpt.textContent=memory.description.length>140?memory.description.slice(0,140)+'…':memory.description;
+    const photoUrl=memoryThumbnail(memory);
+    if(photoUrl){const photo=document.createElement('img');photo.src=photoUrl;photo.alt='';photo.className='pin-preview-photo';photo.onerror=()=>{photo.hidden=true;};content.append(photo);}
     content.append(meta,title,excerpt);
     if(props.onOpen){const open=document.createElement('button');open.textContent='Ver publicación →';open.addEventListener('click',()=>latest.current.onOpen?.(memory));content.append(open);}
     const preview=new mapboxgl.Popup({className:'pin-message-preview',anchor:'left',offset:25,maxWidth:'230px',closeButton:true,closeOnClick:false,focusAfterOpen:false})

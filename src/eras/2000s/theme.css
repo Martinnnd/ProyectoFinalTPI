@@ -1107,3 +1107,15 @@
 .era-2000 .timeline-drawer { background:linear-gradient(#fff,#e3effd); border:2px solid #7aaad1; }
 .era-2000 .timeline-drawer-header { background:linear-gradient(#72bbef,#216abe); color:#fff; }
 .era-2000 .timeline-drawer-header .eyebrow { color:#fff; }
+
+/* Early LCD monitor: charcoal bezel, silver chin and pedestal. */
+.era-2000 .profile-era-device { background:linear-gradient(125deg,#555c65,#20262d 60%,#454e58); border:2px solid #7c8793; border-radius:12px; padding:12px 12px 0; margin-bottom:40px; box-shadow:inset 0 1px #bac3cc,3px 6px 12px #1a354455; }
+.era-2000 .profile-device-top { color:#dde6ee; padding:2px 8px 12px; font:11px Arial,sans-serif; }
+.era-2000 .profile-era-device .profile-atlas-screen { padding:3px; border:3px solid #111921; background:#737e89; }
+.era-2000 .profile-era-device .personal-map { border:1px solid #0b1118; border-radius:0; }
+.era-2000 .profile-device-bottom { margin:0 -12px; padding:8px 20px; min-height:45px; border-radius:0 0 10px 10px; background:linear-gradient(#e2e7ea,#aab5c0); color:#364554; border-top:1px solid #788896; }
+.era-2000 .profile-device-buttons { margin-left:auto; }
+.era-2000 .profile-device-buttons i { width:12px; height:4px; border:1px solid #7c8994; background:#d9e0e6; border-radius:2px; }
+.era-2000 .profile-device-led { background:#74d454; box-shadow:0 0 5px #64c244; margin-left:10px; }
+.era-2000 .profile-era-device::before { content:''; position:absolute; left:calc(50% - 32px); bottom:-27px; width:64px; height:25px; background:linear-gradient(90deg,#626f7b,#bdc7ce,#626f7b); z-index:-1; }
+.era-2000 .profile-era-device::after { content:''; position:absolute; bottom:-35px; left:calc(50% - 85px); width:170px; height:12px; border-radius:50%; background:linear-gradient(#ccd5dd,#6c7a87); box-shadow:0 4px 5px #183b4525; }

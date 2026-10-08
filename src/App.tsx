@@ -124,7 +124,7 @@ export default function App() {
   );
   const profileMemories = profileAuthor === null ? local : initialMemories.filter(m => m.author === profileAuthor);
   const ownMemories = filterMemories(profileMemories, period, category);
-  const visibleMemories = view === "profile" ? ownMemories : memories;
+  const visibleMemories = view === "profile" ? profileMemories : memories;
   const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
     setScope(value);setQuery('');setSelectedId(null);

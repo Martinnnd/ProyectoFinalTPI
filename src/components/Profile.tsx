@@ -179,13 +179,18 @@ export default function Profile({
             <h3>{author ? `Los lugares de ${author}` : "Los lugares de mi historia"}</h3>
           </div>
           <span>
-            {period.year ?? `${period.decade}–${period.decade + 9}`} ·{" "}
-            {memories.length} recuerdos
+            Todas las épocas · {allMemories.length} recuerdos
           </span>
         </div>
+        <div className="profile-atlas-workspace">
+        <div className={period.decade === 1990 ? "profile-computer" : "profile-atlas-frame profile-era-device"}>
+        {period.decade === 1990 && <div className="profile-computer-title"><span>▣ Mi PC — Mapa personal</span><small>Archivo de recuerdos</small></div>}
+        {period.decade !== 1990 && <div className="profile-device-top" aria-hidden="true"><strong>{period.decade === 1970 ? "NOSTALGIAR · TELEVISIÓN" : period.decade === 1980 ? "MEMORY ARCADE" : "Nostalgiar · Digital Display"}</strong><small>{period.decade === 1980 ? "UN LUGAR · UNA HISTORIA" : "MAPA PERSONAL"}</small></div>}
+        <div className="profile-atlas-screen">
         <div className="personal-map">
           <MemoryMap
-            memories={memories}
+            fitMemories
+            memories={allMemories}
             selected={selected}
             onSelect={onSelect}
             onOpen={onOpen}
@@ -194,6 +199,19 @@ export default function Profile({
             draft={null}
             onCancel={() => { }}
           />
+        </div>
+
+        </div>
+        {period.decade !== 1990 && <div className="profile-device-bottom" aria-hidden="true"><span className="profile-device-brand">NOSTALGIAR</span><span className="profile-device-grille"/><span className="profile-device-knob"/><span className="profile-device-buttons"><i/><i/><i/></span><span className="profile-device-led"/></div>}
+        {period.decade === 1990 && <div className="profile-computer-chin" aria-hidden="true"><strong>NOSTALGIAR <small>PERSONAL COMPUTER</small></strong><span className="profile-computer-vents"/><i/><span>POWER</span></div>}
+        </div>
+        <aside className="profile-map-list" aria-label="Recuerdos del mapa">
+          <header><strong>{author ? "Sus recuerdos" : "Mis recuerdos"}</strong><small>{allMemories.length}</small></header>
+          <div className="profile-map-items">{allMemories.length ? [...allMemories].sort((a,b)=>a.year-b.year).map(memory=><div className="profile-map-row" key={memory.id} data-selected={selected?.id===memory.id}>
+            <button className="profile-map-select" aria-pressed={selected?.id===memory.id} onClick={()=>onSelect(memory)}><span className="profile-map-year">{memory.year}</span><span><strong>{memory.title}</strong><small>{memory.place}</small></span></button>
+            {selected?.id===memory.id && <><p>{memory.description}</p>{onOpen && <button className="profile-map-open" onClick={()=>onOpen(memory)}>Ver publicación →</button>}</>}
+          </div>):<p className="profile-map-empty">Los recuerdos publicados aparecerán acá.</p>}</div>
+        </aside>
         </div>
         {selected && (
           <article className="personal-detail">

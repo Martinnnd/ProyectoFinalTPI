@@ -1696,3 +1696,46 @@
 .memory-fm-presets button:disabled { opacity:.4; cursor:default; }
 .memory-fm-memory { text-shadow:none; }
 @media(max-width:700px) { .memory-fm-console { grid-template-columns:minmax(0,1fr); } .memory-fm-speaker { display:none; } .memory-fm-readout > small { font-size:10px; } }
+
+/* Personal atlas: bounded width and enough height to explore its places. */
+.app.view-profile .personal-atlas { width:100%; max-width:1120px; margin:28px auto; }
+.app.view-profile .personal-atlas .personal-map { height:clamp(400px,57vh,640px); min-height:400px; width:100%; }
+@media(max-width:899px) { .app.view-profile .personal-atlas .personal-map { height:clamp(320px,52dvh,480px); min-height:320px; } }
+
+.profile-atlas-screen { display:grid; grid-template-columns:minmax(0,1fr) 265px; gap:12px; }
+.app.view-profile .personal-atlas .profile-atlas-screen .personal-map { height:clamp(420px,56vh,600px); min-height:0; }
+.profile-map-list { min-width:0; height:clamp(420px,56vh,600px); display:flex; flex-direction:column; border:1px solid var(--line); background:var(--surface); color:var(--ink); }
+.profile-map-list > header { display:flex; justify-content:space-between; gap:12px; padding:12px; border-bottom:1px solid var(--line); font-size:13px; }
+.profile-map-items { overflow-y:auto; min-height:0; scrollbar-width:thin; }
+.profile-map-row { border-bottom:1px solid var(--line); padding:10px; }
+.profile-map-select { display:flex; width:100%; gap:10px; align-items:flex-start; border:0; padding:4px 0; background:transparent; box-shadow:none; color:inherit; text-align:left; font:inherit; cursor:pointer; }
+.profile-map-year { flex-shrink:0; padding:5px; background:var(--soft); color:var(--accent); border:1px solid var(--line); font:bold 11px monospace; }
+.profile-map-select strong { font-size:12px; line-height:1.4; display:block; }
+.profile-map-select small { display:block; margin-top:5px; font-size:10px; color:var(--muted); }
+.profile-map-row[data-selected="true"] { background:var(--soft); box-shadow:inset 3px 0 var(--accent); }
+.profile-map-row p { font-size:11px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.profile-map-open { padding:5px; font:11px var(--font-body); cursor:pointer; }
+.profile-map-empty { padding:12px; font-size:12px; }
+@media(max-width:700px) { .profile-atlas-screen { grid-template-columns:minmax(0,1fr); } .app.view-profile .personal-atlas .profile-atlas-screen .personal-map { height:340px; } .profile-map-list { height:230px; } }
+
+/* The personal computer and its publication list are separate desktop panels. */
+.app.view-profile .personal-atlas { max-width:none; margin:28px 0; }
+.profile-atlas-workspace { display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,300px); gap:22px; align-items:start; }
+.profile-atlas-workspace > .profile-computer,.profile-atlas-workspace > .profile-atlas-frame { min-width:0; }
+.profile-atlas-workspace .profile-atlas-screen { grid-template-columns:minmax(0,1fr); }
+.profile-atlas-workspace > .profile-map-list { height:clamp(420px,56vh,600px); box-shadow:var(--shadow); }
+@media(max-width:899px) { .profile-atlas-workspace { grid-template-columns:minmax(0,1fr); gap:16px; } .profile-atlas-workspace > .profile-map-list { height:auto; max-height:300px; } }
+
+.profile-era-device { position:relative; min-width:0; }
+.profile-device-top,.profile-device-bottom { display:flex; align-items:center; gap:12px; }
+.profile-device-top { justify-content:space-between; }
+.profile-device-top small { font-size:9px; letter-spacing:1px; }
+.profile-device-bottom { min-height:48px; }
+.profile-device-brand { font:700 11px Arial,sans-serif; letter-spacing:2px; }
+.profile-device-buttons { display:flex; gap:8px; }
+.profile-device-buttons i { display:block; width:9px; height:9px; border-radius:50%; }
+.profile-device-led { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+@media(max-width:700px) { .profile-device-top small { display:none; } }
+
+.pin-message-preview img.pin-preview-photo { display:block; width:76px; height:58px; object-fit:cover; border-radius:4px; margin:0 0 8px; border:1px solid #8886; }
+.pin-message-preview img.pin-preview-photo[hidden] { display:none; }
