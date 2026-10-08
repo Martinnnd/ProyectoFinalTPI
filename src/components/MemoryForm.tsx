@@ -95,7 +95,8 @@ import { eraRegistry } from "../eras/registry";
         description,
         author: "Vos",
         source: "local",
-        ...point,
+        lat: point.lat,
+        lng: point.lng,
       });
       if (result) setError(result);
     }
@@ -164,7 +165,7 @@ import { eraRegistry } from "../eras/registry";
           <label>
             Nombre del lugar
             <input
-              name="place" defaultValue={initial?.place}
+              name="place" defaultValue={initial?.place ?? point.label}
               required
               maxLength={120}
               placeholder="Una plaza, tu barrio, aquel café…"

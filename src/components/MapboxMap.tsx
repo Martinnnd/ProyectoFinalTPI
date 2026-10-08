@@ -241,7 +241,7 @@ export default function MapboxMap(
   useEffect(() => {
     const map=instance.current;
     const memory=props.selected;
-    if(!map || !ready || !memory || props.picking)return;
+    if(!map || !ready || !memory || props.picking || props.searchTarget)return;
     const content=document.createElement('div');
     const meta=document.createElement('small');meta.textContent=`${memory.author} · ${memory.year}`;
     const title=document.createElement('strong');title.textContent=memory.title;
@@ -253,7 +253,21 @@ export default function MapboxMap(
     const preview=new mapboxgl.Popup({className:'pin-message-preview',anchor:'left',offset:25,maxWidth:'230px',closeButton:true,closeOnClick:false,focusAfterOpen:false})
       .setLngLat([memory.lng,memory.lat]).setDOMContent(content).addTo(map);
     return ()=>{preview.remove();};
-  }, [props.selected, props.picking, ready]);
+  }, [props.selected, props.picking, props.searchTarget, ready]);
+  useEffect(() => {
+    const map = instance.current;
+    const target = props.searchTarget;
+    if (!map || !ready || !target) return;
+    map.flyTo({ center: [target.lng, target.lat], zoom: 16, pitch: 0, bearing: 0, duration: duration() });
+    const marker = new mapboxgl.Marker({ color: "#e35a38", draggable: true })
+      .setLngLat([target.lng, target.lat]).addTo(map);
+    marker.getElement().setAttribute("aria-label", "Ubicación encontrada. Arrastrá para ajustar");
+    marker.on("dragend", () => {
+      const point = marker.getLngLat().wrap();
+      latest.current.onSearchMove?.({ ...target, lat: point.lat, lng: point.lng });
+    });
+    return () => { marker.remove(); };
+  }, [props.searchTarget, ready]);
   function satellite(value: boolean) {
     const next = { ...options, satellite: value };
     optionsRef.current = next;

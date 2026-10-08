@@ -1119,3 +1119,6 @@
 .era-2000 .profile-device-led { background:#74d454; box-shadow:0 0 5px #64c244; margin-left:10px; }
 .era-2000 .profile-era-device::before { content:''; position:absolute; left:calc(50% - 32px); bottom:-27px; width:64px; height:25px; background:linear-gradient(90deg,#626f7b,#bdc7ce,#626f7b); z-index:-1; }
 .era-2000 .profile-era-device::after { content:''; position:absolute; bottom:-35px; left:calc(50% - 85px); width:170px; height:12px; border-radius:50%; background:linear-gradient(#ccd5dd,#6c7a87); box-shadow:0 4px 5px #183b4525; }
+
+.era-2000 .place-search-panel { border:1px solid #7faccd; border-radius:10px; box-shadow:0 8px 24px #17385840; }
+.era-2000 .place-search-panel header { background:linear-gradient(#69bafa,#1460b1); color:white; text-shadow:0 1px #10477c; }

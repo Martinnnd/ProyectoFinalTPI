@@ -1114,3 +1114,7 @@
 
 .era-1990 .profile-atlas-workspace > .profile-map-list { border:3px outset #eee; background:#fff; }
 .era-1990 .profile-atlas-workspace > .profile-map-list > header { background:linear-gradient(90deg,#000080,#2864a3); color:#fff; margin:2px; border-bottom:0; }
+
+.era-1990 .place-search-panel,.era-1990 .place-search-trigger { border-radius:0; border:2px solid; border-color:#fff #555 #555 #fff; background:#c0c0c0; box-shadow:2px 2px 0 #0006; }
+.era-1990 .place-search-panel header { background:#000080; color:white; }
+.era-1990 .place-search-field { border-radius:0; border:2px inset #ddd; }

@@ -854,3 +854,6 @@
 .era-1980 .profile-device-buttons i:nth-child(2) { background:#f254bd; border-color:#e68ccc; }
 .era-1980 .profile-device-buttons i:nth-child(3) { background:#f2c75c; border-color:#f5dc8d; }
 @media(max-width:700px) { .era-1980 .profile-era-device { padding:8px 8px 0; } .era-1980 .profile-era-device .profile-atlas-screen { border-width:6px; } .era-1980 .profile-device-brand { font-size:8px; } .era-1980 .profile-device-buttons { gap:6px; margin-left:8px; } .era-1980 .profile-device-buttons i { width:16px; height:16px; } }
+
+.era-1980 .place-search-panel,.era-1980 .place-search-trigger { border:1px solid #ff3deb; border-radius:0; box-shadow:3px 3px 0 #48f5ff55; }
+.era-1980 .place-search-panel header { border-bottom:1px solid #48f5ff; color:#48f5ff; }

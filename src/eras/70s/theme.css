@@ -414,3 +414,6 @@
 .era-1970 .profile-device-buttons i { background:#302e22; border:1px solid #bca77b; }
 .era-1970 .profile-device-led { background:#ecc16c; box-shadow:0 0 4px #eb9c3f; }
 @media(max-width:700px) { .era-1970 .profile-era-device { padding:10px 8px 0; } .era-1970 .profile-era-device .profile-atlas-screen { border-width:5px; border-radius:22px; } .era-1970 .profile-device-grille { width:42px; } .era-1970 .profile-device-buttons { display:none; } }
+
+.era-1970 .place-search-panel,.era-1970 .place-search-trigger { background:#f5eddc; border:1px solid #857456; border-radius:2px; box-shadow:3px 4px 0 #392b2029; }
+.era-1970 .place-search-panel header { background:#e9dec6; border-bottom:3px double #857456; }

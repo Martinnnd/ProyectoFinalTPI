@@ -11,7 +11,7 @@ import {
 import L from "leaflet";
 import { LocateFixed, MapPin, RotateCcw } from "lucide-react";
 import { symbols, type Memory } from "../types";
-export type Point = { lat: number; lng: number };
+export type Point = { lat: number; lng: number; label?: string };
 const center: [number, number] = [-38.4, -64.4];
 function MapActions({
   picking,
@@ -19,12 +19,14 @@ function MapActions({
   selected,
   reset,
   fitPoints,
+  searchTarget,
 }: {
   picking: boolean;
   onPick: (p: Point) => void;
   selected: Memory | null;
   reset: number;
   fitPoints?: string;
+  searchTarget?: Point | null;
 }) {
   const map = useMapEvents({
     click(e) {
@@ -58,6 +60,11 @@ function MapActions({
     observer.observe(map.getContainer());
     return () => observer.disconnect();
   }, [reset, map, fitPoints]);
+  useEffect(() => {
+    if (searchTarget) map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
+      animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .8,
+    });
+  }, [searchTarget, map]);
   useEffect(() => {
     map.getContainer().style.cursor = picking ? "crosshair" : "";
   }, [picking, map]);
@@ -108,6 +115,8 @@ function icon(memory?: Memory, selected = false) {
   });
 }
 export default function MemoryMap({
+  searchTarget,
+  onSearchMove,
   fitMemories = false,
   memories,
   selected,
@@ -118,6 +127,8 @@ export default function MemoryMap({
   draft,
   onCancel,
 }: {
+  searchTarget?: Point | null;
+  onSearchMove?: (point: Point) => void;
   fitMemories?: boolean;
   memories: Memory[];
   selected: Memory | null;
@@ -173,6 +184,7 @@ export default function MemoryMap({
             onPick={onPick}
             selected={selected}
             reset={reset}
+            searchTarget={searchTarget}
             fitPoints={fitMemories ? JSON.stringify(memories.map(m => [m.lat,m.lng])) : undefined}
           />
           {memories.map((m) => (
@@ -200,7 +212,10 @@ export default function MemoryMap({
               <Tooltip direction="top">{m.title} · {m.year}</Tooltip>
             </Marker>
           ))}
-          {selected && !picking && <Tooltip key={selected.id} position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{selected.author} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip>}
+          {selected && !picking && !searchTarget && <Tooltip key={selected.id} position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{selected.author} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip>}
+          {searchTarget && <Marker position={[searchTarget.lat, searchTarget.lng]} icon={icon()} draggable title="Arrastrá para ajustar la ubicación" eventHandlers={{ dragend: event => {
+            const point = event.target.getLatLng(); onSearchMove?.({ ...searchTarget, lat: point.lat, lng: point.lng });
+          }}}><Tooltip>Ubicación encontrada · Arrastrá para ajustar</Tooltip></Marker>}
           {draft && (
             <Marker
               position={[draft.lat, draft.lng]}
