@@ -1,5 +1,5 @@
 import { memoryThumbnail } from "./memoryThumbnail";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
   Marker,
@@ -40,12 +40,8 @@ function MapActions({
     observer.observe(map.getContainer());
     return () => observer.disconnect();
   }, [map]);
-  useEffect(() => {
-    if (selected)
-      map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
-        animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
-      });
-  }, [selected, map]);
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
   useEffect(() => {
     const fit = () => {
       if (!fitPoints) {map.setView(center, 4);return;}
@@ -56,10 +52,16 @@ function MapActions({
     };
     fit();
     if (fitPoints === undefined) return;
-    const observer = new ResizeObserver(fit);
+    const observer = new ResizeObserver(() => { if (!selectedRef.current) fit(); });
     observer.observe(map.getContainer());
     return () => observer.disconnect();
   }, [reset, map, fitPoints]);
+  useEffect(() => {
+    if (selected)
+      map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
+        animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
+      });
+  }, [selected, map]);
   useEffect(() => {
     if (searchTarget) map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
       animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .8,
