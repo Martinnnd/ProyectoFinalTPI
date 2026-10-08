@@ -1714,7 +1714,9 @@
 .profile-map-select small { display:block; margin-top:5px; font-size:10px; color:var(--muted); }
 .profile-map-row[data-selected="true"] { background:var(--soft); box-shadow:inset 3px 0 var(--accent); }
 .profile-map-row p { font-size:11px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.profile-map-open { padding:5px; font:11px var(--font-body); cursor:pointer; }
+.app .profile-map-list .profile-map-open { display:inline-flex; align-items:center; justify-content:center; min-height:36px; padding:8px 12px; font:600 12px/1.3 var(--font-body); color:var(--ink); background:var(--surface); border:1px solid var(--accent); border-radius:var(--radius); cursor:pointer; }
+.app .profile-map-list .profile-map-open:hover { background:var(--soft); box-shadow:inset 0 0 0 1px var(--accent); }
+.app .profile-map-list .profile-map-open:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .profile-map-empty { padding:12px; font-size:12px; }
 @media(max-width:700px) { .profile-atlas-screen { grid-template-columns:minmax(0,1fr); } .app.view-profile .personal-atlas .profile-atlas-screen .personal-map { height:340px; } .profile-map-list { height:230px; } }
 

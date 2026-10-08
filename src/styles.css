@@ -1,8 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
 
 @font-face {
-  font-family: 'MyFont';
-  src: url('../fonts/AnandaBlack.ttf') format('ttf');
+  font-family: 'Ananda';
+  font-display: swap;
+  src: url('../fonts/AnandaBlack.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

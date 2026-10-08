@@ -1,11 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;500;600;700&family=VT323&display=swap");
-@font-face {
-  font-family: 'MyFont';
-  src: url('../../../fonts/AnandaBlack.ttf') format('ttf');
-  font-weight: normal;
-  font-style: normal;
-}
-
 .era-1980 .leaflet-tile-pane {
   filter: invert(0.88) hue-rotate(170deg) saturate(0.45) brightness(0.9);
 }
