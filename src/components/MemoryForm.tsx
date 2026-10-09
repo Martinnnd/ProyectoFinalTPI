@@ -17,7 +17,7 @@ import { eraRegistry } from "../eras/registry";
     point: Point;
     decade: Decade;
     onCancel: () => void;
-    onSave: (m: Memory) => string | null;
+    onSave: (m: Memory) => string | null | Promise<string | null | void> | void;
   }) {
     const dirty = useRef(false);
     function requestClose() {
@@ -53,7 +53,7 @@ import { eraRegistry } from "../eras/registry";
         previous?.focus();
       };
     }, []);
-    function submit(event: React.FormEvent<HTMLFormElement>) {
+    async function submit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
       const title = String(data.get("title")).trim(),
@@ -80,7 +80,7 @@ import { eraRegistry } from "../eras/registry";
         if(!id||!title||!artist){setError('Completá el enlace de una canción de Spotify, el título y el artista.');return;}
         music={spotifyId:id,title,artist};
       }else if(musicChoice){const track=tracks.find(t=>t.spotifyId===musicChoice);if(track)music={spotifyId:track.spotifyId,title:track.title,artist:track.artist};}
-      const result = onSave({
+      const result = await onSave({
         ...initial,
         image: undefined,
         music: undefined,
@@ -98,7 +98,7 @@ import { eraRegistry } from "../eras/registry";
         lat: point.lat,
         lng: point.lng,
       });
-      if (result) setError(result);
+      if (typeof result === "string") setError(result);
     }
     return (
       <dialog

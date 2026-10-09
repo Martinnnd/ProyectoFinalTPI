@@ -5,8 +5,8 @@ import {
   Marker,
   TileLayer,
   Tooltip,
-  ZoomControl,
   useMapEvents,
+  ZoomControl,
 } from "react-leaflet";
 import L from "leaflet";
 import { LocateFixed, MapPin, RotateCcw } from "lucide-react";
@@ -96,6 +96,7 @@ function MapActions({
       element.removeEventListener("mousedown", focusMap, true);
     };
   }, [map, picking, onPick]);
+
   return null;
 }
 function icon(memory?: Memory, selected = false) {
@@ -167,11 +168,7 @@ export default function MemoryMap({
           attributionControl
           zoomControl={false}
         >
-          <ZoomControl
-            position="bottomright"
-            zoomInTitle="Acercar mapa"
-            zoomOutTitle="Alejar mapa"
-          />
+          <ZoomControl position="bottomright" />
           <TileLayer
             key={retry}
             url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"

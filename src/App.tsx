@@ -229,13 +229,25 @@ export default function App() {
     setNotice("Recuerdo actualizado.");
     return null;
   }
-  function save(memory: Memory) {
+  async function save(memory: Memory) {
     const destinationGroup=groups.find(g=>g.id===scope);
     if(destinationGroup) {
       if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
       memory={...memory,groupId:scope};
     }
     const isFirstMemory = local.length === 0;
+
+    try {
+      const { crearPublicacion } = await import("./api");
+      const res = await crearPublicacion(memory);
+      if (res && res.id) {
+        memory = { ...memory, id: res.id.toString() };
+      }
+    } catch (err) {
+      console.warn("Backend falló, queda con el ID local.", err);
+      return "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
+    }
+
     const next = [...local, memory];
     try {
       if (!saveMemories(next, window.localStorage))
