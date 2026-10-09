@@ -8,6 +8,8 @@ import FeedHeader from "./FeedHeader";
 import FeedPost from "./FeedPost";
 import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
+import RepostDialog from "./RepostDialog";
+import { compartirPublicacion } from "../../api";
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -48,13 +50,17 @@ export default function SocialFeed({
   const desktopDetail = !!selected && (decade === 1990 || decade === 2000);
   const [maximized, setMaximized] = useState(false);
   const [reposts, setReposts] = useState<string[]>([]);
+  const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
+  const [localReposts, setLocalReposts] = useState<Memory[]>([]);
   const [saves, setSaves] = useState<string[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<FeedTab>("all");
   const openingRect = useRef<DOMRect | undefined>(undefined);
   const cancelTurn = useRef<() => void>(() => {});
   const stream = useRef<HTMLDivElement>(null);
-  const resultKey = memories.map((memory) => memory.id).join(",");
+  
+  const allMemories = [...localReposts, ...memories];
+  const resultKey = allMemories.map((memory) => memory.id).join(",");
 
   useEffect(() => () => cancelTurn.current(), []);
   useEffect(() => {
@@ -63,20 +69,20 @@ export default function SocialFeed({
 
   const authors = [
     ...new Set(
-      memories
+      allMemories
         .filter((memory) => memory.source === "demo")
         .map((memory) => memory.author),
     ),
   ];
   const posts =
     tab === "following"
-      ? memories.filter((memory) => following.includes(memory.author))
+      ? allMemories.filter((memory) => following.includes(memory.author))
       : tab === "groups"
-        ? memories.filter(
+        ? allMemories.filter(
             (memory) =>
               !!memory.groupId && groupIds.includes(memory.groupId),
           )
-        : memories;
+        : allMemories;
 
   function rate(id: string, value: number) {
     setRatings((current) => {
@@ -154,9 +160,7 @@ export default function SocialFeed({
                 onMap={onMap}
                 onRate={(value) => rate(memory.id, value)}
                 onLike={() => interactions.toggleLike(memory.id)}
-                onRepost={() =>
-                  setReposts((current) => toggleId(current, memory.id))
-                }
+                onRepost={() => setRepostMemory(memory)}
                 onSave={() =>
                   setSaves((current) => toggleId(current, memory.id))
                 }
@@ -188,6 +192,49 @@ export default function SocialFeed({
         onAdd={onAdd}
         onFollow={onFollow}
       />
+      {repostMemory && (
+        <RepostDialog
+          memoryTitle={repostMemory.title}
+          onCancel={() => setRepostMemory(null)}
+          onConfirm={async (descripcion) => {
+            try {
+              // Llamada defensiva al backend
+              const res = await compartirPublicacion(repostMemory.id, descripcion);
+              
+              const newRepost: Memory = {
+                ...repostMemory,
+                id: res.id ? String(res.id) : `repost-${Date.now()}`,
+                author: "Vos",
+                source: "local",
+                repost: {
+                  author: repostMemory.author,
+                  comment: descripcion || undefined
+                }
+              };
+              setLocalReposts((prev) => [newRepost, ...prev]);
+
+            } catch (err) {
+              console.warn("Backend no disponible o falló al compartir, pero seguimos visualmente.", err);
+              
+              const newRepost: Memory = {
+                ...repostMemory,
+                id: `repost-${Date.now()}`,
+                author: "Vos",
+                source: "local",
+                repost: {
+                  author: repostMemory.author,
+                  comment: descripcion || undefined
+                }
+              };
+              setLocalReposts((prev) => [newRepost, ...prev]);
+            } finally {
+              // Igualmente actualizamos la UI para no romper el flujo "demo" del front
+              setReposts((current) => toggleId(current, repostMemory.id));
+              setRepostMemory(null);
+            }
+          }}
+        />
+      )}
     </section>
   );
 }

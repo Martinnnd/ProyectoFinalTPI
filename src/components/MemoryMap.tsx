@@ -4,7 +4,6 @@ import {
   Marker,
   TileLayer,
   Tooltip,
-  ZoomControl,
   useMapEvents,
 } from "react-leaflet";
 import L from "leaflet";
@@ -73,6 +72,19 @@ function MapActions({
       element.removeEventListener("mousedown", focusMap, true);
     };
   }, [map, picking, onPick]);
+
+  useEffect(() => {
+    const zoom = L.control.zoom({
+      position: "bottomright",
+      zoomInTitle: "Acercar mapa",
+      zoomOutTitle: "Alejar mapa",
+    });
+    zoom.addTo(map);
+    return () => {
+      zoom.remove();
+    };
+  }, [map]);
+
   return null;
 }
 function icon(memory?: Memory, selected = false) {
@@ -138,11 +150,6 @@ export default function MemoryMap({
           attributionControl
           zoomControl={false}
         >
-          <ZoomControl
-            position="bottomright"
-            zoomInTitle="Acercar mapa"
-            zoomOutTitle="Alejar mapa"
-          />
           <TileLayer
             key={retry}
             url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"

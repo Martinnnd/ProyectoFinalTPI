@@ -26,6 +26,10 @@ export interface Memory {
   media?: { kind: "image" | "video" | "youtube"; url: string };
   music?: { spotifyId: string; title: string; artist: string };
   reference?: string;
+  repost?: {
+    author: string;
+    comment?: string;
+  };
 }
 export interface Period {
   decade: Decade;

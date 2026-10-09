@@ -256,6 +256,23 @@ export default function App() {
       setPanelOpen(false);
     }
     setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
+
+    // Actualización optimista: guardamos rápido en la UI para no trabar React,
+    // y mandamos al backend de fondo. Si el backend nos da su propio ID, lo reemplazamos.
+    import("./api").then(({ crearPublicacion }) => {
+      crearPublicacion(memory).then(res => {
+        if (res && res.id) {
+          const newId = res.id.toString();
+          setLocal(current => {
+            const updated = current.map(m => m.id === memory.id ? { ...m, id: newId } : m);
+            saveMemories(updated, window.localStorage);
+            return updated;
+          });
+          setSelectedId(current => current === memory.id ? newId : current);
+        }
+      }).catch(err => console.warn("Backend falló, queda con el ID local.", err));
+    });
+
     // Hardcoded unlock: the very first memory the visitor creates earns badge 01.
     // It only sets this state, so the popup never moves them off the current view.
     if (isFirstMemory) setCelebrating(achievements[0]);
