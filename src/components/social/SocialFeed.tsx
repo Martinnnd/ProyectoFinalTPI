@@ -70,7 +70,7 @@ export default function SocialFeed({
   const authors = [
     ...new Set(
       allMemories
-        .filter((memory) => memory.source === "demo")
+        .filter((memory) => memory.source !== "local" && memory.author !== "Vos")
         .map((memory) => memory.author),
     ),
   ];

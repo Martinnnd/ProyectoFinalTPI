@@ -1,9 +1,7 @@
 export const API_BASE_URL = "http://localhost:5199";
 
 export async function compartirPublicacion(originalId: string, descripcion: string, autorId: number = 1) {
-    // Intentamos parsear el ID de la memoria a numérico para que el backend lo acepte.
-    // En caso de que sea un ID local estilo "demo-1", extraerá el 1.
-    // Si no hay número, enviamos 1 por defecto para evitar errores tipo "400 Bad Request".
+   
     const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1; 
 
     const response = await fetch(`${API_BASE_URL}/api/publicaciones/compartir`, {
@@ -36,11 +34,18 @@ function dataURItoBlob(dataURI: string) {
     return new Blob([ab], { type: mimeString });
 }
 
+export async function getMemories() {
+    const response = await fetch(`${API_BASE_URL}/api/publicaciones`);
+    if (!response.ok) {
+        throw new Error(`Error fetching memories: ${response.statusText}`);
+    }
+    return await response.json();
+}
+
 export async function crearPublicacion(memory: any, autorId: number = 1): Promise<any> {
     const formData = new FormData();
     formData.append('Titulo', memory.title);
     formData.append('Descripcion', memory.description);
-    // Asignamos una fecha con el año del recuerdo
     formData.append('Fecha', new Date(memory.year, 0, 1).toISOString());
     
     const mapCategory = (cat: string) => {
@@ -57,7 +62,7 @@ export async function crearPublicacion(memory: any, autorId: number = 1): Promis
     }
     formData.append('Categoria', mapCategory(memory.category));
     formData.append('NombreLugar', memory.place);
-    formData.append('Latitud', memory.lat.toString().replace('.', ',')); // Defensive against localization, but FormData stringifies safely. Actually backend invariant culture might expect '.' Let's send raw string
+    formData.append('Latitud', memory.lat.toString().replace('.', ',')); 
     formData.set('Latitud', memory.lat.toString());
     formData.set('Longitud', memory.lng.toString());
     formData.append('AutorId', autorId.toString());

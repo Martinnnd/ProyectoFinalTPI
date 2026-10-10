@@ -20,6 +20,7 @@ import {
 } from "./types";
 import { achievements, eraContent, initialMemories } from "./data";
 import { loadMemories, saveMemories } from "./storage";
+import { getMemories } from "./api";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
@@ -59,6 +60,10 @@ export default function App() {
   });
   const [category, setCategory] = useState<Category | "Todas">("Todas");
   const [local, setLocal] = useState<Memory[]>([]);
+  const [dbMemories, setDbMemories] = useState<Memory[]>([]);
+  useEffect(() => {
+    getMemories().then(data => setDbMemories(data)).catch(console.error);
+  }, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [deleting, setDeleting] = useState<Memory | null>(null);
@@ -118,11 +123,11 @@ export default function App() {
     };
   }, []);
   const memories = filterMemories(
-    filterCommunity([...initialMemories, ...local],view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
+    filterCommunity([...dbMemories, ...local],view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
     period,
     category,
   );
-  const profileMemories = profileAuthor === null ? local : initialMemories.filter(m => m.author === profileAuthor);
+  const profileMemories = profileAuthor === null ? local : dbMemories.filter(m => m.author === profileAuthor);
   const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? ownMemories : memories;
   const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
