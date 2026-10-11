@@ -7,7 +7,7 @@ export const theme = {
   storiesTitle: "Mis recuerdos — Nostalgiar Messenger",
   factsTitle: "La época — Internet Explorer",
   musicTitle: "Mi música · Compartiendo recuerdos",
-  brandLabel: "",
+  brandLabel: "Windows Live",
   shortLabel: "2000",
   tokens: {
     "--bg": "#e8f3ff",
