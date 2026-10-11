@@ -1,5 +1,6 @@
 import { youtubeId, safeMediaUrl } from "./media";
 import { categories, type Memory } from "./types";
+import { isHashtag, MAX_HASHTAGS } from "./hashtags";
 export const STORAGE_KEY = "nostalgia.memories.v1";
 export function isMemory(value: unknown): value is Memory {
   if (!value || typeof value !== "object") return false;
@@ -13,6 +14,8 @@ export function isMemory(value: unknown): value is Memory {
     ) &&
     (m.media === undefined || validMedia(m.media)) &&
     (m.music === undefined || validMusic(m.music)) &&
+    (m.hashtags === undefined || (Array.isArray(m.hashtags) && m.hashtags.length <= MAX_HASHTAGS && m.hashtags.every(isHashtag))) &&
+    (m.createdAt === undefined || (typeof m.createdAt === "string" && Number.isFinite(Date.parse(m.createdAt)))) &&
     typeof m.year === "number" &&
     Number.isInteger(m.year) &&
     m.year >= 1970 &&

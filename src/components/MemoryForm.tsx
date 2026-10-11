@@ -1,11 +1,13 @@
 import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../media";
 import { eraRegistry } from "../eras/registry";
+import { parseHashtags } from "../hashtags";
   import { useEffect, useRef, useState } from "react";
   import { X, MapPin, Save } from "lucide-react";
   import { categories, type Memory, type Decade } from "../types";
   import type { Point } from "./MemoryMap";
   export default function MemoryForm({
     initial,
+    defaultHashtags = [],
     groupName,
     point,
     decade,
@@ -13,6 +15,7 @@ import { eraRegistry } from "../eras/registry";
     onSave,
   }: {
     initial?: Memory;
+    defaultHashtags?: string[];
     groupName?: string;
     point: Point;
     decade: Decade;
@@ -60,6 +63,8 @@ import { eraRegistry } from "../eras/registry";
         place = String(data.get("place")).trim(),
         description = String(data.get("description")).trim();
       const year = Number(data.get("year"));
+      const hashtags = parseHashtags(String(data.get("hashtags") ?? ""));
+      if (hashtags.error) { setError(hashtags.error); return; }
       if (
         !title ||
         !place ||
@@ -93,6 +98,8 @@ import { eraRegistry } from "../eras/registry";
         year,
         category: data.get("category") as Memory["category"],
         description,
+        hashtags: hashtags.tags,
+        createdAt: initial?.createdAt ?? (initial ? undefined : new Date().toISOString()),
         author: "Vos",
         source: "local",
         lat: point.lat,
@@ -181,6 +188,12 @@ import { eraRegistry } from "../eras/registry";
               rows={4}
               placeholder="Contanos qué hace especial a este recuerdo."
             />
+          </label>
+          <label>
+            Hashtags · opcional
+            <input name="hashtags" defaultValue={(initial?.hashtags ?? defaultHashtags).map(tag => `#${tag}`).join(" ")}
+              maxLength={500} placeholder="#cassettes #recuerdosdelbarrio" aria-describedby="hashtags-help" />
+            <small id="hashtags-help">Hasta 5 etiquetas separadas por espacios o comas. Compartí un hashtag para sumar tu recuerdo a su hilo.</small>
           </label>
           <fieldset className="media-fields"><legend>Foto o video · obligatorio</legend>
             <label>Tipo de adjunto<select value={mediaKind} onChange={e=>{fileVersion.current++;setLoadingFile(false);setMediaKind(e.target.value as typeof mediaKind);setMediaUrl('');}}><option value="image">Foto</option><option value="video">Video</option><option value="youtube">YouTube</option></select></label>

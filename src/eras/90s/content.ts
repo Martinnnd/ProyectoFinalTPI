@@ -8,7 +8,7 @@ export const content = {
   },
   memories: [
 {
-    "id": "grunge-90-1",
+    "id": "grunge-90-1", hashtags: ["cassettes", "grunge"],
     "groupId": "grunge-90",
     "title": "El cassette de Nirvana que no volvía nunca",
     "year": 1993,
@@ -22,7 +22,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "grunge-90-2",
+    "id": "grunge-90-2", hashtags: ["cassettes", "grunge"],
     "groupId": "grunge-90",
     "title": "Pearl Jam en el cuarto de mi amigo",
     "year": 1995,
@@ -36,7 +36,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "grunge-90-3",
+    "id": "grunge-90-3", hashtags: ["grunge", "recuerdosdelbarrio"],
     "groupId": "grunge-90",
     "title": "Nuestra banda ensayaba en un garaje",
     "year": 1997,
@@ -53,7 +53,7 @@ export const content = {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,
       lng: -58.4355,
-      id: "demo-7",
+      id: "demo-7", hashtags: ["recuerdosdelbarrio"],
       title: "La ronda de mate del Parque Centenario",
       year: 1997,
       category: "Personales",
@@ -80,7 +80,7 @@ export const content = {
       place: "Monumento Nacional a la Bandera, Rosario",
       lat: -32.9475,
       lng: -60.6304,
-      id: "demo-8",
+      id: "demo-8", hashtags: ["cassettes", "rocknacional"],
       title: "Una cinta y las escalinatas del Monumento",
       year: 1993,
       category: "Música",

@@ -64,6 +64,7 @@ export default function App() {
   const [deleting, setDeleting] = useState<Memory | null>(null);
   const [editing, setEditing] = useState<Memory | null>(null);
   const [draft, setDraft] = useState<Point | null>(null);
+  const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
   const [celebrating, setCelebrating] = useState<Achievement | null>(null);
   // Badge 01 means "you published a first memory", so it is derived from the
@@ -171,6 +172,7 @@ export default function App() {
     storiesButton.current?.focus();
   }
   function startAdding() {
+    setDraftHashtags([]);
     creationOrigin.current = view === "profile";
     setProfileAuthor(null);
     setView("map");
@@ -181,6 +183,7 @@ export default function App() {
     setMusicOpen(false);
   }
   function cancel() {
+    if (draftHashtags.length) setView("feed");
     if (creationOrigin.current) setView("profile");
     setPicking(false);
     setDraft(null);
@@ -267,6 +270,10 @@ export default function App() {
     if (creationOrigin.current) {
       setView("profile");
       setPanelOpen(false);
+    }
+    if (draftHashtags.length) {
+      setView("feed"); setSelectedId(null); setPanelOpen(false); setQuery("");
+      setDraftHashtags([]);
     }
     setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
     // Hardcoded unlock: the very first memory the visitor creates earns badge 01.
@@ -507,6 +514,7 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
+          onAddHashtag={tag => { startAdding(); setDraftHashtags([tag]); }}
           onEdit={editMemory}
           onDelete={deleteMemory}
           onProfile={openProfile}
@@ -582,6 +590,7 @@ export default function App() {
       {editing && <MemoryForm key={editing.id} initial={editing} point={{lat:editing.lat,lng:editing.lng}} decade={Math.floor(editing.year / 10) * 10 as Decade} groupName={groups.find(g => g.id === editing.groupId)?.name} onCancel={() => setEditing(null)} onSave={saveEdit}/>}
       {draft && (
         <MemoryForm
+          defaultHashtags={draftHashtags}
           groupName={groups.find(g=>g.id===scope)?.name}
           point={draft}
           decade={period.decade}
