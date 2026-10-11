@@ -64,7 +64,7 @@ export const content = {
       source: "demo",
     },
     {
-      place: "universidad Nacional De La Matanza",
+      place: "Universidad Nacional de La Matanza, San Justo",
       lat: -34.67077213671422, 
       lng: -58.562816626446505,
       id: "demo-33",
@@ -73,8 +73,7 @@ export const content = {
       category: "Personales",
       author: "Fernando",
       image: "https://i.postimg.cc/QdMKq3ZV/0f7ca658-ec73-40e1-98fa-39d9e501e3da.png",
-      description:
-        "Todavia me acuerdo de aquel 15 de abril, empecé a estudiar en La Matanza y marcó un antes y un despues en mi vida",
+        description: "Todavía me acuerdo de aquel 15 de abril de 1991, cuando empecé a estudiar en la Universidad Nacional de La Matanza. Llegué con una mezcla de nervios, entusiasmo y muchas expectativas sobre lo que vendría. Con el tiempo conocí compañeros que se volvieron grandes amigos y viví experiencias que marcaron una etapa importante de mi vida. Cada pasillo, cada clase y cada charla después de cursar forman parte de esos recuerdos que todavía conservo con mucho cariño. Fue el comienzo de un camino que me ayudó a crecer y que recuerdo como uno de los momentos más importantes de mi juventud.",
       source: "demo",
     },
     {

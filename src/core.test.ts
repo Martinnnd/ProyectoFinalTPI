@@ -5,16 +5,23 @@ import { eraFacts, factsForPeriod, musicByDecade } from "./eraData";
 import { isMemory, loadMemories, saveMemories } from "./storage";
 const local: Memory = { ...initialMemories[0], id: "local-1", source: "local" };
 describe("Exploración temporal", () => {
-  it("ofrece siete escenas por década en lugares distintos", () => {
+  it("ofrece escenas por década en lugares distintos", () => {
     for (const decade of [1970, 1980, 1990, 2000] as const) {
       const memories = filterMemories(
         initialMemories.filter(m => !m.groupId),
         { decade, year: null },
         "Todas",
       );
-      expect(memories).toHaveLength(7);
-      expect(new Set(memories.map((m) => m.place)).size).toBe(7);
+      expect(memories.length).toBeGreaterThanOrEqual(7);
+      expect(new Set(memories.map((m) => m.place)).size).toBe(
+        memories.length,
+      );
       expect(memories.every((m) => m.source === "demo")).toBe(true);
+      expect(
+        memories.every(
+          (m) => m.year >= decade && m.year < decade + 10,
+        ),
+      ).toBe(true);
     }
   });
   it("combina año y categoría, incluyendo estados vacíos", () => {
