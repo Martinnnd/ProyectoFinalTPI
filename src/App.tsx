@@ -6,7 +6,7 @@ import CommunityControls from "./components/CommunityControls";
 import { demoGroups, loadGroups, filterCommunity } from "./groups";
 import type { CommunityGroup } from "./types";
 import { useEffect, useRef, useState } from "react";
-import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
+import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown, LogIn } from "lucide-react";
 import {
   categories,
   filterMemories,
@@ -20,7 +20,8 @@ import {
 } from "./types";
 import { achievements, eraContent, initialMemories } from "./data";
 import { loadMemories, saveMemories } from "./storage";
-import { getMemories, isOwnMemory } from "./api";
+import { getMemories, isOwnMemory, getSesion, type UsuarioSesion } from "./api";
+import LoginDialog from "./components/LoginDialog";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
@@ -61,7 +62,10 @@ export default function App() {
   const [category, setCategory] = useState<Category | "Todas">("Todas");
   const [local, setLocal] = useState<Memory[]>([]);
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
   useEffect(() => {
+    setCurrentSesion(getSesion());
     getMemories().then(data => setDbMemories(data)).catch(console.error);
   }, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -397,7 +401,16 @@ export default function App() {
           <UserRound />
           <span>Perfil</span>
         </button>
-        
+        <button
+          aria-label={currentSesion ? `Cuenta: ${currentSesion.username}` : "Iniciar sesión"}
+          className={loginOpen ? "rail-active" : ""}
+          onClick={() => setLoginOpen(true)}
+          title={currentSesion ? `Sesión: ${currentSesion.username}` : "Iniciar sesión"}
+          style={currentSesion ? { color: "var(--accent, #4ade80)" } : undefined}
+        >
+          <LogIn />
+          <span>{currentSesion ? currentSesion.username : "Login"}</span>
+        </button>
       </nav>
       <header className="map-toolbar">
         <div className="brand-card">
@@ -597,6 +610,14 @@ export default function App() {
           onSave={save}
         />
       )}
+      <LoginDialog
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSesionChange={() => {
+          setCurrentSesion(getSesion());
+          getMemories().then(data => setDbMemories(data)).catch(console.error);
+        }}
+      />
     </div>
   );
 }
