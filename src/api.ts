@@ -1,5 +1,69 @@
 export const API_BASE_URL = "http://localhost:5199";
 
+export interface UsuarioSesion {
+    token: string;
+    usuarioId: number;
+    username: string;
+    email: string;
+    esAdmin: boolean;
+}
+
+export function getSesion(): UsuarioSesion | null {
+    if (typeof window === "undefined") return null;
+    try {
+        const raw = localStorage.getItem("nostalgia_auth");
+        return raw ? JSON.parse(raw) : null;
+    } catch {
+        return null;
+    }
+}
+
+export function guardarSesion(sesion: UsuarioSesion): void {
+    if (typeof window !== "undefined") {
+        localStorage.setItem("nostalgia_auth", JSON.stringify(sesion));
+    }
+}
+
+export function cerrarSesion(): void {
+    if (typeof window !== "undefined") {
+        localStorage.removeItem("nostalgia_auth");
+    }
+}
+
+export async function login(email: string, contrasena: string): Promise<UsuarioSesion> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, contrasena })
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({ mensaje: "Credenciales inválidas" }));
+        throw new Error(err.mensaje || `Error ${response.status}`);
+    }
+
+    const data: UsuarioSesion = await response.json();
+    guardarSesion(data);
+    return data;
+}
+
+export async function registro(datos: { username: string; email: string; contrasena: string; esAdmin?: boolean }): Promise<UsuarioSesion> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/registro`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({ mensaje: "Error al registrarse" }));
+        throw new Error(err.mensaje || `Error ${response.status}`);
+    }
+
+    const data: UsuarioSesion = await response.json();
+    guardarSesion(data);
+    return data;
+}
+
 let validAutorId: number | null = null;
 
 async function getValidAutorId(providedId: number): Promise<number> {
@@ -20,15 +84,22 @@ async function getValidAutorId(providedId: number): Promise<number> {
     return providedId;
 }
 
-export async function compartirPublicacion(originalId: string, descripcion: string, autorId: number = 1) {
-    const finalAutorId = await getValidAutorId(autorId);
+export async function compartirPublicacion(originalId: string, descripcion: string, autorId?: number) {
+    const sesion = getSesion();
+    const token = sesion?.token;
+    const finalAutorId = sesion?.usuarioId ?? (autorId !== undefined ? await getValidAutorId(autorId) : await getValidAutorId(1));
     const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1; 
+
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
 
     const response = await fetch(`${API_BASE_URL}/api/publicaciones/compartir`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
             publicacionOriginalId: numericId,
             descripcion: descripcion,
@@ -62,8 +133,10 @@ export async function getMemories() {
     return await response.json();
 }
 
-export async function crearPublicacion(memory: any, autorId: number = 1): Promise<any> {
-    const finalAutorId = await getValidAutorId(autorId);
+export async function crearPublicacion(memory: any, autorId?: number): Promise<any> {
+    const sesion = getSesion();
+    const token = sesion?.token;
+    const finalAutorId = sesion?.usuarioId ?? (autorId !== undefined ? await getValidAutorId(autorId) : await getValidAutorId(1));
     const formData = new FormData();
     formData.append('Titulo', memory.title);
     formData.append('Descripcion', memory.description);
@@ -103,8 +176,14 @@ export async function crearPublicacion(memory: any, autorId: number = 1): Promis
         }
     }
 
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/publicaciones`, {
         method: 'POST',
+        headers,
         body: formData
     });
 
