@@ -1,7 +1,7 @@
 import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../media";
 import { eraRegistry } from "../eras/registry";
   import { useEffect, useRef, useState } from "react";
-  import { X, MapPin, Save } from "lucide-react";
+  import { X, MapPin, Save, Loader2 } from "lucide-react";
   import { categories, type Memory, type Decade } from "../types";
   import type { Point } from "./MemoryMap";
   export default function MemoryForm({
@@ -53,8 +53,10 @@ import { eraRegistry } from "../eras/registry";
         previous?.focus();
       };
     }, []);
+    const [saving, setSaving] = useState(false);
     async function submit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
+      if (saving) return;
       const data = new FormData(event.currentTarget);
       const title = String(data.get("title")).trim(),
         place = String(data.get("place")).trim(),
@@ -80,6 +82,10 @@ import { eraRegistry } from "../eras/registry";
         if(!id||!title||!artist){setError('Completá el enlace de una canción de Spotify, el título y el artista.');return;}
         music={spotifyId:id,title,artist};
       }else if(musicChoice){const track=tracks.find(t=>t.spotifyId===musicChoice);if(track)music={spotifyId:track.spotifyId,title:track.title,artist:track.artist};}
+      
+      setSaving(true);
+      setError("");
+      
       const result = await onSave({
         ...initial,
         image: undefined,
@@ -97,6 +103,8 @@ import { eraRegistry } from "../eras/registry";
         source: "local",
         ...point,
       });
+      
+      setSaving(false);
       if (typeof result === "string") setError(result);
     }
     return (
@@ -202,11 +210,15 @@ import { eraRegistry } from "../eras/registry";
             dispositivos.
           </p>
           <div className="dialog-actions">
-            <button type="button" className="secondary-button" onClick={requestClose}>
+            <button type="button" className="secondary-button" onClick={requestClose} disabled={saving}>
               Cancelar
             </button>
-            <button className="primary-button" type="submit">
-              <Save size={17} /> {loadingFile ? "Cargando…" : "Guardar recuerdo"}
+            <button className="primary-button" type="submit" disabled={saving || loadingFile}>
+              {saving ? (
+                <><Loader2 size={17} style={{ animation: "device-spin 1s linear infinite" }} /> Guardando...</>
+              ) : (
+                <><Save size={17} /> {loadingFile ? "Cargando archivo…" : "Guardar recuerdo"}</>
+              )}
             </button>
           </div>
         </form>

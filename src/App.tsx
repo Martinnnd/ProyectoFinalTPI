@@ -122,8 +122,9 @@ export default function App() {
       document.removeEventListener("keydown", closeMenus);
     };
   }, []);
+  const uniqueLocal = local.filter(l => !dbMemories.some(db => db.id === l.id));
   const memories = filterMemories(
-    filterCommunity([...dbMemories, ...local],view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
+    filterCommunity([...dbMemories, ...uniqueLocal],view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
     period,
     category,
   );

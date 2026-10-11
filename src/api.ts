@@ -1,7 +1,27 @@
 export const API_BASE_URL = "http://localhost:5199";
 
+let validAutorId: number | null = null;
+
+async function getValidAutorId(providedId: number): Promise<number> {
+    if (providedId !== 1) return providedId;
+    if (validAutorId !== null) return validAutorId;
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/publicaciones/test-users`);
+        if (response.ok) {
+            const users = await response.json();
+            if (users && users.length > 0) {
+                validAutorId = users[0].id;
+                return validAutorId as number;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch users", e);
+    }
+    return providedId;
+}
+
 export async function compartirPublicacion(originalId: string, descripcion: string, autorId: number = 1) {
-   
+    const finalAutorId = await getValidAutorId(autorId);
     const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1; 
 
     const response = await fetch(`${API_BASE_URL}/api/publicaciones/compartir`, {
@@ -12,7 +32,7 @@ export async function compartirPublicacion(originalId: string, descripcion: stri
         body: JSON.stringify({
             publicacionOriginalId: numericId,
             descripcion: descripcion,
-            autorId: autorId
+            autorId: finalAutorId
         })
     });
 
@@ -43,6 +63,7 @@ export async function getMemories() {
 }
 
 export async function crearPublicacion(memory: any, autorId: number = 1): Promise<any> {
+    const finalAutorId = await getValidAutorId(autorId);
     const formData = new FormData();
     formData.append('Titulo', memory.title);
     formData.append('Descripcion', memory.description);
@@ -65,7 +86,7 @@ export async function crearPublicacion(memory: any, autorId: number = 1): Promis
     formData.append('Latitud', memory.lat.toString().replace('.', ',')); 
     formData.set('Latitud', memory.lat.toString());
     formData.set('Longitud', memory.lng.toString());
-    formData.append('AutorId', autorId.toString());
+    formData.append('AutorId', finalAutorId.toString());
 
     let mediaUrl = memory.image || (memory.media ? memory.media.url : '');
     let isVideo = memory.media && memory.media.kind !== 'image';
