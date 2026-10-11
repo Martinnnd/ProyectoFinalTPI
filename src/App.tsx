@@ -19,7 +19,6 @@ import {
   type TierProgress,
 } from "./types";
 import { achievements, eraContent, initialMemories } from "./data";
-import { loadMemories, saveMemories } from "./storage";
 import { getMemories, isOwnMemory, getSesion, type UsuarioSesion } from "./api";
 import LoginDialog from "./components/LoginDialog";
 import AchievementToast from "./components/AchievementToast";
@@ -60,13 +59,22 @@ export default function App() {
     };
   });
   const [category, setCategory] = useState<Category | "Todas">("Todas");
-  const [local, setLocal] = useState<Memory[]>([]);
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
   const [loginOpen, setLoginOpen] = useState(false);
   const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
+
+  const reloadMemories = async () => {
+    try {
+      const data = await getMemories();
+      setDbMemories(data);
+    } catch (e) {
+      console.error("Error al cargar publicaciones:", e);
+    }
+  };
+
   useEffect(() => {
     setCurrentSesion(getSesion());
-    getMemories().then(data => setDbMemories(data)).catch(console.error);
+    reloadMemories();
   }, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
@@ -75,15 +83,9 @@ export default function App() {
   const [draft, setDraft] = useState<Point | null>(null);
   const [notice, setNotice] = useState("");
   const [celebrating, setCelebrating] = useState<Achievement | null>(null);
-  // Badge 01 means "you published a first memory", so it is derived from the
-  // visitor's own data instead of being stored again. That way it survives a
-  // reload with no extra storage key, and dismissing the banner cannot revoke it.
-  const earned: Achievement[] = local.length > 0 ? [achievements[0]] : [];
-  // Nostalgia points and monthly subscriptions have no data source yet, so
-  // Aedo and Mnemosine stay locked: their rules are declared, their inputs are
-  // not. Wire the real values here and both tiers unlock with no other change.
+  const earned: Achievement[] = dbMemories.some(m => isOwnMemory(m)) ? [achievements[0]] : [];
   const tierProgress: TierProgress = {
-    memories: local.length,
+    memories: dbMemories.filter(m => isOwnMemory(m)).length,
     points: 0,
     subscribed: false,
   };
@@ -95,17 +97,6 @@ export default function App() {
   }, [view]);
   const addButton = useRef<HTMLButtonElement>(null);
   const storiesButton = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    try {
-      const loaded = loadMemories(window.localStorage);
-      setLocal(loaded.memories);
-      setNotice(loaded.warning);
-    } catch {
-      setNotice(
-        "El almacenamiento está desactivado en este navegador. Podés explorar los recuerdos de demostración.",
-      );
-    }
-  }, []);
   useEffect(() => {
     const closeMenus = (event: MouseEvent | KeyboardEvent) => {
       if (event instanceof KeyboardEvent && event.key !== "Escape") return;
@@ -126,14 +117,13 @@ export default function App() {
       document.removeEventListener("keydown", closeMenus);
     };
   }, []);
-  const uniqueLocal = local.filter(l => !dbMemories.some(db => db.id === l.id));
   const memories = filterMemories(
-    filterCommunity([...dbMemories, ...uniqueLocal],view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
+    filterCommunity(dbMemories, view === "map" ? "all" : scope, groups, view === "map" ? "" : query),
     period,
     category,
   );
   const profileMemories = profileAuthor === null
-    ? [...local, ...dbMemories.filter(m => isOwnMemory(m))]
+    ? dbMemories.filter(m => isOwnMemory(m))
     : dbMemories.filter(m => m.author === profileAuthor);
   const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? profileMemories : memories;
@@ -213,30 +203,27 @@ export default function App() {
     return () => window.removeEventListener("keydown", handler);
   }, [picking, panelOpen, draft, mapExpanded]);
   function editMemory(memory: Memory) {
-    if (local.some(m => m.id === memory.id)) setEditing(memory);
+    if (dbMemories.some(m => m.id === memory.id && isOwnMemory(m))) setEditing(memory);
   }
   function deleteMemory(memory: Memory) {
-    if (!local.some(m => m.id === memory.id)) return;
+    if (!dbMemories.some(m => m.id === memory.id && isOwnMemory(m))) return;
     setDeleting(memory);
   }
   function confirmDelete(memory: Memory): string | null {
-    if (!local.some(m => m.id === memory.id)) return "Este recuerdo ya no está disponible.";
-    const next = local.filter(m => m.id !== memory.id);
-    if (!saveMemories(next, window.localStorage)) return "No se pudo eliminar el recuerdo. Intentá nuevamente.";
-    setLocal(next);
+    if (!dbMemories.some(m => m.id === memory.id)) return "Este recuerdo ya no está disponible.";
+    setDbMemories(prev => prev.filter(m => m.id !== memory.id));
     if (selectedId === memory.id) setSelectedId(null);
     setNotice("Recuerdo eliminado.");
     return null;
   }
   function saveEdit(memory: Memory): string | null {
-    const original = local.find(m => m.id === editing?.id);
+    const original = dbMemories.find(m => m.id === editing?.id);
     if (!original) return "Este recuerdo ya no está disponible.";
     const group = groups.find(g => g.id === original.groupId);
     if (group && (memory.year < group.decade || memory.year > group.decade + 9)) return `Elegí un año entre ${group.decade} y ${group.decade + 9} para este grupo.`;
     const updated = {...memory, id: original.id, groupId: original.groupId, source: original.source, author: original.author};
-    const next = local.map(m => m.id === original.id ? updated : m);
-    if (!saveMemories(next, window.localStorage)) return "No se pudo guardar. Revisá el espacio del navegador e intentá nuevamente.";
-    setLocal(next);setEditing(null);
+    setDbMemories(prev => prev.map(m => m.id === original.id ? updated : m));
+    setEditing(null);
     setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");setQuery("");
     setNotice("Recuerdo actualizado.");
     return null;
@@ -247,7 +234,7 @@ export default function App() {
       if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
       memory={...memory,groupId:scope};
     }
-    const isFirstMemory = local.length === 0;
+    const isFirstMemory = dbMemories.filter(m => isOwnMemory(m)).length === 0;
 
     try {
       const { crearPublicacion } = await import("./api");
@@ -255,19 +242,12 @@ export default function App() {
       if (res && res.id) {
         memory = { ...memory, id: res.id.toString() };
       }
+      await reloadMemories();
     } catch (err) {
-      console.warn("Backend falló, queda con el ID local.", err);
+      console.warn("Backend falló al crear publicación.", err);
       return "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
     }
 
-    const next = [...local, memory];
-    try {
-      if (!saveMemories(next, window.localStorage))
-        return "No se pudo guardar: el almacenamiento está lleno o bloqueado. Tu formulario sigue abierto para que no pierdas lo escrito.";
-    } catch {
-      return "Tu navegador no permite guardar recuerdos. Habilitá el almacenamiento y volvé a intentar.";
-    }
-    setLocal(next);
     setPeriod({
       decade: (Math.floor(memory.year / 10) * 10) as Decade,
       year: null,
@@ -553,6 +533,7 @@ export default function App() {
             setFactsOpen(false);
           }}
           onAdd={startAdding}
+          onReloadMemories={reloadMemories}
         />
       </div>
       <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft}/>

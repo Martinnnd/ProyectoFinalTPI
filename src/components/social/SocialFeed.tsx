@@ -30,6 +30,7 @@ export default function SocialFeed({
   onAdd,
   following,
   onFollow,
+  onReloadMemories,
 }: {
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
@@ -45,13 +46,13 @@ export default function SocialFeed({
   onSelect: (memory: Memory | null) => void;
   onMap: (memory: Memory) => void;
   onAdd: () => void;
+  onReloadMemories?: () => void | Promise<void>;
 }) {
   const interactions = useMemoryInteractions();
   const desktopDetail = !!selected && (decade === 1990 || decade === 2000);
   const [maximized, setMaximized] = useState(false);
   const [reposts, setReposts] = useState<string[]>([]);
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
-  const [localReposts, setLocalReposts] = useState<Memory[]>([]);
   const [saves, setSaves] = useState<string[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<FeedTab>("all");
@@ -59,7 +60,7 @@ export default function SocialFeed({
   const cancelTurn = useRef<() => void>(() => {});
   const stream = useRef<HTMLDivElement>(null);
   
-  const allMemories = [...localReposts, ...memories];
+  const allMemories = memories;
   const resultKey = allMemories.map((memory) => memory.id).join(",");
 
   useEffect(() => () => cancelTurn.current(), []);
@@ -211,43 +212,14 @@ export default function SocialFeed({
           memoryTitle={repostMemory.title}
           onCancel={() => setRepostMemory(null)}
           onConfirm={async (descripcion) => {
-            const originalAuthor =
-              repostMemory.repost && !repostMemory.repost.comment && repostMemory.repost.author
-                ? repostMemory.repost.author
-                : repostMemory.author;
-
             try {
-              // Llamada defensiva al backend
-              const res = await compartirPublicacion(repostMemory.id, descripcion);
-              
-              const newRepost: Memory = {
-                ...repostMemory,
-                id: res.id ? String(res.id) : `repost-${Date.now()}`,
-                author: "Vos",
-                source: "local",
-                repost: {
-                  author: originalAuthor,
-                  comment: descripcion || undefined
-                }
-              };
-              setLocalReposts((prev) => [newRepost, ...prev]);
-
+              await compartirPublicacion(repostMemory.id, descripcion);
+              if (onReloadMemories) {
+                await onReloadMemories();
+              }
             } catch (err) {
-              console.warn("Backend no disponible o falló al compartir, pero seguimos visualmente.", err);
-              
-              const newRepost: Memory = {
-                ...repostMemory,
-                id: `repost-${Date.now()}`,
-                author: "Vos",
-                source: "local",
-                repost: {
-                  author: originalAuthor,
-                  comment: descripcion || undefined
-                }
-              };
-              setLocalReposts((prev) => [newRepost, ...prev]);
+              console.error("Error al compartir en el servidor:", err);
             } finally {
-              // Igualmente actualizamos la UI para no romper el flujo "demo" del front
               setReposts((current) => toggleId(current, repostMemory.id));
               setRepostMemory(null);
             }
