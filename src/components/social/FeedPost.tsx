@@ -4,6 +4,7 @@ import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
 import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import type { Memory } from "../../types";
+import { isOwnMemory, getMemoryAuthorDisplay } from "../../api";
 import CommentsSection from "./CommentsSection";
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
@@ -58,31 +59,38 @@ export default function FeedPost({
   const hasInlineImage =
     memory.image && !memory.media && !youtubeId(memory.image);
 
+  const isOwn = isOwnMemory(memory);
+  const displayAuthor = isOwn
+    ? "Vos"
+    : (!memory.repost?.comment && memory.repost
+        ? (isOwnMemory({ author: memory.repost.author }) ? "Vos" : memory.repost.author)
+        : getMemoryAuthorDisplay(memory));
+
   return (
     <article className="feed-post">
       {memory.repost && (
         <div style={{ padding: '0.5rem 1rem 0', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
           <Repeat2 size={14} />
-          <span>Has reposteado esto</span>
+          <span>{isOwn ? "Has reposteado esto" : `${displayAuthor} reposteó esto`}</span>
         </div>
       )}
       <header>
         <button
           className="social-avatar author-avatar"
-          aria-label={`Ver perfil de ${!memory.repost?.comment && memory.repost ? memory.repost.author : (memory.source === "local" ? "Vos" : memory.author)}`}
+          aria-label={`Ver perfil de ${displayAuthor}`}
           onClick={() => onProfile(memory)}
         >
-          {(!memory.repost?.comment && memory.repost ? memory.repost.author : (memory.source === "local" ? "Vos" : memory.author)).slice(0, 1)}
+          {displayAuthor.slice(0, 1)}
         </button>
         <div>
           <button className="author-name" onClick={() => onProfile(memory)}>
-            <strong>{!memory.repost?.comment && memory.repost ? memory.repost.author : (memory.source === "local" ? "Vos" : memory.author)}</strong>
+            <strong>{displayAuthor}</strong>
           </button>
           <small>
-            {memory.source === "demo" ? "" : "Recuerdo local"} {memory.year}
+            {isOwn ? "Recuerdo local" : (memory.source === "demo" ? "" : "Recuerdo de la comunidad")} {memory.year}
           </small>
         </div>
-        {memory.source === "demo" && (
+        {!isOwn && (
           <button
             className="follow-button"
             aria-pressed={following}
@@ -107,8 +115,8 @@ export default function FeedPost({
       <div style={memory.repost?.comment ? { border: '1px solid var(--border, #ccc)', margin: '0 1rem 1rem', borderRadius: '8px', overflow: 'hidden' } : undefined}>
         {memory.repost?.comment && (
           <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--border, #ccc)', background: 'var(--surface-hover, rgba(0,0,0,0.03))', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div className="social-avatar" style={{ width: '20px', height: '20px', fontSize: '0.7rem' }}>{memory.repost.author.slice(0, 1)}</div>
-            <span><strong>{memory.repost.author}</strong></span>
+            <div className="social-avatar" style={{ width: '20px', height: '20px', fontSize: '0.7rem' }}>{getMemoryAuthorDisplay({ author: memory.repost.author }).slice(0, 1)}</div>
+            <span><strong>{getMemoryAuthorDisplay({ author: memory.repost.author })}</strong></span>
           </div>
         )}
 

@@ -20,7 +20,7 @@ import {
 } from "./types";
 import { achievements, eraContent, initialMemories } from "./data";
 import { loadMemories, saveMemories } from "./storage";
-import { getMemories } from "./api";
+import { getMemories, isOwnMemory } from "./api";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
@@ -128,7 +128,9 @@ export default function App() {
     period,
     category,
   );
-  const profileMemories = profileAuthor === null ? local : dbMemories.filter(m => m.author === profileAuthor);
+  const profileMemories = profileAuthor === null
+    ? [...local, ...dbMemories.filter(m => isOwnMemory(m))]
+    : dbMemories.filter(m => m.author === profileAuthor);
   const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? profileMemories : memories;
   const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
@@ -154,7 +156,7 @@ export default function App() {
     if (next.decade !== period.decade) setMusicOpen(false);
   }
   function openProfile(memory: Memory) {
-    setProfileAuthor(memory.source === "local" ? null : memory.author);
+    setProfileAuthor(isOwnMemory(memory) ? null : memory.author);
     setSelectedId(null); setPanelOpen(false); setFactsOpen(false); setPicking(false);
     setCategory("Todas"); setPeriod(p => ({...p, year: null}));
     setView("profile");

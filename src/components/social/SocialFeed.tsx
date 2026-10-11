@@ -9,7 +9,7 @@ import FeedPost from "./FeedPost";
 import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
 import RepostDialog from "./RepostDialog";
-import { compartirPublicacion } from "../../api";
+import { compartirPublicacion, isOwnMemory } from "../../api";
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -70,7 +70,7 @@ export default function SocialFeed({
   const authors = [
     ...new Set(
       allMemories
-        .filter((memory) => memory.source !== "local" && memory.author !== "Vos")
+        .filter((memory) => !isOwnMemory(memory))
         .map((memory) => memory.author),
     ),
   ];
@@ -198,7 +198,6 @@ export default function SocialFeed({
           onCancel={() => setRepostMemory(null)}
           onConfirm={async (descripcion) => {
             try {
-              // Llamada defensiva al backend
               const res = await compartirPublicacion(repostMemory.id, descripcion);
               
               const newRepost: Memory = {
@@ -228,7 +227,6 @@ export default function SocialFeed({
               };
               setLocalReposts((prev) => [newRepost, ...prev]);
             } finally {
-              // Igualmente actualizamos la UI para no romper el flujo "demo" del front
               setReposts((current) => toggleId(current, repostMemory.id));
               setRepostMemory(null);
             }

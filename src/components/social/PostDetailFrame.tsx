@@ -1,5 +1,6 @@
 import { forwardRef, type ReactNode } from "react";
 import type { Memory } from "../../types";
+import { getMemoryAuthorDisplay } from "../../api";
 
 const PostDetailFrame = forwardRef<
   HTMLDivElement,
@@ -67,10 +68,10 @@ const PostDetailFrame = forwardRef<
               <>
                 <div className="transition-contact">
                   <span className="transition-contact-avatar">
-                    {memory.author.slice(0, 1)}
+                    {getMemoryAuthorDisplay(memory).slice(0, 1)}
                   </span>
                   <div className="transition-contact-name">
-                    {memory.author} — Conversación
+                    {getMemoryAuthorDisplay(memory)} — Conversación
                   </div>
                   <small className="transition-contact-status">
                     Recuerdo de {memory.year}

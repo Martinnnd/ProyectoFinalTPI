@@ -30,6 +30,22 @@ export function cerrarSesion(): void {
     }
 }
 
+export function isOwnMemory(memory: { author?: string; source?: string } | null | undefined): boolean {
+    if (!memory) return false;
+    if (memory.source === "local" || memory.author === "Vos") return true;
+    const sesion = getSesion();
+    if (sesion && sesion.username && memory.author) {
+        return memory.author.trim().toLowerCase() === sesion.username.trim().toLowerCase();
+    }
+    return false;
+}
+
+export function getMemoryAuthorDisplay(memory: { author?: string; source?: string } | null | undefined): string {
+    if (!memory) return "Desconocido";
+    if (isOwnMemory(memory)) return "Vos";
+    return memory.author || "Desconocido";
+}
+
 export async function login(email: string, contrasena: string): Promise<UsuarioSesion> {
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
