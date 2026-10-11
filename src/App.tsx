@@ -90,7 +90,7 @@ export default function App() {
     if (window.innerWidth < 900 && view !== "map") setMusicOpen(false);
   }, [view]);
   const addButton = useRef<HTMLButtonElement>(null);
-  const storiesButton = useRef<HTMLButtonElement>(null);
+  const storiesButton = useRef<HTMLElement | null>(null);
   useEffect(() => {
     try {
       const loaded = loadMemories(window.localStorage);
@@ -130,7 +130,7 @@ export default function App() {
   );
   const profileMemories = profileAuthor === null ? local : dbMemories.filter(m => m.author === profileAuthor);
   const ownMemories = filterMemories(profileMemories, period, category);
-  const visibleMemories = view === "profile" ? ownMemories : memories;
+  const visibleMemories = view === "profile" ? profileMemories : memories;
   const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
     setScope(value);setQuery('');setSelectedId(null);
@@ -160,6 +160,7 @@ export default function App() {
     setView("profile");
   }
   function openPublication(memory: Memory) {
+    setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
   }
   function select(memory: Memory) {
@@ -280,20 +281,18 @@ export default function App() {
     window.setTimeout(() => addButton.current?.focus(), 0);
     return null;
   }
-  function toggleStories() {
-    setView("map");
-    setPanelOpen(!panelOpen);
-    if (window.innerWidth < 900) {
-      setFactsOpen(false);
-      setMusicOpen(false);
-    }
-  }
   function navigate(destination: "map" | "stories" | "facts" | "music") {
-    setView("map");
     setPicking(false);
-    setPanelOpen(destination === "stories");
-    setFactsOpen(destination === "facts");
-    setMusicOpen(destination === "music");
+    if (destination === "music") {
+      setMusicOpen(!musicOpen);
+      if (window.innerWidth < 900) { setPanelOpen(false); setFactsOpen(false); }
+      return;
+    }
+    if (destination === "stories") storiesButton.current = document.activeElement as HTMLElement | null;
+    setView("map");
+    setPanelOpen(destination === "stories" && (view !== "map" || !panelOpen));
+    setFactsOpen(destination === "facts" && (view !== "map" || !factsOpen));
+    if (window.innerWidth < 900 || destination === "map") setMusicOpen(false);
     if (destination === "map") setSelectedId(null);
   }
   const theme = eraThemes[period.decade];
@@ -350,6 +349,7 @@ export default function App() {
         period={period}
         count={visibleMemories.length}
         panelOpen={panelOpen}
+        factsOpen={factsOpen}
         musicOpen={musicOpen}
         onNavigate={navigate}
       />
@@ -380,48 +380,6 @@ export default function App() {
           <span>Feed</span>
         </button>
         <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);}}><MessageCircle/><span>Chat</span></button>
-        <button
-          ref={storiesButton}
-          data-mobile-secondary="true"
-          aria-expanded={panelOpen}
-          aria-controls="stories"
-          className={panelOpen ? "rail-active" : ""}
-          onClick={toggleStories}
-        >
-          <EraIcon decade={period.decade} destination="stories" />
-          <span>Historias</span>
-        </button>
-        <button
-          aria-expanded={factsOpen}
-          data-mobile-secondary="true"
-          aria-controls="era-facts"
-          onClick={() => {
-            setView("map");
-            setFactsOpen(view !== "map" || !factsOpen);
-            if (window.innerWidth < 900) {
-              setPanelOpen(false);
-              setMusicOpen(false);
-            }
-          }}
-        >
-          <EraIcon decade={period.decade} destination="facts" />
-          <span>La época</span>
-        </button>
-        <button
-          aria-expanded={musicOpen}
-          data-mobile-secondary="true"
-          aria-controls="music-player"
-          onClick={() => {
-            setMusicOpen(!musicOpen);
-            if (window.innerWidth < 900) {
-              setPanelOpen(false);
-              setFactsOpen(false);
-            }
-          }}
-        >
-          <EraIcon decade={period.decade} destination="music" />
-          <span>Música</span>
-        </button>
         <button
           aria-current={view === "profile" ? "page" : undefined}
           className={`rail-profile ${view === "profile" ? "rail-active" : ""}`}

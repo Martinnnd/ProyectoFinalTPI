@@ -1,10 +1,3 @@
-@font-face {
-  font-family: 'Ananda';
-  src: url('../../../fonts/AnandaBlack.ttf') format('ttf');
-  font-weight: normal;
-  font-style: normal;
-}
-
 /* Canal 70: CRT glass inside a wood and brushed-metal television. */
 .era-1970 .leaflet-tile-pane,.era-1970 .mapboxgl-canvas { filter:grayscale(1) contrast(.9) brightness(.83); }
 .era-1970 .memory-map { background:#313533; }
@@ -397,3 +390,31 @@
 .era-1970 .delete-scene-result { bottom:8px; }
 @keyframes paper-physical { 0% {transform:rotate(-8deg);clip-path:polygon(0 0,100% 0,100% 100%,0 100%)} 18% {transform:rotate(-12deg) rotateY(22deg) scale(.8,.9);clip-path:polygon(8% 5%,87% 0,100% 83%,17% 100%)} 36% {transform:rotate(12deg) rotateY(-25deg) scale(.52,.62);clip-path:polygon(20% 0,75% 8%,100% 35%,87% 90%,55% 100%,5% 78%,0 32%)} 48% {left:13%;top:63px;transform:rotate(-15deg) scale(.4,.35);border-radius:38%;box-shadow:inset 8px 8px 10px #fff9,inset -8px -5px 15px #4d3d26aa,3px 6px 8px #0004} 68% {left:50%;top:16px;transform:rotate(140deg) scale(.38,.35);border-radius:38%;opacity:1} 84% {left:calc(92% - 86px);top:98px;transform:rotate(245deg) scale(.3);opacity:1} 93%,100% {left:calc(92% - 86px);top:133px;transform:rotate(275deg) scale(.2);opacity:0;border-radius:38%} }
 @keyframes paper-shadow { 0% {transform:scale(1);opacity:.5} 48% {left:13%;transform:scale(.4);opacity:.6} 68% {left:50%;transform:scale(.5);opacity:.15} 90%,100% {left:72%;transform:scale(.3);opacity:0} }
+
+.era-1970 .profile-timeline { background:#e8ddbc; border:3px double #807458; border-radius:0; }
+
+.era-1970 .timeline-drawer { background:#e9ddba; border:4px double #847552; }
+.era-1970 .timeline-drawer-header { border-bottom:4px double #847552; }
+
+/* Wood cabinet television with inset curved glass and tuning controls. */
+.era-1970 .profile-era-device { background:repeating-linear-gradient(2deg,#29170c20 0 2px,transparent 2px 8px),linear-gradient(100deg,#694428,#996740 40%,#56351f); border:5px ridge #a68155; border-radius:23px; padding:16px 18px 0; box-shadow:inset 0 0 0 3px #32261e,4px 7px 13px #0004; }
+.era-1970 .profile-device-top { color:#efddab; padding:0 4px 12px; font:bold 11px Georgia,serif; }
+.era-1970 .profile-era-device .profile-atlas-screen { border:9px solid #302e29; border-radius:34px; padding:4px; background:#888673; box-shadow:inset 0 2px 6px #000; }
+.era-1970 .profile-era-device .personal-map { border-radius:24px; border:2px solid #141b17; }
+.era-1970 .profile-device-bottom { color:#efdcac; min-height:66px; }
+.era-1970 .profile-device-grille { margin-left:auto; width:90px; height:28px; background:repeating-linear-gradient(0deg,#161915 0 2px,#8d8063 2px 5px); border:2px solid #443d2f; }
+.era-1970 .profile-device-knob { width:30px; height:30px; border-radius:50%; border:3px ridge #b5ad8f; background:linear-gradient(90deg,#2c2b23 43%,#c7bd97 45% 52%,#2c2b23 55%); box-shadow:1px 3px 3px #0008; }
+.era-1970 .profile-device-buttons i { background:#302e22; border:1px solid #bca77b; }
+.era-1970 .profile-device-led { background:#ecc16c; box-shadow:0 0 4px #eb9c3f; }
+@media(max-width:700px) { .era-1970 .profile-era-device { padding:10px 8px 0; } .era-1970 .profile-era-device .profile-atlas-screen { border-width:5px; border-radius:22px; } .era-1970 .profile-device-grille { width:42px; } .era-1970 .profile-device-buttons { display:none; } }
+
+.era-1970 .place-search-panel,.era-1970 .place-search-trigger { background:#f5eddc; border:1px solid #857456; border-radius:2px; box-shadow:3px 4px 0 #392b2029; }
+.era-1970 .place-search-panel header { background:#e9dec6; border-bottom:3px double #857456; }
+
+.era-1970 .era-activity-dock { background:linear-gradient(100deg,#705338,#3c2c1d); border:3px ridge #a98a5f; border-radius:10px; padding:10px; color:#f7edcc; }
+.era-1970 .activity-dock-heading { color:#f1e6c8; }
+.era-1970 .activity-dock-heading>span { color:#c9df84; }
+.era-1970 .activity-dock-options button { background:linear-gradient(#f2ead4,#cbc3ad); color:#302c23; border:1px solid #9b927c; border-bottom:4px solid #82745c; border-radius:4px; box-shadow:inset 0 1px #fff9; }
+.era-1970 .activity-dock-options button:hover { background:#fff1cb; }
+.era-1970 .activity-dock-options button[aria-expanded="true"] { background:#b7c0a0; border-bottom-width:1px; box-shadow:inset 1px 2px 5px #0005; }
+.era-1970 .tv-console .tv-dial { cursor:default; display:grid; place-items:center; }
