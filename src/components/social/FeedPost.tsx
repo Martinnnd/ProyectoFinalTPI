@@ -59,51 +59,62 @@ export default function FeedPost({
   const hasInlineImage =
     memory.image && !memory.media && !youtubeId(memory.image);
 
-  const isOwn = isOwnMemory(memory);
-  const displayAuthor = isOwn
-    ? "Vos"
-    : (!memory.repost?.comment && memory.repost
-        ? (isOwnMemory({ author: memory.repost.author }) ? "Vos" : memory.repost.author)
-        : getMemoryAuthorDisplay(memory));
+  const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
+
+  const isReposterOwn = isOwnMemory(memory);
+  const reposterDisplay = isReposterOwn ? "Vos" : getMemoryAuthorDisplay(memory);
+
+  const originalAuthor = memory.repost?.author;
+  const isOriginalAuthorOwn = originalAuthor ? isOwnMemory({ author: originalAuthor }) : false;
+
+  const headerAuthor = isSimpleRepost && originalAuthor ? originalAuthor : memory.author;
+  const isHeaderAuthorOwn = isSimpleRepost && originalAuthor ? isOriginalAuthorOwn : isReposterOwn;
+  const displayAuthor = isHeaderAuthorOwn ? "Vos" : getMemoryAuthorDisplay({ author: headerAuthor });
+
+  const profileMemory: Memory = isSimpleRepost && originalAuthor
+    ? { ...memory, author: originalAuthor, source: isOriginalAuthorOwn ? "local" : "community" }
+    : memory;
 
   return (
     <article className="feed-post">
       {memory.repost && (
         <div style={{ padding: '0.5rem 1rem 0', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
           <Repeat2 size={14} />
-          <span>{isOwn ? "Has reposteado esto" : `${displayAuthor} reposteó esto`}</span>
+          <span>{isReposterOwn ? "Has reposteado esto" : `${reposterDisplay} reposteó esto`}</span>
         </div>
       )}
       <header>
         <button
           className="social-avatar author-avatar"
           aria-label={`Ver perfil de ${displayAuthor}`}
-          onClick={() => onProfile(memory)}
+          onClick={() => onProfile(profileMemory)}
         >
           {displayAuthor.slice(0, 1)}
         </button>
         <div>
-          <button className="author-name" onClick={() => onProfile(memory)}>
+          <button className="author-name" onClick={() => onProfile(profileMemory)}>
             <strong>{displayAuthor}</strong>
           </button>
           <small>
-            {isOwn ? "Recuerdo local" : (memory.source === "demo" ? "" : "Recuerdo de la comunidad")} {memory.year}
+            {isHeaderAuthorOwn ? "Recuerdo local" : (memory.source === "demo" ? "" : "Recuerdo de la comunidad")} {memory.year}
           </small>
         </div>
-        {!isOwn && (
+        {!isHeaderAuthorOwn && (
           <button
             className="follow-button"
             aria-pressed={following}
-            onClick={() => onFollow(memory.author)}
+            onClick={() => onFollow(headerAuthor)}
           >
             {following ? "Siguiendo" : "Seguir"}
           </button>
         )}
-        <MemoryOwnerActions
-          memory={memory}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        {isHeaderAuthorOwn && (
+          <MemoryOwnerActions
+            memory={profileMemory}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        )}
       </header>
 
       {memory.repost?.comment && (

@@ -8,25 +8,32 @@ export interface UsuarioSesion {
     esAdmin: boolean;
 }
 
+let memorySesion: UsuarioSesion | null = null;
+
 export function getSesion(): UsuarioSesion | null {
-    if (typeof window === "undefined") return null;
-    try {
-        const raw = localStorage.getItem("nostalgia_auth");
-        return raw ? JSON.parse(raw) : null;
-    } catch {
-        return null;
+    if (memorySesion) return memorySesion;
+    if (typeof window !== "undefined" && window.localStorage) {
+        try {
+            const raw = window.localStorage.getItem("nostalgia_auth");
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
     }
+    return null;
 }
 
 export function guardarSesion(sesion: UsuarioSesion): void {
-    if (typeof window !== "undefined") {
-        localStorage.setItem("nostalgia_auth", JSON.stringify(sesion));
+    memorySesion = sesion;
+    if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem("nostalgia_auth", JSON.stringify(sesion));
     }
 }
 
 export function cerrarSesion(): void {
-    if (typeof window !== "undefined") {
-        localStorage.removeItem("nostalgia_auth");
+    memorySesion = null;
+    if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.removeItem("nostalgia_auth");
     }
 }
 
@@ -50,7 +57,7 @@ export async function login(email: string, contrasena: string): Promise<UsuarioS
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, contrasena })
+        body: JSON.stringify({ email, contrasena, contraseña: contrasena })
     });
 
     if (!response.ok) {

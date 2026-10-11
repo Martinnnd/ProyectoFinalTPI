@@ -70,13 +70,23 @@ export default function SocialFeed({
   const authors = [
     ...new Set(
       allMemories
-        .filter((memory) => !isOwnMemory(memory))
-        .map((memory) => memory.author),
+        .map((memory) =>
+          memory.repost && !memory.repost.comment && memory.repost.author
+            ? memory.repost.author
+            : memory.author
+        )
+        .filter((author) => !isOwnMemory({ author })),
     ),
   ];
   const posts =
     tab === "following"
-      ? allMemories.filter((memory) => following.includes(memory.author))
+      ? allMemories.filter((memory) => {
+          const author =
+            memory.repost && !memory.repost.comment && memory.repost.author
+              ? memory.repost.author
+              : memory.author;
+          return following.includes(author);
+        })
       : tab === "groups"
         ? allMemories.filter(
             (memory) =>
@@ -146,7 +156,11 @@ export default function SocialFeed({
                 key={memory.id}
                 memory={memory}
                 selected={selected?.id === memory.id}
-                following={following.includes(memory.author)}
+                following={following.includes(
+                  memory.repost && !memory.repost.comment && memory.repost.author
+                    ? memory.repost.author
+                    : memory.author
+                )}
                 liked={interactions.isLiked(memory.id)}
                 comments={comments}
                 rating={ratings[memory.id]}
@@ -197,7 +211,13 @@ export default function SocialFeed({
           memoryTitle={repostMemory.title}
           onCancel={() => setRepostMemory(null)}
           onConfirm={async (descripcion) => {
+            const originalAuthor =
+              repostMemory.repost && !repostMemory.repost.comment && repostMemory.repost.author
+                ? repostMemory.repost.author
+                : repostMemory.author;
+
             try {
+              // Llamada defensiva al backend
               const res = await compartirPublicacion(repostMemory.id, descripcion);
               
               const newRepost: Memory = {
@@ -206,7 +226,7 @@ export default function SocialFeed({
                 author: "Vos",
                 source: "local",
                 repost: {
-                  author: repostMemory.author,
+                  author: originalAuthor,
                   comment: descripcion || undefined
                 }
               };
@@ -221,12 +241,13 @@ export default function SocialFeed({
                 author: "Vos",
                 source: "local",
                 repost: {
-                  author: repostMemory.author,
+                  author: originalAuthor,
                   comment: descripcion || undefined
                 }
               };
               setLocalReposts((prev) => [newRepost, ...prev]);
             } finally {
+              // Igualmente actualizamos la UI para no romper el flujo "demo" del front
               setReposts((current) => toggleId(current, repostMemory.id));
               setRepostMemory(null);
             }
