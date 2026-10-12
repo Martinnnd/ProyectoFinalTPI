@@ -355,8 +355,8 @@ export default function App() {
         onNavigate={navigate}
       />
       <nav className="navigation-rail" aria-label="Navegación principal">
-        <span className="rail-logo" aria-hidden="true">
-          N
+        <span className="rail-logo">
+          <img src="/nostalgiar-rail-logo.png" alt="Nostalgiar" width={48} height={48} />
         </span>
         <button
           aria-label="Explorar mapa"
