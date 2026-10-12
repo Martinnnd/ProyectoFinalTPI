@@ -1,6 +1,7 @@
+import ActivityDock from "../shared/ActivityDock";
 import type { ChromeProps } from "../contracts";
 import { theme } from "./theme";
-export default function Chrome({ period, count }: ChromeProps) {
+export default function Chrome({ period, count, ...activities }: ChromeProps) {
   const label = period.year ?? `${period.decade}–${period.decade + 9}`;
   return (
     <div className="era-chrome">
@@ -18,6 +19,7 @@ export default function Chrome({ period, count }: ChromeProps) {
           CINTA {label}
         </span>
       </div>
+      <ActivityDock {...activities} title="SELECT SCREEN"/>
       <div className="vhs-status" aria-hidden="true">
         <span>HI-FI STEREO</span>
         <span>

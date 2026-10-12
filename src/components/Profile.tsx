@@ -1,7 +1,8 @@
+import ProfileTimeline from "./ProfileTimeline";
 import MemoryOwnerActions from "./MemoryOwnerActions";
 import PostMedia, { PostMusic } from "./PostMedia";
 import type { ReactNode } from "react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Grid3x3, Link2, Lock, MapPin, Plus, Send, Share2, UserRound, X } from "lucide-react";
 import MemoryMap from "./MemoryMap";
 import { describeTiers, resolveAchievements, resolveUserCategory } from "../data";
@@ -40,7 +41,31 @@ export default function Profile({
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
 }) {
-  const atlas = useRef<HTMLElement>(null);
+  const mapDialog = useRef<HTMLDialogElement>(null);
+  const mapReturnFocus = useRef<HTMLElement | null>(null);
+  const mapCloseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [mapOpened, setMapOpened] = useState(false);
+  const [mapClosing, setMapClosing] = useState(false);
+  useEffect(() => () => clearTimeout(mapCloseTimer.current), []);
+  function openMap() {
+    clearTimeout(mapCloseTimer.current);
+    mapReturnFocus.current = document.activeElement as HTMLElement | null;
+    setMapClosing(false);
+    setMapOpened(true);
+    mapDialog.current?.showModal();
+  }
+  function closeMap(after?: () => void) {
+    if (mapClosing) return;
+    setMapClosing(true);
+    mapCloseTimer.current = setTimeout(() => {
+      mapDialog.current?.close();
+      setMapOpened(false);
+      setMapClosing(false);
+      mapReturnFocus.current?.focus({ preventScroll: true });
+      after?.();
+    }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 320);
+  }
+  const openFromMap = onOpen ? (memory: Memory) => closeMap(() => onOpen(memory)) : undefined;
   const album = useRef<HTMLElement>(null);
   const presentation = {
     1970: {title: "Historias con nombre propio", label: "Suplemento personal", collection: "La hemeroteca", map: "Lugares de una vida", footer: "Cada vida merece ser contada"},
@@ -165,39 +190,64 @@ export default function Profile({
         </dl>
       </header>
       <nav className="profile-shortcuts" aria-label="Secciones del perfil">
-        <button onClick={() => jumpTo(album.current)}><Grid3x3 size={16}/>{author ? "Su colección" : presentation.collection}<span>{memories.length}</span></button>
-        <button onClick={() => jumpTo(atlas.current)}><MapPin size={16}/>{presentation.map}</button>
+        <button onClick={() => jumpTo(album.current)}><Grid3x3 size={16}/>{author ? "Su colección" : presentation.collection}<span>{allMemories.length}</span></button>
+        <button onClick={openMap} aria-haspopup="dialog" aria-expanded={mapOpened}><MapPin size={16}/>{presentation.map}</button>
         <span className="profile-motto">{presentation.footer}</span>
       </nav>
+      <ProfileTimeline memories={allMemories} author={author} onOpen={onOpen} onAdd={onAdd}/>
       {community}
-      <section ref={atlas} className="personal-atlas">
+      <button className="profile-map-trigger" aria-label="Abrir mapa del perfil" title="Los lugares de tu historia" aria-haspopup="dialog" aria-expanded={mapOpened} aria-controls="profile-map-dialog" onClick={openMap}>
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="21" stroke="currentColor" strokeWidth="1" strokeDasharray="4 5"/><path d="m9 20 10-4 10 4 10-4v20l-10 4-10-4-10 4V20Zm10-4v20m10-16v20" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><g className="profile-map-pin"><path d="M31 15c0 5-7 11-7 11s-7-6-7-11a7 7 0 0 1 14 0Z" fill="var(--surface)" stroke="currentColor" strokeWidth="2"/><circle cx="24" cy="15" r="2.5" fill="currentColor"/></g></svg>
+      </button>
+      <dialog ref={mapDialog} id="profile-map-dialog" className={`timeline-drawer profile-map-dialog${mapClosing ? " is-closing" : ""}`} aria-labelledby="profile-map-dialog-title" onCancel={e => { e.preventDefault(); e.stopPropagation(); closeMap(); }} onKeyDown={e => e.stopPropagation()}>
+        <header className="timeline-drawer-header"><div><span className="eyebrow">UN VIAJE POR TUS LUGARES</span><h2 id="profile-map-dialog-title">{author ? `El mapa de ${author}` : "Mi mapa de recuerdos"}</h2></div><button className="icon-button" aria-label="Cerrar mapa del perfil" onClick={() => closeMap()}><X size={22}/></button></header>
+        <div className="profile-map-dialog-content">
+      {mapOpened && <section className="personal-atlas">
         <div className="personal-section-title">
           <div>
             <span className="eyebrow">{author ? "GEOGRAFÍA DE RECUERDOS" : "MI GEOGRAFÍA DE RECUERDOS"}</span>
             <h3>{author ? `Los lugares de ${author}` : "Los lugares de mi historia"}</h3>
           </div>
           <span>
-            {period.year ?? `${period.decade}–${period.decade + 9}`} ·{" "}
-            {memories.length} recuerdos
+            Todas las épocas · {allMemories.length} recuerdos
           </span>
         </div>
+        <div className="profile-atlas-workspace">
+        <div className={period.decade === 1990 ? "profile-computer" : "profile-atlas-frame profile-era-device"}>
+        {period.decade === 1990 && <div className="profile-computer-title"><span>▣ Mi PC — Mapa personal</span><small>Archivo de recuerdos</small></div>}
+        {period.decade !== 1990 && <div className="profile-device-top" aria-hidden="true"><strong>{period.decade === 1970 ? "NOSTALGIAR · TELEVISIÓN" : period.decade === 1980 ? "MEMORY ARCADE" : "Nostalgiar · Digital Display"}</strong><small>{period.decade === 1980 ? "UN LUGAR · UNA HISTORIA" : "MAPA PERSONAL"}</small></div>}
+        <div className="profile-atlas-screen">
         <div className="personal-map">
           <MemoryMap
-            memories={memories}
+            fitMemories
+            memories={allMemories}
             selected={selected}
             onSelect={onSelect}
-            onOpen={onOpen}
+            onOpen={openFromMap}
             picking={false}
             onPick={() => { }}
             draft={null}
             onCancel={() => { }}
           />
         </div>
+
+        </div>
+        {period.decade !== 1990 && <div className="profile-device-bottom" aria-hidden="true"><span className="profile-device-brand">NOSTALGIAR</span><span className="profile-device-grille"/><span className="profile-device-knob"/><span className="profile-device-buttons"><i/><i/><i/></span><span className="profile-device-led"/></div>}
+        {period.decade === 1990 && <div className="profile-computer-chin" aria-hidden="true"><strong>NOSTALGIAR <small>PERSONAL COMPUTER</small></strong><span className="profile-computer-vents"/><i/><span>POWER</span></div>}
+        </div>
+        <aside className="profile-map-list" aria-label="Recuerdos del mapa">
+          <header><strong>{author ? "Sus recuerdos" : "Mis recuerdos"}</strong><small>{allMemories.length}</small></header>
+          <div className="profile-map-items">{allMemories.length ? [...allMemories].sort((a,b)=>a.year-b.year).map(memory=><div className="profile-map-row" key={memory.id} data-selected={selected?.id===memory.id}>
+            <button className="profile-map-select" aria-pressed={selected?.id===memory.id} onClick={()=>onSelect(memory)}><span className="profile-map-year">{memory.year}</span><span><strong>{memory.title}</strong><small>{memory.place}</small></span></button>
+            {selected?.id===memory.id && <><p>{memory.description}</p>{onOpen && <button className="profile-map-open" onClick={()=>openFromMap?.(memory)}>Ver publicación →</button>}</>}
+          </div>):<p className="profile-map-empty">Los recuerdos publicados aparecerán acá.</p>}</div>
+        </aside>
+        </div>
         {selected && (
           <article className="personal-detail">
             
             <div className="personal-detail-actions">
-              <MemoryOwnerActions memory={selected} onEdit={onEdit} onDelete={onDelete}/>
+              <MemoryOwnerActions memory={selected} onEdit={memory => closeMap(() => onEdit(memory))} onDelete={memory => closeMap(() => onDelete(memory))}/>
               <div className="share-menu">
                 <button
                   className="icon-button"
@@ -267,23 +317,25 @@ export default function Profile({
             <PostMedia key={`media-${selected.id}`} memory={selected}/>
           </article>
         )}
-      </section>
-      <section ref={album} className="personal-album">
-        <div className="personal-section-title">
-          <h3>{author ? `Recuerdos de ${author}` : "Mi colección"}</h3>
-          <span>Elegí un recuerdo para verlo en el mapa</span>
+      </section>}
         </div>
-        {memories.length ? (
-          <div className="personal-grid">
-            {memories.map((memory) => (
+      </dialog>
+      <section ref={album} className="personal-album profile-posts">
+        <div className="personal-section-title">
+          <h3>{author ? `Recuerdos de ${author}` : "Mis recuerdos"}</h3>
+          <span>Todas las épocas · Últimas publicaciones primero</span>
+        </div>
+        {allMemories.length ? (
+          <div className="personal-grid profile-post-list">
+            {[...allMemories].reverse().map((memory) => (
               <article
                 key={memory.id}
-                className="personal-memory"
+                className="personal-memory profile-post"
                 data-selected={selected?.id === memory.id}
               >
                 
                 <div className="memory-card-top">
-                  <span className="album-year">{memory.year}</span>
+                  <div className="profile-post-author"><span className="profile-post-avatar" aria-hidden="true">{(author ?? "Marty").slice(0,1)}</span><span><strong>{author ?? "Marty McFly"}</strong><small>{memory.year} · {memory.category}</small></span></div>
                   <MemoryOwnerActions memory={memory} onEdit={onEdit} onDelete={onDelete}/>
 
                   <div className="share-menu">
@@ -344,29 +396,24 @@ export default function Profile({
                     )}
                   </div>
                 </div>
-                <button className="personal-memory-open" aria-pressed={selected?.id === memory.id} onClick={() => onSelect(memory)}>
-                <span className="eyebrow">{memory.category}</span>
-                <strong>{memory.title}</strong>
-                <small>
-                  <MapPin size={13} />
-                  {memory.place}
-                </small>
-                </button>
+                <div className="profile-post-body">
+                  <h3>{memory.title}</h3>
+                  <p className="profile-post-location"><MapPin size={14}/>{memory.place}</p>
+                  <p className="profile-post-story">{memory.description}</p>
+                  <PostMusic music={memory.music}/>
+                  <PostMedia memory={memory}/>
+                </div>
+                <footer className="profile-post-footer">
+                  {onOpen && <button onClick={() => onOpen(memory)}>Ver publicación</button>}
+                  <button onClick={() => { onSelect(memory); openMap(); }}><MapPin size={16}/>Ver en el mapa</button>
+                </footer>
               </article>
             ))}
           </div>
         ) : (
           <div className="personal-empty">
-            <h3>
-              {author ? "No hay recuerdos de esta persona con estos filtros" : allMemories.length
-                ? "No hay recuerdos tuyos con estos filtros"
-                : "Tu primer recuerdo merece un lugar"}
-            </h3>
-            <p>
-              {author ? "Probá otra época o categoría para ver sus recuerdos." : allMemories.length
-                ? "Cambiá la época o la categoría para recorrer tu colección."
-                : "Marcá un lugar en el mapa y contá qué viviste allí. Tus publicaciones aparecerán en este archivo."}
-            </p>
+            <h3>{author ? "Todavía no hay recuerdos publicados" : "Tu primer recuerdo merece un lugar"}</h3>
+            <p>{author ? "Sus publicaciones aparecerán acá." : "Contá tu historia: cada recuerdo que publiques aparecerá acá, uno debajo del otro."}</p>
             {!author && <button className="primary-button" onClick={onAdd}>
               Crear un recuerdo
             </button>}
