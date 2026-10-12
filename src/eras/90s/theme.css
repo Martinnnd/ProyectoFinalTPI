@@ -1056,3 +1056,65 @@
 .era-1990 .chat-titlebar { background:#000080; color:white; padding:7px 10px; }
 .era-1990 .chat-conversation,.era-1990 .chat-list { background:white; color:#111; }
 .era-1990 .chat-bubble { border-radius:0; background:#eee; border-color:#999; }
+
+.era-1990 .memory-owner-actions .icon-button { border-radius:0; background:#c0c0c0; border:2px outset #eee; color:#161616; }
+.era-1990 .memory-owner-actions .icon-button:active { border-style:inset; }
+
+.era-1990 .delete-memory-dialog { background:#c0c0c0; border:3px outset #eee; border-radius:0; }
+.era-1990 .delete-memory-heading { background:#000080; color:#fff; margin:2px; }
+.era-1990 .delete-memory-heading .icon-button { background:#c0c0c0; border:2px outset #eee; color:#111; width:24px; height:24px; border-radius:0; }
+
+/* Explorer window, inset panels and compact system tools. */
+.era-1990 .profile-era-bar { background:linear-gradient(90deg,#000080,#2864a3); color:white; border:3px outset #eee; padding:7px 10px; }
+.era-1990 .personal-profile .personal-header { border-top:0; border-radius:0; border:2px outset #eee; background:#c0c0c0; padding:22px; }
+.era-1990 .personal-profile .profile-portrait { border:3px inset #eee; border-radius:0; background:white; color:#000080; }
+.era-1990 .personal-profile .personal-identity .eyebrow { background:#fff; border:2px inset #eee; padding:5px 9px; display:inline-block; letter-spacing:0; }
+.era-1990 .personal-profile .personal-counts { border:2px inset #eee; background:#d2d2d2; padding:14px 0; }
+.era-1990 .profile-shortcuts { background:#c0c0c0; border:2px outset #eee; border-top:0; }
+.era-1990 .profile-shortcuts button { border:2px outset #eee; background:#c0c0c0; }
+.era-1990 .profile-shortcuts button:active { border-style:inset; }
+.era-1990 .personal-profile .personal-section-title { border-bottom:1px solid #808080; padding-bottom:10px; }
+.era-1990 .personal-profile .personal-memory { border:2px inset #eee; background:#fff; }
+.era-1990 .memory-owner-actions { padding:3px; background:#c0c0c0; border:1px solid #808080; box-shadow:inset 1px 1px #fff; }
+.era-1990 .memory-owner-actions .icon-button { box-shadow:1px 1px #404040; }
+.era-1990 .memory-owner-actions .memory-delete:hover { background:#e7cccc; color:#800000; }
+
+ .era-1990 .delete-scene { background:#008080; border:3px inset #eee; color:white; }
+.era-1990 .delete-scene-caption { background:#000080; top:0; left:0; right:0; padding:5px 8px; letter-spacing:0; }
+.era-1990 .delete-item svg { color:#fff; fill:#eee; stroke:#000080; filter:drop-shadow(2px 2px #004747); }
+.era-1990 .delete-item small { background:#000080; padding:2px 4px; border:1px dotted white; }
+.era-1990 .delete-bin svg { color:#eee; fill:#c0c0c0; stroke:#444; filter:drop-shadow(2px 2px #004747); }
+.era-1990 .delete-path { color:#fff; }
+.era-1990 .delete-memory-dialog.is-deleting .delete-item { animation-timing-function:steps(12,end); }
+
+ .era-1990 .scene-bin-art { filter:contrast(1.25); shape-rendering:crispEdges; }
+.era-1990 .desktop-file { background:#fff;border:2px solid #333;box-shadow:2px 2px #003b3b; }
+.era-1990 .delete-memory-dialog.is-deleting .scene-desktop .delete-item,.era-1990 .is-deleting .delete-cursor { animation-timing-function:steps(14,end); }
+.era-1990 .delete-transfer { color:#fff; }
+
+.era-1990 .profile-timeline { background:#c0c0c0; border:3px outset #eee; border-radius:0; }
+
+.era-1990 .timeline-drawer { background:#c0c0c0; border:3px outset #eee; }
+.era-1990 .timeline-drawer-header { background:linear-gradient(90deg,#000080,#2564a0); color:#fff; margin:3px; }
+.era-1990 .timeline-drawer-header .eyebrow { color:#fff; }
+
+/* Personal map displayed inside a desktop monitor. */
+.era-1990 .profile-computer { padding:18px 18px 0; background:linear-gradient(125deg,#e7e3d7,#bfbeb4 65%,#d7d4c8); border:3px outset #eeebdf; border-radius:18px 18px 8px 8px; box-shadow:inset 0 0 0 3px #9c9d9355,4px 7px 12px #0003; }
+.era-1990 .profile-computer-title { display:flex; justify-content:space-between; gap:8px; background:linear-gradient(90deg,#000080,#2864a3); color:white; padding:7px 10px; border:6px solid #4b4e48; border-bottom:0; border-radius:8px 8px 0 0; font:bold 12px Arial,sans-serif; }
+.era-1990 .profile-computer-title small { font-weight:normal; font-size:10px; }
+.era-1990 .profile-computer .profile-atlas-screen { padding:8px; border:6px solid #4b4e48; border-top:0; background:#c0c0c0; gap:8px; border-radius:0 0 9px 9px; }
+.era-1990 .profile-computer .profile-map-list { border:2px inset #eee; background:#fff; }
+.era-1990 .profile-computer .profile-map-list > header { background:#c0c0c0; border-bottom:2px outset #eee; }
+.era-1990 .profile-computer-chin { display:flex; align-items:center; gap:10px; min-height:52px; padding:8px 12px; color:#454940; font:9px Arial,sans-serif; }
+.era-1990 .profile-computer-chin strong { font-size:12px; letter-spacing:1px; }
+.era-1990 .profile-computer-chin small { display:block; font-size:7px; font-weight:normal; margin-top:3px; }
+.era-1990 .profile-computer-vents { margin-left:auto; width:70px; height:20px; background:repeating-linear-gradient(0deg,#646a5c 0 1px,transparent 1px 4px); }
+.era-1990 .profile-computer-chin i { width:6px; height:6px; border-radius:50%; background:#7cbf3f; box-shadow:0 0 4px #5e9e25; }
+@media(max-width:700px) { .era-1990 .profile-computer { padding:9px 9px 0; } .era-1990 .profile-computer-title small { display:none; } .era-1990 .profile-computer .profile-atlas-screen { padding:4px; border-width:4px; } }
+
+.era-1990 .profile-atlas-workspace > .profile-map-list { border:3px outset #eee; background:#fff; }
+.era-1990 .profile-atlas-workspace > .profile-map-list > header { background:linear-gradient(90deg,#000080,#2864a3); color:#fff; margin:2px; border-bottom:0; }
+
+.era-1990 .place-search-panel,.era-1990 .place-search-trigger { border-radius:0; border:2px solid; border-color:#fff #555 #555 #fff; background:#c0c0c0; box-shadow:2px 2px 0 #0006; }
+.era-1990 .place-search-panel header { background:#000080; color:white; }
+.era-1990 .place-search-field { border-radius:0; border:2px inset #ddd; }

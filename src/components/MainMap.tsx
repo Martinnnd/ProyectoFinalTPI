@@ -1,5 +1,6 @@
-import { lazy, Suspense, useState, type ComponentProps } from "react";
-import MemoryMap from "./MemoryMap";
+import { lazy, Suspense, useEffect, useState, type ComponentProps } from "react";
+import MemoryMap, { type Point } from "./MemoryMap";
+import PlaceSearch from "./PlaceSearch";
 const MapboxMap = lazy(() => import("./MapboxMap"));
 export type MapProps = ComponentProps<typeof MemoryMap>;
 export default function MainMap(props: MapProps) {
@@ -8,35 +9,87 @@ export default function MainMap(props: MapProps) {
       ? undefined
       : process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim();
   const [fallback, setFallback] = useState(false);
-  if (!token?.startsWith("pk.") || fallback)
-    return (
-      <div className="main-map-shell">
-        <MemoryMap {...props} />
-        <div className="mapbox-status" role="status">
-          {fallback
-            ? "Mapbox no pudo cargar. Seguís explorando con el mapa 2D."
-            : "Vista 2D · Mapbox pendiente de configuración."}
-          {fallback && (
-            <button onClick={() => setFallback(false)}>
-              Reintentar Mapbox
-            </button>
-          )}
-        </div>
-      </div>
+  const [searchTarget, setSearchTarget] = useState<Point | null>(null);
+  const [userLocation, setUserLocation] = useState<Point | null>(null);
+  const [locationResolved, setLocationResolved] = useState(false);
+
+  useEffect(() => {
+    if (!("geolocation" in navigator)) {
+      setLocationResolved(true);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocationResolved(true);
+      },
+      () => {
+        setUserLocation(null);
+        setLocationResolved(true);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 8000,
+        maximumAge: 300000,
+      },
     );
+  }, []);
+
+  const mapProps = {
+    ...props,
+    searchTarget,
+    onSearchMove: setSearchTarget,
+    onSelect: (memory: Parameters<MapProps["onSelect"]>[0]) => {
+      setSearchTarget(null);
+      props.onSelect(memory);
+    },
+  };
+
+  const useFallback = !token?.startsWith("pk.") || fallback;
+
   return (
-    <Suspense
-      fallback={
-        <div className="map-empty" role="status">
-          Cargando globo…
-        </div>
-      }
-    >
-      <MapboxMap
-        {...props}
-        token={token}
-        onFallback={() => setFallback(true)}
+    <div className="main-map-shell">
+      {useFallback ? (
+        <>
+          <MemoryMap {...mapProps} />
+          <div className="mapbox-status" role="status">
+            {fallback
+              ? "Mapbox no pudo cargar. Seguís explorando con el mapa 2D."
+              : "Vista 2D · Mapbox pendiente de configuración."}
+            {fallback && (
+              <button onClick={() => setFallback(false)}>
+                Reintentar Mapbox
+              </button>
+            )}
+          </div>
+        </>
+      ) : (
+        <Suspense
+          fallback={
+            <div className="map-empty" role="status">
+              Cargando globo…
+            </div>
+          }
+        >
+          <MapboxMap
+            {...mapProps}
+            token={token!}
+            onFallback={() => setFallback(true)}
+            userLocation={userLocation}
+            locationResolved={locationResolved}
+          />
+        </Suspense>
+      )}
+
+      <PlaceSearch
+        target={searchTarget}
+        onChoose={setSearchTarget}
+        onCreate={props.onPick}
       />
-    </Suspense>
+    </div>
   );
 }

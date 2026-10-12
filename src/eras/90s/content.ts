@@ -8,7 +8,7 @@ export const content = {
   },
   memories: [
 {
-    "id": "grunge-90-1",
+    "id": "grunge-90-1", hashtags: ["cassettes", "grunge"],
     "groupId": "grunge-90",
     "title": "El cassette de Nirvana que no volvía nunca",
     "year": 1993,
@@ -22,7 +22,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "grunge-90-2",
+    "id": "grunge-90-2", hashtags: ["cassettes", "grunge"],
     "groupId": "grunge-90",
     "title": "Pearl Jam en el cuarto de mi amigo",
     "year": 1995,
@@ -36,7 +36,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "grunge-90-3",
+    "id": "grunge-90-3", hashtags: ["grunge", "recuerdosdelbarrio"],
     "groupId": "grunge-90",
     "title": "Nuestra banda ensayaba en un garaje",
     "year": 1997,
@@ -53,7 +53,7 @@ export const content = {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,
       lng: -58.4355,
-      id: "demo-7",
+      id: "demo-7", hashtags: ["recuerdosdelbarrio"],
       title: "La ronda de mate del Parque Centenario",
       year: 1997,
       category: "Personales",
@@ -64,7 +64,7 @@ export const content = {
       source: "demo",
     },
     {
-      place: "universidad Nacional De La Matanza",
+      place: "Universidad Nacional de La Matanza, San Justo",
       lat: -34.67077213671422, 
       lng: -58.562816626446505,
       id: "demo-33",
@@ -73,15 +73,14 @@ export const content = {
       category: "Personales",
       author: "Fernando",
       image: "https://i.postimg.cc/QdMKq3ZV/0f7ca658-ec73-40e1-98fa-39d9e501e3da.png",
-      description:
-        "Todavia me acuerdo de aquel 15 de abril, empecé a estudiar en La Matanza y marcó un antes y un despues en mi vida",
+        description: "Todavía me acuerdo de aquel 15 de abril de 1991, cuando empecé a estudiar en la Universidad Nacional de La Matanza. Llegué con una mezcla de nervios, entusiasmo y muchas expectativas sobre lo que vendría. Con el tiempo conocí compañeros que se volvieron grandes amigos y viví experiencias que marcaron una etapa importante de mi vida. Cada pasillo, cada clase y cada charla después de cursar forman parte de esos recuerdos que todavía conservo con mucho cariño. Fue el comienzo de un camino que me ayudó a crecer y que recuerdo como uno de los momentos más importantes de mi juventud.",
       source: "demo",
     },
     {
       place: "Monumento Nacional a la Bandera, Rosario",
       lat: -32.9475,
       lng: -60.6304,
-      id: "demo-8",
+      id: "demo-8", hashtags: ["cassettes", "rocknacional"],
       title: "Una cinta y las escalinatas del Monumento",
       year: 1993,
       category: "Música",

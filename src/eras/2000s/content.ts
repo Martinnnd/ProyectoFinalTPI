@@ -8,7 +8,7 @@ export const content = {
   },
   memories: [
 {
-    "id": "cine-2000-1",
+    "id": "cine-2000-1", hashtags: ["nochesdecine", "conamigos"],
     "groupId": "cine-2000",
     "title": "La fila para ver El retorno del rey",
     "year": 2004,
@@ -21,7 +21,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "cine-2000-2",
+    "id": "cine-2000-2", hashtags: ["nochesdecine", "conamigos"],
     "groupId": "cine-2000",
     "title": "Harry Potter y una salida después del colegio",
     "year": 2005,
@@ -34,7 +34,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "cine-2000-3",
+    "id": "cine-2000-3", hashtags: ["nochesdecine"],
     "groupId": "cine-2000",
     "title": "Shrek en DVD y el sillón lleno",
     "year": 2002,
@@ -51,6 +51,7 @@ export const content = {
       lat: -34.6065,
       lng: -58.4355,
       id: "demo-14",
+      hashtags: ["recuerdosdelbarrio"],
       title: "La foto del Fotolog, junto al lago",
       year: 2007,
       category: "Personales",
@@ -61,17 +62,17 @@ export const content = {
       source: "demo",
     },
     {
-      place: "Bajada Gral. Paz Crovara",
+      place: "Avenida General Paz y Crovara, Buenos Aires",
       lat: -34.673563442734945, 
       lng: -58.5034528673788,
-      id: "demo-33",
+      id: "demo-34",
       title: "Chicago campeón B Nacional",
       year: 2001,
       category: "Acontecimientos",
       author: "Sergio",
       image: "https://www.soloascenso.com.ar/Noticias/nchicago2001inedito.jpg",
       description:
-        "No me olvido mas de ese dia, nos juntamos todos a la altura de Liniers a esperar al micro con los jugadores que volvian de Cordoba, en el renault 12 que se ve estabamos mis hermanos y yo, estuvimos festejando en la cancha por horas, ya volveran esos tiempos chicago querido",
+        "No me olvido más de aquel día de 2001. Nos juntamos todos a la altura de Liniers para esperar al micro con los jugadores que volvían de Córdoba después de conseguir el ascenso. En el Renault 12 que se ve en la foto estábamos mis hermanos y yo, compartiendo la emoción con otros hinchas que habían ido a recibir al equipo. Después seguimos festejando durante horas, recordando todo lo que habíamos vivido para llegar hasta ese momento. Cada vez que pienso en aquella jornada vuelvo a sentir la alegría de estar con mi familia y con tanta gente que comparte la misma pasión. ¡Ya volverán esos tiempos, Chicago querido!",
       source: "demo",
     },
     {

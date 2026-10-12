@@ -20,12 +20,19 @@ export interface Memory {
   lat: number;
   lng: number;
   source: "demo" | "local";
+  hashtags?: string[];
+  /** Publication time, independent of the historical year of the memory. */
+  createdAt?: string;
   groupId?: string;
   image?: string;
   imageCaption?: string;
   media?: { kind: "image" | "video" | "youtube"; url: string };
   music?: { spotifyId: string; title: string; artist: string };
   reference?: string;
+  repost?: {
+    author: string;
+    comment?: string;
+  };
 }
 export interface Period {
   decade: Decade;

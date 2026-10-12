@@ -1,10 +1,3 @@
-@font-face {
-  font-family: 'Ananda';
-  src: url('../../../fonts/AnandaBlack.ttf') format('ttf');
-  font-weight: normal;
-  font-style: normal;
-}
-
 .era-2000 .primary-button {
   color: white;
   background: linear-gradient(#4794cc, #266da6);
@@ -1067,3 +1060,58 @@
 .era-2000 .chat-avatar { border-radius:8px; background:linear-gradient(#b1e681,#579d20); color:white; border:2px solid white; box-shadow:0 0 0 1px #81a85f; }
 .era-2000 .chat-conversation { background:linear-gradient(white,#e7f2ff); }
 .era-2000 .chat-bubble.own { background:#e4f5d5; border-color:#91bb68; }
+
+.era-2000 .memory-owner-actions .icon-button { border-radius:6px; background:linear-gradient(#fff,#dcecff); border-color:#8caed5; color:#205e9b; box-shadow:inset 0 1px #fff,0 1px 2px #173d6420; }
+
+.era-2000 .delete-memory-dialog { border:1px solid #3279b6; border-radius:9px; background:linear-gradient(#fff,#eaf4ff); }
+.era-2000 .delete-memory-heading { background:linear-gradient(#66b5f1,#257bc8 48%,#1663b0); color:white; text-shadow:0 1px #164779; }
+
+/* Messenger personal space. */
+.era-2000 .profile-era-bar { border-radius:9px 9px 0 0; background:linear-gradient(#71bfee,#2e8ad0 48%,#1768b4); color:white; text-shadow:0 1px #18558e; box-shadow:inset 0 1px #fff8; }
+.era-2000 .personal-profile .personal-header { border-top:0; border-radius:0; background:radial-gradient(ellipse at 90% 0,#b9e4ff99,transparent 65%),linear-gradient(#edf8ff,#fff); }
+.era-2000 .personal-profile .profile-portrait { border:4px solid white; border-radius:14px; box-shadow:0 0 0 1px #84bb60,0 4px 10px #386e9828; }
+.era-2000 .personal-profile .personal-identity-text > p { color:#577696; font-style:italic; }
+.era-2000 .personal-profile .personal-counts { background:#deedfc88; border:1px solid #aec9e3; border-radius:8px; padding:16px 0; }
+.era-2000 .profile-shortcuts { border-radius:0 0 9px 9px; background:linear-gradient(#fff,#daebfb); border-top:0; box-shadow:0 3px 8px #27628d18; }
+.era-2000 .profile-shortcuts button { border-radius:5px; background:linear-gradient(#fff,#e0edfc); border-color:#92b5db; color:#245887; }
+.era-2000 .personal-profile .personal-memory { background:linear-gradient(135deg,#fff,#edf6ff); border-color:#b2cce5; box-shadow:0 3px 8px #35648818; border-radius:10px; }
+.era-2000 .memory-owner-actions { border-radius:9px; background:linear-gradient(#eef7ff,#d7e7f7); border-color:#b7cde4; box-shadow:inset 0 1px white; }
+.era-2000 .memory-owner-actions .icon-button { border-color:transparent; background:transparent; box-shadow:none; }
+.era-2000 .memory-owner-actions .icon-button:hover { border-color:#88acd1; background:linear-gradient(#fff,#c5e5ff); }
+.era-2000 .memory-owner-actions .memory-delete:hover { background:linear-gradient(#ffe6dc,#f3b49d); border-color:#c88671; color:#87341f; }
+
+ .era-2000 .delete-scene { border-radius:7px; background:radial-gradient(ellipse at 25% 5%,#fff9,transparent 50%),linear-gradient(160deg,#489bd7 0%,#a8d8ed 60%,#80b850 61%,#4d873b); border:1px solid #83b4d7; box-shadow:inset 0 1px 4px #fff9; color:#fff; }
+.era-2000 .delete-scene-caption { text-shadow:0 1px 2px #215782; }
+.era-2000 .delete-item svg { fill:#fff; color:#559ad0; filter:drop-shadow(2px 3px 2px #16477555); }
+.era-2000 .delete-item small,.era-2000 .delete-bin small { text-shadow:0 1px 3px #000; }
+.era-2000 .delete-bin svg { fill:#e7f8ff99; color:#f7ffff; filter:drop-shadow(2px 3px 2px #16477555); }
+.era-2000 .delete-path { color:#fff9; }
+.era-2000 .delete-scene-result { text-shadow:0 1px 3px #174700; }
+
+ .era-2000 .desktop-taskbar { background:linear-gradient(#6aabf5,#2264d3 20%,#235ac7 85%,#1247a6);color:#fff;border:0; }
+.era-2000 .desktop-taskbar b { background:linear-gradient(#99ce71,#3c942e 45%,#25821e);border:0;border-radius:0 10px 10px 0;height:100%;font-style:italic;text-shadow:1px 1px #286324; }
+.era-2000 .desktop-taskbar span { background:#347de0;border:1px solid #80b1f3; }
+.era-2000 .delete-transfer i { background:repeating-linear-gradient(90deg,#63c73e 0 8px,#dfebdc 8px 10px);border-color:#66a6d6; }
+.era-2000 .delete-transfer { color:#154c80; }
+.era-2000 .scene-bin-art { filter:drop-shadow(2px 4px 3px #11365d55); }
+
+.era-2000 .profile-timeline { background:linear-gradient(#fff,#eaf4ff); border:1px solid #92b9df; border-radius:10px; }
+
+.era-2000 .timeline-drawer { background:linear-gradient(#fff,#e3effd); border:2px solid #7aaad1; }
+.era-2000 .timeline-drawer-header { background:linear-gradient(#72bbef,#216abe); color:#fff; }
+.era-2000 .timeline-drawer-header .eyebrow { color:#fff; }
+
+/* Early LCD monitor: charcoal bezel, silver chin and pedestal. */
+.era-2000 .profile-era-device { background:linear-gradient(125deg,#555c65,#20262d 60%,#454e58); border:2px solid #7c8793; border-radius:12px; padding:12px 12px 0; margin-bottom:40px; box-shadow:inset 0 1px #bac3cc,3px 6px 12px #1a354455; }
+.era-2000 .profile-device-top { color:#dde6ee; padding:2px 8px 12px; font:11px Arial,sans-serif; }
+.era-2000 .profile-era-device .profile-atlas-screen { padding:3px; border:3px solid #111921; background:#737e89; }
+.era-2000 .profile-era-device .personal-map { border:1px solid #0b1118; border-radius:0; }
+.era-2000 .profile-device-bottom { margin:0 -12px; padding:8px 20px; min-height:45px; border-radius:0 0 10px 10px; background:linear-gradient(#e2e7ea,#aab5c0); color:#364554; border-top:1px solid #788896; }
+.era-2000 .profile-device-buttons { margin-left:auto; }
+.era-2000 .profile-device-buttons i { width:12px; height:4px; border:1px solid #7c8994; background:#d9e0e6; border-radius:2px; }
+.era-2000 .profile-device-led { background:#74d454; box-shadow:0 0 5px #64c244; margin-left:10px; }
+.era-2000 .profile-era-device::before { content:''; position:absolute; left:calc(50% - 32px); bottom:-27px; width:64px; height:25px; background:linear-gradient(90deg,#626f7b,#bdc7ce,#626f7b); z-index:-1; }
+.era-2000 .profile-era-device::after { content:''; position:absolute; bottom:-35px; left:calc(50% - 85px); width:170px; height:12px; border-radius:50%; background:linear-gradient(#ccd5dd,#6c7a87); box-shadow:0 4px 5px #183b4525; }
+
+.era-2000 .place-search-panel { border:1px solid #7faccd; border-radius:10px; box-shadow:0 8px 24px #17385840; }
+.era-2000 .place-search-panel header { background:linear-gradient(#69bafa,#1460b1); color:white; text-shadow:0 1px #10477c; }

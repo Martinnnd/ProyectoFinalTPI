@@ -1,4 +1,5 @@
 "use client";
+import DeleteMemoryDialog from "./components/DeleteMemoryDialog";
 
 import HourglassLogo from "./components/HourglassLogo";
 import EraTransition from "./components/EraTransition";
@@ -25,7 +26,7 @@ import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
 import Profile from "./components/Profile";
-import SocialFeed from "./components/SocialFeed";
+import SocialFeed from "./components/social/SocialFeed";
 import Timeline from "./components/Timeline";
 import MemoryMap, { type Point } from "./components/MemoryMap";
 import MemoryForm from "./components/MemoryForm";
@@ -49,6 +50,7 @@ export default function App() {
   const [mapExpanded, setMapExpanded] = useState(false);
   const [following, setFollowing] = useState<string[]>([]);
   const creationOrigin = useRef(false);
+  const [profileAuthor, setProfileAuthor] = useState<string | null>(null);
   const [view, setView] = useState<"map" | "feed" | "profile" | "chat">("map");
   const [period, setPeriod] = useState<Period>(() => {
     const requested = Number(
@@ -63,7 +65,10 @@ export default function App() {
   const [local, setLocal] = useState<Memory[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
+  const [deleting, setDeleting] = useState<Memory | null>(null);
+  const [editing, setEditing] = useState<Memory | null>(null);
   const [draft, setDraft] = useState<Point | null>(null);
+  const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
   const [celebrating, setCelebrating] = useState<Achievement | null>(null);
   // Badge 01 means "you published a first memory", so it is derived from the
@@ -85,7 +90,7 @@ export default function App() {
     if (window.innerWidth < 900 && view !== "map") setMusicOpen(false);
   }, [view]);
   const addButton = useRef<HTMLButtonElement>(null);
-  const storiesButton = useRef<HTMLButtonElement>(null);
+  const storiesButton = useRef<HTMLElement | null>(null);
   useEffect(() => {
     try {
       const loaded = loadMemories(window.localStorage);
@@ -122,8 +127,9 @@ export default function App() {
     period,
     category,
   );
-  const ownMemories = filterMemories(local, period, category);
-  const visibleMemories = view === "profile" ? ownMemories : memories;
+  const profileMemories = profileAuthor === null ? local : initialMemories.filter(m => m.author === profileAuthor);
+  const ownMemories = filterMemories(profileMemories, period, category);
+  const visibleMemories = view === "profile" ? profileMemories : memories;
   const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
     setScope(value);setQuery('');setSelectedId(null);
@@ -153,7 +159,14 @@ export default function App() {
     setPanelOpen(false);
     if (next.decade !== period.decade) setMusicOpen(false);
   }
+  function openProfile(memory: Memory) {
+    setProfileAuthor(memory.source === "local" ? null : memory.author);
+    setSelectedId(null); setPanelOpen(false); setFactsOpen(false); setPicking(false);
+    setCategory("Todas"); setPeriod(p => ({...p, year: null}));
+    setView("profile");
+  }
   function openPublication(memory: Memory) {
+    setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
   }
   function select(memory: Memory) {
@@ -170,7 +183,9 @@ export default function App() {
     storiesButton.current?.focus();
   }
   function startAdding() {
+    setDraftHashtags([]);
     creationOrigin.current = view === "profile";
+    setProfileAuthor(null);
     setView("map");
     setPicking(true);
     setSelectedId(null);
@@ -179,6 +194,7 @@ export default function App() {
     setMusicOpen(false);
   }
   function cancel() {
+    if (draftHashtags.length) setView("feed");
     if (creationOrigin.current) setView("profile");
     setPicking(false);
     setDraft(null);
@@ -198,13 +214,54 @@ export default function App() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [picking, panelOpen, draft, mapExpanded]);
-  function save(memory: Memory) {
+  function editMemory(memory: Memory) {
+    if (local.some(m => m.id === memory.id)) setEditing(memory);
+  }
+  function deleteMemory(memory: Memory) {
+    if (!local.some(m => m.id === memory.id)) return;
+    setDeleting(memory);
+  }
+  function confirmDelete(memory: Memory): string | null {
+    if (!local.some(m => m.id === memory.id)) return "Este recuerdo ya no está disponible.";
+    const next = local.filter(m => m.id !== memory.id);
+    if (!saveMemories(next, window.localStorage)) return "No se pudo eliminar el recuerdo. Intentá nuevamente.";
+    setLocal(next);
+    if (selectedId === memory.id) setSelectedId(null);
+    setNotice("Recuerdo eliminado.");
+    return null;
+  }
+  function saveEdit(memory: Memory): string | null {
+    const original = local.find(m => m.id === editing?.id);
+    if (!original) return "Este recuerdo ya no está disponible.";
+    const group = groups.find(g => g.id === original.groupId);
+    if (group && (memory.year < group.decade || memory.year > group.decade + 9)) return `Elegí un año entre ${group.decade} y ${group.decade + 9} para este grupo.`;
+    const updated = {...memory, id: original.id, groupId: original.groupId, source: original.source, author: original.author};
+    const next = local.map(m => m.id === original.id ? updated : m);
+    if (!saveMemories(next, window.localStorage)) return "No se pudo guardar. Revisá el espacio del navegador e intentá nuevamente.";
+    setLocal(next);setEditing(null);
+    setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");setQuery("");
+    setNotice("Recuerdo actualizado.");
+    return null;
+  }
+  async function save(memory: Memory) {
     const destinationGroup=groups.find(g=>g.id===scope);
     if(destinationGroup) {
       if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
       memory={...memory,groupId:scope};
     }
     const isFirstMemory = local.length === 0;
+
+    try {
+      const { crearPublicacion } = await import("./api");
+      const res = await crearPublicacion(memory);
+      if (res && res.id) {
+        memory = { ...memory, id: res.id.toString() };
+      }
+    } catch (err) {
+      console.warn("Backend falló, queda con el ID local.", err);
+      return "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
+    }
+
     const next = [...local, memory];
     try {
       if (!saveMemories(next, window.localStorage))
@@ -225,6 +282,10 @@ export default function App() {
       setView("profile");
       setPanelOpen(false);
     }
+    if (draftHashtags.length) {
+      setView("feed"); setSelectedId(null); setPanelOpen(false); setQuery("");
+      setDraftHashtags([]);
+    }
     setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
     // Hardcoded unlock: the very first memory the visitor creates earns badge 01.
     // It only sets this state, so the popup never moves them off the current view.
@@ -232,20 +293,18 @@ export default function App() {
     window.setTimeout(() => addButton.current?.focus(), 0);
     return null;
   }
-  function toggleStories() {
-    setView("map");
-    setPanelOpen(!panelOpen);
-    if (window.innerWidth < 900) {
-      setFactsOpen(false);
-      setMusicOpen(false);
-    }
-  }
   function navigate(destination: "map" | "stories" | "facts" | "music") {
-    setView("map");
     setPicking(false);
-    setPanelOpen(destination === "stories");
-    setFactsOpen(destination === "facts");
-    setMusicOpen(destination === "music");
+    if (destination === "music") {
+      setMusicOpen(!musicOpen);
+      if (window.innerWidth < 900) { setPanelOpen(false); setFactsOpen(false); }
+      return;
+    }
+    if (destination === "stories") storiesButton.current = document.activeElement as HTMLElement | null;
+    setView("map");
+    setPanelOpen(destination === "stories" && (view !== "map" || !panelOpen));
+    setFactsOpen(destination === "facts" && (view !== "map" || !factsOpen));
+    if (window.innerWidth < 900 || destination === "map") setMusicOpen(false);
     if (destination === "map") setSelectedId(null);
   }
   const theme = eraThemes[period.decade];
@@ -303,6 +362,7 @@ export default function App() {
         period={period}
         count={visibleMemories.length}
         panelOpen={panelOpen}
+        factsOpen={factsOpen}
         musicOpen={musicOpen}
         onNavigate={navigate}
       />
@@ -332,51 +392,10 @@ export default function App() {
         </button>
         <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);}}><MessageCircle/><span>Chat</span></button>
         <button
-          ref={storiesButton}
-          data-mobile-secondary="true"
-          aria-expanded={panelOpen}
-          aria-controls="stories"
-          className={panelOpen ? "rail-active" : ""}
-          onClick={toggleStories}
-        >
-          <EraIcon decade={period.decade} destination="stories" />
-          <span>Historias</span>
-        </button>
-        <button
-          aria-expanded={factsOpen}
-          data-mobile-secondary="true"
-          aria-controls="era-facts"
-          onClick={() => {
-            setView("map");
-            setFactsOpen(view !== "map" || !factsOpen);
-            if (window.innerWidth < 900) {
-              setPanelOpen(false);
-              setMusicOpen(false);
-            }
-          }}
-        >
-          <EraIcon decade={period.decade} destination="facts" />
-          <span>La época</span>
-        </button>
-        <button
-          aria-expanded={musicOpen}
-          data-mobile-secondary="true"
-          aria-controls="music-player"
-          onClick={() => {
-            setMusicOpen(!musicOpen);
-            if (window.innerWidth < 900) {
-              setPanelOpen(false);
-              setFactsOpen(false);
-            }
-          }}
-        >
-          <EraIcon decade={period.decade} destination="music" />
-          <span>Música</span>
-        </button>
-        <button
           aria-current={view === "profile" ? "page" : undefined}
           className={`rail-profile ${view === "profile" ? "rail-active" : ""}`}
           onClick={() => {
+            setProfileAuthor(null);
             setView("profile");
             setSelectedId(null);
             setPanelOpen(false);
@@ -485,10 +504,15 @@ export default function App() {
       )}
       {view === "profile" && (
         <Profile
+          onEdit={editMemory}
+          onDelete={deleteMemory}
           onOpen={openPublication}
-          community={communityControls(true)}
+          key={profileAuthor ?? "own"}
+          author={profileAuthor ?? undefined}
+          onBack={() => {setSelectedId(null);setView("feed");}}
+          community={profileAuthor === null ? communityControls(true) : undefined}
           memories={ownMemories}
-          allMemories={local}
+          allMemories={profileMemories}
           tierProgress={tierProgress}
           following={following}
           period={period}
@@ -500,6 +524,10 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
+          onAddHashtag={tag => { startAdding(); setDraftHashtags([tag]); }}
+          onEdit={editMemory}
+          onDelete={deleteMemory}
+          onProfile={openProfile}
           groupIds={groups.map(group => group.id)}
           community={communityControls()}
           groupName={groups.find(g=>g.id===scope)?.name}
@@ -568,8 +596,11 @@ export default function App() {
           }}
         />
       )}
+      {deleting && <DeleteMemoryDialog memory={deleting} onCancel={() => setDeleting(null)} onConfirm={() => confirmDelete(deleting)}/>}
+      {editing && <MemoryForm key={editing.id} initial={editing} point={{lat:editing.lat,lng:editing.lng}} decade={Math.floor(editing.year / 10) * 10 as Decade} groupName={groups.find(g => g.id === editing.groupId)?.name} onCancel={() => setEditing(null)} onSave={saveEdit}/>}
       {draft && (
         <MemoryForm
+          defaultHashtags={draftHashtags}
           groupName={groups.find(g=>g.id===scope)?.name}
           point={draft}
           decade={period.decade}

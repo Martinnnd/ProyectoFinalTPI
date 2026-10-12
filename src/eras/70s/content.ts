@@ -7,7 +7,7 @@ export const content = {
   },
   memories: [
 {
-    "id": "vinilos-70-1",
+    "id": "vinilos-70-1", hashtags: ["vinilos", "rocknacional"],
     "groupId": "vinilos-70",
     "title": "El vinilo que escuchábamos de principio a fin",
     "year": 1973,
@@ -20,7 +20,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "vinilos-70-2",
+    "id": "vinilos-70-2", hashtags: ["vinilos", "rocknacional"],
     "groupId": "vinilos-70",
     "title": "La bolsa de discos de la avenida Corrientes",
     "year": 1976,
@@ -33,7 +33,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "vinilos-70-3",
+    "id": "vinilos-70-3", hashtags: ["vinilos"],
     "groupId": "vinilos-70",
     "title": "Un domingo para intercambiar vinilos",
     "year": 1978,
@@ -49,7 +49,7 @@ export const content = {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,
       lng: -58.4355,
-      id: "demo-21",
+      id: "demo-21", hashtags: ["recuerdosdelbarrio"],
       title: "El mapa abierto junto al lago",
       year: 1972,
       category: "Lugares",

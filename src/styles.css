@@ -1,8 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
 
 @font-face {
-  font-family: 'MyFont';
-  src: url('../fonts/AnandaBlack.ttf') format('ttf');
+  font-family: 'Ananda';
+  font-display: swap;
+  src: url('../fonts/AnandaBlack.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -321,20 +322,19 @@ a {
   padding: 22px 5px;
   gap: 12px;
 }
-.rail-logo {
-  font:
-    600 38px/1;
-    font-family: 'Ananda', 'Courier New', Courier, monospace;
-  border-bottom: 3px solid var(--ink);
-  width: 31px;
+.navigation-rail .rail-logo {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: 0;
   margin: 0 0 22px;
-  position: relative;
+  line-height: 0;
 }
-.rail-logo > span {
-  position: absolute;
-  font-size: 16px;
-  top: -3px;
-  right: -8px;
+.rail-logo > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .navigation-rail button {
   display: flex;
