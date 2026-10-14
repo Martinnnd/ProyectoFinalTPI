@@ -30,6 +30,8 @@ export interface Memory {
   music?: { spotifyId: string; title: string; artist: string };
   reference?: string;
   repost?: {
+    id?: string;
+    originalId?: string;
     author: string;
     comment?: string;
   };

@@ -30,11 +30,15 @@ export default function PostActions({
         {commentCount || ""} Comentar
       </button>
       <button
-        aria-label={`Repostear: ${memoryTitle}`}
+        type="button"
+        className={`repost-button${reposted ? " is-reposted" : ""}`}
+        aria-label={reposted ? `Deshacer repost: ${memoryTitle}` : `Repostear: ${memoryTitle}`}
+        title={reposted ? "Deshacer repost" : "Repostear"}
         aria-pressed={reposted}
+        style={reposted ? { color: '#10b981', fontWeight: 600 } : undefined}
         onClick={onRepost}
       >
-        <Repeat2 size={17} />
+        <Repeat2 size={17} style={reposted ? { stroke: '#10b981', strokeWidth: 2.5 } : undefined} />
         {reposted ? "Reposteado" : "Repostear"}
       </button>
       <button

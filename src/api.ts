@@ -137,6 +137,60 @@ export async function compartirPublicacion(originalId: string, descripcion: stri
     return await response.json();
 }
 
+export async function eliminarRepost(originalId: string, autorId?: number) {
+    const sesion = getSesion();
+    const token = sesion?.token;
+    const finalAutorId = sesion?.usuarioId ?? autorId;
+    const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1;
+
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = finalAutorId !== undefined
+        ? `${API_BASE_URL}/api/publicaciones/compartir/${numericId}?autorId=${finalAutorId}`
+        : `${API_BASE_URL}/api/publicaciones/compartir/${numericId}`;
+
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error en el backend al eliminar repost: ${response.statusText}`);
+    }
+
+    return await response.json().catch(() => ({}));
+}
+
+export async function eliminarPublicacion(id: string, autorId?: number) {
+    const sesion = getSesion();
+    const token = sesion?.token;
+    const finalAutorId = sesion?.usuarioId ?? autorId;
+    const numericId = parseInt(id.replace(/\D/g, ''), 10) || 1;
+
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = finalAutorId !== undefined
+        ? `${API_BASE_URL}/api/publicaciones/${numericId}?autorId=${finalAutorId}`
+        : `${API_BASE_URL}/api/publicaciones/${numericId}`;
+
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error en el backend al eliminar publicación: ${response.statusText}`);
+    }
+
+    return await response.json().catch(() => ({}));
+}
+
 function dataURItoBlob(dataURI: string) {
     const byteString = atob(dataURI.split(',')[1]);
     const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];

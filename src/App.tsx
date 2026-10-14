@@ -19,7 +19,7 @@ import {
   type TierProgress,
 } from "./types";
 import { achievements, eraContent, initialMemories } from "./data";
-import { getMemories, isOwnMemory, getSesion, type UsuarioSesion } from "./api";
+import { getMemories, isOwnMemory, getSesion, type UsuarioSesion, eliminarPublicacion } from "./api";
 import LoginDialog from "./components/LoginDialog";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
@@ -209,11 +209,17 @@ export default function App() {
     if (dbMemories.some(m => m.id === memory.id && isOwnMemory(m))) setEditing(memory);
   }
   function deleteMemory(memory: Memory) {
-    if (!dbMemories.some(m => m.id === memory.id && isOwnMemory(m))) return;
     setDeleting(memory);
   }
   function confirmDelete(memory: Memory): string | null {
-    if (!dbMemories.some(m => m.id === memory.id)) return "Este recuerdo ya no está disponible.";
+    eliminarPublicacion(memory.id)
+      .then(() => {
+        getMemories().then(data => setDbMemories(data)).catch(console.error);
+      })
+      .catch((err) =>
+        console.warn("Backend falló al eliminar publicación:", err)
+      );
+
     setDbMemories(prev => prev.filter(m => m.id !== memory.id));
     if (selectedId === memory.id) setSelectedId(null);
     setNotice("Recuerdo eliminado.");
