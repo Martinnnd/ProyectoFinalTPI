@@ -19,7 +19,7 @@ export interface Memory {
   author: string;
   lat: number;
   lng: number;
-  source: "demo" | "local";
+  source: "demo" | "local" | "community" | "db";
   hashtags?: string[];
   /** Publication time, independent of the historical year of the memory. */
   createdAt?: string;
@@ -30,6 +30,8 @@ export interface Memory {
   music?: { spotifyId: string; title: string; artist: string };
   reference?: string;
   repost?: {
+    id?: string;
+    originalId?: string;
     author: string;
     comment?: string;
   };

@@ -1,4 +1,5 @@
 import { memoryThumbnail } from "./memoryThumbnail";
+import { getMemoryAuthorDisplay } from "../api";
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -325,7 +326,7 @@ export default function MapboxMap(
     const memory=props.selected;
     if(!map || !ready || !memory || props.picking || props.searchTarget)return;
     const content=document.createElement('div');
-    const meta=document.createElement('small');meta.textContent=`${memory.author} · ${memory.year}`;
+    const meta=document.createElement('small');meta.textContent=`${getMemoryAuthorDisplay(memory)} · ${memory.year}`;
     const title=document.createElement('strong');title.textContent=memory.title;
     const excerpt=document.createElement('p');excerpt.textContent=memory.description.length>140?memory.description.slice(0,140)+'…':memory.description;
     const photoUrl=memoryThumbnail(memory);

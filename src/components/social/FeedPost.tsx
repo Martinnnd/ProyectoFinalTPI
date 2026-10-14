@@ -4,6 +4,7 @@ import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
 import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import type { Memory } from "../../types";
+import { isOwnMemory, getMemoryAuthorDisplay } from "../../api";
 import CommentsSection from "./CommentsSection";
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
@@ -18,6 +19,7 @@ export default function FeedPost({
   rating,
   reposted,
   saved,
+  quotedMemory,
   onDelete,
   onEdit,
   onProfile,
@@ -40,6 +42,7 @@ export default function FeedPost({
   rating?: number;
   reposted: boolean;
   saved: boolean;
+  quotedMemory?: Memory;
   onDelete: (memory: Memory) => void;
   onEdit: (memory: Memory) => void;
   onProfile: (memory: Memory) => void;
@@ -61,96 +64,185 @@ export default function FeedPost({
   const hasInlineImage =
     memory.image && !memory.media && !youtubeId(memory.image);
 
+  const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
+
+  const isReposterOwn = isOwnMemory(memory);
+  const reposterDisplay = isReposterOwn ? "Vos" : getMemoryAuthorDisplay(memory);
+
+  const originalAuthor = memory.repost?.author;
+  const isOriginalAuthorOwn = originalAuthor ? isOwnMemory({ author: originalAuthor }) : false;
+
+  const headerAuthor = isSimpleRepost && originalAuthor ? originalAuthor : memory.author;
+  const isHeaderAuthorOwn = isSimpleRepost && originalAuthor ? isOriginalAuthorOwn : isReposterOwn;
+  const displayAuthor = isHeaderAuthorOwn ? "Vos" : getMemoryAuthorDisplay({ author: headerAuthor });
+
+  const profileMemory: Memory = isSimpleRepost && originalAuthor
+    ? { ...memory, author: originalAuthor, source: isOriginalAuthorOwn ? "local" : "community" }
+    : memory;
+
   return (
     <article className="feed-post">
-      {memory.repost && (
-        <div style={{ padding: '0.5rem 1rem 0', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+      {isSimpleRepost && (
+        <div className="repost-header-badge" style={{ padding: '0.5rem 1rem 0', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
           <Repeat2 size={14} />
-          <span>Has reposteado esto</span>
+          <span>{isReposterOwn ? "Has reposteado" : `${reposterDisplay} ha reposteado`}</span>
         </div>
       )}
       <header>
         <button
           className="social-avatar author-avatar"
-          aria-label={`Ver perfil de ${!memory.repost?.comment && memory.repost ? memory.repost.author : (memory.source === "local" ? "Vos" : memory.author)}`}
-          onClick={() => onProfile(memory)}
+          aria-label={`Ver perfil de ${displayAuthor}`}
+          onClick={() => onProfile(profileMemory)}
         >
-          {(!memory.repost?.comment && memory.repost ? memory.repost.author : (memory.source === "local" ? "Vos" : memory.author)).slice(0, 1)}
+          {displayAuthor.slice(0, 1)}
         </button>
         <div>
-          <button className="author-name" onClick={() => onProfile(memory)}>
-            <strong>{!memory.repost?.comment && memory.repost ? memory.repost.author : (memory.source === "local" ? "Vos" : memory.author)}</strong>
+          <button className="author-name" onClick={() => onProfile(profileMemory)}>
+            <strong>{displayAuthor}</strong>
           </button>
           <small>
-            {memory.source === "demo" ? "" : "Recuerdo local"} {memory.year}
+            {isHeaderAuthorOwn ? "Recuerdo local" : (memory.source === "demo" ? "" : "Recuerdo de la comunidad")} {memory.year}
           </small>
         </div>
-        {memory.source === "demo" && (
+        {!isHeaderAuthorOwn && (
           <button
             className="follow-button"
             aria-pressed={following}
-            onClick={() => onFollow(memory.author)}
+            onClick={() => onFollow(headerAuthor)}
           >
             {following ? "Siguiendo" : "Seguir"}
           </button>
         )}
-        <MemoryOwnerActions
-          memory={memory}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        {isHeaderAuthorOwn && (
+          <MemoryOwnerActions
+            memory={profileMemory}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        )}
       </header>
 
       {memory.repost?.comment && (
-        <div style={{ padding: '0 1rem 0.5rem', fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>
+        <div
+          style={{
+            padding: '0 1rem 0.5rem',
+            fontSize: '0.95rem',
+            whiteSpace: 'pre-wrap',
+            cursor: !selected ? 'pointer' : undefined,
+          }}
+          onClick={!selected ? () => onOpen(memory) : undefined}
+          title={!selected ? "Ver publicación con cita" : undefined}
+        >
           {memory.repost.comment}
         </div>
       )}
 
-      <div style={memory.repost?.comment ? { border: '1px solid var(--border, #ccc)', margin: '0 1rem 1rem', borderRadius: '8px', overflow: 'hidden' } : undefined}>
-        {memory.repost?.comment && (
-          <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--border, #ccc)', background: 'var(--surface-hover, rgba(0,0,0,0.03))', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div className="social-avatar" style={{ width: '20px', height: '20px', fontSize: '0.7rem' }}>{memory.repost.author.slice(0, 1)}</div>
-            <span><strong>{memory.repost.author}</strong></span>
-          </div>
-        )}
+      {(() => {
+        const isQuote = Boolean(memory.repost?.comment);
+        const targetQuoted: Memory = isQuote
+          ? (quotedMemory || {
+              ...memory,
+              id: memory.repost?.originalId || memory.id,
+              title: memory.title,
+              description: memory.description,
+              author: memory.repost?.author || "Desconocido",
+              repost: undefined,
+            })
+          : memory;
+        const targetHasInlineImage =
+          targetQuoted.image && !targetQuoted.media && !youtubeId(targetQuoted.image);
 
-        <PostMusic music={memory.music} />
-        <button
-          className={hasInlineImage ? `post-content with-image${selected ? " is-open" : ""}` : "post-content"}
-          onClick={() => onOpen(memory)}
-        >
-          <span className="post-text">
-            <h3>{memory.title}</h3>
-            <p className={selected ? "" : "post-excerpt"}>{memory.description}</p>
-            {!selected && (
-              <span className="read-post">Leer recuerdo completo →</span>
+        return (
+          <div
+            className={isQuote ? "quoted-post-box" : undefined}
+            onClick={isQuote ? (e) => {
+              e.stopPropagation();
+              onOpen(targetQuoted);
+            } : undefined}
+            style={isQuote ? {
+              border: '1px solid var(--border, #ccc)',
+              margin: '0 1rem 1rem',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              cursor: 'pointer',
+            } : undefined}
+            title={isQuote ? `Ver publicación original de ${getMemoryAuthorDisplay({ author: targetQuoted.author })}` : undefined}
+          >
+            {isQuote && (
+              <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--border, #ccc)', background: 'var(--surface-hover, rgba(0,0,0,0.03))', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="social-avatar" style={{ width: '20px', height: '20px', fontSize: '0.7rem' }}>
+                  {getMemoryAuthorDisplay({ author: targetQuoted.author }).slice(0, 1)}
+                </div>
+                <span><strong>{getMemoryAuthorDisplay({ author: targetQuoted.author })}</strong></span>
+              </div>
             )}
-          </span>
-          {hasInlineImage && (
-            <img
-              className="post-image"
-              src={memory.image}
-              alt={`Fotografía de ${memory.title} en ${memory.place}, ${memory.year}`}
-              loading="lazy"
-              decoding="async"
-              onError={(event) => {
-                event.currentTarget.hidden = true;
+
+            <PostMusic music={targetQuoted.music} />
+            <button
+              className={targetHasInlineImage ? `post-content with-image${selected && !isQuote ? " is-open" : ""}` : "post-content"}
+              onClick={(e) => {
+                if (isQuote) {
+                  e.stopPropagation();
+                  onOpen(targetQuoted);
+                } else {
+                  onOpen(memory);
+                }
               }}
-            />
-          )}
-        </button>
-        {(memory.media || (memory.image && youtubeId(memory.image))) && (
-          <PostMedia memory={memory} />
-        )}
-        {!!memoryHashtags(memory).length && <div className="post-hashtags" aria-label="Hashtags del recuerdo">
-          {memoryHashtags(memory).map(tag => <button key={tag} onClick={() => onHashtag(tag)} aria-label={`Ver hilo #${tag}`}>#{tag}</button>)}
-        </div>}
-        <button className="post-place" onClick={() => onMap(memory)}>
-          <MapPin size={14} />
-          {memory.place} · {memory.year}
-        </button>
-      </div>
+            >
+              <span className="post-text">
+                <h3>{targetQuoted.title}</h3>
+                <p className={selected && !isQuote ? "" : "post-excerpt"}>{targetQuoted.description}</p>
+                {(!selected || isQuote) && (
+                  <span className="read-post">
+                    {isQuote ? "Leer recuerdo original completo →" : "Leer recuerdo completo →"}
+                  </span>
+                )}
+              </span>
+              {targetHasInlineImage && (
+                <img
+                  className="post-image"
+                  src={targetQuoted.image}
+                  alt={`Fotografía de ${targetQuoted.title} en ${targetQuoted.place}, ${targetQuoted.year}`}
+                  loading="lazy"
+                  decoding="async"
+                  onError={(event) => {
+                    event.currentTarget.hidden = true;
+                  }}
+                />
+              )}
+            </button>
+            {(targetQuoted.media || (targetQuoted.image && youtubeId(targetQuoted.image))) && (
+              <PostMedia memory={targetQuoted} />
+            )}
+            {!!memoryHashtags(targetQuoted).length && (
+              <div className="post-hashtags" aria-label="Hashtags del recuerdo">
+                {memoryHashtags(targetQuoted).map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onHashtag(tag);
+                    }}
+                    aria-label={`Ver hilo #${tag}`}
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              className="post-place"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMap(targetQuoted);
+              }}
+            >
+              <MapPin size={14} />
+              {targetQuoted.place} · {targetQuoted.year}
+            </button>
+          </div>
+        );
+      })()}
 
       <PostRating
         memoryTitle={memory.title}
