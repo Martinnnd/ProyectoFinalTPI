@@ -353,6 +353,8 @@
 .era-1970.view-profile .personal-header::before { content:none; }
 .era-1970 .profile-era-bar { padding:20px 8px 14px; border:0; border-bottom:4px double #61593e; background:transparent; color:#363d30; flex-wrap:wrap; }
 .era-1970 .profile-era-bar strong { font:900 clamp(24px,3vw,42px)/1 Georgia,serif; text-align:center; }
+.app.era-1970.view-profile .profile-era-bar,
+.app.era-1970.view-profile .newspaper-edition { display:none; }
 .era-1970 .profile-era-mark { display:none; }
 .era-1970 .profile-edition { font-family:Georgia,serif; }
 .era-1970.view-profile .personal-header { padding:24px 12px; background:repeating-linear-gradient(0deg,#69521e05 0 1px,transparent 1px 4px); }
@@ -419,6 +421,8 @@
 .era-1970 .activity-dock-options button[aria-expanded="true"] { color:#d1eea0; border-color:#a8b285; background:linear-gradient(#34392c,#454a37); box-shadow:inset 0 2px 3px #0006; outline:none; }
 .era-1970 .activity-dock-options button:focus-visible { outline:1px solid #f4e7c8; outline-offset:1px; }
 .era-1970 .tv-console .tv-dial { cursor:default; display:grid; place-items:center; }
+.app.era-1970 #chat-taskbar-slot { position:absolute; right:8px; bottom:4px; z-index:680; border:2px ridge #a98a5f; border-radius:3px; color:#f7edcc; background:linear-gradient(#63523c,#392d20); }
+@media(max-width:899px) { .era-1970 .tv-chat-tray { display:none; } }
 
 /* Compact physical TV controls share the desktop dock's location. */
 .era-1970 .activity-dock-heading,

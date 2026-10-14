@@ -1,0 +1,86 @@
+/* The same walnut cabinet and monochrome glass across the social views. */
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) {
+  color:var(--ink);
+  font-family:Arial,Helvetica,sans-serif;
+  background:repeating-linear-gradient(2deg,#ffffff05 0 1px,#00000012 2px 4px,transparent 5px 10px),linear-gradient(100deg,#382b20,#624a32 48%,#30251c);
+}
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .newspaper-edition,
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .era-atmosphere { display:none; }
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail {
+  background:repeating-linear-gradient(0deg,#ffffff07 0 1px,transparent 2px 7px),linear-gradient(90deg,#493724,#30261d);
+  border-right:3px ridge #9a8a6f;
+  color:#eee9d9;
+}
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail button { color:#eee9d9; font-family:Arial,sans-serif; border-radius:4px; }
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail .rail-active { background:linear-gradient(#777b6d,#494f43); border:1px solid #a5a695; box-shadow:inset 0 1px #ffffff55,0 2px 3px #0006; }
+
+.app.era-1970.view-feed .social-stream,
+.app.era-1970.view-profile .profile-main,
+.app.era-1970 .chat-window {
+  background:radial-gradient(ellipse at 45% 15%,#f0f1e9,#c4c8bd);
+  border:7px solid #30332e;
+  border-radius:24px;
+  box-shadow:0 0 0 2px #a3a18f,0 0 0 5px #352e25,inset 0 0 18px #333c3025,0 7px 14px #0006;
+  color:#202820;
+}
+.app.era-1970.view-feed .social-stream { --paper-turn:0; padding:16px 20px 24px; }
+.app.era-1970.view-feed .feed-heading { padding:10px 0; border:0; border-bottom:1px solid #8b9282; }
+.app.era-1970.view-feed .feed-heading::before { content:none; }
+.app.era-1970.view-feed .feed-heading h2 { font:700 23px 'Courier New',monospace; letter-spacing:0; }
+.app.era-1970.view-feed .feed-post { background:#f0f1e9; border:1px solid #969e8f; border-radius:10px; margin:16px 0; padding:18px; box-shadow:inset 0 1px #fff9,0 2px 5px #2b332215; }
+.app.era-1970.view-feed .feed-post h3 { font:700 22px/1.3 Arial,sans-serif; text-transform:none; letter-spacing:0; color:#253026; }
+.app.era-1970.view-feed .feed-post p { font:15px/1.65 Arial,sans-serif; text-align:left; }
+.app.era-1970.view-feed .social-avatar { border:2px solid #8a9283; border-radius:50%; background:#d5dacd; color:#354233; }
+
+.app.era-1970 :is(.community-controls,.feed-sidebar-content > section) { background:linear-gradient(120deg,#e1e3d9,#c2c6b9); border:2px ridge #9c9e8f; border-radius:10px; box-shadow:0 3px 8px #0004; }
+.app.era-1970 .community-heading { border-bottom:1px solid #909582; padding-bottom:12px; }
+.app.era-1970 :is(.community-heading strong,.community-card-copy strong,.feed-sidebar h3) { font-family:'Courier New',monospace; text-transform:none; }
+.app.era-1970 .community-heading strong { font-size:16px; }
+.app.era-1970 .feed-sidebar h3 { font-size:18px; }
+.app.era-1970 .community-heading-icon { background:#3b4539; color:#e8efdc; border:2px ridge #9ca08b; border-radius:7px; }
+.app.era-1970 .community-controls :is(button,input,select) { border:1px solid #909784; border-radius:5px; background:#edf0e5; color:#293226; }
+.app.era-1970 .community-controls input { box-shadow:inset 0 1px 3px #0002; }
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) :is(.primary-button,.secondary-button,.feed-tabs button,.follow-button,.profile-shortcuts button) {
+  background:linear-gradient(#e8e9df,#b6bcac);
+  color:#283023;
+  border:1px solid #8a927c;
+  border-bottom:3px solid #626a57;
+  border-radius:5px;
+  box-shadow:inset 0 1px #fff9,0 1px 2px #0003;
+  font-family:Arial,sans-serif;
+  text-transform:none;
+}
+.app.era-1970 .feed-tabs button[aria-pressed="true"] { background:#46503e; color:#edf3e3; box-shadow:inset 0 2px 4px #0005; }
+
+.app.era-1970.view-profile .personal-profile { border:0; background:transparent; box-shadow:none; }
+.app.era-1970.view-profile .profile-main { padding:14px; }
+.app.era-1970.view-profile .personal-header { background:transparent; color:#273025; border:0; border-bottom:1px solid #909984; border-radius:0; box-shadow:none; }
+.app.era-1970.view-profile .personal-header::before { content:none; }
+.app.era-1970.view-profile .personal-identity h2 { font-family:Arial,sans-serif; color:#263022; }
+.app.era-1970.view-profile .profile-portrait { transform:none; border:3px ridge #9da38d; border-radius:12px; background:#bfc8b4; box-shadow:inset 0 0 8px #0005; }
+.app.era-1970.view-profile .profile-portrait img { filter:grayscale(1) contrast(1.05); }
+.app.era-1970.view-profile .personal-counts { border:0; padding:0; }
+.app.era-1970.view-profile .personal-header :is(p,small,.eyebrow,dt) { color:#505c49; }
+.app.era-1970 .profile-shortcuts { background:transparent; border:0; border-bottom:1px solid #909984; }
+.app.era-1970 .profile-motto { font:11px Arial,sans-serif; }
+.app.era-1970.view-profile .personal-section-title h3 { font:700 22px 'Courier New',monospace; text-transform:none; }
+.app.era-1970.view-profile :is(.personal-memory,.personal-empty) { color:#273025; background:#e8ecdf; border:1px solid #919b84; border-radius:10px; box-shadow:inset 0 1px #fff9; }
+.app.era-1970 .profile-post-body h3 { font-family:Arial,sans-serif; }
+.app.era-1970 .memory-owner-actions { background:#d3d9c9; border-color:#909984; border-radius:4px; }
+.app.era-1970 .memory-owner-actions .icon-button { background:#e8ecdf; border-color:#909984; border-radius:4px; box-shadow:none; }
+
+.app.era-1970.view-chat .chat-page { top:20px; }
+.app.era-1970.view-chat > .map-toolbar { display:none; }
+.app.era-1970 .chat-titlebar { color:#e9efdd; background:linear-gradient(#505a49,#303a2b); border-bottom:2px ridge #909981; font-family:'Courier New',monospace; }
+.app.era-1970 .chat-contact { font-family:Arial,sans-serif; }
+.app.era-1970 .chat-contact:hover,.app.era-1970 .chat-contact.is-selected { background:#bec8af; }
+.app.era-1970 .chat-bubble { border:1px solid #9ba68d; border-radius:12px 12px 12px 3px; background:#edf1e4; color:#253020; font-family:Arial,sans-serif; }
+.app.era-1970 .chat-bubble.own { background:#c9d4ba; border-radius:12px 12px 3px 12px; }
+.app.era-1970 .chat-avatar { background:#d0d8c3; color:#3c4c32; border:1px solid #929e81; }
+.app.era-1970 .chat-composer { background:#e5eadc; box-shadow:inset 0 2px 4px #0002; }
+@media(max-width:899px) {
+  .app.era-1970.view-chat .chat-page { top:var(--mobile-top); }
+  .app.era-1970.view-profile .profile-main { padding:8px; }
+  .app.era-1970.view-feed .social-stream { padding:12px; }
+  .app.era-1970.view-feed .social-stream,.app.era-1970.view-profile .profile-main,.app.era-1970 .chat-window { border-width:4px; border-radius:16px; }
+}

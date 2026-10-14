@@ -20,13 +20,7 @@ export default function Chrome({ period, count, ...activities }: ChromeProps) {
         </span>
       </div>
       <ActivityDock {...activities} title="SELECT SCREEN"/>
-      <div className="vhs-status" aria-hidden="true">
-        <span>HI-FI STEREO</span>
-        <span>
-          ✦ {count.toString().padStart(2, "0")} RECUERDOS · {label} ✦
-        </span>
-        <span>VHS / NOSTALGIAR</span>
-      </div>
+      <div className="vhs-status"><div id="chat-taskbar-slot" /></div>
     </div>
   );
 }

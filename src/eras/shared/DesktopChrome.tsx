@@ -84,10 +84,7 @@ export default function DesktopChrome({
         <button className={musicOpen ? "task-active" : ""} aria-expanded={musicOpen} aria-controls="music-player" onClick={() => navigate("music")} title="Música: abrir el reproductor">
           <Music2 size={15}/> Música
         </button>
-        <span className="system-tray">
-          <span className="connection-dot" />
-          {count} recuerdos<span className="tray-year">{periodLabel}</span>
-        </span>
+        <div className="system-tray" id="chat-taskbar-slot" />
       </footer>
       <div
         ref={menu}

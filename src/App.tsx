@@ -482,6 +482,7 @@ export default function App() {
           onClick={() => {
             setProfileAuthor(null);
             setView("profile");
+            setMusicOpen(false);
             setSelectedId(null);
             setPanelOpen(false);
             setFactsOpen(false);

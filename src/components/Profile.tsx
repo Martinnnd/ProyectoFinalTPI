@@ -1,4 +1,3 @@
-import ProfileTimeline from "./ProfileTimeline";
 import MemoryOwnerActions from "./MemoryOwnerActions";
 import PostMedia, { PostMusic } from "./PostMedia";
 import type { ReactNode } from "react";
@@ -44,6 +43,8 @@ export default function Profile({
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
 }) {
+  const followDialog = useRef<HTMLDialogElement>(null);
+  const [followList, setFollowList] = useState<"followers" | "following">("followers");
   const mapDialog = useRef<HTMLDialogElement>(null);
   const mapReturnFocus = useRef<HTMLElement | null>(null);
   const mapCloseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -71,7 +72,7 @@ export default function Profile({
   const openFromMap = onOpen ? (memory: Memory) => closeMap(() => onOpen(memory)) : undefined;
   const album = useRef<HTMLElement>(null);
   const presentation = {
-    1970: {title: "Historias con nombre propio", label: "Suplemento personal", collection: "La hemeroteca", map: "Lugares de una vida", footer: "Cada vida merece ser contada"},
+    1970: {title: "Historias con nombre propio", label: "Suplemento personal", collection: "Mis recuerdos", map: "Lugares de una vida", footer: "Cada vida merece ser contada"},
     1980: {title: "Archivo de videoclub", label: "Colección personal · VHS", collection: "Mis cintas", map: "Locaciones", footer: "Rebobiná. Volvé a esos días."},
     1990: {title: "Archivo personal — Nostalgiar 95", label: "Mi PC / Personas / Archivo personal", collection: "Recuerdos", map: "Mapa de lugares", footer: "Archivo de recuerdos"},
     2000: {title: "Mi espacio — Nostalgiar Messenger", label: "Un espacio para volver a conectar", collection: "Álbum de recuerdos", map: "Mis lugares", footer: "Historias que nos conectan"},
@@ -107,6 +108,7 @@ export default function Profile({
   return (
     <main id="explore" className="personal-profile" data-visitor={!!author} aria-label={author ? `Perfil de ${author}` : "Mi perfil"}>
       
+      <div className="profile-main">
       {author && <button className="feed-back" onClick={onBack}>← Volver al feed</button>}
       <div className="profile-era-bar"><span className="profile-era-mark" aria-hidden="true"><UserRound size={18}/></span><strong>{presentation.title}</strong><span className="profile-edition">{period.decade}—{period.decade + 9}</span></div>
       <header className="personal-header">
@@ -121,8 +123,8 @@ export default function Profile({
         <div className="personal-identity">
           <div className="personal-identity-text">
             <span className="eyebrow">{presentation.label}</span>
+            <div className="profile-name-row">
             <h2>{author ?? "Marty McFly"}</h2>
-            <p>{author ? `Los lugares y recuerdos de ${author}.` : "Los lugares cambian. Tus historias quedan."}</p>
             {!author && <button
               className="profile-note"
               onClick={openTiers}
@@ -131,10 +133,18 @@ export default function Profile({
             >
               {userCategory}
             </button>}
+            </div>
+        <div className="personal-counts">
+          <span><strong>{allMemories.length}</strong> Recuerdos</span>
+          {!author && <>
+            <button type="button" aria-haspopup="dialog" onClick={() => { setFollowList("followers"); followDialog.current?.showModal(); }}><strong>{followers.length}</strong> Seguidores</button>
+            <button type="button" aria-haspopup="dialog" onClick={() => { setFollowList("following"); followDialog.current?.showModal(); }}><strong>{followedUsers.length}</strong> Seguidos</button>
+          </>}
+        </div>
           </div>
           {!author && <div className="achievements">
             <div className="achievements-heading">
-              <h3>Logros</h3>
+              <h3><button type="button" className="profile-achievements-trigger" onClick={openCatalogue} aria-haspopup="dialog" aria-expanded={achievementsOpen}>Logros</button></h3>
               <span className="achievements-count">
                 {unlocked.length}/{catalogue.length}
               </span>
@@ -158,54 +168,27 @@ export default function Profile({
                 Todavía no conseguiste ninguna insignia.
               </p>
             )}
-            <button
-              className="achievements-browse"
-              onClick={openCatalogue}
-              aria-haspopup="dialog"
-              aria-expanded={achievementsOpen}
-            >
-              <Grid3x3 size={14} />
-              Ver todas
-            </button>
+
           </div>}
         </div>
 
 
-        <dl className="personal-counts">
-          <div>
-            <dt>Recuerdos</dt>
-            <dd>{allMemories.length}</dd>
-          </div>
-          {!author && <><div>
-            <dt>Seguidores</dt>
-            <dd>{followers.length}</dd>
-          </div>
-          <div>
-            <dt>Seguidos</dt>
-            <dd>{followedUsers.length}</dd>
-          </div></>}
-          <div>
-            <dt>Lugares</dt>
-            <dd>
-              {new Set(allMemories.map((m) => `${m.lat},${m.lng}`)).size}
-            </dd>
-          </div>
-        </dl>
-        {!author && <div className="profile-follow-lists">
-          <details><summary>Ver seguidores</summary><ul>{followers.length ? followers.map(user => <li key={user.id}>{user.username}</li>) : <li>Todavía no tenés seguidores.</li>}</ul></details>
-          <details><summary>Ver seguidos</summary><ul>{followedUsers.length ? followedUsers.map(user => <li key={user.id}>{user.username}</li>) : <li>Todavía no seguís a nadie.</li>}</ul></details>
-        </div>}
+
       </header>
+      <dialog ref={followDialog} className="profile-follow-dialog" aria-labelledby="profile-follow-title" onClick={event => { if (event.target === event.currentTarget) followDialog.current?.close(); }}>
+        <header>
+          <h2 id="profile-follow-title">{followList === "followers" ? "Seguidores" : "Seguidos"}</h2>
+          <button className="icon-button" aria-label="Cerrar lista" onClick={() => followDialog.current?.close()}><X size={20}/></button>
+        </header>
+        {(followList === "followers" ? followers : followedUsers).length ? (
+          <ul>{(followList === "followers" ? followers : followedUsers).map(user => <li key={user.id}><span aria-hidden="true">{user.username.slice(0,1).toUpperCase()}</span><strong>{user.username}</strong></li>)}</ul>
+        ) : <p>{followList === "followers" ? "Todavía no tenés seguidores." : "Todavía no seguís a nadie."}</p>}
+      </dialog>
       <nav className="profile-shortcuts" aria-label="Secciones del perfil">
         <button onClick={() => jumpTo(album.current)}><Grid3x3 size={16}/>{author ? "Su colección" : presentation.collection}<span>{allMemories.length}</span></button>
-        <button onClick={openMap} aria-haspopup="dialog" aria-expanded={mapOpened}><MapPin size={16}/>{presentation.map}</button>
+        <button onClick={openMap} aria-haspopup="dialog" aria-expanded={mapOpened}><MapPin size={16}/>{author ? "Sus lugares" : "Mis lugares"}</button>
         <span className="profile-motto">{presentation.footer}</span>
       </nav>
-      <ProfileTimeline memories={allMemories} author={author} onOpen={onOpen} onAdd={onAdd}/>
-      {community}
-      <button className="profile-map-trigger" aria-label="Abrir mapa del perfil" title="Los lugares de tu historia" aria-haspopup="dialog" aria-expanded={mapOpened} aria-controls="profile-map-dialog" onClick={openMap}>
-        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="21" stroke="currentColor" strokeWidth="1" strokeDasharray="4 5"/><path d="m9 20 10-4 10 4 10-4v20l-10 4-10-4-10 4V20Zm10-4v20m10-16v20" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><g className="profile-map-pin"><path d="M31 15c0 5-7 11-7 11s-7-6-7-11a7 7 0 0 1 14 0Z" fill="var(--surface)" stroke="currentColor" strokeWidth="2"/><circle cx="24" cy="15" r="2.5" fill="currentColor"/></g></svg>
-      </button>
       <dialog ref={mapDialog} id="profile-map-dialog" className={`timeline-drawer profile-map-dialog${mapClosing ? " is-closing" : ""}`} aria-labelledby="profile-map-dialog-title" onCancel={e => { e.preventDefault(); e.stopPropagation(); closeMap(); }} onKeyDown={e => e.stopPropagation()}>
         <header className="timeline-drawer-header"><div><span className="eyebrow">UN VIAJE POR TUS LUGARES</span><h2 id="profile-map-dialog-title">{author ? `El mapa de ${author}` : "Mi mapa de recuerdos"}</h2></div><button className="icon-button" aria-label="Cerrar mapa del perfil" onClick={() => closeMap()}><X size={22}/></button></header>
         <div className="profile-map-dialog-content">
@@ -534,6 +517,8 @@ export default function Profile({
           </ul>
         </div>
       </dialog>
+      </div>
+      {community && <aside className="profile-groups" aria-label="Mis grupos">{community}</aside>}
     </main>
   );
 }
