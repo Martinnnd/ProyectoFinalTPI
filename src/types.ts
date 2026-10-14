@@ -19,7 +19,7 @@ export interface Memory {
   author: string;
   lat: number;
   lng: number;
-  source: "demo" | "local";
+  source: "demo" | "local" | "community" | "db";
   groupId?: string;
   image?: string;
   imageCaption?: string;
