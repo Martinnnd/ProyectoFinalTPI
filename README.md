@@ -97,3 +97,16 @@ Los equipos se migraron desde TPIMockFront manteniendo el resto de esta aplicaci
 La interacción común está en `src/eras/shared/PlayerFrame.tsx`, `SongPicker.tsx`, `deviceSound.ts` y `SpotifyEmbed.tsx`. Permite selección por clic/toque, arrastre al equipo en escritorio, efectos mecánicos silenciables y animaciones. La API de Spotify Embed informa reproducción/pausa para activar o detener las animaciones, sin modificar la duración disponible de las muestras. Si falla la API se ofrece el iframe básico sin simular reproducción. Se respeta movimiento reducido.
 
 Validación: `npm run check`, `npm test`, `npm run build` y `npx playwright test --config playwright.players.config.ts`. Las pruebas de estado de Spotify simulan sus eventos; las pruebas de biblioteca verifican selección, cinco pistas, arrastre y comportamiento móvil.
+
+## Conexión con el Backend y Usuarios de Prueba (Data Seeder)
+
+El frontend se conecta con la API en `http://localhost:5199` (configurado en `src/api.ts`).
+
+Cuando el backend se inicia por primera vez en desarrollo, su **Data Seeder** puebla automáticamente la base de datos con los usuarios y publicaciones históricas desde `seed.json`.
+
+Para iniciar sesión en el frontend o en Swagger:
+- **Email:** `<nombre_autor_sin_tildes>@example.com` (ej: `miguel@example.com`, `susana@example.com`, `diego@example.com`, `mati@example.com`)
+- **Contraseña:** `password123`
+
+Para más detalles sobre el funcionamiento interno, reinicio de la base y configuración de PostgreSQL/PostGIS, consultar el [README del Backend](../ProyectoFinalTPI.Backend/README.md).
+
