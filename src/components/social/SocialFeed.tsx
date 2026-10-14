@@ -229,7 +229,6 @@ export default function SocialFeed({
         <FeedHeader
           title={groupName ?? "Feed"}
           tab={tab}
-          community={community}
           selected={!!selected}
           onBack={() => open(null)}
           onTabChange={changeTab}
@@ -239,11 +238,11 @@ export default function SocialFeed({
           {remote.loading && <span role="status">Cargando publicaciones…</span>}
           {remote.error && <p role="alert">{remote.error} <button type="button" disabled={remote.loading} onClick={remote.expired || !remote.hayMas ? remote.reload : remote.more}>{remote.expired ? 'Nueva selección' : 'Reintentar'}</button></p>}
         </div>}
-        {!selected && (hashtag ? (
+        {!selected && hashtag && (
           <HashtagThread key={hashtag} tag={hashtag} count={posts.length}
             hasDemo={posts.some(memory => memory.source === "demo")}
             onBack={() => setHashtag(null)} onAdd={() => { setTab("all"); onAddHashtag(hashtag); }} />
-        ) : <WeeklyTrends trends={trends} onSelect={chooseHashtag} />)}
+        )}
         <div className="feed-posts">
           {(selected ? [selected] : posts).map((memory) => {
             const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
@@ -330,6 +329,8 @@ export default function SocialFeed({
         </div>
       </PostDetailFrame>
       <FeedSidebar
+        community={community}
+        trends={<WeeklyTrends trends={trends} onSelect={chooseHashtag} />}
         authors={authors}
         following={following}
         onAdd={onAdd}

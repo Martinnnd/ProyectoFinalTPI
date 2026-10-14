@@ -411,10 +411,30 @@
 .era-1970 .place-search-panel,.era-1970 .place-search-trigger { background:#f5eddc; border:1px solid #857456; border-radius:2px; box-shadow:3px 4px 0 #392b2029; }
 .era-1970 .place-search-panel header { background:#e9dec6; border-bottom:3px double #857456; }
 
-.era-1970 .era-activity-dock { background:linear-gradient(100deg,#705338,#3c2c1d); border:3px ridge #a98a5f; border-radius:10px; padding:10px; color:#f7edcc; }
+.era-1970 .era-activity-dock { left:78px; right:auto; bottom:4px; width:auto; max-width:calc(100% - 90px); transform:none; background:linear-gradient(100deg,#705338,#3c2c1d); border:2px ridge #a98a5f; border-radius:5px; padding:4px 7px; color:#f7edcc; }
 .era-1970 .activity-dock-heading { color:#f1e6c8; }
 .era-1970 .activity-dock-heading>span { color:#c9df84; }
-.era-1970 .activity-dock-options button { background:linear-gradient(#f2ead4,#cbc3ad); color:#302c23; border:1px solid #9b927c; border-bottom:4px solid #82745c; border-radius:4px; box-shadow:inset 0 1px #fff9; }
-.era-1970 .activity-dock-options button:hover { background:#fff1cb; }
-.era-1970 .activity-dock-options button[aria-expanded="true"] { background:#b7c0a0; border-bottom-width:1px; box-shadow:inset 1px 2px 5px #0005; }
+.era-1970 .activity-dock-options button { background:linear-gradient(#645b48,#3e382c); color:#f4e7c8; border:1px solid #988768; border-bottom:2px solid #241f17; box-shadow:inset 0 1px #ffffff20; }
+.era-1970 .activity-dock-options button:hover { background:linear-gradient(#746950,#494031); }
+.era-1970 .activity-dock-options button[aria-expanded="true"] { color:#d1eea0; border-color:#a8b285; background:linear-gradient(#34392c,#454a37); box-shadow:inset 0 2px 3px #0006; outline:none; }
+.era-1970 .activity-dock-options button:focus-visible { outline:1px solid #f4e7c8; outline-offset:1px; }
 .era-1970 .tv-console .tv-dial { cursor:default; display:grid; place-items:center; }
+
+/* Compact physical TV controls share the desktop dock's location. */
+.era-1970 .activity-dock-heading,
+.era-1970 .activity-dock-options small,
+.era-1970 .press-footer { display:none; }
+.era-1970 .activity-dock-options { grid-template-columns:repeat(3,auto); gap:8px; }
+.era-1970 .activity-dock-options button { min-height:30px; padding:4px 12px; gap:6px; border-radius:3px; }
+.era-1970 .activity-dock-options button svg { display:none; }
+.era-1970 .activity-dock-options strong { font:700 11px Arial,sans-serif; }
+.era-1970 .activity-dock-options button::before { content:''; flex:none; width:22px; height:20px; border:2px solid #777b76; border-radius:2px; background:radial-gradient(ellipse at 40% 32%,#ffffff55,transparent 37%),radial-gradient(circle at center,#555e5e 0 23%,#343e40 33%,#151c1e 53%,#90948d 57%,#252b2b 66%,#0c1011 70%); box-shadow:0 1px 0 #c7c3ad,0 0 0 1px #1a1b17,inset 0 1px 2px #000; transition:transform 100ms,box-shadow 100ms; }
+.era-1970 .activity-dock-options button[aria-expanded="true"]::before,
+.era-1970 .activity-dock-options button:active::before { transform:translateY(1px); border-color:#a6a692; box-shadow:inset 1px 2px 4px #000b,0 0 0 1px #201c14; }
+@media(min-width:900px) {
+  .era-1970 .era-atmosphere { right:18px; bottom:52px; }
+  .era-1970.view-map .map-canvas { right:16px; bottom:52px; }
+  .era-1970.view-map .map-toolbar,
+  .era-1970 .achievement-toast,
+  .era-1970.view-map .stories-drawer { right:36px; }
+}

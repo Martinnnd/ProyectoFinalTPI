@@ -26,7 +26,8 @@ import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
 import Profile from "./components/Profile";
 import SocialFeed from "./components/social/SocialFeed";
-import Timeline from "./components/Timeline";
+import EraTimeline from "./components/EraTimeline";
+import { flushSync } from "react-dom";
 import MemoryMap, { type Point } from "./components/MemoryMap";
 import MemoryForm from "./components/MemoryForm";
 import SidePanel from "./components/SidePanel";
@@ -181,13 +182,35 @@ export default function App() {
     setGroups(next);setScope(group.id);setSelectedId(null);setQuery('');setCategory('Todas');setPeriod({decade:group.decade,year:null});return null;
   }
   const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile)setView('feed');}} onCreate={createGroup}/>;
+  const eraTransition = useRef<ViewTransition | null>(null);
+  useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
   function changePeriod(next: Period) {
+    if (next.decade === period.decade && next.year === period.year) return;
+    const update = () => applyPeriod(next);
+    if (next.decade === period.decade || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { update(); return; }
+    if (document.startViewTransition) {
+      eraTransition.current?.skipTransition();
+      document.documentElement.classList.add("switching-era");
+      const transition = document.startViewTransition(() => flushSync(update));
+      eraTransition.current = transition;
+      void transition.finished.catch(() => {}).finally(() => {
+        if (eraTransition.current === transition) {
+          document.documentElement.classList.remove("switching-era");
+          eraTransition.current = null;
+        }
+      });
+    } else {
+      flushSync(update);
+      document.querySelector(".app")?.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 600, easing: "ease-out" });
+    }
+  }
+  function applyPeriod(next: Period) {
     setPeriod(next);
     if(groups.some(g=>g.id===scope && g.decade!==next.decade)) setScope("all");
     setSelectedId(null);
     setFactsOpen(false);
     setPanelOpen(false);
-    if (next.decade !== period.decade) setMusicOpen(window.innerWidth >= 900);
+    if (next.decade !== period.decade) setMusicOpen(view === "map" && window.innerWidth >= 900);
   }
   function openProfile(memory: Memory) {
     setProfileAuthor(isOwnMemory(memory) ? null : memory.author);
@@ -344,14 +367,25 @@ export default function App() {
       style={theme.tokens}
       className={`app map-app view-${view} era-${period.decade} ${panelOpen ? "stories-open" : ""} ${musicOpen ? "music-open" : ""}`}
     >
+      <EraTimeline period={period} onChange={changePeriod} action={
+        <button
+          ref={addButton}
+          aria-label="Sumar mi recuerdo"
+          className="primary-button time-add-memory"
+          onClick={startAdding}
+          disabled={picking || !!draft}
+        >
+          <Plus size={18} />
+          <span>Sumar mi recuerdo</span>
+        </button>
+      }/>
       <div className="mobile-appbar">
         <div className="mobile-page-title"><span>Nostalgiar</span><strong>{view === 'map' ? 'Explorar' : view === 'feed' ? 'Feed' : view === 'chat' ? 'Chat' : 'Mi perfil'}</strong></div>
-        <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir épocas y opciones"><span className="mobile-era-dot" aria-hidden="true"/><strong>{period.decade === 2000 ? '2000s' : `${String(period.decade).slice(2)}s`}</strong><ChevronDown size={15}/></button>
+        <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir opciones"><strong>Opciones</strong><ChevronDown size={15}/></button>
         <button className="mobile-add-button" aria-label="Sumar mi recuerdo" onClick={startAdding} disabled={picking || !!draft}><Plus size={23}/></button>
       </div>
       <dialog ref={mobileOptions} className="mobile-options" onClick={e=>{if(e.target===e.currentTarget)mobileOptions.current?.close();}} onClose={()=>mobileOptionsTrigger.current?.focus()} aria-labelledby="mobile-options-title">
-        <header><h2 id="mobile-options-title">Tu viaje en el tiempo</h2><button className="icon-button" aria-label="Cerrar opciones" onClick={()=>mobileOptions.current?.close()}><X/></button></header>
-        <Timeline period={period} onChange={changePeriod}/>
+        <header><h2 id="mobile-options-title">Opciones de exploración</h2><button className="icon-button" aria-label="Cerrar opciones" onClick={()=>mobileOptions.current?.close()}><X/></button></header>
         <label className="mobile-category">Categoría<select value={category} onChange={e=>{setCategory(e.target.value as Category | 'Todas');setSelectedId(null);}}>{['Todas',...categories].map(c=><option key={c}>{c}</option>)}</select></label>
         <div className="mobile-tools">{(['stories','facts','music'] as const).map(destination=><button key={destination} onClick={()=>{mobileOptions.current?.close();navigate(destination);}}><EraIcon decade={period.decade} destination={destination}/><span>{destination==='stories'?'Recuerdos':destination==='facts'?'Efemérides':'Música'}</span></button>)}</div>
         <button className="primary-button mobile-options-done" onClick={()=>mobileOptions.current?.close()}>Ver selección</button>
@@ -377,18 +411,6 @@ export default function App() {
             onCancel={cancel}
           />
         </main>
-      {view === 'feed' && <main className="map-canvas">
-          <MemoryMap memories={memories} selected={selected} onSelect={select} onOpen={openPublication} picking={false} onPick={() => {}} draft={null} onCancel={cancel}/>
-            <button
-              ref={mapExpandButton}
-              className="mini-map-expand"
-              aria-label="Ampliar mapa"
-              aria-haspopup="dialog"
-              onClick={() => setMapExpanded(true)}
-            >
-              <span>Ampliar mapa</span>
-            </button>
-        </main>}
       <EraChrome
         period={period}
         count={visibleMemories.length}
@@ -398,9 +420,6 @@ export default function App() {
         onNavigate={navigate}
       />
       <nav className="navigation-rail" aria-label="Navegación principal">
-        <span className="rail-logo">
-          <img src="/nostalgiar-rail-logo.png" alt="Nostalgiar" width={48} height={48} />
-        </span>
         <button
           aria-label="Explorar mapa"
           className={view === "map" && !panelOpen ? "rail-active" : ""}
@@ -414,6 +433,7 @@ export default function App() {
           className={view === "feed" ? "rail-active" : ""}
           onClick={() => {
             setView("feed");
+            setMusicOpen(false);
             setSelectedId(null);
             setPanelOpen(false);
             setFactsOpen(false);
@@ -451,18 +471,7 @@ export default function App() {
         </button>
       </nav>
       <header className="map-toolbar">
-        <div className="brand-card">
-          <span className="brand-era-label" aria-hidden="true">
-            {theme.brandLabel}
-          </span>
-          <h1>
-            {theme.brand}
-            <span>.</span>
-          </h1>
-          <span>{theme.subtitle}</span>
-        </div>
         <div className="compact-selectors">
-          <Timeline period={period} onChange={changePeriod} />
           <details className="filters compact-menu">
             <summary>
               {category === "Personales" ? "Recuerdos personales" : category}
@@ -496,15 +505,7 @@ export default function App() {
             </div>
           </details>
         </div>
-        <button
-          ref={addButton}
-          className="primary-button add-button"
-          onClick={startAdding}
-          disabled={picking || !!draft}
-        >
-          <Plus size={18} />
-          <span>Sumar mi recuerdo</span>
-        </button>
+
       </header>
 
       <div className="map-period">

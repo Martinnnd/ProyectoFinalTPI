@@ -13,6 +13,8 @@ import "../../eras/80s/theme.css";
 import "../../eras/90s/theme.css";
 import "../../eras/2000s/theme.css";
 import "../../mobile.css";
+import "../../components/social/feedLayout.css";
+import "../../components/eraTimeline.css";
 
 export const metadata: Metadata = {
   title: "Explorar | Nostalgiar",

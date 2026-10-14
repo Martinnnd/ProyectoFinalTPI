@@ -871,28 +871,36 @@
   min-width:130px;
   min-height:32px;
   padding:4px 12px;
-  background:linear-gradient(#43234f,#25112f);
-  border:1px solid #ff62d9;
-  border-bottom:4px solid #821567;
-  border-radius:0;
+  --arcade-key:#ff4c9e;
+  background:linear-gradient(#402447,#21122d);
+  border:1px solid #b464ac;
+  border-top:2px solid #ef9fdf;
+  border-bottom:3px solid #100a19;
+  border-radius:4px 4px 0 0;
   color:#fff0fc;
-  box-shadow:inset 1px 1px #ffb3ee66,0 0 7px #ed24cb33;
+  box-shadow:inset 0 0 0 1px #ffffff0b,0 2px 3px #0006;
 }
 .era-1980 .activity-dock-options strong {
   font:18px "VT323",monospace;
   text-transform:uppercase;
   letter-spacing:1px;
 }
-.era-1980 .activity-dock-options button svg { width:17px; height:17px; color:#54ffff; }
+.era-1980 .activity-dock-options button svg { display:none; }
+.era-1980 .activity-dock-options button:nth-child(2) { --arcade-key:#ffe45c; }
+.era-1980 .activity-dock-options button:nth-child(3) { --arcade-key:#42edf2; }
+.era-1980 .activity-dock-options button::before { content:''; flex:none; width:23px; height:23px; border-radius:50%; border:3px solid #241b2e; background:radial-gradient(ellipse at 42% 22%,#ffffffc0 0 8%,transparent 38%),radial-gradient(circle at 50% 40%,transparent 48%,#0005 80%),var(--arcade-key); box-shadow:0 2px 0 1px #09060e,0 0 0 1px #9b7fa6,inset 0 1px 1px #fff9,inset 0 -3px 1px #0005; transition:transform 100ms,box-shadow 100ms; }
 .era-1980 .activity-dock-options button:hover,
-.era-1980 .activity-dock-options button:focus-visible { background:#51275d; outline:2px solid #54ffff; outline-offset:1px; }
+.era-1980 .activity-dock-options button:focus-visible { background:linear-gradient(#56305f,#2b1837); outline:1px solid var(--arcade-key); outline-offset:1px; }
 .era-1980 .activity-dock-options button[aria-expanded="true"] {
-  background:#12353d;
-  border-color:#54ffff;
-  border-bottom-color:#237982;
-  box-shadow:inset 0 2px 5px #0009,0 0 8px #54ffff44;
+  color:var(--arcade-key);
+  background:linear-gradient(#29223c,#161222);
+  border-color:var(--arcade-key);
+  border-bottom-color:#100a19;
+  box-shadow:inset 0 2px 5px #0007,0 0 5px #42edf222;
   outline:none;
 }
+.era-1980 .activity-dock-options button[aria-expanded="true"]::before,
+.era-1980 .activity-dock-options button:active::before { transform:translateY(2px); box-shadow:0 1px 0 #08060c,0 0 7px var(--arcade-key),inset 0 2px 4px #0006; }
 @media (min-width:900px) {
   .era-1980 .vhs-status { height:42px; padding-left:430px; justify-content:flex-end; }
   .era-1980 .vhs-status>span:first-child,
