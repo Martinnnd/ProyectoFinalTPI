@@ -27,13 +27,15 @@ test('pines, resumen, detalle y comentarios del backend', async ({ page }) => {
     }
     return route.fulfill({ headers, json: url.pathname.endsWith('/resumen') ? { ...publication, descripcion: undefined, lugar: undefined } : publication });
   });
+  await page.route(`${API_BASE_URL}/api/publicaciones`, route => route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: [] }));
   await page.goto('/explorar?era=1990');
   await page.getByRole('button', { name: 'Recuerdo, 1990, Lugares', exact: true }).click();
   await expect(page.locator('.stories-drawer')).toHaveCount(0);
+  await expect.poll(() => requests).toContain('/api/publicaciones/25/resumen');
   const summary = page.locator('#explore .pin-message-preview');
   await expect(summary.getByText('Resumen del recuerdo', { exact: true })).toBeVisible();
   await summary.getByRole('button', { name: 'Ver publicación →', exact: true }).click();
-  await expect(page.getByText('Descripción completa del recuerdo', { exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Feed de recuerdos' }).getByText('Descripción completa del recuerdo', { exact: true })).toBeVisible();
   await expect(page.getByText('Comentario reciente', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ver más comentarios', exact: true }).click();
   await expect(page.getByText('Comentario anterior', { exact: true })).toBeVisible();

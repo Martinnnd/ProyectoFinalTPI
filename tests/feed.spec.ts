@@ -6,6 +6,7 @@ test('mapa conserva la cámara entre pestañas y se crea de nuevo al recargar', 
   const bounds: string[] = [];
   await page.route(`${API_BASE_URL}/api/**`, async route => {
     const url = new URL(route.request().url());
+    if (url.pathname === '/api/publicaciones') return route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: [] });
     if (url.pathname.endsWith('/mapa')) bounds.push(url.search);
     return route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: url.pathname.endsWith('/mapa') ? { pines: [], hayMas: false } : { items: [], siguienteCursor: null, hayMas: false } });
   });
@@ -40,6 +41,7 @@ test('feed paginado, sesión vencida, recarga y Seguidos del servidor', async ({
   const publication = (id: number, titulo: string) => ({ id, titulo, descripcion: 'Descripción abreviada', fecha: '1992-01-01T00:00:00Z', fechaCreacion: '2026-10-13T15:00:00Z', categoria: 0, tipoMultimedia: 0, urlMultimedia: '', autor: { id: 2, username: 'Ana' }, lugar: { nombre: 'Buenos Aires', latitud: -34, longitud: -58 } });
   await page.route(`${API_BASE_URL}/api/**`, async route => {
     const url = new URL(route.request().url());
+    if (url.pathname === '/api/publicaciones') return route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: [] });
     const headers = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type' };
     if (url.pathname.endsWith('/mapa')) return route.fulfill({ headers, json: { pines: [], hayMas: false } });
     if (url.pathname.endsWith('/para-vos')) {

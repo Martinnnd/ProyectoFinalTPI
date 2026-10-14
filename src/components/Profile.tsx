@@ -335,7 +335,7 @@ export default function Profile({
               >
                 
                 <div className="memory-card-top">
-                  <div className="profile-post-author"><span className="profile-post-avatar" aria-hidden="true">{(author ?? "Marty").slice(0,1)}</span><span><strong>{author ?? "Marty McFly"}</strong><small>{memory.year} · {memory.category}</small></span></div>
+                  <div className="profile-post-author"><span className="profile-post-avatar" aria-hidden="true">{(author ?? "Vos").slice(0,1)}</span><span><strong>{author ?? "Vos"}</strong><small>{memory.year} · {memory.category}</small></span></div>
                   <MemoryOwnerActions memory={memory} onEdit={onEdit} onDelete={onDelete}/>
 
                   <div className="share-menu">

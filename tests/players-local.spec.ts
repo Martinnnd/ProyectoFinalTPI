@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { API_BASE_URL } from '../src/api';
 for (const era of [1970, 1980, 1990, 2000]) {
   test(`MP3 local: controles integrados sin cambiar tamaño ${era}`, async ({ page }) => {
-    await page.route(`${API_BASE_URL}/api/**`, route => route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: { pines: [], hayMas: false } }));
+    await page.route(`${API_BASE_URL}/api/**`, route => route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: new URL(route.request().url()).pathname === "/api/publicaciones" ? [] : { pines: [], hayMas: false } }));
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto(`/explorar?era=${era}`);
     const player = page.getByRole('region', { name: 'Música de la época', exact: true });

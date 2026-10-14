@@ -1,8 +1,10 @@
 import { memoryThumbnail } from "./memoryThumbnail";
 import type { MapBounds } from '../publicationsApi';
+import { getMemoryAuthorDisplay } from "../api";
 import { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
+  CircleMarker,
   Marker,
   TileLayer,
   Tooltip,
@@ -228,7 +230,7 @@ export default function MemoryMap({
               <Tooltip direction="top">{m.title} · {m.year}</Tooltip>
             </Marker>
           ))}
-          {selected && !picking && !searchTarget && <Tooltip key={selected.id} position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{selected.author} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip>}
+          {selected && !picking && !searchTarget && <CircleMarker key={selected.id} center={[selected.lat,selected.lng]} radius={0} opacity={0} fillOpacity={0} interactive={false}><Tooltip position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{getMemoryAuthorDisplay(selected)} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip></CircleMarker>}
           {searchTarget && <Marker position={[searchTarget.lat, searchTarget.lng]} icon={icon()} draggable title="Arrastrá para ajustar la ubicación" eventHandlers={{ dragend: event => {
             const point = event.target.getLatLng(); onSearchMove?.({ ...searchTarget, lat: point.lat, lng: point.lng });
           }}}><Tooltip>Ubicación encontrada · Arrastrá para ajustar</Tooltip></Marker>}

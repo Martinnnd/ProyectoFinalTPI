@@ -157,3 +157,38 @@ describe("Persistencia resistente a errores", () => {
     ).toBe(false);
   });
 });
+
+describe("Autoría de recuerdos y reposts", () => {
+  it("identifica recuerdos propios y devuelve 'Vos' para el usuario en sesión", async () => {
+    const { isOwnMemory, getMemoryAuthorDisplay, guardarSesion, cerrarSesion } = await import("./api");
+    cerrarSesion();
+    expect(isOwnMemory({ author: "Vos" })).toBe(true);
+    expect(isOwnMemory({ author: "Susana" })).toBe(false);
+    expect(getMemoryAuthorDisplay({ author: "Susana" })).toBe("Susana");
+
+    guardarSesion({
+      token: "fake-jwt",
+      usuarioId: 17,
+      username: "Nico",
+      email: "nico@example.com",
+      esAdmin: false,
+    });
+
+    expect(isOwnMemory({ author: "Nico" })).toBe(true);
+    expect(isOwnMemory({ author: "nico" })).toBe(true);
+    expect(getMemoryAuthorDisplay({ author: "Nico" })).toBe("Vos");
+    expect(getMemoryAuthorDisplay({ author: "Susana" })).toBe("Susana");
+
+    // Repost sin comentario: autor original Susana
+    const repostSinComentario = {
+      id: "repost-1",
+      author: "Vos",
+      repost: { author: "Susana" },
+    };
+    const headerAuthor = repostSinComentario.repost?.author || repostSinComentario.author;
+    expect(getMemoryAuthorDisplay({ author: headerAuthor })).toBe("Susana");
+
+    cerrarSesion();
+  });
+});
+

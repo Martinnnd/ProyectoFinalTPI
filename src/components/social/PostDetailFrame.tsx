@@ -1,5 +1,6 @@
 import { forwardRef, type ReactNode } from "react";
 import type { Memory } from "../../types";
+import { getMemoryAuthorDisplay } from "../../api";
 
 const PostDetailFrame = forwardRef<
   HTMLDivElement,
@@ -63,24 +64,32 @@ const PostDetailFrame = forwardRef<
             <div className="transition-menu">
               Archivo · Recuerdos · Conversación
             </div>
-            {decade === 2000 && (
-              <>
-                <div className="transition-contact">
-                  <span className="transition-contact-avatar">
-                    {memory.author.slice(0, 1)}
-                  </span>
-                  <div className="transition-contact-name">
-                    {memory.author} — Conversación
+            {decade === 2000 && (() => {
+              const displayContact = getMemoryAuthorDisplay({
+                author:
+                  memory.repost && !memory.repost.comment && memory.repost.author
+                    ? memory.repost.author
+                    : memory.author,
+              });
+              return (
+                <>
+                  <div className="transition-contact">
+                    <span className="transition-contact-avatar">
+                      {displayContact.slice(0, 1)}
+                    </span>
+                    <div className="transition-contact-name">
+                      {displayContact} — Conversación
+                    </div>
+                    <small className="transition-contact-status">
+                      Recuerdo de {memory.year}
+                    </small>
                   </div>
-                  <small className="transition-contact-status">
-                    Recuerdo de {memory.year}
-                  </small>
-                </div>
-                <div className="transition-chat-tools">
-                  ☺ Recuerdos compartidos · ♫ Nostalgiar
-                </div>
-              </>
-            )}
+                  <div className="transition-chat-tools">
+                    ☺ Recuerdos compartidos · ♫ Nostalgiar
+                  </div>
+                </>
+              );
+            })()}
           </>
         )}
         <div className={detail ? "transition-content" : undefined}>

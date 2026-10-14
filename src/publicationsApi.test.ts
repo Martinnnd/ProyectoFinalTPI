@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './api';
+import { API_BASE_URL, guardarSesion, cerrarSesion } from './api';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createComment, getComments, getMapPublications, getPublication, publicationId, toMemory } from './publicationsApi';
 import type { Memory } from './types';
@@ -9,7 +9,15 @@ const comment = { id: 8, contenido: 'Qué lindo recuerdo', fechaCreacion: '2026-
 function respond(data: unknown, status = 200) {
   return vi.fn().mockImplementation(async () => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } }));
 }
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { cerrarSesion(); vi.unstubAllGlobals(); });
+it('crea comentarios con la identidad de la sesión', async () => {
+  guardarSesion({ usuarioId: 42, token: 'token-test', username: 'Ana', email: 'ana@example.com', esAdmin: false });
+  const fetch = respond(comment);
+  vi.stubGlobal('fetch', fetch);
+  await createComment('25', ' Hola ');
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Hola', usuarioId: 42 });
+  expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
+});
 describe('Publicaciones del backend', () => {
   it('conserva los contadores y el estado de like, incluyendo ceros', () => {
     const data = { id: 25, titulo: 'Recuerdo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, cantidadLikes: 12, cantidadComentarios: 47, dioLike: true };
