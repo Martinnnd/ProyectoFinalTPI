@@ -432,8 +432,9 @@
 .era-1970 .activity-dock-options button[aria-expanded="true"]::before,
 .era-1970 .activity-dock-options button:active::before { transform:translateY(1px); border-color:#a6a692; box-shadow:inset 1px 2px 4px #000b,0 0 0 1px #201c14; }
 @media(min-width:900px) {
-  .era-1970 .era-atmosphere { right:18px; bottom:52px; }
-  .era-1970.view-map .map-canvas { right:16px; bottom:52px; }
+  .era-1970.view-map .era-atmosphere { top:0; right:18px; bottom:52px; }
+  .era-1970.view-map .map-canvas { top:0; right:16px; bottom:52px; }
+  .era-1970.view-map .tv-console { top:0; }
   .era-1970.view-map .map-toolbar,
   .era-1970 .achievement-toast,
   .era-1970.view-map .stories-drawer { right:36px; }

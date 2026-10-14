@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState, type ComponentProps } from "react";
+import { createPortal } from "react-dom";
 import MemoryMap, { type Point } from "./MemoryMap";
 import PlaceSearch from "./PlaceSearch";
 const MapboxMap = lazy(() => import("./MapboxMap"));
@@ -12,6 +13,14 @@ export default function MainMap(props: MapProps) {
   const [searchTarget, setSearchTarget] = useState<Point | null>(null);
   const [userLocation, setUserLocation] = useState<Point | null>(null);
   const [locationResolved, setLocationResolved] = useState(false);
+  const [searchSlot, setSearchSlot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const placeSearch = () => setSearchSlot(window.innerWidth >= 900 ? document.getElementById("place-search-slot") : null);
+    placeSearch();
+    window.addEventListener("resize", placeSearch);
+    return () => window.removeEventListener("resize", placeSearch);
+  }, []);
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
@@ -85,11 +94,15 @@ export default function MainMap(props: MapProps) {
         </Suspense>
       )}
 
-      <PlaceSearch
+      {searchSlot ? createPortal(<PlaceSearch
         target={searchTarget}
         onChoose={setSearchTarget}
         onCreate={props.onPick}
-      />
+      />, searchSlot) : <PlaceSearch
+        target={searchTarget}
+        onChoose={setSearchTarget}
+        onCreate={props.onPick}
+      />}
     </div>
   );
 }

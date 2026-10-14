@@ -17,6 +17,7 @@ export interface Memory {
   description: string;
   place: string;
   author: string;
+  authorId?: number;
   likeCount?: number;
   commentCount?: number;
   viewerLiked?: boolean;
@@ -36,6 +37,7 @@ export interface Memory {
     id?: string;
     originalId?: string;
     author: string;
+    authorId?: number;
     comment?: string;
   };
 }

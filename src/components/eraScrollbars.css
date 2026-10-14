@@ -1,0 +1,112 @@
+/* Scrollbars follow the active decade in every scrollable panel and dialog. */
+.app.era-1970 {
+  --era-scroll-width: 13px;
+  --era-scroll-track: #4b3a2b;
+  --era-scroll-thumb: #a8916b;
+  --era-scroll-thumb-hover: #c0aa82;
+  --era-scroll-border: #38291f;
+  --era-scroll-track-image: repeating-linear-gradient(2deg, #493627 0 3px, #604832 4px 7px, #3c2e23 8px 11px);
+  --era-scroll-thumb-image: linear-gradient(90deg, #6b583f, #c4af87 42%, #a18a66 70%, #67553e);
+}
+
+.app.era-1980 {
+  --era-scroll-width: 12px;
+  --era-scroll-track: #180d2b;
+  --era-scroll-thumb: #dc44bf;
+  --era-scroll-thumb-hover: #fa7bdf;
+  --era-scroll-border: #472463;
+  --era-scroll-track-image: repeating-linear-gradient(0deg, #150a27 0 5px, #26123c 6px 7px);
+  --era-scroll-thumb-image: linear-gradient(90deg, #72287f, #f064d8 45%, #bc36b8);
+}
+
+.app.era-1990 {
+  --era-scroll-width: 16px;
+  --era-scroll-track: #e5e5e5;
+  --era-scroll-thumb: #c0c0c0;
+  --era-scroll-thumb-hover: #d4d4d4;
+  --era-scroll-border: #808080;
+  --era-scroll-track-image: repeating-conic-gradient(#fff 0% 25%, #e5e5e5 0% 50%) 0 0 / 4px 4px;
+  --era-scroll-thumb-image: linear-gradient(#dfdfdf, #c0c0c0);
+}
+
+.app.era-2000 {
+  --era-scroll-width: 13px;
+  --era-scroll-track: #c7dcf3;
+  --era-scroll-thumb: #468acc;
+  --era-scroll-thumb-hover: #68a8e9;
+  --era-scroll-border: #4680bd;
+  --era-scroll-track-image: linear-gradient(90deg, #a9c9eb, #e6f3ff 50%, #b5d2f0);
+  --era-scroll-thumb-image: linear-gradient(90deg, #3979c1, #91c9fa 48%, #3479bd);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .app:is(.era-1970, .era-1980, .era-1990, .era-2000),
+  .app:is(.era-1970, .era-1980, .era-1990, .era-2000) * {
+    scrollbar-color: var(--era-scroll-thumb) var(--era-scroll-track) !important;
+  }
+}
+
+@supports selector(::-webkit-scrollbar) {
+  .app:is(.era-1970, .era-1980, .era-1990, .era-2000),
+  .app:is(.era-1970, .era-1980, .era-1990, .era-2000) * {
+    scrollbar-color: auto !important;
+    /* A non-auto standard width takes precedence over the themed pseudo-elements. */
+    scrollbar-width: auto !important;
+  }
+}
+
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar {
+  width: var(--era-scroll-width);
+  height: var(--era-scroll-width);
+}
+
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar-track,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar-track {
+  background: var(--era-scroll-track-image);
+  border: 1px solid var(--era-scroll-border);
+}
+
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar-thumb,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar-thumb {
+  background: var(--era-scroll-thumb-image);
+  border: 2px solid var(--era-scroll-border);
+  border-radius: 3px;
+}
+
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar-thumb:hover,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar-thumb:hover {
+  background: var(--era-scroll-thumb-hover);
+}
+
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar-corner,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar-corner {
+  background: var(--era-scroll-track);
+}
+
+.app.era-1990::-webkit-scrollbar-thumb,
+.app.era-1990 *::-webkit-scrollbar-thumb {
+  border: 2px outset #fff;
+  border-radius: 0;
+  box-shadow: inset -1px -1px #808080;
+}
+
+.app.era-1980::-webkit-scrollbar-thumb,
+.app.era-1980 *::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 3px #ffb9f0, 0 0 5px #e739c7;
+}
+
+.app.era-2000::-webkit-scrollbar-thumb,
+.app.era-2000 *::-webkit-scrollbar-thumb {
+  border-radius: 7px;
+  box-shadow: inset 0 1px #fff9;
+}
+
+/* The compact category strip deliberately hides its scrollbar. */
+.app .filters {
+  scrollbar-width: none !important;
+}
+
+.app .filters::-webkit-scrollbar {
+  display: none;
+}

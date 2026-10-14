@@ -20,7 +20,7 @@ it('consulta Para vos sin cursor y adapta ubicación, autor y multimedia', async
   expect(url.pathname).toBe('/api/feed/para-vos');
   expect(Object.fromEntries(url.searchParams)).toEqual({ usuarioId: '1', limite: '20' });
   expect(fetch.mock.calls[0][1].cache).toBe('no-store');
-  expect(page.items[0]).toMatchObject({ id: '25', source: 'backend', author: 'Ana', year: 1992, place: 'Mi barrio', lat: -34, lng: -58, image: `${API_BASE_URL}/uploads/foto.jpg` });
+  expect(page.items[0]).toMatchObject({ id: '25', source: 'backend', author: 'Ana', authorId: 2, year: 1992, place: 'Mi barrio', lat: -34, lng: -58, image: `${API_BASE_URL}/uploads/foto.jpg` });
   expect(page).toMatchObject({ siguienteCursor: 'next+/=', hayMas: true });
 });
 it('continúa Seguidos con el cursor exacto y propaga la cancelación', async () => {

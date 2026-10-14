@@ -38,6 +38,7 @@ import { availableDecades } from "./eras/registry";
 import { eraThemes } from "./themes";
 
 import { getMapPublications, getPublication, publicationId, type MapBounds } from './publicationsApi';
+import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from './seguimientosApi';
 
 export default function App() {
   const [bounds, setBounds] = useState<MapBounds | null>(null);
@@ -56,7 +57,10 @@ export default function App() {
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
   const mapExpandButton = useRef<HTMLButtonElement>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [following, setFollowing] = useState<string[]>([]);
+  const [followingUsers, setFollowingUsers] = useState<FollowedUser[]>([]);
+  const [followers, setFollowers] = useState<FollowedUser[]>([]);
+  const [followingRevision, setFollowingRevision] = useState(0);
+  const pendingFollows = useRef(new Set<number>());
   const creationOrigin = useRef(false);
   const [profileAuthor, setProfileAuthor] = useState<string | null>(null);
   const [view, setView] = useState<"map" | "feed" | "profile" | "chat">("map");
@@ -73,6 +77,41 @@ export default function App() {
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
   const [loginOpen, setLoginOpen] = useState(false);
   const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
+  const currentUserId = currentSesion?.usuarioId ?? 1;
+  const following = followingUsers.map(user => user.username);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setFollowingUsers([]);
+    setFollowers([]);
+    Promise.all([getSeguidos(currentUserId, controller.signal), getSeguidores(currentUserId, controller.signal)])
+      .then(([nextFollowing, nextFollowers]) => {
+        if (!controller.signal.aborted) { setFollowingUsers(nextFollowing); setFollowers(nextFollowers); }
+      })
+      .catch(error => { if (!controller.signal.aborted) setNotice(`No se pudieron cargar los seguimientos: ${error.message}`); });
+    return () => controller.abort();
+  }, [currentUserId]);
+
+  async function toggleFollow(author: string, authorId?: number) {
+    const targetId = authorId ?? [...feedItems, ...dbMemories].find(memory => memory.author === author)?.authorId;
+    if (!targetId) { setNotice(`No se puede seguir a ${author}: falta su identificador de usuario.`); return; }
+    if (targetId === currentUserId || pendingFollows.current.has(targetId)) return;
+    pendingFollows.current.add(targetId);
+    try {
+      if (followingUsers.some(user => user.id === targetId)) {
+        await dejarDeSeguir(currentUserId, targetId);
+        setFollowingUsers(current => current.filter(user => user.id !== targetId));
+      } else {
+        await seguir(currentUserId, targetId);
+        setFollowingUsers(current => [...current, { id: targetId, username: author }]);
+      }
+      setFollowingRevision(revision => revision + 1);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'No se pudo actualizar el seguimiento.');
+    } finally {
+      pendingFollows.current.delete(targetId);
+    }
+  }
 
   const reloadMemories = async () => {
     try {
@@ -105,9 +144,6 @@ export default function App() {
   const [factsOpen, setFactsOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
   useEffect(() => { setMusicOpen(window.innerWidth >= 900); }, []);
-  useEffect(() => {
-    if (window.innerWidth < 900 && view !== "map") setMusicOpen(false);
-  }, [view]);
   const addButton = useRef<HTMLButtonElement>(null);
   const storiesButton = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -210,7 +246,6 @@ export default function App() {
     setSelectedId(null);
     setFactsOpen(false);
     setPanelOpen(false);
-    if (next.decade !== period.decade) setMusicOpen(view === "map" && window.innerWidth >= 900);
   }
   function openProfile(memory: Memory) {
     setProfileAuthor(isOwnMemory(memory) ? null : memory.author);
@@ -229,7 +264,6 @@ export default function App() {
     setPanelOpen(false);
     if (window.innerWidth < 900) {
       setFactsOpen(false);
-      setMusicOpen(false);
     }
   }
   function closeStories() {
@@ -358,7 +392,6 @@ export default function App() {
     setView("map");
     setPanelOpen(destination === "stories" && (view !== "map" || !panelOpen));
     setFactsOpen(destination === "facts" && (view !== "map" || !factsOpen));
-    if (window.innerWidth < 900 || destination === "map") setMusicOpen(false);
     if (destination === "map") setSelectedId(null);
   }
   const theme = eraThemes[period.decade];
@@ -370,13 +403,13 @@ export default function App() {
       <EraTimeline period={period} onChange={changePeriod} action={
         <button
           ref={addButton}
-          aria-label="Sumar mi recuerdo"
+          aria-label="Recordar"
           className="primary-button time-add-memory"
           onClick={startAdding}
           disabled={picking || !!draft}
         >
-          <Plus size={18} />
-          <span>Sumar mi recuerdo</span>
+          <Plus size={16} />
+          <span>Recordar</span>
         </button>
       }/>
       <div className="mobile-appbar">
@@ -433,7 +466,6 @@ export default function App() {
           className={view === "feed" ? "rail-active" : ""}
           onClick={() => {
             setView("feed");
-            setMusicOpen(false);
             setSelectedId(null);
             setPanelOpen(false);
             setFactsOpen(false);
@@ -472,6 +504,7 @@ export default function App() {
       </nav>
       <header className="map-toolbar">
         <div className="compact-selectors">
+          <div id="place-search-slot" />
           <details className="filters compact-menu">
             <summary>
               {category === "Personales" ? "Recuerdos personales" : category}
@@ -508,13 +541,7 @@ export default function App() {
 
       </header>
 
-      <div className="map-period">
-        <Compass size={17} />
-        <strong>{eraContent[period.decade].label}</strong>
-        <span>{period.year ?? `${period.decade} — ${period.decade + 9}`}</span>
-        <i />
-        <span>{memories.length} recuerdos</span>
-      </div>
+      
       {view === "map" && panelOpen && (
         <div className="stories-drawer stories-index">
           <div className="drawer-heading">
@@ -555,7 +582,8 @@ export default function App() {
           memories={ownMemories}
           allMemories={profileMemories}
           tierProgress={tierProgress}
-          following={following}
+          followers={followers}
+          followedUsers={followingUsers}
           period={period}
           selected={selected}
           earned={earned}
@@ -579,13 +607,8 @@ export default function App() {
           decade={period.decade}
           memories={filterMemories(filterCommunity(dbMemories, scope, groups, query), period, category)}
           following={following}
-          onFollow={(author) =>
-            setFollowing((v) =>
-              v.includes(author)
-                ? v.filter((a) => a !== author)
-                : [...v, author],
-            )
-          }
+          followingRevision={followingRevision}
+          onFollow={toggleFollow}
           selected={selected}
           onSelect={(m) => { selectedSeed.current = m; setRemoteSelected(m); setSelectedId(m?.id ?? null); }}
           onMap={(m) => {

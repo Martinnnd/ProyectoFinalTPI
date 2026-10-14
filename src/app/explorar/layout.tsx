@@ -15,6 +15,7 @@ import "../../eras/2000s/theme.css";
 import "../../mobile.css";
 import "../../components/social/feedLayout.css";
 import "../../components/eraTimeline.css";
+import "../../components/eraScrollbars.css";
 
 export const metadata: Metadata = {
   title: "Explorar | Nostalgiar",

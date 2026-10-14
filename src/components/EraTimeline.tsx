@@ -17,16 +17,15 @@ export default function EraTimeline({ period, onChange, action }: {
   return (
     <header className="time-navigation" aria-label="Viajar en el tiempo">
       <div className="time-brand">
-        <img src="/nostalgiar-rail-logo.png" alt="" width={42} height={42}/>
+        <img src="/nostalgiar-rail-logo.png" alt="" width={50} height={42}/>
         <span>Nostalgiar</span>
-        <small>Tu viaje en el tiempo</small>
       </div>
       <div className="time-scale">
         <div className="time-decades" role="group" aria-label="Elegir década">
           {availableDecades.map(decade => <button key={decade} type="button"
             aria-label={`Década de ${decade}`} aria-pressed={period.decade === decade}
             onClick={() => { setPreview(null); onChange({ decade, year: null }); }}>
-            {eraRegistry[decade].theme.shortLabel}<span>{decade} — {decade + 9}</span>
+            {eraRegistry[decade].theme.shortLabel}
           </button>)}
         </div>
         <div className="time-track" style={{ '--time-progress': `${(year - 1970) / 39 * 100}%` } as CSSProperties}>

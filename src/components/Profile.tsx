@@ -7,6 +7,7 @@ import { Grid3x3, Link2, Lock, MapPin, Plus, Send, Share2, UserRound, X } from "
 import MemoryMap from "./MemoryMap";
 import { describeTiers, resolveAchievements, resolveUserCategory } from "../data";
 import type { Achievement, Memory, Period, TierProgress } from "../types";
+import type { FollowedUser } from "../seguimientosApi";
 
 export default function Profile({
   onEdit,
@@ -17,7 +18,8 @@ export default function Profile({
   memories,
   allMemories,
   tierProgress,
-  following,
+  followers,
+  followedUsers,
   period,
   selected,
   earned,
@@ -33,7 +35,8 @@ export default function Profile({
   memories: Memory[];
   allMemories: Memory[];
   tierProgress: TierProgress;
-  following: string[];
+  followers: FollowedUser[];
+  followedUsers: FollowedUser[];
   period: Period;
   selected: Memory | null;
   earned: Achievement[];
@@ -175,11 +178,11 @@ export default function Profile({
           </div>
           {!author && <><div>
             <dt>Seguidores</dt>
-            <dd>0</dd>
+            <dd>{followers.length}</dd>
           </div>
           <div>
             <dt>Seguidos</dt>
-            <dd>{following.length}</dd>
+            <dd>{followedUsers.length}</dd>
           </div></>}
           <div>
             <dt>Lugares</dt>
@@ -188,6 +191,10 @@ export default function Profile({
             </dd>
           </div>
         </dl>
+        {!author && <div className="profile-follow-lists">
+          <details><summary>Ver seguidores</summary><ul>{followers.length ? followers.map(user => <li key={user.id}>{user.username}</li>) : <li>Todavía no tenés seguidores.</li>}</ul></details>
+          <details><summary>Ver seguidos</summary><ul>{followedUsers.length ? followedUsers.map(user => <li key={user.id}>{user.username}</li>) : <li>Todavía no seguís a nadie.</li>}</ul></details>
+        </div>}
       </header>
       <nav className="profile-shortcuts" aria-label="Secciones del perfil">
         <button onClick={() => jumpTo(album.current)}><Grid3x3 size={16}/>{author ? "Su colección" : presentation.collection}<span>{allMemories.length}</span></button>

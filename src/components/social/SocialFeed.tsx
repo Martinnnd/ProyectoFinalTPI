@@ -52,6 +52,7 @@ export default function SocialFeed({
   onAdd,
   onAddHashtag,
   following,
+  followingRevision,
   onFollow,
   onReloadMemories,
 }: {
@@ -63,7 +64,8 @@ export default function SocialFeed({
   onProfile: (memory: Memory) => void;
   decade: number;
   following: string[];
-  onFollow: (author: string) => void;
+  followingRevision: number;
+  onFollow: (author: string, authorId?: number) => void;
   groupIds: string[];
   groupName?: string;
   community?: ReactNode;
@@ -84,6 +86,7 @@ export default function SocialFeed({
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<FeedTab>("all");
   const remote = useRemoteFeed(tab === 'groups' ? null : tab === 'following' ? 'seguidos' : 'para-vos', active);
+  useEffect(() => { if (followingRevision && tab === 'following') remote.reload(); }, [followingRevision]);
   useEffect(() => { if (tab !== 'groups') onItems(remote.items); }, [remote.items, tab, onItems]);
   const [hashtag, setHashtag] = useState<string | null>(null);
   const [, setNow] = useState(Date.now);
@@ -102,17 +105,12 @@ export default function SocialFeed({
     if (stream.current) stream.current.scrollTop = 0;
   }, [selected?.id, tab, hashtag]);
 
-  const authors = [
-    ...new Set(
-      allMemories
-        .map((memory) =>
-          memory.repost && !memory.repost.comment && memory.repost.author
-            ? memory.repost.author
-            : memory.author
-        )
-        .filter((author) => !isOwnMemory({ author })),
-    ),
-  ];
+  const authors = [...new Map(allMemories.map(memory => {
+    const simpleRepost = memory.repost && !memory.repost.comment && memory.repost.author;
+    const name = simpleRepost ? memory.repost!.author : memory.author;
+    const id = simpleRepost ? memory.repost?.authorId : memory.authorId;
+    return [name, { name, id }] as const;
+  }).filter(([, author]) => author.id && !isOwnMemory({ author: author.name }))).values()];
   const tabPosts =
     tab === "groups"
         ? allMemories.filter(
@@ -233,11 +231,7 @@ export default function SocialFeed({
           onBack={() => open(null)}
           onTabChange={changeTab}
         />
-        {!selected && tab !== 'groups' && <div className="feed-heading">
-          <button type="button" disabled={remote.loading} onClick={() => { setHashtag(null); remote.reload(); }}>Recargar {tab === 'all' ? 'Para vos' : 'Seguidos'}</button>
-          {remote.loading && <span role="status">Cargando publicaciones…</span>}
-          {remote.error && <p role="alert">{remote.error} <button type="button" disabled={remote.loading} onClick={remote.expired || !remote.hayMas ? remote.reload : remote.more}>{remote.expired ? 'Nueva selección' : 'Reintentar'}</button></p>}
-        </div>}
+        
         {!selected && hashtag && (
           <HashtagThread key={hashtag} tag={hashtag} count={posts.length}
             hasDemo={posts.some(memory => memory.source === "demo")}

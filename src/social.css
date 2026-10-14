@@ -13,7 +13,7 @@
   flex-wrap: wrap;
 }
 
-.app:is(.view-feed, .view-profile) .music-card {
+.app:is(.view-feed, .view-profile, .view-chat) .music-card {
   width: 265px;
   bottom: 60px;
 }
@@ -139,7 +139,7 @@
     font-size: 5px !important;
   }
 
-  .app:is(.view-feed, .view-profile) .music-card {
+  .app:is(.view-feed, .view-profile, .view-chat) .music-card {
     width: auto;
     bottom: 80px;
   }
@@ -151,7 +151,7 @@
 }
 
 @media (min-width: 900px) and (max-height: 800px) {
-  .app:is(.view-feed, .view-profile) .music-card:not(.expanded) .device-illustration {
+  .app:is(.view-feed, .view-profile, .view-chat) .music-card:not(.expanded) .device-illustration {
     display: none;
   }
 }
@@ -288,6 +288,20 @@
   font: 700 30px/1 var(--font-display);
   margin: 0;
 }
+
+.profile-follow-lists {
+  grid-column: 1/-1;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.profile-follow-lists details { min-width: 130px; }
+.profile-follow-lists summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+.profile-follow-lists ul { margin: 8px 0 0; padding-left: 18px; line-height: 1.7; }
 
 .personal-demo-note {
   grid-column: 1/-1;

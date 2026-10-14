@@ -373,40 +373,7 @@ export default function MapboxMap(
       aria-label="Globo Mapbox de recuerdos de Argentina"
     >
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
-      <details className="globe-tools" open={window.innerWidth >= 900 ? true : undefined}><summary>Opciones del mapa</summary><div className="globe-tool-buttons">
-        <button
-          onClick={() => {
-            userInteracted.current = true;
-            instance.current?.flyTo({
-              ...responsiveOverview(),
-              duration: duration(),
-            });
-          }}
-        >
-          Ver globo
-        </button>
-        <button
-          onClick={() => {
-            userInteracted.current = true;
-            instance.current?.flyTo({
-              center: [-64.4, -38.4],
-              zoom: 4,
-              pitch: 0,
-              bearing: 0,
-              duration: duration(),
-            });
-          }}
-        >
-          Ver Argentina
-        </button>
-        <button
-          aria-expanded={controls}
-          aria-controls="mapbox-settings"
-          onClick={() => setControls((v) => !v)}
-        >
-          Estilo del mapa
-        </button>
-      </div></details>
+      
       {controls && (
         <aside
           id="mapbox-settings"
