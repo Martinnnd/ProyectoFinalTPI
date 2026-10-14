@@ -13,12 +13,16 @@ import { compartirPublicacion } from "../../api";
 import { memoryHashtags, weeklyTrends } from "../../hashtags";
 import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
+import useRemoteFeed from '../../hooks/useRemoteFeed';
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
 }
 
 export default function SocialFeed({
+  active,
+  onItems,
+  filterFeed,
   onEdit,
   onDelete,
   onProfile,
@@ -35,6 +39,9 @@ export default function SocialFeed({
   following,
   onFollow,
 }: {
+  active: boolean;
+  onItems: (items: Memory[]) => void;
+  filterFeed: (items: Memory[]) => Memory[];
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
   onProfile: (memory: Memory) => void;
@@ -60,6 +67,8 @@ export default function SocialFeed({
   const [saves, setSaves] = useState<string[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<FeedTab>("all");
+  const remote = useRemoteFeed(tab === 'groups' ? null : tab === 'following' ? 'seguidos' : 'para-vos', active);
+  useEffect(() => { if (tab !== 'groups') onItems(remote.items); }, [remote.items, tab, onItems]);
   const [hashtag, setHashtag] = useState<string | null>(null);
   const [, setNow] = useState(Date.now);
   useEffect(() => {
@@ -70,25 +79,21 @@ export default function SocialFeed({
   const cancelTurn = useRef<() => void>(() => {});
   const stream = useRef<HTMLDivElement>(null);
   
-  const allMemories = [...localReposts, ...memories];
-  const resultKey = allMemories.map((memory) => memory.id).join(",");
+  const allMemories = tab === 'groups' ? [...localReposts, ...memories] : filterFeed(tab === 'all' ? [...new Map([...localReposts, ...remote.items].map(memory => [memory.id, memory])).values()] : remote.items);
 
   useEffect(() => () => cancelTurn.current(), []);
   useEffect(() => {
     if (stream.current) stream.current.scrollTop = 0;
-  }, [selected?.id, resultKey, tab, hashtag]);
+  }, [selected?.id, tab, hashtag]);
 
   const authors = [
     ...new Set(
       allMemories
-        .filter((memory) => memory.source === "demo")
         .map((memory) => memory.author),
     ),
   ];
   const tabPosts =
-    tab === "following"
-      ? allMemories.filter((memory) => following.includes(memory.author))
-      : tab === "groups"
+    tab === "groups"
         ? allMemories.filter(
             (memory) =>
               !!memory.groupId && groupIds.includes(memory.groupId),
@@ -133,6 +138,7 @@ export default function SocialFeed({
 
   function changeTab(nextTab: FeedTab) {
     setTab(nextTab);
+    setHashtag(null);
     open(null);
   }
 
@@ -157,6 +163,11 @@ export default function SocialFeed({
           onBack={() => open(null)}
           onTabChange={changeTab}
         />
+        {!selected && tab !== 'groups' && <div className="feed-heading">
+          <button type="button" disabled={remote.loading} onClick={() => { setHashtag(null); remote.reload(); }}>Recargar {tab === 'all' ? 'Para vos' : 'Seguidos'}</button>
+          {remote.loading && <span role="status">Cargando publicaciones…</span>}
+          {remote.error && <p role="alert">{remote.error} <button type="button" disabled={remote.loading} onClick={remote.expired || !remote.hayMas ? remote.reload : remote.more}>{remote.expired ? 'Nueva selección' : 'Reintentar'}</button></p>}
+        </div>}
         {!selected && (hashtag ? (
           <HashtagThread key={hashtag} tag={hashtag} count={posts.length}
             hasDemo={posts.some(memory => memory.source === "demo")}
@@ -171,7 +182,7 @@ export default function SocialFeed({
                 memory={memory}
                 selected={selected?.id === memory.id}
                 following={following.includes(memory.author)}
-                liked={interactions.isLiked(memory.id)}
+                liked={interactions.isLiked(memory.id, memory.viewerLiked)}
                 comments={comments}
                 rating={ratings[memory.id]}
                 reposted={reposts.includes(memory.id)}
@@ -183,7 +194,7 @@ export default function SocialFeed({
                 onOpen={open}
                 onMap={onMap}
                 onRate={(value) => rate(memory.id, value)}
-                onLike={() => interactions.toggleLike(memory.id)}
+                onLike={() => interactions.toggleLike(memory.id, memory.viewerLiked)}
                 onRepost={() => setRepostMemory(memory)}
                 onSave={() =>
                   setSaves((current) => toggleId(current, memory.id))
@@ -194,7 +205,7 @@ export default function SocialFeed({
               />
             );
           })}
-          {!selected && !posts.length && (
+          {!selected && !posts.length && (tab === 'groups' || (!remote.loading && !remote.error)) && (
             <div className="feed-empty">
               <h3>
                 {tab === "following"
@@ -209,6 +220,7 @@ export default function SocialFeed({
               </p>
             </div>
           )}
+          {!selected && tab !== 'groups' && remote.hayMas && <button className="primary-button" type="button" disabled={remote.loading || remote.expired} onClick={remote.more}>Ver más publicaciones</button>}
         </div>
       </PostDetailFrame>
       <FeedSidebar

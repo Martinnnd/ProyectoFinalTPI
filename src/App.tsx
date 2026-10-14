@@ -5,7 +5,7 @@ import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
 import { demoGroups, loadGroups, filterCommunity } from "./groups";
 import type { CommunityGroup } from "./types";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
 import {
   categories,
@@ -35,7 +35,17 @@ import EraChrome, { EraIcon } from "./components/EraChrome";
 import { availableDecades } from "./eras/registry";
 import { eraThemes } from "./themes";
 
+import { getMapPublications, getPublication, publicationId, type MapBounds } from './publicationsApi';
+
 export default function App() {
+  const [bounds, setBounds] = useState<MapBounds | null>(null);
+  const reportBounds = useCallback((next: MapBounds) => setBounds(current => JSON.stringify(current) === JSON.stringify(next) ? current : next), []);
+  const [remotePins, setRemotePins] = useState<Memory[]>([]);
+  const [feedItems, setFeedItems] = useState<Memory[]>([]);
+  const [remoteSelected, setRemoteSelected] = useState<Memory | null>(null);
+  const selectedSeed = useRef<Memory | null>(null);
+  const [apiStatus, setApiStatus] = useState('');
+  const [mapRevision, setMapRevision] = useState(0);
   const [groups,setGroups] = useState<CommunityGroup[]>(demoGroups);
   const [scope,setScope] = useState('all');
   const [query,setQuery] = useState('');
@@ -82,6 +92,7 @@ export default function App() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
+  useEffect(() => { setMusicOpen(window.innerWidth >= 900); }, []);
   useEffect(() => {
     if (window.innerWidth < 900 && view !== "map") setMusicOpen(false);
   }, [view]);
@@ -118,15 +129,43 @@ export default function App() {
       document.removeEventListener("keydown", closeMenus);
     };
   }, []);
+  useEffect(() => {
+    if (!bounds || view !== 'map') return;
+    const controller = new AbortController();
+    setApiStatus('');
+    const loadingTimer = setTimeout(() => setApiStatus('Actualizando publicaciones…'), 1000);
+    const timer = setTimeout(() => {
+      getMapPublications(bounds, period, category, controller.signal).then(result => {
+        if (controller.signal.aborted) return;
+        clearTimeout(loadingTimer);
+        setRemotePins(result.memories);
+        setApiStatus(result.hayMas ? 'Hay más publicaciones: acercá el mapa para verlas.' : '');
+      }).catch(error => { if (!controller.signal.aborted) { clearTimeout(loadingTimer); setApiStatus(`No se pudieron cargar las publicaciones: ${error.message}`); } });
+    }, 300);
+    return () => { clearTimeout(timer); clearTimeout(loadingTimer); controller.abort(); };
+  }, [bounds, period, category, view, mapRevision]);
+  useEffect(() => {
+    setRemoteSelected(current => current?.id === selectedId ? current : null);
+    if (!selectedId) return;
+    const pin = [selectedSeed.current, remoteSelected, ...remotePins, ...local].find(memory => memory?.id === selectedId);
+    if (!pin || !publicationId(pin)) return;
+    const controller = new AbortController();
+    setApiStatus(view === 'map' ? 'Cargando resumen…' : 'Cargando publicación…');
+    getPublication(pin, view === 'map', controller.signal).then(memory => {
+      if (controller.signal.aborted) return;
+      setRemoteSelected(memory); setApiStatus('');
+    }).catch(error => { if (!controller.signal.aborted) { setRemoteSelected(null); setApiStatus(`No se pudo abrir la publicación: ${error.message}`); } });
+    return () => controller.abort();
+  }, [selectedId, view, mapRevision]);
   const memories = filterMemories(
-    filterCommunity([...initialMemories, ...local],view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
+    filterCommunity(view === 'map' ? remotePins : view === 'feed' ? feedItems : [...initialMemories, ...local],view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
     period,
     category,
   );
   const profileMemories = profileAuthor === null ? local : initialMemories.filter(m => m.author === profileAuthor);
   const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? profileMemories : memories;
-  const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
+  const selected = remoteSelected?.id === selectedId ? remoteSelected : visibleMemories.find((m) => m.id === selectedId) ?? remotePins.find(m => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
     setScope(value);setQuery('');setSelectedId(null);
     const group=groups.find(g=>g.id===value);
@@ -146,7 +185,7 @@ export default function App() {
     setSelectedId(null);
     setFactsOpen(false);
     setPanelOpen(false);
-    if (next.decade !== period.decade) setMusicOpen(false);
+    if (next.decade !== period.decade) setMusicOpen(window.innerWidth >= 900);
   }
   function openProfile(memory: Memory) {
     setProfileAuthor(memory.source === "local" ? null : memory.author);
@@ -155,12 +194,14 @@ export default function App() {
     setView("profile");
   }
   function openPublication(memory: Memory) {
+    selectedSeed.current = memory;
     setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
   }
   function select(memory: Memory) {
+    selectedSeed.current = memory;
     setSelectedId(memory.id);
-    setPanelOpen(view === "map");
+    setPanelOpen(false);
     if (window.innerWidth < 900) {
       setFactsOpen(false);
       setMusicOpen(false);
@@ -259,6 +300,7 @@ export default function App() {
       return "Tu navegador no permite guardar recuerdos. Habilitá el almacenamiento y volvé a intentar.";
     }
     setLocal(next);
+    setMapRevision(value => value + 1);
     setPeriod({
       decade: (Math.floor(memory.year / 10) * 10) as Decade,
       year: null,
@@ -297,7 +339,6 @@ export default function App() {
     if (destination === "map") setSelectedId(null);
   }
   const theme = eraThemes[period.decade];
-  const ActiveMap = view === "map" ? MainMap : MemoryMap;
   return (
     <div
       style={theme.tokens}
@@ -318,11 +359,13 @@ export default function App() {
       <a className="skip-link" href="#explore">
         Saltar al mapa
       </a>
-      {view !== "profile" && view !== "chat" && (
-        <main id="explore" className="map-canvas">
-          <ActiveMap
-            memories={memories}
-            selected={selected}
+        <main id="explore" className="map-canvas" style={view === 'map' ? undefined : { display: 'none' }}>
+          <MainMap
+            active={view === 'map'}
+            showEmptyState={false}
+            onBoundsChange={reportBounds}
+            memories={filterMemories(remotePins, period, category)}
+            selected={view === 'map' ? selected : null}
             onSelect={select}
             onOpen={openPublication}
             picking={picking}
@@ -333,7 +376,9 @@ export default function App() {
             draft={draft}
             onCancel={cancel}
           />
-          {view === "feed" && (
+        </main>
+      {view === 'feed' && <main className="map-canvas">
+          <MemoryMap memories={memories} selected={selected} onSelect={select} onOpen={openPublication} picking={false} onPick={() => {}} draft={null} onCancel={cancel}/>
             <button
               ref={mapExpandButton}
               className="mini-map-expand"
@@ -343,9 +388,7 @@ export default function App() {
             >
               <span>Ampliar mapa</span>
             </button>
-          )}
-        </main>
-      )}
+        </main>}
       <EraChrome
         period={period}
         count={visibleMemories.length}
@@ -478,9 +521,7 @@ export default function App() {
             selected={selected}
             memories={memories}
             onSelect={(memory) => {
-              setSelectedId(memory.id);
-              setPanelOpen(false);
-              setView("feed");
+              openPublication(memory);
             }}
           />
         </div>
@@ -514,6 +555,9 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
+          active={view === 'feed'}
+          onItems={setFeedItems}
+          filterFeed={items => filterMemories(filterCommunity(items, scope, groups, query), period, category)}
           onAddHashtag={tag => { startAdding(); setDraftHashtags([tag]); }}
           onEdit={editMemory}
           onDelete={deleteMemory}
@@ -522,7 +566,7 @@ export default function App() {
           community={communityControls()}
           groupName={groups.find(g=>g.id===scope)?.name}
           decade={period.decade}
-          memories={memories}
+          memories={filterMemories(filterCommunity([...initialMemories, ...local], scope, groups, query), period, category)}
           following={following}
           onFollow={(author) =>
             setFollowing((v) =>
@@ -532,11 +576,13 @@ export default function App() {
             )
           }
           selected={selected}
-          onSelect={(m) => setSelectedId(m?.id ?? null)}
+          onSelect={(m) => { selectedSeed.current = m; setRemoteSelected(m); setSelectedId(m?.id ?? null); }}
           onMap={(m) => {
+            selectedSeed.current = m;
+            setRemoteSelected(m);
             setView("map");
             setSelectedId(m.id);
-            setPanelOpen(true);
+            setPanelOpen(false);
             setFactsOpen(false);
           }}
           onAdd={startAdding}
@@ -555,6 +601,7 @@ export default function App() {
           }
         }}
       />
+      {apiStatus && <div className="toast" role="status">{apiStatus}{apiStatus.startsWith('No se pud') && <button onClick={() => setMapRevision(value => value + 1)}>Reintentar</button>}</div>}
       {notice && (
         <div className="toast" role="status">
           <span>{notice}</span>

@@ -4,6 +4,7 @@ import LikeButton from "./LikeButton";
 export default function PostActions({
   memoryTitle,
   liked,
+  likeCount,
   commentCount,
   reposted,
   saved,
@@ -14,6 +15,7 @@ export default function PostActions({
 }: {
   memoryTitle: string;
   liked: boolean;
+  likeCount?: number;
   commentCount: number;
   reposted: boolean;
   saved: boolean;
@@ -24,10 +26,10 @@ export default function PostActions({
 }) {
   return (
     <footer>
-      <LikeButton liked={liked} memoryTitle={memoryTitle} onToggle={onLike} />
+      <LikeButton liked={liked} count={likeCount} memoryTitle={memoryTitle} onToggle={onLike} />
       <button onClick={onOpenComments}>
         <MessageCircle size={17} />
-        {commentCount || ""} Comentar
+        {commentCount} Comentar
       </button>
       <button
         aria-label={`Repostear: ${memoryTitle}`}

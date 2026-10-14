@@ -23,6 +23,7 @@ export interface ChromeProps {
   onNavigate: (destination: Destination) => void;
 }
 export interface MusicTrack {
+  audioSrc?: string;
   title: string;
   artist: string;
   year: number;

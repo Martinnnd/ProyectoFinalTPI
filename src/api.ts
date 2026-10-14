@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:5199";
+export const API_BASE_URL = "https://localhost:7014";
 
 export async function compartirPublicacion(originalId: string, descripcion: string, autorId: number = 1) {
     // Intentamos parsear el ID de la memoria a numérico para que el backend lo acepte.

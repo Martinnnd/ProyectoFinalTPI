@@ -17,9 +17,12 @@ export interface Memory {
   description: string;
   place: string;
   author: string;
+  likeCount?: number;
+  commentCount?: number;
+  viewerLiked?: boolean;
   lat: number;
   lng: number;
-  source: "demo" | "local";
+  source: "demo" | "local" | "backend";
   hashtags?: string[];
   /** Publication time, independent of the historical year of the memory. */
   createdAt?: string;

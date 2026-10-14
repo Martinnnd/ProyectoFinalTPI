@@ -1,6 +1,6 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 for (const era of [1970,1980,1990,2000]) {
- test(`colección de cinco temas ${era}`, async ({page}) => {
+ test(`colección de tres temas locales ${era}`, async ({page}) => {
   await page.route('https://open.spotify.com/embed/**', route => route.fulfill({contentType:'text/html',body:'Spotify de prueba'}));
   await page.setViewportSize({width:1440,height:1000});
   await page.goto(`/explorar?era=${era}`);
@@ -8,9 +8,9 @@ for (const era of [1970,1980,1990,2000]) {
   await trigger.click();
   const dialog=page.locator('.song-picker');
   await expect(dialog).toBeVisible();
-  await expect(dialog.locator('.song-choice')).toHaveCount(5);
+  await expect(dialog.locator('.song-choice')).toHaveCount(3);
   await page.screenshot({path:`test-results/song-library-${era}.png`});
-  for(let i=0;i<5;i++) {
+  for(let i=0;i<3;i++) {
    if(i) await trigger.click();
    const option=dialog.locator('.song-choice').nth(i);
    const title=await option.locator('strong').innerText();
@@ -20,18 +20,20 @@ for (const era of [1970,1980,1990,2000]) {
   }
   await expect(page.locator('.spotify-player')).toHaveCount(0);
   await page.getByRole('button',{name:'Pista siguiente'}).click();
-  await expect(trigger).toContainText('1 / 5');
+  await expect(trigger).toContainText('1 / 3');
   await page.getByRole('button',{name:'Pista anterior'}).click();
-  await expect(trigger).toContainText('5 / 5');
-  await page.getByRole('button',{name:'Abrir reproductor',exact:true}).click();
-  const previous=await page.locator('.spotify-player').getAttribute('src');
+  await expect(trigger).toContainText('3 / 3');
+  await page.getByRole('button',{name:'Reproducir música',exact:true}).click();
+  const previous=await page.locator('audio').getAttribute('src');
   await trigger.click();
-  await dialog.locator('.song-choice').nth(2).click();
-  await expect(page.locator('.spotify-player')).not.toHaveAttribute('src',previous!);
+  await dialog.locator('.song-choice').nth(1).click();
+  await expect(page.locator('audio')).not.toHaveAttribute('src',previous!);
   await trigger.click();
   await page.keyboard.press('Escape');
   await expect(trigger).toBeFocused();
   await page.setViewportSize({width:390,height:844});
+  await page.getByRole('button',{name:'Abrir épocas y opciones'}).click();
+  await page.locator('.mobile-options').getByRole('button',{name:'Música',exact:true}).click();
   await trigger.click();
   await expect(dialog).toBeVisible();
   const box=await dialog.boundingBox();

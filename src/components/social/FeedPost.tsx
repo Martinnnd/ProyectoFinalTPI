@@ -5,6 +5,8 @@ import { youtubeId } from "../../media";
 import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import type { Memory } from "../../types";
 import CommentsSection from "./CommentsSection";
+import RemoteComments from './RemoteComments';
+import { publicationId } from '../../publicationsApi';
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
 import { memoryHashtags } from "../../hashtags";
@@ -82,7 +84,7 @@ export default function FeedPost({
             <strong>{!memory.repost?.comment && memory.repost ? memory.repost.author : (memory.source === "local" ? "Vos" : memory.author)}</strong>
           </button>
           <small>
-            {memory.source === "demo" ? "" : "Recuerdo local"} {memory.year}
+            {memory.source === "local" ? "Recuerdo local" : ""} {memory.year}
           </small>
         </div>
         {memory.source === "demo" && (
@@ -160,7 +162,8 @@ export default function FeedPost({
       <PostActions
         memoryTitle={memory.title}
         liked={liked}
-        commentCount={comments.length}
+        likeCount={memory.likeCount}
+        commentCount={memory.commentCount ?? comments.length}
         reposted={reposted}
         saved={saved}
         onLike={onLike}
@@ -168,14 +171,14 @@ export default function FeedPost({
         onRepost={onRepost}
         onSave={onSave}
       />
-      {selected && (
+      {selected && (publicationId(memory) ? <RemoteComments key={memory.id} memoryId={memory.id}/> : (
         <CommentsSection
           memoryId={memory.id}
           comments={comments}
           onAddComment={onAddComment}
           onReaction={onReaction}
         />
-      )}
+      ))}
     </article>
   );
 }

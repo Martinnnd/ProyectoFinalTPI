@@ -59,6 +59,9 @@ export default function DesktopChrome({
           >
             _
           </button>
+          <button type="button" aria-label="Cerrar ventana" title="Cerrar">
+            ×
+          </button>
         </div>
       </div>
       <footer className="system-taskbar" aria-label="Barra de tareas">

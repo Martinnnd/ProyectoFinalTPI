@@ -6,10 +6,6 @@ import type {
 } from "../socialTypes";
 import { demoComments } from "@/components/social/demoComments";
 
-function toggleId(ids: string[], id: string) {
-  return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
-}
-
 function updateReaction(
   comment: MemoryComment,
   reaction: CommentReaction,
@@ -32,16 +28,16 @@ function updateReaction(
 }
 
 export default function useMemoryInteractions() {
-  const [likedMemoryIds, setLikedMemoryIds] = useState<string[]>([]);
+  const [likes, setLikes] = useState<Record<string, boolean>>({});
   const [commentsByMemory, setCommentsByMemory] = useState<CommentsByMemory>(demoComments);
 
 
-  function isLiked(memoryId: string) {
-    return likedMemoryIds.includes(memoryId);
+  function isLiked(memoryId: string, initial = false) {
+    return likes[memoryId] ?? initial;
   }
 
-  function toggleLike(memoryId: string) {
-    setLikedMemoryIds((current) => toggleId(current, memoryId));
+  function toggleLike(memoryId: string, initial = false) {
+    setLikes(current => ({ ...current, [memoryId]: !(current[memoryId] ?? initial) }));
   }
 
   function getComments(memoryId: string) {
