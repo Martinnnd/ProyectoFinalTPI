@@ -10,9 +10,15 @@ import type {
   UserCategory,
   UserTier,
 } from "./types";
+// Demo activity is anchored to this visit, so the weekly feature can be explored
+// without changing the historical year. Production timestamps must come from the API.
+const demoActivityTime = new Date().setHours(0, 0, 0, 0);
 export const initialMemories: Memory[] = availableDecades.flatMap(
   (year) => eraRegistry[year].content.memories,
-);
+).map((memory, index) => ({
+  ...memory,
+  createdAt: new Date(demoActivityTime - (index % 10) * 86_400_000).toISOString(),
+}));
 export const eraContent = Object.fromEntries(
   availableDecades.map((year) => [
     year,

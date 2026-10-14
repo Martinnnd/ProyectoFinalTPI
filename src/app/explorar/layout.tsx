@@ -4,6 +4,7 @@ import "../../styles.css";
 import "../../themes.css";
 import "../../social.css";
 import "../../components/social/socialFeed.css";
+import "../../components/social/hashtags.css";
 import "../../components/community.css";
 import "../../components/chat.css";
 import "../../components/mapbox.css";

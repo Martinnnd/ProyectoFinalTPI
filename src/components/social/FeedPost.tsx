@@ -7,6 +7,7 @@ import type { Memory } from "../../types";
 import CommentsSection from "./CommentsSection";
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
+import { memoryHashtags } from "../../hashtags";
 
 export default function FeedPost({
   memory,
@@ -29,6 +30,7 @@ export default function FeedPost({
   onSave,
   onAddComment,
   onReaction,
+  onHashtag,
 }: {
   memory: Memory;
   selected: boolean;
@@ -48,6 +50,7 @@ export default function FeedPost({
   onLike: () => void;
   onRepost: () => void;
   onSave: () => void;
+  onHashtag: (tag: string) => void;
   onAddComment: (memoryId: string, text: string, parentId?: string) => void;
   onReaction: (
     memoryId: string,
@@ -140,6 +143,9 @@ export default function FeedPost({
         {(memory.media || (memory.image && youtubeId(memory.image))) && (
           <PostMedia memory={memory} />
         )}
+        {!!memoryHashtags(memory).length && <div className="post-hashtags" aria-label="Hashtags del recuerdo">
+          {memoryHashtags(memory).map(tag => <button key={tag} onClick={() => onHashtag(tag)} aria-label={`Ver hilo #${tag}`}>#{tag}</button>)}
+        </div>}
         <button className="post-place" onClick={() => onMap(memory)}>
           <MapPin size={14} />
           {memory.place} · {memory.year}
