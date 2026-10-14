@@ -20,6 +20,9 @@ export interface Memory {
   lat: number;
   lng: number;
   source: "demo" | "local" | "community" | "db";
+  hashtags?: string[];
+  /** Publication time, independent of the historical year of the memory. */
+  createdAt?: string;
   groupId?: string;
   image?: string;
   imageCaption?: string;

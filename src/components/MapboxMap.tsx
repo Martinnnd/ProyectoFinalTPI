@@ -63,11 +63,18 @@ function configure(map: mapboxgl.Map, options: Options) {
 }
 
 export default function MapboxMap(
-  props: MapProps & { token: string; onFallback: () => void },
+  props: MapProps & {
+    token: string;
+    onFallback: () => void;
+    userLocation?: { lat: number; lng: number } | null;
+    locationResolved: boolean;
+  },
 ) {
   const container = useRef<HTMLDivElement>(null);
   const instance = useRef<mapboxgl.Map | null>(null);
   const styleReady = useRef(false);
+  const userInteracted = useRef(false);
+  const initialLocationApplied = useRef(false);
   const latest = useRef(props);
   latest.current = props;
   const [options, setOptions] = useState(initial);
@@ -108,32 +115,47 @@ export default function MapboxMap(
       configure(map, optionsRef.current);
     });
     map.on("webglcontextlost", () => latest.current.onFallback());
-    map.on("load", () => {
-  loaded = true;
-  clearTimeout(timeout);
-  setReady(true);
-
-  // intro: del globo completo al destino, solo la primera vez
-  if (introSeen) return;
-  introSeen = true;
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduce) {
-    map.jumpTo(intro);
-  } else {
-    map.flyTo({
-      ...intro,
-      duration: 6000,
-      essential: true,
-    });
-  }
-});
+    
     map.on("error", () => setError(true));
+    map.on("load", () => {
+      loaded = true;
+      clearTimeout(timeout);
+      setReady(true);
+
+      // Si ya se mostró la introducción en una visita anterior,
+      // conservamos la cámara guardada.
+      if (introSeen) {
+        initialLocationApplied.current = true;
+      }
+    });
+
+    map.on("dragstart", () => {
+      userInteracted.current = true;
+    });
+
+    map.on("zoomstart", (event) => {
+      if ("originalEvent" in event && event.originalEvent) {
+        userInteracted.current = true;
+      }
+    });
+
+    map.on("rotatestart", () => {
+      userInteracted.current = true;
+    });
+
+    map.on("pitchstart", (event) => {
+      if ("originalEvent" in event && event.originalEvent) {
+        userInteracted.current = true;
+      }
+    });
+
     map.on("click", (event) => {
-      if (latest.current.picking)
+      if (latest.current.picking) {
         latest.current.onPick({
           lat: event.lngLat.lat,
           lng: event.lngLat.wrap().lng,
         });
+      }
     });
     map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
     const canvas = map.getCanvas();
@@ -180,6 +202,66 @@ export default function MapboxMap(
     if (!map || !ready) return;
     if (styleReady.current) configure(map, options);
   }, [options, ready]);
+  useEffect(() => {
+    const map = instance.current;
+
+    if (
+      !map ||
+      !ready ||
+      !props.locationResolved ||
+      initialLocationApplied.current
+    ) {
+      return;
+    }
+
+    // Si ya se había mostrado la introducción, no alteramos
+    // la cámara guardada al volver a entrar al mapa.
+    if (introSeen) {
+      initialLocationApplied.current = true;
+      return;
+    }
+
+    // Si el usuario ya interactuó mientras esperábamos el permiso,
+    // respetamos su posición y no lo recentramos.
+    if (userInteracted.current) {
+      introSeen = true;
+      initialLocationApplied.current = true;
+      return;
+    }
+
+    const location = props.userLocation;
+
+    const target = location
+      ? {
+          center: [location.lng, location.lat] as [number, number],
+          zoom: 14,
+          pitch: 45,
+          bearing: -20,
+        }
+      : {
+        center: [-64.4, -38.4] as [number, number],
+        zoom: 4,
+        pitch: 0,
+        bearing: 0,
+      };
+
+    introSeen = true;
+    initialLocationApplied.current = true;
+
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reduce) {
+      map.jumpTo(target);
+    } else {
+      map.flyTo({
+        ...target,
+        duration: 6000,
+        essential: true,
+      });
+    }
+  }, [props.locationResolved, props.userLocation, ready]);
   useEffect(() => {
     const map = instance.current;
     if (!map) return;
@@ -287,22 +369,27 @@ export default function MapboxMap(
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
       <details className="globe-tools" open={window.innerWidth >= 900 ? true : undefined}><summary>Opciones del mapa</summary><div className="globe-tool-buttons">
         <button
-          onClick={() =>
-            instance.current?.flyTo({ ...responsiveOverview(), duration: duration() })
-          }
+          onClick={() => {
+            userInteracted.current = true;
+            instance.current?.flyTo({
+              ...responsiveOverview(),
+              duration: duration(),
+            });
+          }}
         >
           Ver globo
         </button>
         <button
-          onClick={() =>
+          onClick={() => {
+            userInteracted.current = true;
             instance.current?.flyTo({
               center: [-64.4, -38.4],
               zoom: 4,
               pitch: 0,
               bearing: 0,
               duration: duration(),
-            })
-          }
+            });
+          }}
         >
           Ver Argentina
         </button>

@@ -10,6 +10,9 @@ import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
 import RepostDialog from "./RepostDialog";
 import { compartirPublicacion, isOwnMemory } from "../../api";
+import { memoryHashtags, weeklyTrends } from "../../hashtags";
+import WeeklyTrends from "./WeeklyTrends";
+import HashtagThread from "./HashtagThread";
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -28,6 +31,7 @@ export default function SocialFeed({
   onSelect,
   onMap,
   onAdd,
+  onAddHashtag,
   following,
   onFollow,
   onReloadMemories,
@@ -46,6 +50,7 @@ export default function SocialFeed({
   onSelect: (memory: Memory | null) => void;
   onMap: (memory: Memory) => void;
   onAdd: () => void;
+  onAddHashtag: (tag: string) => void;
   onReloadMemories?: () => void | Promise<void>;
 }) {
   const interactions = useMemoryInteractions();
@@ -56,6 +61,12 @@ export default function SocialFeed({
   const [saves, setSaves] = useState<string[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<FeedTab>("all");
+  const [hashtag, setHashtag] = useState<string | null>(null);
+  const [, setNow] = useState(Date.now);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
   const openingRect = useRef<DOMRect | undefined>(undefined);
   const cancelTurn = useRef<() => void>(() => {});
   const stream = useRef<HTMLDivElement>(null);
@@ -66,7 +77,7 @@ export default function SocialFeed({
   useEffect(() => () => cancelTurn.current(), []);
   useEffect(() => {
     if (stream.current) stream.current.scrollTop = 0;
-  }, [selected?.id, resultKey, tab]);
+  }, [selected?.id, resultKey, tab, hashtag]);
 
   const authors = [
     ...new Set(
@@ -79,7 +90,7 @@ export default function SocialFeed({
         .filter((author) => !isOwnMemory({ author })),
     ),
   ];
-  const posts =
+  const tabPosts =
     tab === "following"
       ? allMemories.filter((memory) => {
           const author =
@@ -94,6 +105,14 @@ export default function SocialFeed({
               !!memory.groupId && groupIds.includes(memory.groupId),
           )
         : allMemories;
+  const posts = hashtag ? tabPosts.filter(memory => memoryHashtags(memory).includes(hashtag)) : tabPosts;
+  const trends = weeklyTrends(tabPosts);
+
+  function chooseHashtag(tag: string) {
+    setHashtag(tag);
+    open(null);
+    setNow(Date.now());
+  }
 
   function rate(id: string, value: number) {
     setRatings((current) => {
@@ -149,6 +168,11 @@ export default function SocialFeed({
           onBack={() => open(null)}
           onTabChange={changeTab}
         />
+        {!selected && (hashtag ? (
+          <HashtagThread key={hashtag} tag={hashtag} count={posts.length}
+            hasDemo={posts.some(memory => memory.source === "demo")}
+            onBack={() => setHashtag(null)} onAdd={() => { setTab("all"); onAddHashtag(hashtag); }} />
+        ) : <WeeklyTrends trends={trends} onSelect={chooseHashtag} />)}
         <div className="feed-posts">
           {(selected ? [selected] : posts).map((memory) => {
             const comments = interactions.getComments(memory.id);
@@ -181,6 +205,7 @@ export default function SocialFeed({
                 }
                 onAddComment={interactions.addComment}
                 onReaction={interactions.reactToComment}
+                onHashtag={chooseHashtag}
               />
             );
           })}
