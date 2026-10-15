@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:5199";
+export const API_BASE_URL = "https://localhost:7014";
 
 export interface UsuarioSesion {
     token: string;

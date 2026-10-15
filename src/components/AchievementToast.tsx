@@ -42,7 +42,7 @@ export default function AchievementToast({
   }
   return (
     <div
-      className={`achievement-toast${leaving ? " is-leaving" : ""}`}
+      className={`achievement-toast${achievement.id === "21" ? " is-nostalgia-milestone" : ""}${leaving ? " is-leaving" : ""}`}
       role="status"
       style={
         { "--achievement-lifetime": `${VISIBLE_MS}ms` } as React.CSSProperties

@@ -17,9 +17,13 @@ export interface Memory {
   description: string;
   place: string;
   author: string;
+  authorId?: number;
+  likeCount?: number;
+  commentCount?: number;
+  viewerLiked?: boolean;
   lat: number;
   lng: number;
-  source: "demo" | "local" | "community" | "db";
+  source: "demo" | "local" | "backend" | "community" | "db";
   hashtags?: string[];
   /** Publication time, independent of the historical year of the memory. */
   createdAt?: string;
@@ -33,6 +37,7 @@ export interface Memory {
     id?: string;
     originalId?: string;
     author: string;
+    authorId?: number;
     comment?: string;
   };
 }

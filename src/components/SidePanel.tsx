@@ -38,6 +38,12 @@ export default function SidePanel({ memories, selected, onSelect }: {
 }) {
   return <aside className="side-panel" aria-label="Recuerdos de la época" id="stories">
     <div className="stories-content">
+      {selected?.source === 'backend' && selected.description && <section aria-label="Resumen de la publicación" className="memory-list">
+        <h3>{selected.title}</h3>
+        <small>{selected.author} · {selected.year}</small>
+        <p>{selected.description}</p>
+        <button onClick={() => onSelect(selected)}>Ver publicación →</button>
+      </section>}
       <div className="list-heading"><h3>Elegí un recuerdo</h3><span>{memories.length}</span></div>
       <p className="stories-hint">Abrí el título para leerlo en el feed.</p>
       <div className="memory-list">

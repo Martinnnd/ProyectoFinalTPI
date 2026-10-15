@@ -1,0 +1,47 @@
+import { expect, test } from '@playwright/test';
+import { API_BASE_URL } from '../src/api';
+for (const era of [1970, 1980, 1990, 2000]) {
+  test(`MP3 local: controles integrados sin cambiar tamaño ${era}`, async ({ page }) => {
+    await page.route(`${API_BASE_URL}/api/**`, route => route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: new URL(route.request().url()).pathname === "/api/publicaciones" ? [] : { pines: [], hayMas: false } }));
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto(`/explorar?era=${era}`);
+    const player = page.getByRole('region', { name: 'Música de la época', exact: true });
+    const audio = page.locator('#music-player audio');
+    await expect(player).toBeVisible();
+    const original = await player.boundingBox();
+    await player.getByRole('button', { name: 'Reproducir música', exact: true }).click();
+    await expect(player).toHaveClass(/device-playing/);
+    await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);
+    expect((await player.boundingBox())!.height).toBe(original!.height);
+    expect((await player.boundingBox())!.width).toBe(original!.width);
+    await expect(audio).not.toHaveAttribute('controls');
+    const musicToggle = page.locator('.era-activity-dock, .system-taskbar').getByRole('button', { name: /Música/ });
+    await musicToggle.click();
+    await expect(player).toBeHidden();
+    const hiddenTime = await audio.evaluate((element: HTMLAudioElement) => element.currentTime);
+    await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(hiddenTime);
+    await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.paused)).toBe(false);
+    await musicToggle.click();
+    await expect(player).toBeVisible();
+    expect((await player.boundingBox())!.height).toBe(original!.height);
+    expect((await player.boundingBox())!.width).toBe(original!.width);
+    await player.getByRole('button', { name: 'Volumen', exact: true }).click();
+    const slider = player.getByRole('slider');
+    await slider.press('Home');
+    await slider.press('ArrowRight');
+    await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.volume)).toBeCloseTo(0.01);
+    expect((await player.boundingBox())!.height).toBe(original!.height);
+    await slider.press('Escape');
+    await player.getByRole('button', { name: 'Pista siguiente', exact: true }).click();
+    await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.paused)).toBe(false);
+    await expect.poll(() => audio.evaluate((element: HTMLAudioElement) => element.readyState), { timeout: 20000 }).toBeGreaterThanOrEqual(2);
+    await player.getByRole('button', { name: 'Pausar música', exact: true }).click();
+    await expect(player).not.toHaveClass(/device-playing/);
+    await player.getByRole('button', { name: /Elegir canción/ }).click();
+    await expect(page.locator('.song-choice')).toHaveCount(3);
+    await page.locator('.song-choice').last().click();
+    await expect(audio).toHaveAttribute('src', /^\/music\//);
+    await expect(player).not.toContainText('Spotify');
+    await player.screenshot({ path: `test-results/integrated-player-${era}.png`, animations: 'disabled' });
+  });
+}

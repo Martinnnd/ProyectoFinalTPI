@@ -1,8 +1,10 @@
 import { memoryThumbnail } from "./memoryThumbnail";
+import type { MapBounds } from '../publicationsApi';
 import { getMemoryAuthorDisplay } from "../api";
 import { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
+  CircleMarker,
   Marker,
   TileLayer,
   Tooltip,
@@ -21,6 +23,7 @@ function MapActions({
   reset,
   fitPoints,
   searchTarget,
+  onBoundsChange,
 }: {
   picking: boolean;
   onPick: (p: Point) => void;
@@ -28,16 +31,25 @@ function MapActions({
   reset: number;
   fitPoints?: string;
   searchTarget?: Point | null;
+  onBoundsChange?: (bounds: MapBounds) => void;
 }) {
+  const reportBounds = () => {
+    const b = map.getBounds();
+    const west = b.getWest(), east = b.getEast();
+    const normalize = (value: number) => ((value + 180) % 360 + 360) % 360 - 180;
+    onBoundsChange?.({ minLatitud: Math.max(-90,b.getSouth()), maxLatitud: Math.min(90,b.getNorth()), minLongitud: east-west >= 360 ? -180 : normalize(west), maxLongitud: east-west >= 360 ? 180 : normalize(east) });
+  };
   const map = useMapEvents({
+    moveend: () => reportBounds(),
     click(e) {
       if (picking) onPick({ lat: e.latlng.lat, lng: e.latlng.lng });
     },
   });
+  useEffect(() => { reportBounds(); }, [map, onBoundsChange]);
   useEffect(() => {
-    const observer = new ResizeObserver(() =>
-      map.invalidateSize({ pan: true, animate: false }),
-    );
+    const observer = new ResizeObserver(() => {
+      if (map.getContainer().clientWidth > 0) map.invalidateSize({ pan: false, animate: false });
+    });
     observer.observe(map.getContainer());
     return () => observer.disconnect();
   }, [map]);
@@ -119,6 +131,8 @@ function icon(memory?: Memory, selected = false) {
   });
 }
 export default function MemoryMap({
+  showEmptyState = true,
+  onBoundsChange,
   searchTarget,
   onSearchMove,
   fitMemories = false,
@@ -131,6 +145,9 @@ export default function MemoryMap({
   draft,
   onCancel,
 }: {
+  active?: boolean;
+  showEmptyState?: boolean;
+  onBoundsChange?: (bounds: MapBounds) => void;
   searchTarget?: Point | null;
   onSearchMove?: (point: Point) => void;
   fitMemories?: boolean;
@@ -180,6 +197,7 @@ export default function MemoryMap({
             }}
           />
           <MapActions
+            onBoundsChange={onBoundsChange}
             picking={picking}
             onPick={onPick}
             selected={selected}
@@ -212,7 +230,7 @@ export default function MemoryMap({
               <Tooltip direction="top">{m.title} · {m.year}</Tooltip>
             </Marker>
           ))}
-          {selected && !picking && !searchTarget && <Tooltip key={selected.id} position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{getMemoryAuthorDisplay(selected)} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip>}
+          {selected && !picking && !searchTarget && <CircleMarker key={selected.id} center={[selected.lat,selected.lng]} radius={0} opacity={0} fillOpacity={0} interactive={false}><Tooltip position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{getMemoryAuthorDisplay(selected)} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip></CircleMarker>}
           {searchTarget && <Marker position={[searchTarget.lat, searchTarget.lng]} icon={icon()} draggable title="Arrastrá para ajustar la ubicación" eventHandlers={{ dragend: event => {
             const point = event.target.getLatLng(); onSearchMove?.({ ...searchTarget, lat: point.lat, lng: point.lng });
           }}}><Tooltip>Ubicación encontrada · Arrastrá para ajustar</Tooltip></Marker>}
@@ -256,7 +274,7 @@ export default function MemoryMap({
             </button>
           </div>
         )}
-        {!memories.length && !picking && (
+        {showEmptyState && !memories.length && !picking && (
           <div className="map-empty">
             No hay recuerdos con esta combinación.
             <br />

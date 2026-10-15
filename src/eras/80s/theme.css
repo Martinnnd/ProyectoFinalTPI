@@ -137,7 +137,7 @@
 .era-1980 .brand-card h1 {
   font-size: 33px;
   font-weight: 400;
-  font-family: 'Ananda', 'Courier New', Courier, monospace;
+  font-family: 'Avenue de Madison', 'Courier New', Courier, monospace;
   letter-spacing: 0.5;
   color: #fff4ff;
   text-shadow:
@@ -851,9 +851,66 @@
 .era-1980 .place-search-panel,.era-1980 .place-search-trigger { border:1px solid #ff3deb; border-radius:0; box-shadow:3px 3px 0 #48f5ff55; }
 .era-1980 .place-search-panel header { border-bottom:1px solid #48f5ff; color:#48f5ff; }
 
-.era-1980 .era-activity-dock { background:linear-gradient(#261034,#0c071a); border:2px solid #f540d3; border-radius:12px 12px 4px 4px; box-shadow:0 0 0 3px #161126,0 0 18px #ed24cb40; }
-.era-1980 .activity-dock-heading { color:#54ffff; }
-.era-1980 .activity-dock-heading>span { color:#ff62d9; }
-.era-1980 .activity-dock-options button { background:linear-gradient(#342044,#170d25); border:1px solid #985798; color:#f4e5fb; border-bottom:4px solid #090413; border-radius:5px; }
-.era-1980 .activity-dock-options button svg { color:#54ffff; }
-.era-1980 .activity-dock-options button:hover,.era-1980 .activity-dock-options button[aria-expanded="true"] { background:#43214e; border-color:#54ffff; box-shadow:inset 0 0 14px #fa44cc22; }
+.era-1980 .era-activity-dock {
+  position:absolute;
+  left:72px;
+  bottom:0;
+  z-index:700;
+  transform:none;
+  width:auto;
+  height:42px;
+  display:flex;
+  align-items:center;
+  padding:2px 5px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+}
+.era-1980 .activity-dock-heading,
+.era-1980 .activity-dock-options small { display:none; }
+.era-1980 .activity-dock-options { gap:8px; }
+.era-1980 .activity-dock-options button {
+  justify-content:center;
+  min-width:130px;
+  min-height:34px;
+  padding:2px 10px;
+  --arcade-key:#ff4c9e;
+  background:linear-gradient(#402447,#21122d);
+  border:1px solid #b464ac;
+  border-top:2px solid #ef9fdf;
+  border-bottom:3px solid #100a19;
+  border-radius:4px 4px 0 0;
+  color:#fff0fc;
+  box-shadow:inset 0 0 0 1px #ffffff0b,0 2px 3px #0006;
+}
+.era-1980 .activity-dock-options strong {
+  font:18px "VT323",monospace;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.era-1980 .activity-dock-options button svg { display:none; }
+.era-1980 .activity-dock-options button:nth-child(2) { --arcade-key:#ffe45c; }
+.era-1980 .activity-dock-options button:nth-child(3) { --arcade-key:#42edf2; }
+.era-1980 .activity-dock-options button::before { content:''; flex:none; width:23px; height:23px; border-radius:50%; border:3px solid #241b2e; background:radial-gradient(ellipse at 42% 22%,#ffffffc0 0 8%,transparent 38%),radial-gradient(circle at 50% 40%,transparent 48%,#0005 80%),var(--arcade-key); box-shadow:0 2px 0 1px #09060e,0 0 0 1px #9b7fa6,inset 0 1px 1px #fff9,inset 0 -3px 1px #0005; transition:transform 100ms,box-shadow 100ms; }
+.era-1980 .activity-dock-options button:hover,
+.era-1980 .activity-dock-options button:focus-visible { background:linear-gradient(#56305f,#2b1837); outline:1px solid var(--arcade-key); outline-offset:1px; }
+.era-1980 .activity-dock-options button[aria-expanded="true"] {
+  color:var(--arcade-key);
+  background:linear-gradient(#29223c,#161222);
+  border-color:var(--arcade-key);
+  border-bottom-color:#100a19;
+  box-shadow:inset 0 2px 5px #0007,0 0 5px #42edf222;
+  outline:none;
+}
+.era-1980 .activity-dock-options button[aria-expanded="true"]::before,
+.era-1980 .activity-dock-options button:active::before { transform:translateY(2px); box-shadow:0 1px 0 #08060c,0 0 7px var(--arcade-key),inset 0 2px 4px #0006; }
+@media (min-width:900px) {
+  .era-1980 .vhs-status { height:42px; padding-left:430px; justify-content:flex-end; }
+  .era-1980 .vhs-status>span:first-child,
+  .era-1980 .vhs-status>span:last-child { display:none; }
+  .era-1980 .leaflet-bottom { bottom:42px !important; }
+}
+@media (max-width:899px) {
+  .era-1980 .era-activity-dock { display:none; }
+}

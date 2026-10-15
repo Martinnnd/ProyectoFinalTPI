@@ -4,8 +4,9 @@ import DeleteMemoryDialog from "./components/DeleteMemoryDialog";
 import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
 import { demoGroups, loadGroups, filterCommunity } from "./groups";
+import { demoGroupMemories } from "./groupMemories";
 import type { CommunityGroup } from "./types";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown, LogIn } from "lucide-react";
 import {
   categories,
@@ -18,7 +19,8 @@ import {
   type Period,
   type TierProgress,
 } from "./types";
-import { achievements, eraContent, initialMemories } from "./data";
+import { achievements, eraContent, resolveUserCategory } from "./data";
+import { totalGivenNostalgia, updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
 import { getMemories, isOwnMemory, getSesion, type UsuarioSesion, eliminarPublicacion } from "./api";
 import LoginDialog from "./components/LoginDialog";
 import AchievementToast from "./components/AchievementToast";
@@ -26,7 +28,9 @@ import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
 import Profile from "./components/Profile";
 import SocialFeed from "./components/social/SocialFeed";
-import Timeline from "./components/Timeline";
+import type { FeedTab } from "./socialTypes";
+import EraTimeline from "./components/EraTimeline";
+import { flushSync } from "react-dom";
 import MemoryMap, { type Point } from "./components/MemoryMap";
 import MemoryForm from "./components/MemoryForm";
 import SidePanel from "./components/SidePanel";
@@ -36,7 +40,18 @@ import EraChrome, { EraIcon } from "./components/EraChrome";
 import { availableDecades } from "./eras/registry";
 import { eraThemes } from "./themes";
 
+import { getMapPublications, getPublication, publicationId, type MapBounds } from './publicationsApi';
+import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from './seguimientosApi';
+
 export default function App() {
+  const [bounds, setBounds] = useState<MapBounds | null>(null);
+  const reportBounds = useCallback((next: MapBounds) => setBounds(current => JSON.stringify(current) === JSON.stringify(next) ? current : next), []);
+  const [remotePins, setRemotePins] = useState<Memory[]>([]);
+  const [feedItems, setFeedItems] = useState<Memory[]>([]);
+  const [remoteSelected, setRemoteSelected] = useState<Memory | null>(null);
+  const selectedSeed = useRef<Memory | null>(null);
+  const [apiStatus, setApiStatus] = useState('');
+  const [mapRevision, setMapRevision] = useState(0);
   const [groups,setGroups] = useState<CommunityGroup[]>(demoGroups);
   const [scope,setScope] = useState('all');
   const [query,setQuery] = useState('');
@@ -45,7 +60,10 @@ export default function App() {
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
   const mapExpandButton = useRef<HTMLButtonElement>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [following, setFollowing] = useState<string[]>([]);
+  const [followingUsers, setFollowingUsers] = useState<FollowedUser[]>([]);
+  const [followers, setFollowers] = useState<FollowedUser[]>([]);
+  const [followingRevision, setFollowingRevision] = useState(0);
+  const pendingFollows = useRef(new Set<number>());
   const creationOrigin = useRef(false);
   const [profileAuthor, setProfileAuthor] = useState<string | null>(null);
   const [view, setView] = useState<"map" | "feed" | "profile" | "chat">("map");
@@ -60,8 +78,45 @@ export default function App() {
   });
   const [category, setCategory] = useState<Category | "Todas">("Todas");
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
+  const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
+  const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const [loginOpen, setLoginOpen] = useState(false);
   const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
+  const currentUserId = currentSesion?.usuarioId ?? 1;
+  const following = followingUsers.map(user => user.username);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setFollowingUsers([]);
+    setFollowers([]);
+    Promise.all([getSeguidos(currentUserId, controller.signal), getSeguidores(currentUserId, controller.signal)])
+      .then(([nextFollowing, nextFollowers]) => {
+        if (!controller.signal.aborted) { setFollowingUsers(nextFollowing); setFollowers(nextFollowers); }
+      })
+      .catch(error => { if (!controller.signal.aborted) setNotice(`No se pudieron cargar los seguimientos: ${error.message}`); });
+    return () => controller.abort();
+  }, [currentUserId]);
+
+  async function toggleFollow(author: string, authorId?: number) {
+    const targetId = authorId ?? [...feedItems, ...dbMemories].find(memory => memory.author === author)?.authorId;
+    if (!targetId) { setNotice(`No se puede seguir a ${author}: falta su identificador de usuario.`); return; }
+    if (targetId === currentUserId || pendingFollows.current.has(targetId)) return;
+    pendingFollows.current.add(targetId);
+    try {
+      if (followingUsers.some(user => user.id === targetId)) {
+        await dejarDeSeguir(currentUserId, targetId);
+        setFollowingUsers(current => current.filter(user => user.id !== targetId));
+      } else {
+        await seguir(currentUserId, targetId);
+        setFollowingUsers(current => [...current, { id: targetId, username: author }]);
+      }
+      setFollowingRevision(revision => revision + 1);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'No se pudo actualizar el seguimiento.');
+    } finally {
+      pendingFollows.current.delete(targetId);
+    }
+  }
 
   const reloadMemories = async () => {
     try {
@@ -84,18 +139,31 @@ export default function App() {
   const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
   const [celebrating, setCelebrating] = useState<Achievement | null>(null);
-  const earned: Achievement[] = dbMemories.some(m => isOwnMemory(m)) ? [achievements[0]] : [];
+  const [ratings, setRatings] = useState<NostalgiaRatings>({});
+  const [firstFiveEarned, setFirstFiveEarned] = useState(false);
+  const earned: Achievement[] = [
+    ...(dbMemories.some(m => isOwnMemory(m)) ? [achievements[0]] : []),
+    ...(firstFiveEarned ? [achievements.find(achievement => achievement.id === '21')!] : []),
+  ];
   const tierProgress: TierProgress = {
     memories: dbMemories.filter(m => isOwnMemory(m)).length,
     points: 0,
     subscribed: false,
   };
+  const canRate = resolveUserCategory(tierProgress) !== 'Errante';
+  function rateMemory(postId: string, score: number) {
+    if (!canRate) return;
+    const next = updateNostalgiaRating(ratings, postId, score);
+    setRatings(next);
+    if (!firstFiveEarned && totalGivenNostalgia(next) >= 5) {
+      setFirstFiveEarned(true);
+      setCelebrating(achievements.find(achievement => achievement.id === '21')!);
+    }
+  }
   const [panelOpen, setPanelOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
-  useEffect(() => {
-    if (window.innerWidth < 900 && view !== "map") setMusicOpen(false);
-  }, [view]);
+  useEffect(() => { setMusicOpen(window.innerWidth >= 900); }, []);
   const addButton = useRef<HTMLButtonElement>(null);
   const storiesButton = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -118,8 +186,36 @@ export default function App() {
       document.removeEventListener("keydown", closeMenus);
     };
   }, []);
+  useEffect(() => {
+    if (!bounds || view !== 'map') return;
+    const controller = new AbortController();
+    setApiStatus('');
+    const loadingTimer = setTimeout(() => setApiStatus('Actualizando publicaciones…'), 1000);
+    const timer = setTimeout(() => {
+      getMapPublications(bounds, period, category, controller.signal).then(result => {
+        if (controller.signal.aborted) return;
+        clearTimeout(loadingTimer);
+        setRemotePins(result.memories);
+        setApiStatus(result.hayMas ? 'Hay más publicaciones: acercá el mapa para verlas.' : '');
+      }).catch(error => { if (!controller.signal.aborted) { clearTimeout(loadingTimer); setApiStatus(`No se pudieron cargar las publicaciones: ${error.message}`); } });
+    }, 300);
+    return () => { clearTimeout(timer); clearTimeout(loadingTimer); controller.abort(); };
+  }, [bounds, period, category, view, mapRevision]);
+  useEffect(() => {
+    setRemoteSelected(current => current?.id === selectedId ? current : null);
+    if (!selectedId) return;
+    const pin = [selectedSeed.current, remoteSelected, ...remotePins, ...dbMemories].find(memory => memory?.id === selectedId);
+    if (!pin || !publicationId(pin)) return;
+    const controller = new AbortController();
+    setApiStatus(view === 'map' ? 'Cargando resumen…' : 'Cargando publicación…');
+    getPublication(pin, view === 'map', controller.signal).then(memory => {
+      if (controller.signal.aborted) return;
+      setRemoteSelected(memory); setApiStatus('');
+    }).catch(error => { if (!controller.signal.aborted) { setRemoteSelected(null); setApiStatus(`No se pudo abrir la publicación: ${error.message}`); } });
+    return () => controller.abort();
+  }, [selectedId, view, mapRevision]);
   const memories = filterMemories(
-    filterCommunity(dbMemories, view === "map" ? "all" : scope, groups, view === "map" ? "" : query),
+    filterCommunity(view === 'map' ? remotePins : view === 'feed' ? feedItems : dbMemories,view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
     period,
     category,
   );
@@ -128,7 +224,7 @@ export default function App() {
     : dbMemories.filter(m => m.author === profileAuthor);
   const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? profileMemories : memories;
-  const selected = visibleMemories.find((m) => m.id === selectedId) ?? null;
+  const selected = remoteSelected?.id === selectedId ? remoteSelected : visibleMemories.find((m) => m.id === selectedId) ?? remotePins.find(m => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
     setScope(value);setQuery('');setSelectedId(null);
     const group=groups.find(g=>g.id===value);
@@ -141,14 +237,35 @@ export default function App() {
     try {localStorage.setItem('nostalgia.groups.v1',JSON.stringify(next.filter(g=>!demoGroups.some(d=>d.id===g.id))));} catch {return 'No se pudo guardar el grupo. Revisá el espacio del navegador.';}
     setGroups(next);setScope(group.id);setSelectedId(null);setQuery('');setCategory('Todas');setPeriod({decade:group.decade,year:null});return null;
   }
-  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile)setView('feed');}} onCreate={createGroup}/>;
+  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup}/>;
+  const eraTransition = useRef<ViewTransition | null>(null);
+  useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
   function changePeriod(next: Period) {
+    if (next.decade === period.decade && next.year === period.year) return;
+    const update = () => applyPeriod(next);
+    if (next.decade === period.decade || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { update(); return; }
+    if (document.startViewTransition) {
+      eraTransition.current?.skipTransition();
+      document.documentElement.classList.add("switching-era");
+      const transition = document.startViewTransition(() => flushSync(update));
+      eraTransition.current = transition;
+      void transition.finished.catch(() => {}).finally(() => {
+        if (eraTransition.current === transition) {
+          document.documentElement.classList.remove("switching-era");
+          eraTransition.current = null;
+        }
+      });
+    } else {
+      flushSync(update);
+      document.querySelector(".app")?.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 600, easing: "ease-out" });
+    }
+  }
+  function applyPeriod(next: Period) {
     setPeriod(next);
     if(groups.some(g=>g.id===scope && g.decade!==next.decade)) setScope("all");
     setSelectedId(null);
     setFactsOpen(false);
     setPanelOpen(false);
-    if (next.decade !== period.decade) setMusicOpen(false);
   }
   function openProfile(memory: Memory) {
     setProfileAuthor(isOwnMemory(memory) ? null : memory.author);
@@ -157,15 +274,16 @@ export default function App() {
     setView("profile");
   }
   function openPublication(memory: Memory) {
+    selectedSeed.current = memory;
     setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
   }
   function select(memory: Memory) {
+    selectedSeed.current = memory;
     setSelectedId(memory.id);
-    setPanelOpen(view === "map");
+    setPanelOpen(false);
     if (window.innerWidth < 900) {
       setFactsOpen(false);
-      setMusicOpen(false);
     }
   }
   function closeStories() {
@@ -214,6 +332,8 @@ export default function App() {
   function confirmDelete(memory: Memory): string | null {
     eliminarPublicacion(memory.id)
       .then(() => {
+        setMapRevision(value => value + 1);
+        setRemoteSelected(current => current?.id === memory.id ? null : current);
         getMemories().then(data => setDbMemories(data)).catch(console.error);
       })
       .catch((err) =>
@@ -257,6 +377,7 @@ export default function App() {
       return "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
     }
 
+    setMapRevision(value => value + 1);
     setPeriod({
       decade: (Math.floor(memory.year / 10) * 10) as Decade,
       year: null,
@@ -291,24 +412,33 @@ export default function App() {
     setView("map");
     setPanelOpen(destination === "stories" && (view !== "map" || !panelOpen));
     setFactsOpen(destination === "facts" && (view !== "map" || !factsOpen));
-    if (window.innerWidth < 900 || destination === "map") setMusicOpen(false);
     if (destination === "map") setSelectedId(null);
   }
   const theme = eraThemes[period.decade];
-  const ActiveMap = view === "map" ? MainMap : MemoryMap;
   return (
     <div
       style={theme.tokens}
       className={`app map-app view-${view} era-${period.decade} ${panelOpen ? "stories-open" : ""} ${musicOpen ? "music-open" : ""}`}
     >
+      <EraTimeline period={period} onChange={changePeriod} action={
+        <button
+          ref={addButton}
+          aria-label="Recordar"
+          className="primary-button time-add-memory"
+          onClick={startAdding}
+          disabled={picking || !!draft}
+        >
+          <Plus size={16} />
+          <span>Recordar</span>
+        </button>
+      }/>
       <div className="mobile-appbar">
         <div className="mobile-page-title"><span>Nostalgiar</span><strong>{view === 'map' ? 'Explorar' : view === 'feed' ? 'Feed' : view === 'chat' ? 'Chat' : 'Mi perfil'}</strong></div>
-        <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir épocas y opciones"><span className="mobile-era-dot" aria-hidden="true"/><strong>{period.decade === 2000 ? '2000s' : `${String(period.decade).slice(2)}s`}</strong><ChevronDown size={15}/></button>
+        <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir opciones"><strong>Opciones</strong><ChevronDown size={15}/></button>
         <button className="mobile-add-button" aria-label="Sumar mi recuerdo" onClick={startAdding} disabled={picking || !!draft}><Plus size={23}/></button>
       </div>
       <dialog ref={mobileOptions} className="mobile-options" onClick={e=>{if(e.target===e.currentTarget)mobileOptions.current?.close();}} onClose={()=>mobileOptionsTrigger.current?.focus()} aria-labelledby="mobile-options-title">
-        <header><h2 id="mobile-options-title">Tu viaje en el tiempo</h2><button className="icon-button" aria-label="Cerrar opciones" onClick={()=>mobileOptions.current?.close()}><X/></button></header>
-        <Timeline period={period} onChange={changePeriod}/>
+        <header><h2 id="mobile-options-title">Opciones de exploración</h2><button className="icon-button" aria-label="Cerrar opciones" onClick={()=>mobileOptions.current?.close()}><X/></button></header>
         <label className="mobile-category">Categoría<select value={category} onChange={e=>{setCategory(e.target.value as Category | 'Todas');setSelectedId(null);}}>{['Todas',...categories].map(c=><option key={c}>{c}</option>)}</select></label>
         <div className="mobile-tools">{(['stories','facts','music'] as const).map(destination=><button key={destination} onClick={()=>{mobileOptions.current?.close();navigate(destination);}}><EraIcon decade={period.decade} destination={destination}/><span>{destination==='stories'?'Recuerdos':destination==='facts'?'Efemérides':'Música'}</span></button>)}</div>
         <button className="primary-button mobile-options-done" onClick={()=>mobileOptions.current?.close()}>Ver selección</button>
@@ -316,11 +446,13 @@ export default function App() {
       <a className="skip-link" href="#explore">
         Saltar al mapa
       </a>
-      {view !== "profile" && view !== "chat" && (
-        <main id="explore" className="map-canvas">
-          <ActiveMap
-            memories={memories}
-            selected={selected}
+        <main id="explore" className="map-canvas" style={view === 'map' ? undefined : { display: 'none' }}>
+          <MainMap
+            active={view === 'map'}
+            showEmptyState={false}
+            onBoundsChange={reportBounds}
+            memories={filterMemories(remotePins, period, category)}
+            selected={view === 'map' ? selected : null}
             onSelect={select}
             onOpen={openPublication}
             picking={picking}
@@ -331,19 +463,7 @@ export default function App() {
             draft={draft}
             onCancel={cancel}
           />
-          {view === "feed" && (
-            <button
-              ref={mapExpandButton}
-              className="mini-map-expand"
-              aria-label="Ampliar mapa"
-              aria-haspopup="dialog"
-              onClick={() => setMapExpanded(true)}
-            >
-              <span>Ampliar mapa</span>
-            </button>
-          )}
         </main>
-      )}
       <EraChrome
         period={period}
         count={visibleMemories.length}
@@ -353,9 +473,6 @@ export default function App() {
         onNavigate={navigate}
       />
       <nav className="navigation-rail" aria-label="Navegación principal">
-        <span className="rail-logo">
-          <img src="/nostalgiar-rail-logo.png" alt="Nostalgiar" width={48} height={48} />
-        </span>
         <button
           aria-label="Explorar mapa"
           className={view === "map" && !panelOpen ? "rail-active" : ""}
@@ -385,6 +502,7 @@ export default function App() {
           onClick={() => {
             setProfileAuthor(null);
             setView("profile");
+            setMusicOpen(false);
             setSelectedId(null);
             setPanelOpen(false);
             setFactsOpen(false);
@@ -406,18 +524,8 @@ export default function App() {
         </button>
       </nav>
       <header className="map-toolbar">
-        <div className="brand-card">
-          <span className="brand-era-label" aria-hidden="true">
-            {theme.brandLabel}
-          </span>
-          <h1>
-            {theme.brand}
-            <span>.</span>
-          </h1>
-          <span>{theme.subtitle}</span>
-        </div>
         <div className="compact-selectors">
-          <Timeline period={period} onChange={changePeriod} />
+          <div id="place-search-slot" />
           <details className="filters compact-menu">
             <summary>
               {category === "Personales" ? "Recuerdos personales" : category}
@@ -451,24 +559,10 @@ export default function App() {
             </div>
           </details>
         </div>
-        <button
-          ref={addButton}
-          className="primary-button add-button"
-          onClick={startAdding}
-          disabled={picking || !!draft}
-        >
-          <Plus size={18} />
-          <span>Sumar mi recuerdo</span>
-        </button>
+
       </header>
 
-      <div className="map-period">
-        <Compass size={17} />
-        <strong>{eraContent[period.decade].label}</strong>
-        <span>{period.year ?? `${period.decade} — ${period.decade + 9}`}</span>
-        <i />
-        <span>{memories.length} recuerdos</span>
-      </div>
+      
       {view === "map" && panelOpen && (
         <div className="stories-drawer stories-index">
           <div className="drawer-heading">
@@ -485,9 +579,7 @@ export default function App() {
             selected={selected}
             memories={memories}
             onSelect={(memory) => {
-              setSelectedId(memory.id);
-              setPanelOpen(false);
-              setView("feed");
+              openPublication(memory);
             }}
           />
         </div>
@@ -510,8 +602,10 @@ export default function App() {
           community={profileAuthor === null ? communityControls(true) : undefined}
           memories={ownMemories}
           allMemories={profileMemories}
+          repostedPublicationIds={repostedPublicationIds}
           tierProgress={tierProgress}
-          following={following}
+          followers={followers}
+          followedUsers={followingUsers}
           period={period}
           selected={selected}
           earned={earned}
@@ -521,33 +615,49 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
+          key={currentSesion?.usuarioId ?? 'guest'}
+          active={view === 'feed'}
+          onItems={setFeedItems}
+          filterFeed={items => filterMemories(filterCommunity(items, scope, groups, query), period, category)}
           onAddHashtag={tag => { startAdding(); setDraftHashtags([tag]); }}
+          onTabChange={(tab: FeedTab) => {
+            if (tab !== 'groups' && groups.some(group => group.id === scope)) {
+              setScope('all');
+              setQuery('');
+            }
+          }}
           onEdit={editMemory}
           onDelete={deleteMemory}
           onProfile={openProfile}
           groupIds={groups.map(group => group.id)}
+          suggestedAuthors={[
+            ...dbMemories.filter(memory => memory.authorId).map(memory => ({ name: memory.author, id: memory.authorId! })),
+            ...followers.map(user => ({ name: user.username, id: user.id })),
+          ]}
+          groupOpenRequest={groupOpenRequest}
           community={communityControls()}
           groupName={groups.find(g=>g.id===scope)?.name}
           decade={period.decade}
-          memories={memories}
+          memories={filterMemories(filterCommunity([...dbMemories, ...demoGroupMemories], scope, groups, query), period, category)}
           following={following}
-          onFollow={(author) =>
-            setFollowing((v) =>
-              v.includes(author)
-                ? v.filter((a) => a !== author)
-                : [...v, author],
-            )
-          }
+          followingRevision={followingRevision}
+          onFollow={toggleFollow}
+          ratings={ratings}
+          canRate={canRate}
+          onRate={rateMemory}
           selected={selected}
-          onSelect={(m) => setSelectedId(m?.id ?? null)}
+          onSelect={(m) => { selectedSeed.current = m; setRemoteSelected(m); setSelectedId(m?.id ?? null); }}
           onMap={(m) => {
+            selectedSeed.current = m;
+            setRemoteSelected(m);
             setView("map");
             setSelectedId(m.id);
-            setPanelOpen(true);
+            setPanelOpen(false);
             setFactsOpen(false);
           }}
           onAdd={startAdding}
           onReloadMemories={reloadMemories}
+          onRepostCreated={id => setRepostedPublicationIds(current => [...new Set([...current, id])])}
         />
       </div>
       <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft}/>
@@ -563,6 +673,7 @@ export default function App() {
           }
         }}
       />
+      {apiStatus && <div className="toast" role="status">{apiStatus}{apiStatus.startsWith('No se pud') && <button onClick={() => setMapRevision(value => value + 1)}>Reintentar</button>}</div>}
       {notice && (
         <div className="toast" role="status">
           <span>{notice}</span>

@@ -1,11 +1,12 @@
-import { MapPin, Repeat2 } from "lucide-react";
-import MemoryOwnerActions from "../MemoryOwnerActions";
+import { Ellipsis, MapPin, Pencil, Repeat2, Trash2 } from "lucide-react";
 import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
 import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import type { Memory } from "../../types";
 import { isOwnMemory, getMemoryAuthorDisplay } from "../../api";
 import CommentsSection from "./CommentsSection";
+import RemoteComments from './RemoteComments';
+import { publicationId } from '../../publicationsApi';
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
 import { memoryHashtags } from "../../hashtags";
@@ -17,6 +18,7 @@ export default function FeedPost({
   liked,
   comments,
   rating,
+  canRate,
   reposted,
   saved,
   quotedMemory,
@@ -40,13 +42,14 @@ export default function FeedPost({
   liked: boolean;
   comments: MemoryComment[];
   rating?: number;
+  canRate: boolean;
   reposted: boolean;
   saved: boolean;
   quotedMemory?: Memory;
   onDelete: (memory: Memory) => void;
   onEdit: (memory: Memory) => void;
   onProfile: (memory: Memory) => void;
-  onFollow: (author: string) => void;
+  onFollow: (author: string, authorId?: number) => void;
   onOpen: (memory: Memory) => void;
   onMap: (memory: Memory) => void;
   onRate: (value: number) => void;
@@ -108,17 +111,19 @@ export default function FeedPost({
           <button
             className="follow-button"
             aria-pressed={following}
-            onClick={() => onFollow(headerAuthor)}
+            onClick={() => onFollow(headerAuthor, isSimpleRepost ? memory.repost?.authorId : memory.authorId)}
           >
             {following ? "Siguiendo" : "Seguir"}
           </button>
         )}
-        {isHeaderAuthorOwn && (
-          <MemoryOwnerActions
-            memory={profileMemory}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
+        {isOwnMemory(memory) && (
+          <details className="compact-menu feed-owner-menu">
+            <summary aria-label="Opciones de publicación" title="Opciones de publicación"><Ellipsis size={20} aria-hidden="true" /></summary>
+            <div className="feed-owner-menu-options">
+              <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onEdit(memory); }}><Pencil size={15} /> Editar</button>
+              <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onDelete(memory); }}><Trash2 size={15} /> Eliminar</button>
+            </div>
+          </details>
         )}
       </header>
 
@@ -247,12 +252,14 @@ export default function FeedPost({
       <PostRating
         memoryTitle={memory.title}
         value={rating}
+        canRate={canRate}
         onRate={onRate}
       />
       <PostActions
         memoryTitle={memory.title}
         liked={liked}
-        commentCount={comments.length}
+        likeCount={memory.likeCount}
+        commentCount={memory.commentCount ?? comments.length}
         reposted={reposted}
         saved={saved}
         onLike={onLike}
@@ -260,14 +267,14 @@ export default function FeedPost({
         onRepost={onRepost}
         onSave={onSave}
       />
-      {selected && (
+      {selected && (publicationId(memory) ? <RemoteComments key={memory.id} memoryId={memory.id}/> : (
         <CommentsSection
           memoryId={memory.id}
           comments={comments}
           onAddComment={onAddComment}
           onReaction={onReaction}
         />
-      )}
+      ))}
     </article>
   );
 }
