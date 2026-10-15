@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { createComment, getComments } from '../../publicationsApi';
 import type { MemoryComment } from '../../socialTypes';
+import { useAuth } from '../auth/AuthProvider';
 
 export default function RemoteComments({ memoryId }: { memoryId: string }) {
+  const { isAuthenticated } = useAuth();
   const [comments, setComments] = useState<MemoryComment[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -45,7 +48,7 @@ export default function RemoteComments({ memoryId }: { memoryId: string }) {
     </article>)}</div>
     {!loading && !error && !comments.length && <p>Todavía no hay comentarios.</p>}
     {cursor && <button type="button" disabled={loading} onClick={() => void more()}>Ver más comentarios</button>}
-    <form onSubmit={async event => {
+    {isAuthenticated ? <form onSubmit={async event => {
       event.preventDefault();
       if (!draft.trim() || sending) return;
       setSending(true); setError('');
@@ -60,6 +63,6 @@ export default function RemoteComments({ memoryId }: { memoryId: string }) {
       <label htmlFor={`comment-${memoryId}`}>Comentar el recuerdo</label>
       <textarea id={`comment-${memoryId}`} value={draft} required disabled={sending} onChange={event => setDraft(event.target.value)} placeholder="Comentá este recuerdo…"/>
       <button className="primary-button" disabled={sending || !draft.trim()}>{sending ? 'Enviando…' : 'Comentar'}</button>
-    </form>
+    </form> : <p className="comments-auth-required"><Link href="/auth/login?returnTo=/explorar">Iniciá sesión</Link> para comentar este recuerdo.</p>}
   </section>;
 }

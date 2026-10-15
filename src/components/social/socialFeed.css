@@ -634,6 +634,21 @@
   margin-bottom: 10px;
 }
 
+.comments-auth-required {
+  margin: 10px 0;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.comments-auth-required a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .post-comments textarea {
   min-width: 0;
   width: 100%;

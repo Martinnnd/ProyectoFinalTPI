@@ -59,12 +59,9 @@ describe('Publicaciones del backend', () => {
     expect(page.cursor).toBe('next+/=');
     expect(page.items[0]).toMatchObject({ id: '8', text: comment.contenido, author: 'usuarioTest', createdAt: comment.fechaCreacion });
   });
-  it('crea comentarios con usuario temporal y muestra validaciones ProblemDetails', async () => {
-    const fetch = respond(comment, 201);
-    vi.stubGlobal('fetch', fetch);
-    await createComment('25', '  Qué lindo recuerdo  ');
-    expect(fetch.mock.calls[0][0]).toBe(`${API_BASE_URL}/api/publicaciones/25/comentarios`);
-    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Qué lindo recuerdo', usuarioId: 1 });
+  it('rechaza comentarios anónimos y muestra validaciones ProblemDetails', async () => {
+    await expect(createComment('25', 'Qué lindo recuerdo')).rejects.toThrow('iniciar sesión');
+    guardarSesion({ usuarioId: 42, token: 'token-test', username: 'Ana', email: 'ana@example.com', esAdmin: false });
     vi.stubGlobal('fetch', respond({ title: 'Validación', errors: { Contenido: ['Contenido obligatorio.'] } }, 400));
     await expect(createComment('25', '')).rejects.toThrow('Contenido obligatorio.');
   });

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { transitionFeed } from "../../eras/shared/transitionFeed";
 import useMemoryInteractions from "../../hooks/useMemoryInteractions";
 import type { FeedTab } from "../../socialTypes";
@@ -14,6 +15,7 @@ import { memoryHashtags, weeklyTrends } from "../../hashtags";
 import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
 import useRemoteFeed from '../../hooks/useRemoteFeed';
+import { useAuth } from '../auth/AuthProvider';
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -91,6 +93,8 @@ export default function SocialFeed({
   onReloadMemories?: () => void | Promise<void>;
   onRepostCreated: (id: string) => void;
 }) {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const interactions = useMemoryInteractions();
   const desktopDetail = !!selected && (decade === 1990 || decade === 2000);
   const [maximized, setMaximized] = useState(false);
@@ -98,15 +102,23 @@ export default function SocialFeed({
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
   const [tab, setTab] = useState<FeedTab>("all");
+
+  function requireAuthentication(): boolean {
+    if (isAuthenticated) return true;
+    router.push('/auth/login?returnTo=/explorar');
+    return false;
+  }
   useEffect(() => {
     if (groupName) {
       setTab("groups");
       setHashtag(null);
     }
   }, [groupName, groupOpenRequest]);
-  const remote = useRemoteFeed(tab === 'groups' ? null : tab === 'following' ? 'seguidos' : 'para-vos', active);
+  const remote = useRemoteFeed(tab === 'groups' ? null : tab === 'following' ? 'seguidos' : 'para-vos', active && isAuthenticated);
   useEffect(() => { if (followingRevision && tab === 'following') remote.reload(); }, [followingRevision]);
-  useEffect(() => { if (tab !== 'groups') onItems(remote.items); }, [remote.items, tab, onItems]);
+  useEffect(() => {
+    if (isAuthenticated && tab !== 'groups') onItems(remote.items);
+  }, [isAuthenticated, remote.items, tab, onItems]);
   const [hashtag, setHashtag] = useState<string | null>(null);
   const [, setNow] = useState(Date.now);
   useEffect(() => {
@@ -117,7 +129,9 @@ export default function SocialFeed({
   const cancelTurn = useRef<() => void>(() => {});
   const stream = useRef<HTMLDivElement>(null);
   
-  const allMemories = tab === 'groups' ? memories : filterFeed(remote.items);
+  const allMemories = tab === 'groups' || !isAuthenticated
+    ? filterFeed(memories)
+    : filterFeed(remote.items);
 
   useEffect(() => () => cancelTurn.current(), []);
   useEffect(() => {
@@ -168,6 +182,10 @@ export default function SocialFeed({
   }
 
   function changeTab(nextTab: FeedTab) {
+    if (!isAuthenticated && (nextTab === 'following' || nextTab === 'groups')) {
+      requireAuthentication();
+      return;
+    }
     onTabChange(nextTab);
     setTab(nextTab);
     setHashtag(null);
@@ -213,14 +231,13 @@ export default function SocialFeed({
     const { targetId } = getTargetToRepost(mem, allMemories);
     try {
       await eliminarRepost(targetId);
+      setReposts((current) => current.filter((id) => id !== targetId && id !== mem.id));
       remote.reload();
       if (onReloadMemories) {
         await onReloadMemories();
       }
     } catch (err) {
       console.error("Error al deshacer repost:", err);
-    } finally {
-      setReposts((current) => current.filter((id) => id !== targetId && id !== mem.id));
     }
   }
 
@@ -296,8 +313,12 @@ export default function SocialFeed({
                 onOpen={(memToOpen) => open(memToOpen || targetMemory)}
                 onMap={onMap}
                 onRate={(value) => onRate(isSimpleRepost ? rootId : memory.id, value)}
-                onLike={() => interactions.toggleLike(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
+                onLike={() => {
+                  if (!requireAuthentication()) return;
+                  interactions.toggleLike(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked);
+                }}
                 onRepost={() => {
+                  if (!requireAuthentication()) return;
                   if (isReposted) {
                     handleUnrepost(memory);
                   } else {
@@ -305,15 +326,18 @@ export default function SocialFeed({
                     setRepostMemory(toRepost);
                   }
                 }}
-                onSave={() =>
-                  setSaves((current) => toggleId(current, memory.id))
-                }
-                onAddComment={(memId, text, parentId) =>
-                  interactions.addComment(isSimpleRepost ? rootId : memId, text, parentId)
-                }
-                onReaction={(memId, commentId, reaction) =>
-                  interactions.reactToComment(isSimpleRepost ? rootId : memId, commentId, reaction)
-                }
+                onSave={() => {
+                  if (!requireAuthentication()) return;
+                  setSaves((current) => toggleId(current, memory.id));
+                }}
+                onAddComment={(memId, text, parentId) => {
+                  if (!requireAuthentication()) return;
+                  interactions.addComment(isSimpleRepost ? rootId : memId, text, parentId);
+                }}
+                onReaction={(memId, commentId, reaction) => {
+                  if (!requireAuthentication()) return;
+                  interactions.reactToComment(isSimpleRepost ? rootId : memId, commentId, reaction);
+                }}
                 onHashtag={chooseHashtag}
               />
             );
@@ -349,10 +373,17 @@ export default function SocialFeed({
           memoryTitle={repostMemory.title}
           onCancel={() => setRepostMemory(null)}
           onConfirm={async (descripcion) => {
+            if (!requireAuthentication()) {
+              setRepostMemory(null);
+              return;
+            }
             const { targetId } = getTargetToRepost(repostMemory, allMemories);
             try {
               const created = await compartirPublicacion(targetId, descripcion);
               if (created && typeof created.id !== 'undefined') onRepostCreated(String(created.id));
+              if (!descripcion.trim()) {
+                setReposts((current) => [...new Set([...current, targetId])]);
+              }
               remote.reload();
               if (onReloadMemories) {
                 await onReloadMemories();
@@ -360,10 +391,6 @@ export default function SocialFeed({
             } catch (err) {
               console.error("Error al compartir en el servidor:", err);
             } finally {
-              // Solo se marca pintado en local si fue un repost simple (sin comentario agregado)
-              if (!descripcion.trim()) {
-                setReposts((current) => [...new Set([...current, targetId])]);
-              }
               setRepostMemory(null);
             }
           }}

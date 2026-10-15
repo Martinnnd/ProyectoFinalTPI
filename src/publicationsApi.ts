@@ -1,4 +1,5 @@
 import { API_BASE_URL, getSesion } from './api';
+import { apiFetch } from './components/auth/apiClient';
 import { categories, type Category, type Memory, type Period } from './types';
 import { youtubeId } from './media';
 import type { MemoryComment } from './socialTypes';
@@ -10,9 +11,7 @@ type Comment = { id: number; contenido: string; fechaCreacion: string; autor: { 
 
 export async function publicationRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
-  const session = getSesion();
-  if (session?.token) headers.set('Authorization', `Bearer ${session.token}`);
-  const response = await fetch(`${API_BASE_URL}/api/publicaciones${path}`, { ...options, headers });
+  const response = await apiFetch(`${API_BASE_URL}/api/publicaciones${path}`, { ...options, headers });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
@@ -63,6 +62,8 @@ export async function getComments(memoryId: string, cursor?: string, signal?: Ab
   return { items: data.items.map(item => toComment(item, memoryId)), cursor: data.siguienteCursor };
 }
 export async function createComment(memoryId: string, contenido: string) {
-  const data = await publicationRequest<Comment>(`/${memoryId}/comentarios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contenido: contenido.trim(), usuarioId: getSesion()?.usuarioId ?? 1 }) });
+  const session = getSesion();
+  if (!session) throw new Error('Tenés que iniciar sesión para comentar.');
+  const data = await publicationRequest<Comment>(`/${memoryId}/comentarios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contenido: contenido.trim(), usuarioId: session.usuarioId }) });
   return toComment(data, memoryId);
 }

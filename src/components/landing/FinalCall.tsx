@@ -6,8 +6,8 @@ export default function FinalCall() {
     <section className={styles.finalCall}>
       <p>Tu próximo recuerdo puede empezar en cualquier lugar.</p>
       <h2>¿A qué época querés volver?</h2>
-      <Link className={styles.lightAction} href="/explorar">
-        Abrir Nostalgiar <span aria-hidden="true">→</span>
+      <Link className={styles.lightAction} href="/auth/registro">
+        Crear mi cuenta <span aria-hidden="true">→</span>
       </Link>
     </section>
   );

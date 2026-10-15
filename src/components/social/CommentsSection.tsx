@@ -1,9 +1,11 @@
 import { useEffect, useId, useState } from "react";
+import Link from "next/link";
 import type {
   CommentReaction,
   MemoryComment,
 } from "../../socialTypes";
 import CommentItem from "./CommentItem";
+import { useAuth } from "../auth/AuthProvider";
 
 export default function CommentsSection({
   memoryId,
@@ -20,6 +22,7 @@ export default function CommentsSection({
     reaction: CommentReaction,
   ) => void;
 }) {
+  const { isAuthenticated } = useAuth();
   const [draft, setDraft] = useState("");
   const [commentsExpanded, setCommentsExpanded] = useState(true);
   const fieldId = useId();
@@ -54,6 +57,7 @@ export default function CommentsSection({
                   key={comment.id}
                   comment={comment}
                   comments={comments}
+                  interactive={isAuthenticated}
                   onReply={(parentId, text) =>
                     onAddComment(memoryId, text, parentId)
                   }
@@ -63,7 +67,7 @@ export default function CommentsSection({
                 />
               ))}
           </div>
-          <form
+          {isAuthenticated ? <form
             onSubmit={(event) => {
               event.preventDefault();
               if (!draft.trim()) return;
@@ -85,7 +89,7 @@ export default function CommentsSection({
             <button className="primary-button" type="submit">
               Comentar
             </button>
-          </form>
+          </form> : <p className="comments-auth-required"><Link href="/auth/login?returnTo=/explorar">Iniciá sesión</Link> para comentar o reaccionar.</p>}
         </>
       )}
     </section>

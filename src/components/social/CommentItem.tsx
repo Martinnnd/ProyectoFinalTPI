@@ -11,11 +11,13 @@ import ReactionPicker from "./ReactionPicker";
 export default function CommentItem({
   comment,
   comments,
+  interactive,
   onReply,
   onReaction,
 }: {
   comment: MemoryComment;
   comments: MemoryComment[];
+  interactive: boolean;
   onReply: (parentId: string, text: string) => void;
   onReaction: (commentId: string, reaction: CommentReaction) => void;
 }) {
@@ -84,7 +86,7 @@ export default function CommentItem({
                 ) : null;
               })}
             </div>
-            <div className="comment-reaction-controls" ref={controls}>
+            {interactive && <div className="comment-reaction-controls" ref={controls}>
               <button
                 type="button"
                 className="comment-reply-button"
@@ -113,9 +115,9 @@ export default function CommentItem({
                   }}
                 />
               )}
-            </div>
+            </div>}
           </div>
-          {replyOpen && (
+          {interactive && replyOpen && (
             <form
               className="comment-reply-form"
               onSubmit={(event) => {
@@ -149,6 +151,7 @@ export default function CommentItem({
                   key={reply.id}
                   comment={reply}
                   comments={comments}
+                  interactive={interactive}
                   onReply={onReply}
                   onReaction={onReaction}
                 />
