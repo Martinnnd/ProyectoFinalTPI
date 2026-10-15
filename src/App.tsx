@@ -28,7 +28,7 @@ import { useAuth } from "./components/auth/AuthProvider";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
-import Profile from "./components/Profile";
+import Profile from "./components/profile/Profile";
 import SocialFeed from "./components/social/SocialFeed";
 import type { FeedTab } from "./socialTypes";
 import EraTimeline from "./components/EraTimeline";
@@ -231,7 +231,6 @@ export default function App() {
   const profileMemories = profileAuthor === null
     ? dbMemories.filter(m => isOwnMemory(m))
     : dbMemories.filter(m => m.author === profileAuthor);
-  const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? profileMemories : memories;
   const selected = remoteSelected?.id === selectedId ? remoteSelected : visibleMemories.find((m) => m.id === selectedId) ?? remotePins.find(m => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
@@ -597,16 +596,16 @@ export default function App() {
           onClose={() => setFactsOpen(false)}
         />
       )}
-      {view === "profile" && (
+      {view === "profile" && session && (
         <Profile
           onEdit={editMemory}
           onDelete={deleteMemory}
           onOpen={openPublication}
           key={profileAuthor ?? "own"}
+          username={session.username}
           author={profileAuthor ?? undefined}
           onBack={() => {setSelectedId(null);setView("feed");}}
           community={profileAuthor === null ? communityControls(true) : undefined}
-          memories={ownMemories}
           allMemories={profileMemories}
           repostedPublicationIds={repostedPublicationIds}
           tierProgress={tierProgress}

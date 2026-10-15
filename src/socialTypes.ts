@@ -35,5 +35,4 @@ export interface MemoryComment {
   viewerReaction?: CommentReaction;
 }
 
-export type CommentsByMemory = Record<string, MemoryComment[]>;
 export type FeedTab = "all" | "following" | "groups";

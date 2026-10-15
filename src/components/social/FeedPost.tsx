@@ -1,12 +1,10 @@
 import { Ellipsis, MapPin, Pencil, Repeat2, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
-import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import type { Memory } from "../../types";
 import { isOwnMemory, getMemoryAuthorDisplay } from "../../api";
-import CommentsSection from "./CommentsSection";
 import RemoteComments from './RemoteComments';
-import { publicationId } from '../../publicationsApi';
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
 import { memoryHashtags } from "../../hashtags";
@@ -16,7 +14,7 @@ export default function FeedPost({
   selected,
   following,
   liked,
-  comments,
+  commentMemoryId,
   rating,
   canRate,
   reposted,
@@ -32,15 +30,13 @@ export default function FeedPost({
   onLike,
   onRepost,
   onSave,
-  onAddComment,
-  onReaction,
   onHashtag,
 }: {
   memory: Memory;
   selected: boolean;
   following: boolean;
   liked: boolean;
-  comments: MemoryComment[];
+  commentMemoryId?: string;
   rating?: number;
   canRate: boolean;
   reposted: boolean;
@@ -57,13 +53,9 @@ export default function FeedPost({
   onRepost: () => void;
   onSave: () => void;
   onHashtag: (tag: string) => void;
-  onAddComment: (memoryId: string, text: string, parentId?: string) => void;
-  onReaction: (
-    memoryId: string,
-    commentId: string,
-    reaction: CommentReaction,
-  ) => void;
 }) {
+  const [commentCount, setCommentCount] = useState(memory.commentCount ?? 0);
+  useEffect(() => setCommentCount(memory.commentCount ?? 0), [memory.id, memory.commentCount]);
   const hasInlineImage =
     memory.image && !memory.media && !youtubeId(memory.image);
 
@@ -259,7 +251,7 @@ export default function FeedPost({
         memoryTitle={memory.title}
         liked={liked}
         likeCount={memory.likeCount}
-        commentCount={memory.commentCount ?? comments.length}
+        commentCount={commentCount}
         reposted={reposted}
         saved={saved}
         onLike={onLike}
@@ -267,14 +259,13 @@ export default function FeedPost({
         onRepost={onRepost}
         onSave={onSave}
       />
-      {selected && (publicationId(memory) ? <RemoteComments key={memory.id} memoryId={memory.id}/> : (
-        <CommentsSection
-          memoryId={memory.id}
-          comments={comments}
-          onAddComment={onAddComment}
-          onReaction={onReaction}
+      {selected && commentMemoryId && (
+        <RemoteComments
+          key={commentMemoryId}
+          memoryId={commentMemoryId}
+          onCommentCreated={() => setCommentCount((count) => count + 1)}
         />
-      ))}
+      )}
     </article>
   );
 }

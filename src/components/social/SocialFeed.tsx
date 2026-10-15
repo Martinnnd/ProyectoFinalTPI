@@ -16,6 +16,7 @@ import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
 import useRemoteFeed from '../../hooks/useRemoteFeed';
 import { useAuth } from '../auth/AuthProvider';
+import { publicationId } from '../../publicationsApi';
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -286,7 +287,6 @@ export default function SocialFeed({
                   repost: undefined,
                 })
               : undefined;
-            const comments = interactions.getComments(isSimpleRepost ? rootId : memory.id);
             const isReposted = isMemoryRepostedByMe(memory);
 
             return (
@@ -301,7 +301,7 @@ export default function SocialFeed({
                     : memory.author
                 )}
                 liked={interactions.isLiked(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
-                comments={comments}
+                commentMemoryId={publicationId(targetMemory) ? rootId : undefined}
                 rating={ratings[isSimpleRepost ? rootId : memory.id]}
                 canRate={canRate}
                 reposted={isReposted}
@@ -329,14 +329,6 @@ export default function SocialFeed({
                 onSave={() => {
                   if (!requireAuthentication()) return;
                   setSaves((current) => toggleId(current, memory.id));
-                }}
-                onAddComment={(memId, text, parentId) => {
-                  if (!requireAuthentication()) return;
-                  interactions.addComment(isSimpleRepost ? rootId : memId, text, parentId);
-                }}
-                onReaction={(memId, commentId, reaction) => {
-                  if (!requireAuthentication()) return;
-                  interactions.reactToComment(isSimpleRepost ? rootId : memId, commentId, reaction);
                 }}
                 onHashtag={chooseHashtag}
               />

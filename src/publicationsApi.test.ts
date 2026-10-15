@@ -1,6 +1,7 @@
 import { API_BASE_URL, guardarSesion, cerrarSesion } from './api';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createComment, getComments, getMapPublications, getPublication, publicationId, toMemory } from './publicationsApi';
+import { getMapPublications, getPublication, publicationId, toMemory } from './publicationsApi';
+import { createComment, getComments } from './commentsApi';
 import type { Memory } from './types';
 
 const pin: Memory = { id: '25', title: 'Recuerdo', year: 1990, category: 'Personales', description: '', author: '', place: '', lat: -34, lng: -58, source: 'backend' };
@@ -15,7 +16,7 @@ it('crea comentarios con la identidad de la sesión', async () => {
   const fetch = respond(comment);
   vi.stubGlobal('fetch', fetch);
   await createComment('25', ' Hola ');
-  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Hola', usuarioId: 42 });
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Hola', comentarioPadreId: null });
   expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
 });
 describe('Publicaciones del backend', () => {

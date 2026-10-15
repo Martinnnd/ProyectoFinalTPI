@@ -15,15 +15,17 @@ export default function CommentsSection({
 }: {
   memoryId: string;
   comments: MemoryComment[];
-  onAddComment: (memoryId: string, text: string, parentId?: string) => void;
+  onAddComment: (memoryId: string, text: string, parentId?: string) => void | Promise<void>;
   onReaction: (
     memoryId: string,
     commentId: string,
     reaction: CommentReaction,
-  ) => void;
+  ) => void | Promise<void>;
 }) {
   const { isAuthenticated } = useAuth();
   const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [commentsExpanded, setCommentsExpanded] = useState(true);
   const fieldId = useId();
 
@@ -68,11 +70,19 @@ export default function CommentsSection({
               ))}
           </div>
           {isAuthenticated ? <form
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
-              if (!draft.trim()) return;
-              onAddComment(memoryId, draft);
-              setDraft("");
+              if (!draft.trim() || sending) return;
+              setSending(true);
+              setError("");
+              try {
+                await onAddComment(memoryId, draft);
+                setDraft("");
+              } catch (reason) {
+                setError(reason instanceof Error ? reason.message : "No se pudo publicar el comentario.");
+              } finally {
+                setSending(false);
+              }
             }}
           >
             <label className="sr-only" htmlFor={fieldId}>
@@ -83,12 +93,14 @@ export default function CommentsSection({
               value={draft}
               maxLength={1000}
               required
+              disabled={sending}
               onChange={(event) => setDraft(event.target.value)}
               placeholder="Comentá este recuerdo…"
             />
-            <button className="primary-button" type="submit">
-              Comentar
+            <button className="primary-button" type="submit" disabled={sending || !draft.trim()}>
+              {sending ? "Enviando…" : "Comentar"}
             </button>
+            {error && <p role="alert">{error}</p>}
           </form> : <p className="comments-auth-required"><Link href="/auth/login?returnTo=/explorar">Iniciá sesión</Link> para comentar o reaccionar.</p>}
         </>
       )}

@@ -14,17 +14,21 @@ export default function CommentItem({
   interactive,
   onReply,
   onReaction,
+  depth = 0,
 }: {
   comment: MemoryComment;
   comments: MemoryComment[];
   interactive: boolean;
-  onReply: (parentId: string, text: string) => void;
-  onReaction: (commentId: string, reaction: CommentReaction) => void;
+  onReply: (parentId: string, text: string) => void | Promise<void>;
+  onReaction: (commentId: string, reaction: CommentReaction) => void | Promise<void>;
+  depth?: number;
 }) {
   const replies = comments.filter((reply) => reply.parentId === comment.id);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyDraft, setReplyDraft] = useState("");
+  const [replySending, setReplySending] = useState(false);
+  const [actionError, setActionError] = useState("");
   const [expanded, setExpanded] = useState(true);
   const controls = useRef<HTMLDivElement>(null);
 
@@ -87,14 +91,14 @@ export default function CommentItem({
               })}
             </div>
             {interactive && <div className="comment-reaction-controls" ref={controls}>
-              <button
+              {depth === 0 && <button
                 type="button"
                 className="comment-reply-button"
                 aria-expanded={replyOpen}
                 onClick={() => setReplyOpen((open) => !open)}
               >
                 Responder
-              </button>
+              </button>}
               <button
                 type="button"
                 className="comment-react-button"
@@ -109,23 +113,37 @@ export default function CommentItem({
               {pickerOpen && (
                 <ReactionPicker
                   selected={comment.viewerReaction}
-                  onSelect={(reaction) => {
-                    onReaction(comment.id, reaction);
-                    setPickerOpen(false);
+                  onSelect={async (reaction) => {
+                    setActionError("");
+                    try {
+                      await onReaction(comment.id, reaction);
+                      setPickerOpen(false);
+                    } catch (reason) {
+                      setActionError(reason instanceof Error ? reason.message : "No se pudo guardar la reacción.");
+                    }
                   }}
                 />
               )}
             </div>}
           </div>
-          {interactive && replyOpen && (
+          {actionError && <p role="alert">{actionError}</p>}
+          {interactive && depth === 0 && replyOpen && (
             <form
               className="comment-reply-form"
-              onSubmit={(event) => {
+              onSubmit={async (event) => {
                 event.preventDefault();
-                if (!replyDraft.trim()) return;
-                onReply(comment.id, replyDraft);
-                setReplyDraft("");
-                setReplyOpen(false);
+                if (!replyDraft.trim() || replySending) return;
+                setReplySending(true);
+                setActionError("");
+                try {
+                  await onReply(comment.id, replyDraft);
+                  setReplyDraft("");
+                  setReplyOpen(false);
+                } catch (reason) {
+                  setActionError(reason instanceof Error ? reason.message : "No se pudo publicar la respuesta.");
+                } finally {
+                  setReplySending(false);
+                }
               }}
             >
               <label className="sr-only" htmlFor={`reply-${comment.id}`}>
@@ -136,11 +154,12 @@ export default function CommentItem({
                 value={replyDraft}
                 maxLength={1000}
                 required
+                disabled={replySending}
                 onChange={(event) => setReplyDraft(event.target.value)}
                 placeholder={`Responder a ${comment.author}…`}
               />
-              <button className="primary-button" type="submit">
-                Responder
+              <button className="primary-button" type="submit" disabled={replySending || !replyDraft.trim()}>
+                {replySending ? "Enviando…" : "Responder"}
               </button>
             </form>
           )}
@@ -154,6 +173,7 @@ export default function CommentItem({
                   interactive={interactive}
                   onReply={onReply}
                   onReaction={onReaction}
+                  depth={depth + 1}
                 />
               ))}
             </div>
