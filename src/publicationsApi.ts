@@ -1,18 +1,15 @@
-import { API_BASE_URL, getSesion } from './api';
+import { API_BASE_URL } from './api';
+import { apiFetch } from './components/auth/apiClient';
 import { categories, type Category, type Memory, type Period } from './types';
 import { youtubeId } from './media';
-import type { MemoryComment } from './socialTypes';
 
 export type MapBounds = { minLatitud: number; maxLatitud: number; minLongitud: number; maxLongitud: number };
 type Pin = { id: number; latitud: number; longitud: number; categoria: number | string };
 export type Publication = { cantidadLikes?: number; cantidadComentarios?: number; dioLike?: boolean; id: number; titulo: string; descripcion?: string; descripcionBreve?: string; fecha: string; fechaCreacion?: string; categoria: number | string; urlMultimedia: string; tipoMultimedia: number | string; autor: { id: number; username: string }; lugar?: { nombre: string; latitud: number; longitud: number } };
-type Comment = { id: number; contenido: string; fechaCreacion: string; autor: { id: number; username: string } };
 
 export async function publicationRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
-  const session = getSesion();
-  if (session?.token) headers.set('Authorization', `Bearer ${session.token}`);
-  const response = await fetch(`${API_BASE_URL}/api/publicaciones${path}`, { ...options, headers });
+  const response = await apiFetch(`${API_BASE_URL}/api/publicaciones${path}`, { ...options, headers });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
@@ -52,17 +49,4 @@ export async function getPublication(memory: Memory, summary: boolean, signal?: 
   const id = publicationId(memory);
   if (!id) throw new Error('Esta publicación no tiene un identificador del servidor.');
   return toMemory(await publicationRequest<Publication>(`/${id}${summary ? '/resumen' : ''}`, { signal }), memory);
-}
-function toComment(data: Comment, memoryId: string): MemoryComment {
-  return { id: String(data.id), memoryId, text: data.contenido, author: data.autor.username, createdAt: data.fechaCreacion, reactions: {} };
-}
-export async function getComments(memoryId: string, cursor?: string, signal?: AbortSignal) {
-  const query = new URLSearchParams({ limite: '20' });
-  if (cursor) query.set('cursor', cursor);
-  const data = await publicationRequest<{ items: Comment[]; siguienteCursor: string | null }>(`/${memoryId}/comentarios?${query}`, { signal });
-  return { items: data.items.map(item => toComment(item, memoryId)), cursor: data.siguienteCursor };
-}
-export async function createComment(memoryId: string, contenido: string) {
-  const data = await publicationRequest<Comment>(`/${memoryId}/comentarios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contenido: contenido.trim(), usuarioId: getSesion()?.usuarioId ?? 1 }) });
-  return toComment(data, memoryId);
 }

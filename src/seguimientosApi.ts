@@ -1,12 +1,11 @@
-import { API_BASE_URL, getSesion } from './api';
+import { API_BASE_URL } from './api';
+import { apiFetch } from './components/auth/apiClient';
 
 export type FollowedUser = { id: number; username: string };
 
 async function request(path: string, options?: RequestInit): Promise<unknown> {
   const headers = new Headers(options?.headers);
-  const token = getSesion()?.token;
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-  const response = await fetch(`${API_BASE_URL}/api/seguimientos${path}`, { ...options, headers, cache: 'no-store' });
+  const response = await apiFetch(`${API_BASE_URL}/api/seguimientos${path}`, { ...options, headers, cache: 'no-store' });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';

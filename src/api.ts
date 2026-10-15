@@ -1,41 +1,17 @@
-export const API_BASE_URL = "https://localhost:7014";
+export { API_BASE_URL } from "./apiConfig";
+import { API_BASE_URL } from "./apiConfig";
+import {
+    clearStoredSession,
+    getStoredSession,
+    storeSession,
+} from "./components/auth/authStorage";
+import type { AuthSession } from "./components/auth/authTypes";
+import { apiFetch } from "./components/auth/apiClient";
 
-export interface UsuarioSesion {
-    token: string;
-    usuarioId: number;
-    username: string;
-    email: string;
-    esAdmin: boolean;
-}
-
-let memorySesion: UsuarioSesion | null = null;
-
-export function getSesion(): UsuarioSesion | null {
-    if (memorySesion) return memorySesion;
-    if (typeof window !== "undefined" && window.localStorage) {
-        try {
-            const raw = window.localStorage.getItem("nostalgia_auth");
-            return raw ? JSON.parse(raw) : null;
-        } catch {
-            return null;
-        }
-    }
-    return null;
-}
-
-export function guardarSesion(sesion: UsuarioSesion): void {
-    memorySesion = sesion;
-    if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.setItem("nostalgia_auth", JSON.stringify(sesion));
-    }
-}
-
-export function cerrarSesion(): void {
-    memorySesion = null;
-    if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.removeItem("nostalgia_auth");
-    }
-}
+export type UsuarioSesion = AuthSession;
+export const getSesion = getStoredSession;
+export const guardarSesion = storeSession;
+export const cerrarSesion = clearStoredSession;
 
 export function isOwnMemory(memory: { author?: string; source?: string } | null | undefined): boolean {
     if (!memory) return false;
@@ -53,74 +29,21 @@ export function getMemoryAuthorDisplay(memory: { author?: string; source?: strin
     return memory.author || "Desconocido";
 }
 
-export async function login(email: string, contrasena: string): Promise<UsuarioSesion> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, contrasena, contraseña: contrasena })
-    });
-
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({ mensaje: "Credenciales inválidas" }));
-        throw new Error(err.mensaje || `Error ${response.status}`);
-    }
-
-    const data: UsuarioSesion = await response.json();
-    guardarSesion(data);
-    return data;
-}
-
-export async function registro(datos: { username: string; email: string; contrasena: string; esAdmin?: boolean }): Promise<UsuarioSesion> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/registro`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
-    });
-
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({ mensaje: "Error al registrarse" }));
-        throw new Error(err.mensaje || `Error ${response.status}`);
-    }
-
-    const data: UsuarioSesion = await response.json();
-    guardarSesion(data);
-    return data;
-}
-
-let validAutorId: number | null = null;
-
-async function getValidAutorId(providedId: number): Promise<number> {
-    if (providedId !== 1) return providedId;
-    if (validAutorId !== null) return validAutorId;
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/publicaciones/test-users`);
-        if (response.ok) {
-            const users = await response.json();
-            if (users && users.length > 0) {
-                validAutorId = users[0].id;
-                return validAutorId as number;
-            }
-        }
-    } catch (e) {
-        console.error("Failed to fetch users", e);
-    }
-    return providedId;
+function requireSession(): AuthSession {
+    const session = getSesion();
+    if (!session) throw new Error("Tenés que iniciar sesión para realizar esta acción.");
+    return session;
 }
 
 export async function compartirPublicacion(originalId: string, descripcion: string, autorId?: number) {
-    const sesion = getSesion();
-    const token = sesion?.token;
-    const finalAutorId = sesion?.usuarioId ?? (autorId !== undefined ? await getValidAutorId(autorId) : await getValidAutorId(1));
+    const sesion = requireSession();
+    const finalAutorId = sesion.usuarioId;
     const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1; 
 
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
     };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/publicaciones/compartir`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/compartir`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -138,23 +61,16 @@ export async function compartirPublicacion(originalId: string, descripcion: stri
 }
 
 export async function eliminarRepost(originalId: string, autorId?: number) {
-    const sesion = getSesion();
-    const token = sesion?.token;
-    const finalAutorId = sesion?.usuarioId ?? autorId;
+    const sesion = requireSession();
+    const finalAutorId = sesion.usuarioId;
     const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1;
-
-    const headers: Record<string, string> = {};
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const url = finalAutorId !== undefined
         ? `${API_BASE_URL}/api/publicaciones/compartir/${numericId}?autorId=${finalAutorId}`
         : `${API_BASE_URL}/api/publicaciones/compartir/${numericId}`;
 
-    const response = await fetch(url, {
-        method: 'DELETE',
-        headers
+    const response = await apiFetch(url, {
+        method: 'DELETE'
     });
 
     if (!response.ok) {
@@ -165,23 +81,16 @@ export async function eliminarRepost(originalId: string, autorId?: number) {
 }
 
 export async function eliminarPublicacion(id: string, autorId?: number) {
-    const sesion = getSesion();
-    const token = sesion?.token;
-    const finalAutorId = sesion?.usuarioId ?? autorId;
+    const sesion = requireSession();
+    const finalAutorId = sesion.usuarioId;
     const numericId = parseInt(id.replace(/\D/g, ''), 10) || 1;
-
-    const headers: Record<string, string> = {};
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const url = finalAutorId !== undefined
         ? `${API_BASE_URL}/api/publicaciones/${numericId}?autorId=${finalAutorId}`
         : `${API_BASE_URL}/api/publicaciones/${numericId}`;
 
-    const response = await fetch(url, {
-        method: 'DELETE',
-        headers
+    const response = await apiFetch(url, {
+        method: 'DELETE'
     });
 
     if (!response.ok) {
@@ -203,7 +112,7 @@ function dataURItoBlob(dataURI: string) {
 }
 
 export async function getMemories() {
-    const response = await fetch(`${API_BASE_URL}/api/publicaciones`);
+    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones`);
     if (!response.ok) {
         throw new Error(`Error fetching memories: ${response.statusText}`);
     }
@@ -211,9 +120,8 @@ export async function getMemories() {
 }
 
 export async function crearPublicacion(memory: any, autorId?: number): Promise<any> {
-    const sesion = getSesion();
-    const token = sesion?.token;
-    const finalAutorId = sesion?.usuarioId ?? (autorId !== undefined ? await getValidAutorId(autorId) : await getValidAutorId(1));
+    const sesion = requireSession();
+    const finalAutorId = sesion.usuarioId;
     const formData = new FormData();
     formData.append('Titulo', memory.title);
     formData.append('Descripcion', memory.description);
@@ -253,14 +161,8 @@ export async function crearPublicacion(memory: any, autorId?: number): Promise<a
         }
     }
 
-    const headers: Record<string, string> = {};
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/publicaciones`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones`, {
         method: 'POST',
-        headers,
         body: formData
     });
 

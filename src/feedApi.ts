@@ -1,4 +1,5 @@
 import { API_BASE_URL, getSesion } from './api';
+import { apiFetch } from './components/auth/apiClient';
 import { toMemory, type Publication } from './publicationsApi';
 import type { Memory } from './types';
 
@@ -9,9 +10,10 @@ export class FeedError extends Error {
 }
 export async function getFeed(feed: RemoteFeed, cursor?: string, signal?: AbortSignal): Promise<FeedPage> {
   const session = getSesion();
-  const query = new URLSearchParams({ usuarioId: String(session?.usuarioId ?? 1), limite: '20' });
+  if (!session) throw new FeedError('Tenés que iniciar sesión para ver tu feed personalizado.', 401);
+  const query = new URLSearchParams({ usuarioId: String(session.usuarioId), limite: '20' });
   if (cursor) query.set('cursor', cursor);
-  const response = await fetch(`${API_BASE_URL}/api/feed/${feed}?${query}`, { signal, cache: 'no-store', headers: session?.token ? { Authorization: `Bearer ${session.token}` } : undefined });
+  const response = await apiFetch(`${API_BASE_URL}/api/feed/${feed}?${query}`, { signal, cache: 'no-store' });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';

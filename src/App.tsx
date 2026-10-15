@@ -7,7 +7,8 @@ import { demoGroups, loadGroups, filterCommunity } from "./groups";
 import { demoGroupMemories } from "./groupMemories";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown, LogIn } from "lucide-react";
+import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   categories,
   filterMemories,
@@ -21,12 +22,13 @@ import {
 } from "./types";
 import { achievements, eraContent, resolveUserCategory } from "./data";
 import { totalGivenNostalgia, updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
-import { getMemories, isOwnMemory, getSesion, type UsuarioSesion, eliminarPublicacion } from "./api";
-import LoginDialog from "./components/LoginDialog";
+import { getMemories, isOwnMemory, eliminarPublicacion } from "./api";
+import AuthMenu from "./components/auth/AuthMenu";
+import { useAuth } from "./components/auth/AuthProvider";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
-import Profile from "./components/Profile";
+import Profile from "./components/profile/Profile";
 import SocialFeed from "./components/social/SocialFeed";
 import type { FeedTab } from "./socialTypes";
 import EraTimeline from "./components/EraTimeline";
@@ -44,6 +46,8 @@ import { getMapPublications, getPublication, publicationId, type MapBounds } fro
 import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from './seguimientosApi';
 
 export default function App() {
+  const router = useRouter();
+  const { session } = useAuth();
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const reportBounds = useCallback((next: MapBounds) => setBounds(current => JSON.stringify(current) === JSON.stringify(next) ? current : next), []);
   const [remotePins, setRemotePins] = useState<Memory[]>([]);
@@ -67,6 +71,9 @@ export default function App() {
   const creationOrigin = useRef(false);
   const [profileAuthor, setProfileAuthor] = useState<string | null>(null);
   const [view, setView] = useState<"map" | "feed" | "profile" | "chat">("map");
+  useEffect(() => {
+    if (!session && (view === "chat" || view === "profile")) setView("feed");
+  }, [session, view]);
   const [period, setPeriod] = useState<Period>(() => {
     const requested = Number(
       new URLSearchParams(window.location.search).get("era"),
@@ -80,15 +87,14 @@ export default function App() {
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
   const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
-  const currentUserId = currentSesion?.usuarioId ?? 1;
+  const currentUserId = session?.usuarioId;
   const following = followingUsers.map(user => user.username);
 
   useEffect(() => {
     const controller = new AbortController();
     setFollowingUsers([]);
     setFollowers([]);
+    if (!currentUserId) return () => controller.abort();
     Promise.all([getSeguidos(currentUserId, controller.signal), getSeguidores(currentUserId, controller.signal)])
       .then(([nextFollowing, nextFollowers]) => {
         if (!controller.signal.aborted) { setFollowingUsers(nextFollowing); setFollowers(nextFollowers); }
@@ -98,6 +104,10 @@ export default function App() {
   }, [currentUserId]);
 
   async function toggleFollow(author: string, authorId?: number) {
+    if (!currentUserId) {
+      router.push("/auth/login?returnTo=/explorar");
+      return;
+    }
     const targetId = authorId ?? [...feedItems, ...dbMemories].find(memory => memory.author === author)?.authorId;
     if (!targetId) { setNotice(`No se puede seguir a ${author}: falta su identificador de usuario.`); return; }
     if (targetId === currentUserId || pendingFollows.current.has(targetId)) return;
@@ -128,7 +138,6 @@ export default function App() {
   };
 
   useEffect(() => {
-    setCurrentSesion(getSesion());
     reloadMemories();
   }, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -222,7 +231,6 @@ export default function App() {
   const profileMemories = profileAuthor === null
     ? dbMemories.filter(m => isOwnMemory(m))
     : dbMemories.filter(m => m.author === profileAuthor);
-  const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? profileMemories : memories;
   const selected = remoteSelected?.id === selectedId ? remoteSelected : visibleMemories.find((m) => m.id === selectedId) ?? remotePins.find(m => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
@@ -237,7 +245,7 @@ export default function App() {
     try {localStorage.setItem('nostalgia.groups.v1',JSON.stringify(next.filter(g=>!demoGroups.some(d=>d.id===g.id))));} catch {return 'No se pudo guardar el grupo. Revisá el espacio del navegador.';}
     setGroups(next);setScope(group.id);setSelectedId(null);setQuery('');setCategory('Todas');setPeriod({decade:group.decade,year:null});return null;
   }
-  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup}/>;
+  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} canCreate={!!session} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup}/>;
   const eraTransition = useRef<ViewTransition | null>(null);
   useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
   function changePeriod(next: Period) {
@@ -292,6 +300,10 @@ export default function App() {
     storiesButton.current?.focus();
   }
   function startAdding() {
+    if (!session) {
+      router.push("/auth/login?returnTo=/explorar");
+      return;
+    }
     setDraftHashtags([]);
     creationOrigin.current = view === "profile";
     setProfileAuthor(null);
@@ -495,33 +507,26 @@ export default function App() {
           <Newspaper />
           <span>Feed</span>
         </button>
-        <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);}}><MessageCircle/><span>Chat</span></button>
-        <button
-          aria-current={view === "profile" ? "page" : undefined}
-          className={`rail-profile ${view === "profile" ? "rail-active" : ""}`}
-          onClick={() => {
-            setProfileAuthor(null);
-            setView("profile");
-            setMusicOpen(false);
-            setSelectedId(null);
-            setPanelOpen(false);
-            setFactsOpen(false);
-            setPicking(false);
-          }}
-        >
-          <UserRound />
-          <span>Perfil</span>
-        </button>
-        <button
-          aria-label={currentSesion ? `Cuenta: ${currentSesion.username}` : "Iniciar sesión"}
-          className={loginOpen ? "rail-active" : ""}
-          onClick={() => setLoginOpen(true)}
-          title={currentSesion ? `Sesión: ${currentSesion.username}` : "Iniciar sesión"}
-          style={currentSesion ? { color: "var(--accent, #4ade80)" } : undefined}
-        >
-          <LogIn />
-          <span>{currentSesion ? currentSesion.username : "Login"}</span>
-        </button>
+        {session && <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {
+          setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);
+        }}><MessageCircle/><span>Chat</span></button>}
+        {session && <button
+            aria-current={view === "profile" ? "page" : undefined}
+            className={`rail-profile ${view === "profile" ? "rail-active" : ""}`}
+            onClick={() => {
+              setProfileAuthor(null);
+              setView("profile");
+              setMusicOpen(false);
+              setSelectedId(null);
+              setPanelOpen(false);
+              setFactsOpen(false);
+              setPicking(false);
+            }}
+          >
+            <UserRound />
+            <span>Perfil</span>
+          </button>}
+        <AuthMenu />
       </nav>
       <header className="map-toolbar">
         <div className="compact-selectors">
@@ -591,16 +596,16 @@ export default function App() {
           onClose={() => setFactsOpen(false)}
         />
       )}
-      {view === "profile" && (
+      {view === "profile" && session && (
         <Profile
           onEdit={editMemory}
           onDelete={deleteMemory}
           onOpen={openPublication}
           key={profileAuthor ?? "own"}
+          username={session.username}
           author={profileAuthor ?? undefined}
           onBack={() => {setSelectedId(null);setView("feed");}}
           community={profileAuthor === null ? communityControls(true) : undefined}
-          memories={ownMemories}
           allMemories={profileMemories}
           repostedPublicationIds={repostedPublicationIds}
           tierProgress={tierProgress}
@@ -615,7 +620,7 @@ export default function App() {
       )}
       <div hidden={view !== "feed"}>
         <SocialFeed
-          key={currentSesion?.usuarioId ?? 'guest'}
+          key={session?.usuarioId ?? 'guest'}
           active={view === 'feed'}
           onItems={setFeedItems}
           filterFeed={items => filterMemories(filterCommunity(items, scope, groups, query), period, category)}
@@ -660,7 +665,7 @@ export default function App() {
           onRepostCreated={id => setRepostedPublicationIds(current => [...new Set([...current, id])])}
         />
       </div>
-      <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft}/>
+      {session && <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft}/>}
       <Player
         key={period.decade}
         decade={period.decade}
@@ -717,14 +722,6 @@ export default function App() {
           onSave={save}
         />
       )}
-      <LoginDialog
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSesionChange={() => {
-          setCurrentSesion(getSesion());
-          getMemories().then(data => setDbMemories(data)).catch(console.error);
-        }}
-      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { API_BASE_URL, guardarSesion, cerrarSesion } from './api';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createComment, getComments, getMapPublications, getPublication, publicationId, toMemory } from './publicationsApi';
+import { getMapPublications, getPublication, publicationId, toMemory } from './publicationsApi';
+import { createComment, getComments } from './commentsApi';
 import type { Memory } from './types';
 
 const pin: Memory = { id: '25', title: 'Recuerdo', year: 1990, category: 'Personales', description: '', author: '', place: '', lat: -34, lng: -58, source: 'backend' };
@@ -15,7 +16,7 @@ it('crea comentarios con la identidad de la sesión', async () => {
   const fetch = respond(comment);
   vi.stubGlobal('fetch', fetch);
   await createComment('25', ' Hola ');
-  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Hola', usuarioId: 42 });
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Hola', comentarioPadreId: null });
   expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
 });
 describe('Publicaciones del backend', () => {
@@ -59,12 +60,9 @@ describe('Publicaciones del backend', () => {
     expect(page.cursor).toBe('next+/=');
     expect(page.items[0]).toMatchObject({ id: '8', text: comment.contenido, author: 'usuarioTest', createdAt: comment.fechaCreacion });
   });
-  it('crea comentarios con usuario temporal y muestra validaciones ProblemDetails', async () => {
-    const fetch = respond(comment, 201);
-    vi.stubGlobal('fetch', fetch);
-    await createComment('25', '  Qué lindo recuerdo  ');
-    expect(fetch.mock.calls[0][0]).toBe(`${API_BASE_URL}/api/publicaciones/25/comentarios`);
-    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Qué lindo recuerdo', usuarioId: 1 });
+  it('rechaza comentarios anónimos y muestra validaciones ProblemDetails', async () => {
+    await expect(createComment('25', 'Qué lindo recuerdo')).rejects.toThrow('iniciar sesión');
+    guardarSesion({ usuarioId: 42, token: 'token-test', username: 'Ana', email: 'ana@example.com', esAdmin: false });
     vi.stubGlobal('fetch', respond({ title: 'Validación', errors: { Contenido: ['Contenido obligatorio.'] } }, 400));
     await expect(createComment('25', '')).rejects.toThrow('Contenido obligatorio.');
   });
