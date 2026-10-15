@@ -852,12 +852,16 @@
 .era-1980 .place-search-panel header { border-bottom:1px solid #48f5ff; color:#48f5ff; }
 
 .era-1980 .era-activity-dock {
+  position:absolute;
   left:72px;
   bottom:0;
-  z-index:610;
+  z-index:700;
   transform:none;
   width:auto;
-  padding:5px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  padding:2px 5px;
   background:transparent;
   border:0;
   border-radius:0;
@@ -869,8 +873,8 @@
 .era-1980 .activity-dock-options button {
   justify-content:center;
   min-width:130px;
-  min-height:32px;
-  padding:4px 12px;
+  min-height:34px;
+  padding:2px 10px;
   --arcade-key:#ff4c9e;
   background:linear-gradient(#402447,#21122d);
   border:1px solid #b464ac;
@@ -906,4 +910,7 @@
   .era-1980 .vhs-status>span:first-child,
   .era-1980 .vhs-status>span:last-child { display:none; }
   .era-1980 .leaflet-bottom { bottom:42px !important; }
+}
+@media (max-width:899px) {
+  .era-1980 .era-activity-dock { display:none; }
 }

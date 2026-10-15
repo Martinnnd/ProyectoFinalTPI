@@ -166,8 +166,15 @@ export const achievements: Achievement[] = [
   {
     id: "20",
     name: "Coleccionista",
-    description: "Reuniste las 20 insignias de Nostalgiar.",
+    description: "Reuniste todas las insignias de Nostalgiar.",
     image: "/logros/20_coleccionista.png",
+    unlocked: false,
+  },
+  {
+    id: "21",
+    name: "Primera chispa",
+    description: "Diste tus primeros 5 puntos de nostalgia a publicaciones.",
+    image: "/logros/21_primera_chispa.svg",
     unlocked: false,
   },
 ];

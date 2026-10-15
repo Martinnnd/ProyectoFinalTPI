@@ -4,6 +4,7 @@ import DeleteMemoryDialog from "./components/DeleteMemoryDialog";
 import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
 import { demoGroups, loadGroups, filterCommunity } from "./groups";
+import { demoGroupMemories } from "./groupMemories";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown, LogIn } from "lucide-react";
@@ -18,7 +19,8 @@ import {
   type Period,
   type TierProgress,
 } from "./types";
-import { achievements, eraContent } from "./data";
+import { achievements, eraContent, resolveUserCategory } from "./data";
+import { totalGivenNostalgia, updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
 import { getMemories, isOwnMemory, getSesion, type UsuarioSesion, eliminarPublicacion } from "./api";
 import LoginDialog from "./components/LoginDialog";
 import AchievementToast from "./components/AchievementToast";
@@ -26,6 +28,7 @@ import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
 import Profile from "./components/Profile";
 import SocialFeed from "./components/social/SocialFeed";
+import type { FeedTab } from "./socialTypes";
 import EraTimeline from "./components/EraTimeline";
 import { flushSync } from "react-dom";
 import MemoryMap, { type Point } from "./components/MemoryMap";
@@ -75,6 +78,8 @@ export default function App() {
   });
   const [category, setCategory] = useState<Category | "Todas">("Todas");
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
+  const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
+  const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const [loginOpen, setLoginOpen] = useState(false);
   const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
   const currentUserId = currentSesion?.usuarioId ?? 1;
@@ -134,12 +139,27 @@ export default function App() {
   const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
   const [celebrating, setCelebrating] = useState<Achievement | null>(null);
-  const earned: Achievement[] = dbMemories.some(m => isOwnMemory(m)) ? [achievements[0]] : [];
+  const [ratings, setRatings] = useState<NostalgiaRatings>({});
+  const [firstFiveEarned, setFirstFiveEarned] = useState(false);
+  const earned: Achievement[] = [
+    ...(dbMemories.some(m => isOwnMemory(m)) ? [achievements[0]] : []),
+    ...(firstFiveEarned ? [achievements.find(achievement => achievement.id === '21')!] : []),
+  ];
   const tierProgress: TierProgress = {
     memories: dbMemories.filter(m => isOwnMemory(m)).length,
     points: 0,
     subscribed: false,
   };
+  const canRate = resolveUserCategory(tierProgress) !== 'Errante';
+  function rateMemory(postId: string, score: number) {
+    if (!canRate) return;
+    const next = updateNostalgiaRating(ratings, postId, score);
+    setRatings(next);
+    if (!firstFiveEarned && totalGivenNostalgia(next) >= 5) {
+      setFirstFiveEarned(true);
+      setCelebrating(achievements.find(achievement => achievement.id === '21')!);
+    }
+  }
   const [panelOpen, setPanelOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
@@ -217,7 +237,7 @@ export default function App() {
     try {localStorage.setItem('nostalgia.groups.v1',JSON.stringify(next.filter(g=>!demoGroups.some(d=>d.id===g.id))));} catch {return 'No se pudo guardar el grupo. Revisá el espacio del navegador.';}
     setGroups(next);setScope(group.id);setSelectedId(null);setQuery('');setCategory('Todas');setPeriod({decade:group.decade,year:null});return null;
   }
-  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile)setView('feed');}} onCreate={createGroup}/>;
+  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup}/>;
   const eraTransition = useRef<ViewTransition | null>(null);
   useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
   function changePeriod(next: Period) {
@@ -582,6 +602,7 @@ export default function App() {
           community={profileAuthor === null ? communityControls(true) : undefined}
           memories={ownMemories}
           allMemories={profileMemories}
+          repostedPublicationIds={repostedPublicationIds}
           tierProgress={tierProgress}
           followers={followers}
           followedUsers={followingUsers}
@@ -599,17 +620,31 @@ export default function App() {
           onItems={setFeedItems}
           filterFeed={items => filterMemories(filterCommunity(items, scope, groups, query), period, category)}
           onAddHashtag={tag => { startAdding(); setDraftHashtags([tag]); }}
+          onTabChange={(tab: FeedTab) => {
+            if (tab !== 'groups' && groups.some(group => group.id === scope)) {
+              setScope('all');
+              setQuery('');
+            }
+          }}
           onEdit={editMemory}
           onDelete={deleteMemory}
           onProfile={openProfile}
           groupIds={groups.map(group => group.id)}
+          suggestedAuthors={[
+            ...dbMemories.filter(memory => memory.authorId).map(memory => ({ name: memory.author, id: memory.authorId! })),
+            ...followers.map(user => ({ name: user.username, id: user.id })),
+          ]}
+          groupOpenRequest={groupOpenRequest}
           community={communityControls()}
           groupName={groups.find(g=>g.id===scope)?.name}
           decade={period.decade}
-          memories={filterMemories(filterCommunity(dbMemories, scope, groups, query), period, category)}
+          memories={filterMemories(filterCommunity([...dbMemories, ...demoGroupMemories], scope, groups, query), period, category)}
           following={following}
           followingRevision={followingRevision}
           onFollow={toggleFollow}
+          ratings={ratings}
+          canRate={canRate}
+          onRate={rateMemory}
           selected={selected}
           onSelect={(m) => { selectedSeed.current = m; setRemoteSelected(m); setSelectedId(m?.id ?? null); }}
           onMap={(m) => {
@@ -622,6 +657,7 @@ export default function App() {
           }}
           onAdd={startAdding}
           onReloadMemories={reloadMemories}
+          onRepostCreated={id => setRepostedPublicationIds(current => [...new Set([...current, id])])}
         />
       </div>
       <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft}/>

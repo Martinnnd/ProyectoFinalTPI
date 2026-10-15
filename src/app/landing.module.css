@@ -69,16 +69,27 @@
 }
 
 .brand {
-  display: block;
-  width: clamp(145px, 15vw, 190px);
-  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  width: auto;
   text-decoration: none;
 }
 
 .headerLogo {
-  width: 100%;
+  display: block;
+  width: 44px;
   height: auto;
 }
+
+.brandName,
+.footerBrandName {
+  font-family: "Nostalgiar Script", Georgia, serif;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.brandName { color: var(--green); font-size: clamp(2rem, 3vw, 2.65rem); line-height: 1; }
 
 .navLink {
   padding: 12px 18px;
@@ -597,9 +608,13 @@
 }
 
 .footerLogo {
-  width: min(300px, 100%);
+  display: inline-block;
+  width: 50px;
   height: auto;
+  vertical-align: middle;
 }
+
+.footerBrandName { display:inline-block; margin-left:8px; color:var(--paper); font-size:2.8rem; line-height:1; vertical-align:middle; }
 
 .footerBrand p {
   margin: 18px 0 26px;
@@ -743,8 +758,11 @@
   }
 
   .brand {
-    width: 138px;
+    gap: 6px;
   }
+
+  .headerLogo { width: 34px; }
+  .brandName { font-size: 2rem; }
 
   .navLink {
     padding: 9px 12px;
@@ -861,8 +879,11 @@
 
 @media (max-width: 380px) {
   .brand {
-    width: 118px;
+    gap: 4px;
   }
+
+  .headerLogo { width: 28px; }
+  .brandName { font-size: 1.7rem; }
 
   .navLink {
     padding: 10px 12px;

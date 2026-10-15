@@ -6,8 +6,8 @@
 .feed-add-memory { width:100%; justify-content:center; gap:8px; margin-bottom:16px; }
 .app.view-chat > .map-period,.app.view-chat .brand-card { display:none; }
 .app.view-chat > .music-card.player-visible { z-index:580; }
-.app.view-chat .map-toolbar { justify-content:flex-end; }
-.chat-page { position:absolute; inset:110px 24px 44px 94px; display:flex; flex-direction:column; min-height:0; overflow:hidden; color:var(--ink); }
+.app.view-chat .map-toolbar { display:none; }
+.chat-page { position:absolute; inset:16px 24px 44px 94px; display:flex; flex-direction:column; min-height:0; overflow:hidden; color:var(--ink); }
 .chat-page-intro { display:none; }
 .app.view-chat .compact-selectors .filters { display:none; }
 .chat-page-intro>span { color:var(--accent); font-size:11px; letter-spacing:2px; }

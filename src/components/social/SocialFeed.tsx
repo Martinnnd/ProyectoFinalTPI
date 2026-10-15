@@ -42,6 +42,8 @@ export default function SocialFeed({
   onDelete,
   onProfile,
   groupIds,
+  suggestedAuthors,
+  groupOpenRequest,
   groupName,
   community,
   memories,
@@ -51,10 +53,15 @@ export default function SocialFeed({
   onMap,
   onAdd,
   onAddHashtag,
+  onTabChange,
   following,
   followingRevision,
   onFollow,
+  ratings,
+  canRate,
+  onRate,
   onReloadMemories,
+  onRepostCreated,
 }: {
   active: boolean;
   onItems: (items: Memory[]) => void;
@@ -66,7 +73,12 @@ export default function SocialFeed({
   following: string[];
   followingRevision: number;
   onFollow: (author: string, authorId?: number) => void;
+  ratings: Record<string, number>;
+  canRate: boolean;
+  onRate: (postId: string, score: number) => void;
   groupIds: string[];
+  suggestedAuthors: { name: string; id: number }[];
+  groupOpenRequest: number;
   groupName?: string;
   community?: ReactNode;
   memories: Memory[];
@@ -75,7 +87,9 @@ export default function SocialFeed({
   onMap: (memory: Memory) => void;
   onAdd: () => void;
   onAddHashtag: (tag: string) => void;
+  onTabChange: (tab: FeedTab) => void;
   onReloadMemories?: () => void | Promise<void>;
+  onRepostCreated: (id: string) => void;
 }) {
   const interactions = useMemoryInteractions();
   const desktopDetail = !!selected && (decade === 1990 || decade === 2000);
@@ -83,8 +97,13 @@ export default function SocialFeed({
   const [reposts, setReposts] = useState<string[]>([]);
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
-  const [ratings, setRatings] = useState<Record<string, number>>({});
   const [tab, setTab] = useState<FeedTab>("all");
+  useEffect(() => {
+    if (groupName) {
+      setTab("groups");
+      setHashtag(null);
+    }
+  }, [groupName, groupOpenRequest]);
   const remote = useRemoteFeed(tab === 'groups' ? null : tab === 'following' ? 'seguidos' : 'para-vos', active);
   useEffect(() => { if (followingRevision && tab === 'following') remote.reload(); }, [followingRevision]);
   useEffect(() => { if (tab !== 'groups') onItems(remote.items); }, [remote.items, tab, onItems]);
@@ -105,12 +124,14 @@ export default function SocialFeed({
     if (stream.current) stream.current.scrollTop = 0;
   }, [selected?.id, tab, hashtag]);
 
-  const authors = [...new Map(allMemories.map(memory => {
+  const feedAuthors = allMemories.map(memory => {
     const simpleRepost = memory.repost && !memory.repost.comment && memory.repost.author;
     const name = simpleRepost ? memory.repost!.author : memory.author;
     const id = simpleRepost ? memory.repost?.authorId : memory.authorId;
     return [name, { name, id }] as const;
-  }).filter(([, author]) => author.id && !isOwnMemory({ author: author.name }))).values()];
+  });
+  const authors = [...new Map([...feedAuthors, ...suggestedAuthors.map(author => [author.name, author] as const)]
+    .filter(([, author]) => author.id && !isOwnMemory({ author: author.name }))).values()];
   const tabPosts =
     tab === "groups"
         ? allMemories.filter(
@@ -125,15 +146,6 @@ export default function SocialFeed({
     setHashtag(tag);
     open(null);
     setNow(Date.now());
-  }
-
-  function rate(id: string, value: number) {
-    setRatings((current) => {
-      const next = { ...current };
-      if (next[id] === value) delete next[id];
-      else next[id] = value;
-      return next;
-    });
   }
 
   function open(memory: Memory | null) {
@@ -156,6 +168,7 @@ export default function SocialFeed({
   }
 
   function changeTab(nextTab: FeedTab) {
+    onTabChange(nextTab);
     setTab(nextTab);
     setHashtag(null);
     open(null);
@@ -273,6 +286,7 @@ export default function SocialFeed({
                 liked={interactions.isLiked(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
                 comments={comments}
                 rating={ratings[isSimpleRepost ? rootId : memory.id]}
+                canRate={canRate}
                 reposted={isReposted}
                 saved={saves.includes(memory.id)}
                 onDelete={onDelete}
@@ -281,7 +295,7 @@ export default function SocialFeed({
                 onFollow={onFollow}
                 onOpen={(memToOpen) => open(memToOpen || targetMemory)}
                 onMap={onMap}
-                onRate={(value) => rate(isSimpleRepost ? rootId : memory.id, value)}
+                onRate={(value) => onRate(isSimpleRepost ? rootId : memory.id, value)}
                 onLike={() => interactions.toggleLike(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
                 onRepost={() => {
                   if (isReposted) {
@@ -337,7 +351,8 @@ export default function SocialFeed({
           onConfirm={async (descripcion) => {
             const { targetId } = getTargetToRepost(repostMemory, allMemories);
             try {
-              await compartirPublicacion(targetId, descripcion);
+              const created = await compartirPublicacion(targetId, descripcion);
+              if (created && typeof created.id !== 'undefined') onRepostCreated(String(created.id));
               remote.reload();
               if (onReloadMemories) {
                 await onReloadMemories();

@@ -2,7 +2,7 @@ import MemoryOwnerActions from "./MemoryOwnerActions";
 import PostMedia, { PostMusic } from "./PostMedia";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Grid3x3, Link2, Lock, MapPin, Plus, Send, Share2, UserRound, X } from "lucide-react";
+import { Grid3x3, Link2, Lock, MapPin, Plus, Repeat2, Send, Share2, UserRound, X } from "lucide-react";
 import MemoryMap from "./MemoryMap";
 import { describeTiers, resolveAchievements, resolveUserCategory } from "../data";
 import type { Achievement, Memory, Period, TierProgress } from "../types";
@@ -16,6 +16,7 @@ export default function Profile({
   community,
   memories,
   allMemories,
+  repostedPublicationIds,
   tierProgress,
   followers,
   followedUsers,
@@ -33,6 +34,7 @@ export default function Profile({
   community?: ReactNode;
   memories: Memory[];
   allMemories: Memory[];
+  repostedPublicationIds: string[];
   tierProgress: TierProgress;
   followers: FollowedUser[];
   followedUsers: FollowedUser[];
@@ -113,10 +115,10 @@ export default function Profile({
       <div className="profile-era-bar"><span className="profile-era-mark" aria-hidden="true"><UserRound size={18}/></span><strong>{presentation.title}</strong><span className="profile-edition">{period.decade}—{period.decade + 9}</span></div>
       <header className="personal-header">
         <div className="profile-portrait" aria-hidden="true">
-          <span className="visitor-initial">{(author ?? "Marty").slice(0,1)}</span>
+          <span className="visitor-initial">{(author ?? "Nico").slice(0,1)}</span>
           {!author && <img
-            src="https://static.wikia.nocookie.net/universalstudios/images/1/10/Michael_J._Fox_as_Marty_McFly_%28BTTF%29.jpg/revision/latest?cb=20241030235532"
-            alt="Marty McFly"
+            src="/foto-perfil.jpg"
+            alt="Nico Gutierrez"
             onError={event => {event.currentTarget.hidden = true;}}
           />}
         </div>
@@ -124,7 +126,7 @@ export default function Profile({
           <div className="personal-identity-text">
             <span className="eyebrow">{presentation.label}</span>
             <div className="profile-name-row">
-            <h2>{author ?? "Marty McFly"}</h2>
+            <h2>{author ?? "Nico Gutierrez"}</h2>
             {!author && <button
               className="profile-note"
               onClick={openTiers}
@@ -323,9 +325,11 @@ export default function Profile({
                 className="personal-memory profile-post"
                 data-selected={selected?.id === memory.id}
               >
-                
+                {(memory.repost || repostedPublicationIds.includes(memory.id)) && (
+                  <div className="profile-repost-badge"><Repeat2 size={15} aria-hidden="true" /> Reposteado</div>
+                )}
                 <div className="memory-card-top">
-                  <div className="profile-post-author"><span className="profile-post-avatar" aria-hidden="true">{(author ?? "Vos").slice(0,1)}</span><span><strong>{author ?? "Vos"}</strong><small>{memory.year} · {memory.category}</small></span></div>
+                  <div className="profile-post-author"><span className="profile-post-avatar" aria-hidden="true">{author ? author.slice(0,1) : <img src="/foto-perfil.jpg" alt="" />}</span><span><strong>{author ?? "Vos"}</strong><small>{memory.year} · {memory.category}</small></span></div>
                   <MemoryOwnerActions memory={memory} onEdit={onEdit} onDelete={onDelete}/>
 
                   <div className="share-menu">

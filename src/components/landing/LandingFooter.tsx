@@ -10,11 +10,12 @@ export default function LandingFooter() {
         <div className={styles.footerBrand}>
           <Image
             className={styles.footerLogo}
-            src="/landing/nostalgiar-logo.png"
-            alt="Nostalgiar"
-            width={2170}
-            height={725}
+            src="/landing/isotipo-actual.png"
+            alt=""
+            width={128}
+            height={88}
           />
+          <span className={styles.footerBrandName}>Nostalgiar</span>
           <p>Un día. Un momento. Un lugar.</p>
           <div className={styles.socialLinks} aria-label="Redes sociales">
             <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">

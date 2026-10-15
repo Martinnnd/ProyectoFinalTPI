@@ -270,20 +270,19 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  color: var(--ink);
-  background: var(--surface);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
 }
 
-.post-ratings button[aria-pressed="true"] {
-  border-color: var(--accent);
-  color: var(--surface);
-  background: var(--accent);
-}
+.post-ratings button img { width:100%; height:100%; object-fit:contain; filter:grayscale(1); opacity:.38; transition:filter 180ms ease,opacity 180ms ease,transform 180ms ease; }
+.post-ratings button[data-filled="true"] img { filter:none; opacity:1; }
+.post-ratings button:not(:disabled):hover img { transform:scale(1.13); opacity:1; }
+.post-ratings button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.post-ratings button:disabled { cursor:not-allowed; }
+.post-ratings button:disabled img { opacity:.25; }
+@media (prefers-reduced-motion:reduce) { .post-ratings button img { transition:none; } }
 
 .post-ratings .post-rating-value {
   margin-left: 4px;
@@ -393,7 +392,13 @@
   align-items: center;
   gap: 8px;
   padding: 8px 0;
+  animation: suggested-person-enter 240ms ease-out both;
 }
+
+.suggested-person.is-leaving { animation: suggested-person-leave 240ms ease-in both; }
+@keyframes suggested-person-enter { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+@keyframes suggested-person-leave { to { opacity:0; transform:translateX(12px); } }
+@media (prefers-reduced-motion: reduce) { .suggested-person, .suggested-person.is-leaving { animation:none; } }
 
 .suggested-person strong {
   flex: 1;
@@ -401,10 +406,15 @@
 }
 
 .suggested-person .social-avatar {
+  position: relative;
+  overflow: hidden;
   width: 30px;
   height: 30px;
   font-size: 17px;
 }
+
+.suggested-person .social-avatar img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.suggested-person .social-avatar img[hidden] { display:none; }
 
 .suggested-person button {
   padding: 7px;

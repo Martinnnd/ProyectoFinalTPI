@@ -1,4 +1,10 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
+
+function avatarFor(name: string, id?: number) {
+  const seed = id ?? [...name].reduce((sum, letter) => sum + letter.codePointAt(0)!, 0);
+  return `/avatars/foto-${seed % 12 + 1}.jpg`;
+}
 
 export default function FeedSidebar({
   community,
@@ -13,8 +19,23 @@ export default function FeedSidebar({
   authors: { name: string; id?: number }[];
   following: string[];
   onAdd: () => void;
-  onFollow: (author: string, authorId?: number) => void;
+  onFollow: (author: string, authorId?: number) => void | Promise<void>;
 }) {
+  const [leaving, setLeaving] = useState<string | null>(null);
+  const suggestions = authors
+    .filter((author) => !following.includes(author.name) || author.name === leaving)
+    .slice(0, 4);
+
+  async function followSuggestion(author: { name: string; id?: number }) {
+    if (leaving) return;
+    setLeaving(author.name);
+    await Promise.all([
+      Promise.resolve(onFollow(author.name, author.id)),
+      new Promise<void>((resolve) => window.setTimeout(resolve, 240)),
+    ]);
+    setLeaving(null);
+  }
+
   return (
     <aside className="feed-sidebar">
       <details className="feed-sidebar-content" open={window.innerWidth >= 900}>
@@ -22,18 +43,19 @@ export default function FeedSidebar({
         
         <section>
           <h3>A quién seguir</h3>
-          {authors.slice(0, 4).map((author) => (
-            <div className="suggested-person" key={author.name}>
+          {suggestions.map((author) => (
+            <div className={`suggested-person${leaving === author.name ? " is-leaving" : ""}`} key={author.name}>
               <span className="social-avatar" aria-hidden="true">
                 {author.name[0]}
+                <img src={avatarFor(author.name, author.id)} alt="" onError={event => { event.currentTarget.hidden = true; }} />
               </span>
               <strong>{author.name}</strong>
               <button
                 className="follow-button"
-                aria-pressed={following.includes(author.name)}
-                onClick={() => onFollow(author.name, author.id)}
+                disabled={leaving === author.name}
+                onClick={() => void followSuggestion(author)}
               >
-                {following.includes(author.name) ? "Siguiendo" : "Seguir"}
+                Seguir
               </button>
             </div>
           ))}

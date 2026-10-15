@@ -8,12 +8,13 @@ export default function LandingHeader() {
       <Link className={styles.brand} href="/" aria-label="Nostalgiar, inicio">
         <Image
           className={styles.headerLogo}
-          src="/landing/nostalgiar-logo.png"
-          alt="Nostalgiar"
-          width={2170}
-          height={725}
+          src="/landing/isotipo-actual.png"
+          alt=""
+          width={128}
+          height={88}
           priority
         />
+        <span className={styles.brandName}>Nostalgiar</span>
       </Link>
       <Link className={styles.navLink} href="/explorar">
         Entrar al mapa

@@ -78,6 +78,18 @@
 .app.era-1970 .chat-bubble.own { background:#c9d4ba; border-radius:12px 12px 3px 12px; }
 .app.era-1970 .chat-avatar { background:#d0d8c3; color:#3c4c32; border:1px solid #929e81; }
 .app.era-1970 .chat-composer { background:#e5eadc; box-shadow:inset 0 2px 4px #0002; }
+@media(min-width:900px) {
+  .app.era-1970:is(.view-feed,.view-profile,.view-chat) .newspaper-edition { display:none; }
+  .app.era-1970:is(.view-feed,.view-profile,.view-chat) .era-atmosphere {
+    display:block;
+    inset:0 18px 52px 78px;
+  }
+  .app.era-1970.view-feed .social-layout,
+  .app.era-1970.view-profile .personal-profile,
+  .app.era-1970.view-chat .chat-page {
+    inset:34px 58px 75px 106px;
+  }
+}
 @media(max-width:899px) {
   .app.era-1970.view-chat .chat-page { top:var(--mobile-top); }
   .app.era-1970.view-profile .profile-main { padding:8px; }

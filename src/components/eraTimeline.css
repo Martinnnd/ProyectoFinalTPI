@@ -42,13 +42,13 @@
 .app .era-shell-top, .app .newspaper-edition { display:none; }
 
 /* Each era keeps its own typography and material treatment. */
-.app.era-1970.view-map .time-navigation {
+.app.era-1970 .time-navigation {
   color:#eee9dc;
   background:repeating-linear-gradient(2deg,#3b291d 0 3px,#543c29 4px 9px,#463222 10px 12px);
   border-bottom:4px ridge #a49276;
   box-shadow:inset 0 -5px 10px #26190e80,0 3px 15px #0005;
 }
-.era-1970.view-map .time-decades button { color:#eee9dc; }
+.era-1970 .time-decades button { color:#eee9dc; }
 .era-1980 .time-navigation { box-shadow:0 2px 0 var(--accent),0 5px 22px #e52edd44; }
 .era-1980 .time-brand { text-shadow:2px 2px #d126b4; }
 .era-1990 .time-navigation { border:3px outset #fff; background:#c0c0c0; }

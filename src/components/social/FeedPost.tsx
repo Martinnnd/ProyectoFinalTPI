@@ -18,6 +18,7 @@ export default function FeedPost({
   liked,
   comments,
   rating,
+  canRate,
   reposted,
   saved,
   quotedMemory,
@@ -41,6 +42,7 @@ export default function FeedPost({
   liked: boolean;
   comments: MemoryComment[];
   rating?: number;
+  canRate: boolean;
   reposted: boolean;
   saved: boolean;
   quotedMemory?: Memory;
@@ -250,6 +252,7 @@ export default function FeedPost({
       <PostRating
         memoryTitle={memory.title}
         value={rating}
+        canRate={canRate}
         onRate={onRate}
       />
       <PostActions
