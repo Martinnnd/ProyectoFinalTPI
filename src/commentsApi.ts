@@ -6,9 +6,13 @@ type RemoteComment = {
   id: number;
   publicacionId: number;
   comentarioPadreId?: number | null;
-  contenido: string;
+  contenido?: string | null;
   fechaCreacion: string;
-  autor: { id: number; username: string };
+  autor?: { id: number; username: string } | null;
+  estaEliminado?: boolean;
+  puedeEliminar?: boolean;
+  cantidadRespuestas?: number;
+  siguienteCursorRespuestas?: string | null;
   reacciones: Partial<Record<CommentReaction, number>>;
   reaccionActual?: CommentReaction | null;
   respuestas?: RemoteComment[];
@@ -19,9 +23,13 @@ function toComment(data: RemoteComment, memoryId: string): MemoryComment {
     id: String(data.id),
     memoryId,
     parentId: data.comentarioPadreId ? String(data.comentarioPadreId) : undefined,
-    author: data.autor.username,
-    text: data.contenido,
+    author: data.autor?.username,
+    text: data.contenido ?? undefined,
     createdAt: data.fechaCreacion,
+    deleted: data.estaEliminado ?? false,
+    canDelete: data.puedeEliminar ?? false,
+    replyCount: data.cantidadRespuestas ?? 0,
+    repliesCursor: data.siguienteCursorRespuestas,
     reactions: data.reacciones ?? {},
     viewerReaction: data.reaccionActual ?? undefined,
   };
@@ -39,6 +47,21 @@ export async function getComments(memoryId: string, cursor?: string, signal?: Ab
   if (cursor) query.set("cursor", cursor);
   const data = await publicationRequest<{ items: RemoteComment[]; siguienteCursor: string | null }>(
     `/${memoryId}/comentarios?${query}`,
+    { signal },
+  );
+  return { items: flattenComments(data.items, memoryId), cursor: data.siguienteCursor };
+}
+
+export async function getCommentReplies(
+  memoryId: string,
+  commentId: string,
+  cursor?: string | null,
+  signal?: AbortSignal,
+) {
+  const query = new URLSearchParams({ limite: "3" });
+  if (cursor) query.set("cursor", cursor);
+  const data = await publicationRequest<{ items: RemoteComment[]; siguienteCursor: string | null }>(
+    `/${memoryId}/comentarios/${commentId}/respuestas?${query}`,
     { signal },
   );
   return { items: flattenComments(data.items, memoryId), cursor: data.siguienteCursor };
@@ -70,4 +93,9 @@ export async function removeCommentReaction(memoryId: string, commentId: string)
     method: "DELETE",
   });
   return toComment(data, memoryId);
+}
+
+export async function deleteComment(memoryId: string, commentId: string) {
+  if (!getSesion()) throw new Error("Tenés que iniciar sesión para eliminar un comentario.");
+  await publicationRequest<void>(`/${memoryId}/comentarios/${commentId}`, { method: "DELETE" });
 }

@@ -264,6 +264,7 @@ export default function FeedPost({
           key={commentMemoryId}
           memoryId={commentMemoryId}
           onCommentCreated={() => setCommentCount((count) => count + 1)}
+          onCommentDeleted={() => setCommentCount((count) => Math.max(0, count - 1))}
         />
       )}
     </article>

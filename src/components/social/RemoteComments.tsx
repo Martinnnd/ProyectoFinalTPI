@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
   createComment,
+  deleteComment,
+  getCommentReplies,
   getComments,
   removeCommentReaction,
   setCommentReaction,
@@ -8,12 +10,20 @@ import {
 import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import CommentsSection from "./CommentsSection";
 
+function mergeComments(current: MemoryComment[], incoming: MemoryComment[]) {
+  const merged = new Map(current.map((comment) => [comment.id, comment]));
+  incoming.forEach((comment) => merged.set(comment.id, { ...merged.get(comment.id), ...comment }));
+  return [...merged.values()];
+}
+
 export default function RemoteComments({
   memoryId,
   onCommentCreated,
+  onCommentDeleted,
 }: {
   memoryId: string;
   onCommentCreated?: () => void;
+  onCommentDeleted?: () => void;
 }) {
   const [comments, setComments] = useState<MemoryComment[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -54,9 +64,7 @@ export default function RemoteComments({
     try {
       const page = await getComments(memoryId, cursor, request.signal);
       if (request.signal.aborted) return;
-      setComments((current) => [
-        ...new Map([...current, ...page.items].map((comment) => [comment.id, comment])).values(),
-      ]);
+      setComments((current) => mergeComments(current, page.items));
       setCursor(page.cursor);
     } catch (reason) {
       if (!request.signal.aborted) setError((reason as Error).message);
@@ -66,11 +74,29 @@ export default function RemoteComments({
     }
   }
 
+  async function loadReplies(commentId: string) {
+    const parent = comments.find((comment) => comment.id === commentId);
+    const page = await getCommentReplies(memoryId, commentId, parent?.repliesCursor);
+    setComments((current) => mergeComments(
+      current.map((comment) => comment.id === commentId
+        ? { ...comment, repliesCursor: page.cursor }
+        : comment),
+      page.items,
+    ));
+  }
+
   async function addComment(_: string, text: string, parentId?: string) {
     const comment = await createComment(memoryId, text, parentId);
-    setComments((current) => parentId
-      ? [...current.filter((item) => item.id !== comment.id), comment]
-      : [comment, ...current.filter((item) => item.id !== comment.id)]);
+    setComments((current) => {
+      const updated = parentId
+        ? current.map((item) => item.id === parentId
+          ? { ...item, replyCount: item.replyCount + 1 }
+          : item)
+        : current;
+      return parentId
+        ? mergeComments(updated, [comment])
+        : [comment, ...updated.filter((item) => item.id !== comment.id)];
+    });
     onCommentCreated?.();
   }
 
@@ -79,7 +105,37 @@ export default function RemoteComments({
     const updated = current?.viewerReaction === reaction
       ? await removeCommentReaction(memoryId, commentId)
       : await setCommentReaction(memoryId, commentId, reaction);
-    setComments((items) => items.map((item) => item.id === commentId ? updated : item));
+    setComments((items) => items.map((item) => item.id === commentId
+      ? { ...item, ...updated }
+      : item));
+  }
+
+  async function remove(commentId: string) {
+    await deleteComment(memoryId, commentId);
+    setComments((current) => {
+      const target = current.find((comment) => comment.id === commentId);
+      const withoutLeaf = target?.replyCount === 0;
+      const next = withoutLeaf
+        ? current.filter((comment) => comment.id !== commentId)
+        : current.map((comment) => comment.id === commentId
+          ? {
+              ...comment,
+              deleted: true,
+              canDelete: false,
+              author: undefined,
+              text: undefined,
+              reactions: {},
+              viewerReaction: undefined,
+            }
+          : comment);
+      if (withoutLeaf && target?.parentId) {
+        return next.map((comment) => comment.id === target.parentId
+          ? { ...comment, replyCount: Math.max(0, comment.replyCount - 1) }
+          : comment);
+      }
+      return next;
+    });
+    onCommentDeleted?.();
   }
 
   return (
@@ -98,6 +154,8 @@ export default function RemoteComments({
         comments={comments}
         onAddComment={addComment}
         onReaction={reactToComment}
+        onLoadReplies={loadReplies}
+        onDeleteComment={remove}
       />
       {cursor && (
         <button type="button" disabled={loading} onClick={() => void more()}>
