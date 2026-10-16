@@ -5,9 +5,9 @@ import styles from "../../app/landing.module.css";
 
 export default function LandingFooter() {
   return (
-    <footer className={styles.footer} id="contacto">
+    <footer className={styles.footer} id="contacto" data-landing-footer>
       <div className={styles.footerGrid}>
-        <div className={styles.footerBrand}>
+        <div className={styles.footerBrand} data-footer-group data-landing-animate>
           <Image
             className={styles.footerLogo}
             src="/landing/isotipo-actual.png"
@@ -33,21 +33,21 @@ export default function LandingFooter() {
           </div>
         </div>
 
-        <div className={styles.footerColumn}>
+        <div className={styles.footerColumn} data-footer-group data-landing-animate>
           <h2>Sobre nosotros</h2>
           <a href="#historia">Nuestra historia</a>
           <a href="#mapa">El mapa de recuerdos</a>
           <a href="#epocas">Las épocas</a>
         </div>
 
-        <div className={styles.footerColumn}>
+        <div className={styles.footerColumn} data-footer-group data-landing-animate>
           <h2>Contacto</h2>
           <a href="mailto:contacto@nostalgiar.com">contacto@nostalgiar.com</a>
           <Link href="/explorar">Entrar a Nostalgiar</Link>
         </div>
       </div>
 
-      <div className={styles.footerBottom}>
+      <div className={styles.footerBottom} data-footer-group data-landing-animate>
         <small>© {new Date().getFullYear()} Nostalgiar</small>
         <small>Historias, lugares y música de nuestras épocas.</small>
       </div>

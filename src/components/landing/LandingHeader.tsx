@@ -10,7 +10,12 @@ export default function LandingHeader() {
   const { session, logout } = useAuth();
 
   return (
-    <nav className={styles.navigation} aria-label="Navegación principal">
+    <nav
+      className={styles.navigation}
+      aria-label="Navegación principal"
+      data-landing-header
+      data-landing-animate
+    >
       <Link className={styles.brand} href="/" aria-label="Nostalgiar, inicio">
         <Image
           className={styles.headerLogo}

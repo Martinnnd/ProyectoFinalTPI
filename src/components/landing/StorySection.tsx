@@ -8,11 +8,11 @@ const features = [
 
 export default function StorySection() {
   return (
-    <section className={styles.story} id="historia" aria-labelledby="story-title">
-      <div className={styles.storyQuote} aria-hidden="true">
+    <section className={styles.story} id="historia" aria-labelledby="story-title" data-story-section>
+      <div className={styles.storyQuote} aria-hidden="true" data-story-quote data-landing-animate>
         “
       </div>
-      <div>
+      <div data-story-copy>
         <p className={styles.eyebrow}>LA MEMORIA TAMBIÉN ES UN LUGAR</p>
         <h2 id="story-title">Volvé a ese barrio, esa canción, esa tarde.</h2>
         <p>
@@ -23,7 +23,7 @@ export default function StorySection() {
       </div>
       <ul className={styles.featureList}>
         {features.map((feature, index) => (
-          <li key={feature}>
+          <li key={feature} data-story-feature data-landing-animate>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <strong>{feature}</strong>
           </li>

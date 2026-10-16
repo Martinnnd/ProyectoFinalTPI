@@ -1,52 +1,33 @@
-import Link from "next/link";
-import styles from "../../app/landing.module.css";
-
-const decades = [
-  {
-    year: "70",
-    title: "Vinilos y rutas",
-    description: "Revistas, discos y recuerdos que todavía giran.",
-  },
-  {
-    year: "80",
-    title: "Neón y aventuras",
-    description: "Arcades, VHS y canciones grabadas de la radio.",
-  },
-  {
-    year: "90",
-    title: "Cassettes y ventanas",
-    description: "Historias compartidas entre grunge y computadoras.",
-  },
-  {
-    year: "00",
-    title: "Chats y nuevas pantallas",
-    description: "La época en la que empezamos a vivir conectados.",
-  },
-] as const;
+import DecadeAtmosphere from "./decades/DecadeAtmosphere";
+import DecadeCard from "./decades/DecadeCard";
+import styles from "./decades/decades.module.css";
+import { landingEras } from "./decades/landingEraThemes";
 
 export default function DecadesSection() {
   return (
-    <section className={styles.decades} id="epocas" aria-labelledby="eras-title">
-      <div className={styles.sectionHeading}>
-        <p className={styles.eyebrow}>CUATRO DÉCADAS, MILES DE RECUERDOS</p>
-        <h2 id="eras-title">Elegí una época para empezar el viaje.</h2>
+    <section
+      className={styles.decades}
+      id="epocas"
+      aria-labelledby="eras-title"
+      data-decades-section
+    >
+      <DecadeAtmosphere />
+      <div className={styles.sectionHeading} data-decades-heading>
+        <div className={styles.headingCopy}>
+          <p className={styles.eyebrow}>CUATRO DÉCADAS, MILES DE RECUERDOS</p>
+          <h2 id="eras-title">Deslizá para viajar en el tiempo.</h2>
+        </div>
+        <div className={styles.eraIndicator} aria-hidden="true">
+          <span className={styles.indicatorDefault}>Canal 70 · En el aire</span>
+          <span data-era-label="1970">Canal 70 · En el aire</span>
+          <span data-era-label="1980">VHS · Reproduciendo</span>
+          <span data-era-label="1990">Nostalgiar 95</span>
+          <span data-era-label="2000">Messenger · Conectado</span>
+        </div>
       </div>
       <div className={styles.decadeGrid}>
-        {decades.map((decade) => (
-          <Link
-            key={decade.year}
-            className={styles.decadeCard}
-            href={`/explorar?era=19${decade.year}`}
-          >
-            <span className={styles.decadeNumber}>{decade.year}</span>
-            <span className={styles.decadeCopy}>
-              <strong>{decade.title}</strong>
-              <small>{decade.description}</small>
-            </span>
-            <span className={styles.cardArrow} aria-hidden="true">
-              ↗
-            </span>
-          </Link>
+        {landingEras.map((era) => (
+          <DecadeCard key={era.id} era={era} />
         ))}
       </div>
     </section>
