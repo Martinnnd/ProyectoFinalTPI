@@ -15,6 +15,7 @@ export async function publicationRequest<T>(path: string, options?: RequestInit)
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
     throw new Error(fields || problem?.detail || problem?.title || `Error del servidor (${response.status}).`);
   }
+  if (response.status === 204) return undefined as T;
   return response.json();
 }
 function category(value: number | string): Category {

@@ -12,6 +12,8 @@ export default function CommentsSection({
   comments,
   onAddComment,
   onReaction,
+  onLoadReplies,
+  onDeleteComment,
 }: {
   memoryId: string;
   comments: MemoryComment[];
@@ -21,6 +23,8 @@ export default function CommentsSection({
     commentId: string,
     reaction: CommentReaction,
   ) => void | Promise<void>;
+  onLoadReplies: (commentId: string) => void | Promise<void>;
+  onDeleteComment: (commentId: string) => void | Promise<void>;
 }) {
   const { isAuthenticated } = useAuth();
   const [draft, setDraft] = useState("");
@@ -66,6 +70,8 @@ export default function CommentsSection({
                   onReaction={(commentId, reaction) =>
                     onReaction(memoryId, commentId, reaction)
                   }
+                  onLoadReplies={onLoadReplies}
+                  onDelete={onDeleteComment}
                 />
               ))}
           </div>

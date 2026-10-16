@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cerrarSesion, guardarSesion } from "./api";
 import {
   createComment,
+  deleteComment,
+  getCommentReplies,
   getComments,
   removeCommentReaction,
   setCommentReaction,
@@ -24,6 +26,10 @@ const root = {
   autor: { id: 1, username: "usuarioTest" },
   reacciones: { love: 2 },
   reaccionActual: "love",
+  estaEliminado: false,
+  puedeEliminar: false,
+  cantidadRespuestas: 1,
+  siguienteCursorRespuestas: null,
   respuestas: [{
     id: 9,
     publicacionId: 25,
@@ -32,6 +38,9 @@ const root = {
     fechaCreacion: "2026-10-13T15:01:00Z",
     autor: { id: 2, username: "Ana" },
     reacciones: {},
+    estaEliminado: false,
+    puedeEliminar: true,
+    cantidadRespuestas: 0,
   }],
 };
 
@@ -53,7 +62,7 @@ describe("API de comentarios", () => {
     const page = await getComments("25");
     expect(page.items).toHaveLength(2);
     expect(page.items[0]).toMatchObject({ id: "8", viewerReaction: "love", reactions: { love: 2 } });
-    expect(page.items[1]).toMatchObject({ id: "9", parentId: "8", text: "Totalmente" });
+    expect(page.items[1]).toMatchObject({ id: "9", parentId: "8", text: "Totalmente", canDelete: true });
   });
 
   it("envía respuestas sin confiar la identidad al body", async () => {
@@ -77,5 +86,24 @@ describe("API de comentarios", () => {
     expect(fetch.mock.calls[0][0]).toContain("/25/comentarios/8/reaccion");
     expect(fetch.mock.calls[0][1].method).toBe("PUT");
     expect(fetch.mock.calls[1][1].method).toBe("DELETE");
+  });
+
+  it("carga las respuestas en bloques de tres usando cursor", async () => {
+    const fetch = respond({ items: [root.respuestas[0]], siguienteCursor: "cursor-2" });
+    vi.stubGlobal("fetch", fetch);
+    const page = await getCommentReplies("25", "8", "cursor-1");
+    expect(page.items[0]).toMatchObject({ id: "9", parentId: "8" });
+    expect(page.cursor).toBe("cursor-2");
+    expect(fetch.mock.calls[0][0]).toContain("/25/comentarios/8/respuestas?limite=3&cursor=cursor-1");
+  });
+
+  it("elimina un comentario propio sin enviar identidad en el body", async () => {
+    guardarSesion(session);
+    const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetch);
+    await deleteComment("25", "8");
+    expect(fetch.mock.calls[0][0]).toContain("/25/comentarios/8");
+    expect(fetch.mock.calls[0][1].method).toBe("DELETE");
+    expect(fetch.mock.calls[0][1].body).toBeUndefined();
   });
 });

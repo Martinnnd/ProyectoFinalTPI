@@ -35,7 +35,7 @@ export default function LandingHeader() {
         )}
         {session && (
           <>
-            <span className={styles.navUser}>Hola, {session.username}</span>
+
             <Link className={styles.navLink} href="/explorar">
               Entrar al mapa
             </Link>
