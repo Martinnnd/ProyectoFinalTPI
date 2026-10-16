@@ -29,25 +29,29 @@
   isolation: isolate;
 }
 
-.heroShell::before,
 .heroShell::after {
   content: "";
   position: absolute;
-  z-index: -1;
   inset: 0;
   pointer-events: none;
 }
 
-.heroShell::before {
+.heroMapBackdrop {
+  position: absolute;
+  z-index: -2;
+  inset: -6%;
   background-image: url("/landing/hero-temporal-map.webp");
   background-position: center;
   background-repeat: no-repeat;
   background-size: max(1640px, 118vw) auto;
   filter: sepia(1) saturate(0.42) hue-rotate(345deg) contrast(0.92);
   opacity: 0.24;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .heroShell::after {
+  z-index: -1;
   background: radial-gradient(
     ellipse at 50% 55%,
     rgba(243, 237, 226, 0.78) 0%,
@@ -318,6 +322,7 @@
 }
 
 .mapSection {
+  --divider-scale: 1;
   position: relative;
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;
@@ -340,7 +345,8 @@
       rgba(31, 77, 59, 0.28) 18%,
       rgba(31, 77, 59, 0.28) 82%,
       transparent);
-  transform: translateX(-50%);
+  transform: translateX(-50%) scaleX(var(--divider-scale));
+  transform-origin: center;
 }
 
 .mapSection::after {
@@ -547,6 +553,11 @@
   align-self: flex-end;
   margin-top: 18px;
   font-size: 1.3rem;
+  transition: transform 200ms ease;
+}
+
+.decadeCard:hover .cardArrow {
+  transform: translate(4px, -4px);
 }
 
 .story {
@@ -603,10 +614,22 @@
 }
 
 .finalCall {
+  --call-reveal: 1;
+  position: relative;
+  isolation: isolate;
   padding: 100px 24px;
   color: white;
-  background: var(--orange);
   text-align: center;
+}
+
+.finalCall::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: var(--orange);
+  transform: scaleY(var(--call-reveal));
+  transform-origin: bottom;
 }
 
 .finalCall p {
@@ -719,7 +742,7 @@
 }
 
 @media (max-width: 900px) {
-  .heroShell::before {
+  .heroMapBackdrop {
     background-size: auto 92%;
   }
 
@@ -816,7 +839,7 @@
     padding: 24px 0 32px;
   }
 
-  .heroShell::before {
+  .heroMapBackdrop {
     background-position: center;
     background-size: auto 88%;
     opacity: 0.21;
@@ -989,7 +1012,12 @@
   .navLink,
   .primaryAction,
   .lightAction,
-  .decadeCard {
+  .decadeCard,
+  .cardArrow {
     transition: none;
+  }
+
+  .heroMapBackdrop {
+    transform: none !important;
   }
 }

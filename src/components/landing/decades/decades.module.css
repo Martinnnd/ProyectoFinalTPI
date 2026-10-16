@@ -1,0 +1,735 @@
+.decades {
+  --era-bg: #242424;
+  --era-surface: #d9dad3;
+  --era-ink: #202120;
+  --era-accent: #9b9d94;
+  --era-heading: #f0f1e7;
+  position: relative;
+  min-height: 100svh;
+  padding: clamp(76px, 9vh, 110px) max(24px, calc((100% - 1180px) / 2));
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--era-heading);
+  background:
+    radial-gradient(ellipse at center, rgba(118, 123, 111, 0.28), transparent 58%),
+    var(--era-bg);
+  transition: background-color 500ms ease, color 500ms ease;
+}
+
+.decades:has(.decadeCard[data-era="1970"]:is(:hover, :focus-visible)) {
+  --era-bg: #242424;
+  --era-surface: #d9dad3;
+  --era-ink: #202120;
+  --era-accent: #9b9d94;
+  --era-heading: #f0f1e7;
+}
+
+.decades:has(.decadeCard[data-era="1980"]:is(:hover, :focus-visible)) {
+  --era-bg: #110a21;
+  --era-surface: #180e2c;
+  --era-ink: #f9edff;
+  --era-accent: #4ff7f3;
+  --era-heading: #fff4ff;
+}
+
+.decades:has(.decadeCard[data-era="1990"]:is(:hover, :focus-visible)) {
+  --era-bg: #008080;
+  --era-surface: #c0c0c0;
+  --era-ink: #151515;
+  --era-accent: #000080;
+  --era-heading: #ffffff;
+}
+
+.decades:has(.decadeCard[data-era="2000"]:is(:hover, :focus-visible)) {
+  --era-bg: #e8f3ff;
+  --era-surface: #f4f7fc;
+  --era-ink: #1d3555;
+  --era-accent: #1558a8;
+  --era-heading: #1d3555;
+}
+
+.atmosphere,
+.atmosphereLayer,
+.texture {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.atmosphere {
+  z-index: -1;
+  overflow: hidden;
+}
+
+.atmosphereLayer {
+  opacity: 0;
+  transition: opacity 550ms ease;
+}
+
+.atmosphereLayer::before,
+.atmosphereLayer::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.atmosphereLayer[data-era-scene="1970"] {
+  opacity: 1;
+  background:
+    radial-gradient(ellipse at 48% 48%, rgba(214, 220, 201, 0.09), transparent 43%),
+    radial-gradient(ellipse at center, transparent 18%, rgba(0, 0, 0, 0.68) 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 4px),
+    linear-gradient(115deg, #62665d, #242424 40%, #101210);
+}
+
+.atmosphereLayer[data-era-scene="1970"]::before {
+  inset: clamp(18px, 2.5vh, 30px) clamp(16px, 2.4vw, 38px);
+  border: clamp(17px, 2.2vw, 32px) ridge #7b5939;
+  border-radius: clamp(42px, 5.5vw, 82px) / clamp(34px, 4.5vw, 64px);
+  background:
+    repeating-linear-gradient(3deg, rgba(55, 34, 20, 0.22) 0 3px, rgba(126, 88, 53, 0.18) 4px 7px),
+    radial-gradient(ellipse at 43% 46%, transparent 42%, rgba(0, 0, 0, 0.36) 100%);
+  box-shadow:
+    inset 0 0 0 7px #2b2d29,
+    inset 0 0 95px 26px #000a,
+    0 0 0 4px #291c14,
+    0 18px 45px #000a;
+}
+
+.atmosphereLayer[data-era-scene="1970"]::after {
+  top: clamp(50px, 8vh, 78px);
+  right: clamp(132px, 12vw, 178px);
+  bottom: clamp(50px, 8vh, 78px);
+  left: clamp(50px, 5vw, 78px);
+  border: 6px solid #30332e;
+  border-radius: clamp(34px, 5vw, 70px) / clamp(28px, 4vw, 54px);
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 24%),
+    radial-gradient(ellipse at center, transparent 54%, rgba(0, 0, 0, 0.43));
+  box-shadow:
+    inset 0 0 55px #000b,
+    inset 0 0 0 2px #a7aa9d,
+    3px 0 15px #0009;
+}
+
+.tvControlPanel {
+  position: absolute;
+  z-index: 2;
+  top: clamp(18px, 2.5vh, 30px);
+  right: clamp(16px, 2.4vw, 38px);
+  bottom: clamp(18px, 2.5vh, 30px);
+  width: clamp(104px, 9vw, 136px);
+  padding: clamp(62px, 8vh, 84px) 18px 22px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: clamp(18px, 2.6vh, 28px);
+  border: clamp(17px, 2.2vw, 32px) ridge #7b5939;
+  border-left-width: 9px;
+  border-radius: 0 clamp(42px, 5.5vw, 82px) clamp(42px, 5.5vw, 82px) 0 /
+    0 clamp(34px, 4.5vw, 64px) clamp(34px, 4.5vw, 64px) 0;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent 18%),
+    repeating-linear-gradient(2deg, #63452f 0 3px, #805a3b 4px 8px),
+    #63452f;
+  box-shadow:
+    inset 8px 0 14px #2b190e99,
+    inset -4px 0 10px #b78a5a33,
+    -8px 0 18px #0009;
+}
+
+.tvControlPanel::before {
+  content: "NOSTALGIAR";
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  color: #d9ceb8;
+  font: 700 clamp(7px, 0.65vw, 9px) "Courier New", monospace;
+  letter-spacing: 0.12em;
+  text-shadow: 1px 1px #2a1a10;
+  transform: translateX(-50%);
+}
+
+.tvControlPanel i {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+}
+
+.tvDial {
+  width: clamp(38px, 3.7vw, 52px);
+  height: clamp(38px, 3.7vw, 52px);
+  border: 5px ridge #b9ad94;
+  border-radius: 50%;
+  color: #e9eadf;
+  background: repeating-conic-gradient(#343730 0 10deg, #707568 11deg 15deg);
+  box-shadow: 2px 3px 7px #000b;
+  transform: rotate(-12deg);
+}
+
+.tvDial b {
+  display: grid;
+  width: 66%;
+  height: 66%;
+  place-items: center;
+  border-radius: 50%;
+  background: #3c4038;
+  font: 7px "Courier New", monospace;
+  letter-spacing: 0.04em;
+  transform: rotate(12deg);
+}
+
+.tvSpeaker {
+  width: 100%;
+  min-height: 120px;
+  flex: 1 !important;
+  border: 2px inset #826d52;
+  background: repeating-linear-gradient(0deg, #242720 0 3px, #756d5c 4px 7px);
+  box-shadow: inset 0 0 8px #000c;
+}
+
+.tvPower {
+  width: 11px;
+  height: 11px;
+  border: 2px solid #d0cab7;
+  border-radius: 50%;
+  background: #c85c32;
+  box-shadow: 0 0 8px #e77a45;
+}
+
+.atmosphereLayer[data-era-scene="1980"] {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(231, 39, 206, 0.32), transparent 31%),
+    radial-gradient(circle at 12% 70%, rgba(79, 247, 243, 0.15), transparent 30%),
+    #110a21;
+}
+
+.atmosphereLayer[data-era-scene="1980"]::before {
+  right: -12%;
+  bottom: -24%;
+  left: -12%;
+  height: 58%;
+  background-image:
+    linear-gradient(rgba(248, 44, 228, 0.42) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(54, 234, 250, 0.42) 1px, transparent 1px);
+  background-size: 60px 38px;
+  mask-image: linear-gradient(transparent, #000 45%);
+  transform: perspective(320px) rotateX(55deg);
+  transform-origin: bottom;
+}
+
+.atmosphereLayer[data-era-scene="1980"]::after {
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 4px, rgba(2, 0, 8, 0.18) 4px 5px);
+}
+
+.atmosphereLayer[data-era-scene="1990"] {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 36%),
+    #008080;
+}
+
+.atmosphereLayer[data-era-scene="1990"]::before {
+  top: 9%;
+  right: 7%;
+  width: min(310px, 28vw);
+  height: 170px;
+  border: 4px outset #dfdfdf;
+  background: linear-gradient(#000080 0 25px, #c0c0c0 25px);
+  box-shadow: -42vw 47vh 0 -38px #c0c0c0, -42vw 47vh 0 -34px #dfdfdf;
+  opacity: 0.2;
+}
+
+.atmosphereLayer[data-era-scene="1990"]::after {
+  right: 10%;
+  bottom: 8%;
+  width: 38px;
+  height: 46px;
+  background: linear-gradient(90deg, #fff 0 48%, #ffffd0 49%);
+  filter: drop-shadow(2px 2px #00494b);
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 68% 78%, 68% 100%, 0 100%);
+  opacity: 0.35;
+}
+
+.atmosphereLayer[data-era-scene="2000"] {
+  background:
+    radial-gradient(ellipse at 18% 24%, #ffffff 0 6%, transparent 6.5%),
+    radial-gradient(ellipse at 25% 22%, #ffffff 0 8%, transparent 8.5%),
+    linear-gradient(#6bbcff 0%, #bce6ff 58%, #76bc3b 59%, #4f9e2f 100%);
+}
+
+.atmosphereLayer[data-era-scene="2000"]::before {
+  right: -12%;
+  bottom: -50%;
+  width: 76%;
+  height: 92%;
+  border-radius: 50% 50% 0 0;
+  background: linear-gradient(120deg, #8fd354, #4b9c2e 68%);
+  box-shadow: -48vw 8vh 0 4vw #72bd42;
+  opacity: 0.92;
+}
+
+.atmosphereLayer[data-era-scene="2000"]::after {
+  top: 10%;
+  right: 8%;
+  width: 150px;
+  height: 64px;
+  border: 1px solid rgba(21, 88, 168, 0.35);
+  border-radius: 9px;
+  background: linear-gradient(#fff, #dcecfb);
+  box-shadow: 0 5px 12px rgba(35, 78, 127, 0.25);
+  opacity: 0.4;
+}
+
+.texture {
+  z-index: 2;
+  opacity: 0.2;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.3) 0.6px, transparent 0.7px);
+  background-size: 4px 4px;
+  mix-blend-mode: soft-light;
+}
+
+.decades:has(.decadeCard:is(:hover, :focus-visible)) .atmosphereLayer {
+  opacity: 0;
+}
+
+.decades:has(.decadeCard[data-era="1970"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="1970"],
+.decades:has(.decadeCard[data-era="1980"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="1980"],
+.decades:has(.decadeCard[data-era="1990"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="1990"],
+.decades:has(.decadeCard[data-era="2000"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="2000"] {
+  opacity: 1;
+}
+
+.sectionHeading,
+.decadeGrid {
+  position: relative;
+  z-index: 3;
+  width: min(1080px, calc(100% - 120px));
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.sectionHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 32px;
+  margin-bottom: clamp(38px, 6vh, 62px);
+}
+
+.headingCopy {
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin: 0 0 24px;
+  color: var(--era-accent);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  transition: color 400ms ease;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  color: var(--era-heading);
+  font-family: "Courier New", monospace;
+  font-size: clamp(2.5rem, 5vw, 4.7rem);
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  line-height: 0.98;
+  transition: color 400ms ease, font-family 400ms ease;
+}
+
+.eraIndicator {
+  min-width: 178px;
+  min-height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--era-accent) 72%, transparent);
+  color: var(--era-heading);
+  background: color-mix(in srgb, var(--era-bg) 75%, transparent);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  font-family: "Courier New", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.eraIndicator span {
+  display: none;
+  grid-area: 1 / 1;
+}
+
+.eraIndicator .indicatorDefault {
+  display: block;
+}
+
+.decades:has(.decadeCard:is(:hover, :focus-visible)) .eraIndicator span {
+  display: none;
+}
+
+.decades:has(.decadeCard[data-era="1970"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="1970"],
+.decades:has(.decadeCard[data-era="1980"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="1980"],
+.decades:has(.decadeCard[data-era="1990"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="1990"],
+.decades:has(.decadeCard[data-era="2000"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="2000"] {
+  display: block;
+}
+
+.decadeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(12px, 1.5vw, 20px);
+}
+
+.decadeCard {
+  min-width: 0;
+  min-height: clamp(260px, 34vh, 340px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--era-ink);
+  background: var(--era-surface);
+  text-decoration: none;
+  opacity: 0.82;
+  transform: scale(0.985);
+  transition:
+    opacity 320ms ease,
+    transform 320ms ease,
+    filter 320ms ease,
+    box-shadow 320ms ease;
+}
+
+.decadeCard:is(:hover, :focus-visible) {
+  z-index: 2;
+  opacity: 1;
+  filter: none;
+  transform: translateY(-10px) scale(1.02);
+}
+
+.decades:has(.decadeCard:is(:hover, :focus-visible)) .decadeCard {
+  opacity: 0.38;
+  transform: scale(0.965);
+}
+
+.decades:has(.decadeCard:is(:hover, :focus-visible)) .decadeCard:is(:hover, :focus-visible) {
+  opacity: 1;
+  transform: translateY(-10px) scale(1.02);
+}
+
+.decadeCard:focus-visible {
+  outline: 3px solid var(--era-accent);
+  outline-offset: 5px;
+}
+
+.cardChrome,
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cardChrome {
+  min-height: 34px;
+  padding: 8px 11px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.cardChrome i {
+  flex: none;
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+.cardBody {
+  flex: 1;
+  padding: 22px 20px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.decadeNumber {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(4.4rem, 7vw, 6.7rem);
+  line-height: 0.82;
+}
+
+.decadeCopy {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.decadeCopy strong {
+  font-size: 1.08rem;
+}
+
+.decadeCopy small {
+  max-width: 210px;
+  opacity: 0.74;
+  line-height: 1.45;
+}
+
+.cardFooter {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-top: 1px solid currentColor;
+}
+
+.cardFooter small {
+  overflow: hidden;
+  font-size: 0.58rem;
+  letter-spacing: 0.07em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardArrow {
+  flex: none;
+  font-size: 1.2rem;
+  transition: transform 200ms ease;
+}
+
+.decadeCard:hover .cardArrow,
+.decadeCard:focus-visible .cardArrow {
+  transform: translate(4px, -4px);
+}
+
+.decadeCard[data-era="1970"] {
+  border: 7px ridge #73614f;
+  border-radius: 28px / 20px;
+  color: #202120;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.035) 0 1px, transparent 1px 4px),
+    #d9dad3;
+  box-shadow: inset 0 0 32px #0004, 0 12px 25px #0005;
+  font-family: "Courier New", monospace;
+  opacity: 1;
+  transform: translateY(-10px) scale(1.02);
+}
+
+.decadeCard[data-era="1970"] .cardChrome {
+  color: #f0f1e7;
+  background: linear-gradient(#535b51, #30382f);
+}
+
+.decades:has(.decadeCard[data-era="1970"]:is(:hover, :focus-visible)) .sectionHeading h2 {
+  font-family: "Courier New", monospace;
+  letter-spacing: -0.06em;
+}
+
+.decadeCard[data-era="1970"] .decadeNumber {
+  color: #343a35;
+  text-shadow: 2px 2px #f0f1e7;
+}
+
+.decadeCard[data-era="1980"] {
+  border: 1px solid #e739c7;
+  border-left-width: 4px;
+  border-radius: 0;
+  color: #f9edff;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(2, 0, 8, 0.2) 3px 4px),
+    #180e2c;
+  box-shadow: 4px 4px 0 #4ff7f355, 0 0 25px #ec20cb35;
+  font-family: "Courier New", monospace;
+}
+
+.decadeCard[data-era="1980"] .cardChrome {
+  color: #70fffb;
+  background: #120a22;
+  border-bottom: 1px solid #e739c7;
+}
+
+.decades:has(.decadeCard[data-era="1980"]:is(:hover, :focus-visible)) .sectionHeading h2 {
+  font-family: "Courier New", monospace;
+  letter-spacing: -0.07em;
+  text-shadow: 3px 3px #ec2bca, -1px -1px #4ff7f3;
+}
+
+.decadeCard[data-era="1980"] .decadeNumber {
+  color: #4ff7f3;
+  text-shadow: 4px 3px #ec2bca, 0 0 15px #4ff7f388;
+}
+
+.decadeCard[data-era="1980"] .cardFooter {
+  color: #f2d9ff;
+  border-color: #e739c7;
+}
+
+.decadeCard[data-era="1990"] {
+  border: 0;
+  border-radius: 0;
+  color: #151515;
+  background: #c0c0c0;
+  box-shadow:
+    inset 2px 2px #fff,
+    inset -2px -2px #111,
+    inset 4px 4px #dfdfdf,
+    inset -4px -4px #808080,
+    5px 6px 0 #004d4d;
+  font-family: Tahoma, "MS Sans Serif", Arial, sans-serif;
+}
+
+.decadeCard[data-era="1990"] .cardChrome {
+  margin: 4px 4px 0;
+  color: white;
+  background: #000080;
+}
+
+.decades:has(.decadeCard[data-era="1990"]:is(:hover, :focus-visible)) .sectionHeading h2 {
+  font-family: Tahoma, "MS Sans Serif", Arial, sans-serif;
+  letter-spacing: -0.06em;
+  text-shadow: 2px 2px #004646;
+}
+
+.decadeCard[data-era="1990"] .decadeNumber {
+  color: #000080;
+  font-family: Tahoma, "MS Sans Serif", Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.1em;
+}
+
+.decadeCard[data-era="1990"] .cardFooter {
+  margin: 0 4px 4px;
+  border: 2px inset #dfdfdf;
+}
+
+.decadeCard[data-era="2000"] {
+  border: 1px solid #76a4d6;
+  border-radius: 9px 9px 4px 4px;
+  color: #1d3555;
+  background: linear-gradient(#fff 0%, #f5faff 58%, #dcecfb);
+  box-shadow: 0 6px 16px #234e7f55, inset 0 1px #fff;
+  font-family: Verdana, Tahoma, sans-serif;
+}
+
+.decadeCard[data-era="2000"] .cardChrome {
+  color: #fff;
+  background: linear-gradient(#478ef3 0%, #0864df 18%, #004bbb 75%, #267ae5);
+  text-shadow: 1px 1px #174083;
+}
+
+.decades:has(.decadeCard[data-era="2000"]:is(:hover, :focus-visible)) .sectionHeading h2 {
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  letter-spacing: -0.055em;
+  text-shadow: 1px 1px white;
+}
+
+.decadeCard[data-era="2000"] .decadeNumber {
+  color: #1765b7;
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  font-weight: 700;
+  text-shadow: 2px 2px white;
+}
+
+.decadeCard[data-era="2000"] .cardFooter {
+  color: #315778;
+  border-color: #85a7cf;
+  background: linear-gradient(#fefdf4, #e7e5d8);
+}
+
+@media (max-width: 900px) {
+  .decades {
+    min-height: auto;
+    padding-top: 90px;
+    padding-bottom: 90px;
+  }
+
+  .sectionHeading {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHeading,
+  .decadeGrid {
+    width: min(1180px, 100%);
+  }
+
+  .tvControlPanel {
+    display: none;
+  }
+
+  .atmosphereLayer[data-era-scene="1970"]::after {
+    right: clamp(28px, 5vw, 54px);
+  }
+
+  .eraIndicator {
+    min-width: 0;
+    width: fit-content;
+    min-height: 44px;
+    padding: 0 16px;
+  }
+
+  .decadeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .decadeCard {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 560px) {
+  .decades {
+    padding-top: 76px;
+    padding-bottom: 76px;
+  }
+
+  .sectionHeading {
+    margin-bottom: 34px;
+  }
+
+  .sectionHeading h2 {
+    font-size: clamp(2.35rem, 12vw, 3.5rem);
+  }
+
+  .decadeGrid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .decadeCard {
+    min-height: 280px;
+    opacity: 0.68;
+  }
+
+  .decadeCard[data-era="1970"] {
+    border-radius: 22px / 16px;
+  }
+
+  .atmosphereLayer[data-era-scene="1990"]::before,
+  .atmosphereLayer[data-era-scene="2000"]::after {
+    display: none;
+  }
+
+  .atmosphereLayer[data-era-scene="1970"]::before {
+    inset: 8px;
+    border-width: 9px;
+    border-radius: 30px / 24px;
+  }
+
+  .atmosphereLayer[data-era-scene="1970"]::after {
+    inset: 30px 24px;
+    border-width: 4px;
+    border-radius: 24px / 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .decades,
+  .atmosphereLayer,
+  .decadeCard,
+  .cardArrow {
+    transition: none;
+  }
+}
