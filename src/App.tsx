@@ -19,7 +19,15 @@ import {
   type TierProgress,
 } from "./types";
 import { achievements, eraContent, initialMemories } from "./data";
-import { getMemories, isOwnMemory, getSesion, type UsuarioSesion, eliminarPublicacion } from "./api";
+import {
+  getMemories,
+  obtenerDetallePublicacion,
+  obtenerFeed,
+  isOwnMemory,
+  getSesion,
+  type UsuarioSesion,
+  eliminarPublicacion,
+} from "./api";
 import LoginDialog from "./components/LoginDialog";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
@@ -63,10 +71,28 @@ export default function App() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
 
+  const reloadFeed = async (tipo: 'para-vos' | 'seguidos' = 'para-vos') => {
+    if (!getSesion()) return;
+    try {
+      const feed = await obtenerFeed(tipo);
+      if (feed.items.length > 0) {
+        setDbMemories(prev => {
+          const ids = new Set(feed.items.map(i => i.id));
+          return [...feed.items, ...prev.filter(m => !ids.has(m.id))];
+        });
+      }
+    } catch (e) {
+      console.warn(`Error al cargar feed (${tipo}):`, e);
+    }
+  };
+
   const reloadMemories = async () => {
     try {
       const data = await getMemories();
       setDbMemories(data);
+      if (getSesion()) {
+        await reloadFeed();
+      }
     } catch (e) {
       console.error("Error al cargar publicaciones:", e);
     }
@@ -76,7 +102,26 @@ export default function App() {
     setCurrentSesion(getSesion());
     reloadMemories();
   }, []);
+
+  useEffect(() => {
+    if (view === "feed" && currentSesion) {
+      reloadFeed();
+    }
+  }, [view, currentSesion]);
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const existing = dbMemories.find(m => m.id === selectedId);
+    if (existing && existing.source === "db" && !existing.description && !existing.place) {
+      obtenerDetallePublicacion(selectedId)
+        .then((detalle) => {
+          setDbMemories(prev => prev.map(m => m.id === selectedId ? { ...m, ...detalle } : m));
+        })
+        .catch(console.error);
+    }
+  }, [selectedId]);
   const [picking, setPicking] = useState(false);
   const [deleting, setDeleting] = useState<Memory | null>(null);
   const [editing, setEditing] = useState<Memory | null>(null);
@@ -174,6 +219,11 @@ export default function App() {
     storiesButton.current?.focus();
   }
   function startAdding() {
+    const sesion = getSesion();
+    if (!sesion) {
+      setLoginOpen(true);
+      return;
+    }
     setDraftHashtags([]);
     creationOrigin.current = view === "profile";
     setProfileAuthor(null);
@@ -214,7 +264,7 @@ export default function App() {
   function confirmDelete(memory: Memory): string | null {
     eliminarPublicacion(memory.id)
       .then(() => {
-        getMemories().then(data => setDbMemories(data)).catch(console.error);
+        reloadMemories();
       })
       .catch((err) =>
         console.warn("Backend falló al eliminar publicación:", err)
@@ -245,6 +295,12 @@ export default function App() {
     }
     const isFirstMemory = dbMemories.filter(m => isOwnMemory(m)).length === 0;
 
+    const sesion = getSesion();
+    if (!sesion) {
+      setLoginOpen(true);
+      return "Debés iniciar sesión para publicar un recuerdo.";
+    }
+
     try {
       const { crearPublicacion } = await import("./api");
       const res = await crearPublicacion(memory);
@@ -252,9 +308,9 @@ export default function App() {
         memory = { ...memory, id: res.id.toString() };
       }
       await reloadMemories();
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Backend falló al crear publicación.", err);
-      return "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
+      return err?.message || "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
     }
 
     setPeriod({
@@ -611,7 +667,7 @@ export default function App() {
         onClose={() => setLoginOpen(false)}
         onSesionChange={() => {
           setCurrentSesion(getSesion());
-          getMemories().then(data => setDbMemories(data)).catch(console.error);
+          reloadMemories();
         }}
       />
     </div>

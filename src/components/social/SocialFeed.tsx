@@ -9,7 +9,7 @@ import FeedPost from "./FeedPost";
 import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
 import RepostDialog from "./RepostDialog";
-import { compartirPublicacion, eliminarRepost, isOwnMemory } from "../../api";
+import { compartirPublicacion, eliminarRepost, isOwnMemory, getSesion } from "../../api";
 import { memoryHashtags, weeklyTrends } from "../../hashtags";
 import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
@@ -332,14 +332,21 @@ export default function SocialFeed({
           memoryTitle={repostMemory.title}
           onCancel={() => setRepostMemory(null)}
           onConfirm={async (descripcion) => {
+            const sesion = getSesion();
+            if (!sesion) {
+              alert("Debés iniciar sesión para compartir una publicación.");
+              setRepostMemory(null);
+              return;
+            }
             const { targetId } = getTargetToRepost(repostMemory, allMemories);
             try {
               await compartirPublicacion(targetId, descripcion);
               if (onReloadMemories) {
                 await onReloadMemories();
               }
-            } catch (err) {
+            } catch (err: any) {
               console.error("Error al compartir en el servidor:", err);
+              alert(err?.message || "Error al compartir en el servidor.");
             } finally {
               // Solo se marca pintado en local si fue un repost simple (sin comentario agregado)
               if (!descripcion.trim()) {
