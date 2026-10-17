@@ -21,7 +21,7 @@
   font-family: var(--font-body);
 }
 .time-brand { display:grid; grid-template-columns:auto 1fr; align-items:center; column-gap:14px; row-gap:4px; }
-.time-brand > img { display:block; object-fit:contain; }
+.time-brand > img { display:block; object-fit:contain; filter:drop-shadow(0 0 1px rgb(0 0 0 / 70%)) drop-shadow(0 0 4px rgb(0 0 0 / 50%)); }
 .time-brand > span { font:700 33px/1.2 'Avenue de Madison', 'Courier New', Courier, monospace; letter-spacing:.5px; white-space:nowrap; }
 .time-brand small { grid-column:2; display:block; font:10px/1.3 var(--font-body); letter-spacing:1.5px; }
 .time-scale { min-width:0; width:100%; max-width:580px; align-self:center; justify-self:center; }
@@ -42,6 +42,8 @@
 .app .era-shell-top, .app .newspaper-edition { display:none; }
 
 /* Each era keeps its own typography and material treatment. */
+.era-1970 .time-brand > img,
+.era-1980 .time-brand > img { filter:drop-shadow(0 0 2px rgb(255 255 255 / 30%)) drop-shadow(0 0 4px rgb(255 255 255 / 20%)); }
 .app.era-1970 .time-navigation {
   color:#eee9dc;
   background:repeating-linear-gradient(2deg,#3b291d 0 3px,#543c29 4px 9px,#463222 10px 12px);
