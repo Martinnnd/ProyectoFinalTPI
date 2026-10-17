@@ -135,7 +135,7 @@ export default function App() {
   }
 
   const reloadFeed = async (tipo: 'para-vos' | 'seguidos' = 'para-vos') => {
-    if (!getSesion()) return;
+    if (!session) return;
     try {
       const feed = await obtenerFeed(tipo);
       if (feed.items.length > 0) {
@@ -153,7 +153,7 @@ export default function App() {
     try {
       const data = await getMemories();
       setDbMemories(data);
-      if (getSesion()) {
+      if (session) {
         await reloadFeed();
       }
     } catch (e) {
@@ -166,10 +166,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (view === "feed" && currentSesion) {
+    if (view === "feed" && session) {
       reloadFeed();
     }
-  }, [view, currentSesion]);
+  }, [view, session]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -420,9 +420,8 @@ export default function App() {
     }
     const isFirstMemory = dbMemories.filter(m => isOwnMemory(m)).length === 0;
 
-    const sesion = getSesion();
-    if (!sesion) {
-      setLoginOpen(true);
+    if (!session) {
+      router.push("/auth/login?returnTo=/explorar");
       return "Debés iniciar sesión para publicar un recuerdo.";
     }
 

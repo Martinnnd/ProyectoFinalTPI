@@ -26,7 +26,7 @@ export default function LandingAnimations({ children }: LandingAnimationsProps) 
           mobile: "(max-width: 560px)",
           desktop: "(min-width: 561px)",
         },
-        (mediaContext) => {
+        (mediaContext: any) => {
           const { reducedMotion, mobile } = mediaContext.conditions as {
             reducedMotion: boolean;
             mobile: boolean;
