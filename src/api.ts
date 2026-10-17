@@ -211,7 +211,11 @@ export async function obtenerPinesMapa(filtro?: {
         params.append("categoria", filtro.categoria);
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/publicaciones/mapa?${params.toString()}`);
+    const response = await fetch(`${API_BASE_URL}/api/publicaciones/mapa?${params.toString()}`, {
+        headers: {
+            'X-Nostalgiar-Request': '1'
+        }
+    });
     if (!response.ok) {
         throw new Error(`Error al obtener pines del mapa: ${response.statusText}`);
     }
