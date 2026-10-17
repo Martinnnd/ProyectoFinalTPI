@@ -6,19 +6,21 @@ import LandingFooter from "../components/landing/LandingFooter";
 import LandingHeader from "../components/landing/LandingHeader";
 import MemoryMapSection from "../components/landing/MemoryMapSection";
 import StorySection from "../components/landing/StorySection";
+import LandingAnimations from "../components/landing/animations/LandingAnimations";
 
 export default function LandingPage() {
   return (
-    <main className={styles.landing}>
-      <div className={styles.heroShell}>
+    <LandingAnimations>
+      <div className={styles.heroShell} data-hero-shell>
+        <div className={styles.heroMapBackdrop} data-hero-map aria-hidden="true" />
         <LandingHeader />
         <Hero />
       </div>
-      <MemoryMapSection />
       <DecadesSection />
+      <MemoryMapSection />
       <StorySection />
       <FinalCall />
       <LandingFooter />
-    </main>
+    </LandingAnimations>
   );
 }

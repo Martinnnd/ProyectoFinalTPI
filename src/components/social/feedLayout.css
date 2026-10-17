@@ -1,0 +1,91 @@
+/* Feed uses the whole workspace; Explore keeps its map and era controls. */
+.app.view-feed > .map-toolbar,
+.app.view-feed > .map-period,
+.app.view-feed .era-shell-top,
+.app.view-feed .newspaper-edition,
+.app.view-feed .mobile-era-button,
+.app.view-feed > .music-card.player-hidden {
+  display: none;
+}
+
+.app.view-feed .feed-sidebar {
+  display: block;
+  min-width: 0;
+  padding-top: 0;
+  padding-bottom: 68px;
+}
+
+.feed-sidebar-content > section {
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.feed-sidebar-content > summary {
+  padding: 12px;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.app.view-feed .feed-sidebar .community-heading,
+.app.view-feed .feed-sidebar .trends-heading {
+  flex-wrap: wrap;
+}
+
+.app.view-feed .feed-sidebar .community-filters {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .app.view-feed .social-layout {
+    inset: 20px 24px 50px 94px;
+    grid-template-columns: minmax(0, 1fr) clamp(265px, 24vw, 340px);
+    gap: 24px;
+  }
+
+  .app.view-feed .social-layout.detail-maximized {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app.view-feed .detail-maximized .feed-sidebar {
+    display: none;
+  }
+
+  .feed-sidebar-content > summary {
+    display: none;
+  }
+
+  .feed-sidebar-content::details-content {
+    content-visibility: visible;
+  }
+
+  .app.view-feed > .music-card.player-visible {
+    z-index: 650;
+  }
+}
+
+@media (max-width: 899px) {
+  .app.view-feed .social-layout {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .app.view-feed .social-stream {
+    height: auto;
+    flex: 1 0 auto;
+    overflow: visible;
+  }
+
+  .app.view-feed .feed-sidebar {
+    order: -1;
+    flex-shrink: 0;
+    overflow: visible;
+    padding: 12px 10px 0;
+  }
+}

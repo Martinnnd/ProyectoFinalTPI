@@ -1,11 +1,10 @@
-import { MapPin, Repeat2 } from "lucide-react";
-import MemoryOwnerActions from "../MemoryOwnerActions";
+import { Ellipsis, MapPin, Pencil, Repeat2, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
-import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import type { Memory } from "../../types";
 import { isOwnMemory, getMemoryAuthorDisplay } from "../../api";
-import CommentsSection from "./CommentsSection";
+import RemoteComments from './RemoteComments';
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
 import { memoryHashtags } from "../../hashtags";
@@ -15,8 +14,9 @@ export default function FeedPost({
   selected,
   following,
   liked,
-  comments,
+  commentMemoryId,
   rating,
+  canRate,
   reposted,
   saved,
   quotedMemory,
@@ -30,23 +30,22 @@ export default function FeedPost({
   onLike,
   onRepost,
   onSave,
-  onAddComment,
-  onReaction,
   onHashtag,
 }: {
   memory: Memory;
   selected: boolean;
   following: boolean;
   liked: boolean;
-  comments: MemoryComment[];
+  commentMemoryId?: string;
   rating?: number;
+  canRate: boolean;
   reposted: boolean;
   saved: boolean;
   quotedMemory?: Memory;
   onDelete: (memory: Memory) => void;
   onEdit: (memory: Memory) => void;
   onProfile: (memory: Memory) => void;
-  onFollow: (author: string) => void;
+  onFollow: (author: string, authorId?: number) => void;
   onOpen: (memory: Memory) => void;
   onMap: (memory: Memory) => void;
   onRate: (value: number) => void;
@@ -54,13 +53,9 @@ export default function FeedPost({
   onRepost: () => void;
   onSave: () => void;
   onHashtag: (tag: string) => void;
-  onAddComment: (memoryId: string, text: string, parentId?: string) => void;
-  onReaction: (
-    memoryId: string,
-    commentId: string,
-    reaction: CommentReaction,
-  ) => void;
 }) {
+  const [commentCount, setCommentCount] = useState(memory.commentCount ?? 0);
+  useEffect(() => setCommentCount(memory.commentCount ?? 0), [memory.id, memory.commentCount]);
   const hasInlineImage =
     memory.image && !memory.media && !youtubeId(memory.image);
 
@@ -108,17 +103,19 @@ export default function FeedPost({
           <button
             className="follow-button"
             aria-pressed={following}
-            onClick={() => onFollow(headerAuthor)}
+            onClick={() => onFollow(headerAuthor, isSimpleRepost ? memory.repost?.authorId : memory.authorId)}
           >
             {following ? "Siguiendo" : "Seguir"}
           </button>
         )}
-        {isHeaderAuthorOwn && (
-          <MemoryOwnerActions
-            memory={profileMemory}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
+        {isOwnMemory(memory) && (
+          <details className="compact-menu feed-owner-menu">
+            <summary aria-label="Opciones de publicación" title="Opciones de publicación"><Ellipsis size={20} aria-hidden="true" /></summary>
+            <div className="feed-owner-menu-options">
+              <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onEdit(memory); }}><Pencil size={15} /> Editar</button>
+              <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onDelete(memory); }}><Trash2 size={15} /> Eliminar</button>
+            </div>
+          </details>
         )}
       </header>
 
@@ -247,12 +244,14 @@ export default function FeedPost({
       <PostRating
         memoryTitle={memory.title}
         value={rating}
+        canRate={canRate}
         onRate={onRate}
       />
       <PostActions
         memoryTitle={memory.title}
         liked={liked}
-        commentCount={comments.length}
+        likeCount={memory.likeCount}
+        commentCount={commentCount}
         reposted={reposted}
         saved={saved}
         onLike={onLike}
@@ -260,12 +259,12 @@ export default function FeedPost({
         onRepost={onRepost}
         onSave={onSave}
       />
-      {selected && (
-        <CommentsSection
-          memoryId={memory.id}
-          comments={comments}
-          onAddComment={onAddComment}
-          onReaction={onReaction}
+      {selected && commentMemoryId && (
+        <RemoteComments
+          key={commentMemoryId}
+          memoryId={commentMemoryId}
+          onCommentCreated={() => setCommentCount((count) => count + 1)}
+          onCommentDeleted={() => setCommentCount((count) => Math.max(0, count - 1))}
         />
       )}
     </article>

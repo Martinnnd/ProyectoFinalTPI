@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Nostalgiar Script";
-  src: url("../../fonts/AnandaBlack.ttf") format("truetype");
+  src: url("../../fonts/AvenueDeMadison.ttf") format("truetype");
   font-display: swap;
   font-style: normal;
   font-weight: 400;
@@ -29,25 +29,29 @@
   isolation: isolate;
 }
 
-.heroShell::before,
 .heroShell::after {
   content: "";
   position: absolute;
-  z-index: -1;
   inset: 0;
   pointer-events: none;
 }
 
-.heroShell::before {
+.heroMapBackdrop {
+  position: absolute;
+  z-index: -2;
+  inset: -6%;
   background-image: url("/landing/hero-temporal-map.webp");
   background-position: center;
   background-repeat: no-repeat;
   background-size: max(1640px, 118vw) auto;
   filter: sepia(1) saturate(0.42) hue-rotate(345deg) contrast(0.92);
   opacity: 0.24;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .heroShell::after {
+  z-index: -1;
   background: radial-gradient(
     ellipse at 50% 55%,
     rgba(243, 237, 226, 0.78) 0%,
@@ -69,16 +73,27 @@
 }
 
 .brand {
-  display: block;
-  width: clamp(145px, 15vw, 190px);
-  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  width: auto;
   text-decoration: none;
 }
 
 .headerLogo {
-  width: 100%;
+  display: block;
+  width: 44px;
   height: auto;
 }
+
+.brandName,
+.footerBrandName {
+  font-family: "Nostalgiar Script", Georgia, serif;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.brandName { color: var(--green); font-size: clamp(2rem, 3vw, 2.65rem); line-height: 1; }
 
 .navLink {
   padding: 12px 18px;
@@ -99,6 +114,43 @@
   color: var(--ink);
   background: var(--paper);
   transform: translateY(-2px);
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navSecondary,
+.navLogout {
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.navSecondary:hover,
+.navLogout:hover { color: var(--orange); }
+
+.navLogout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.navUser {
+  max-width: 160px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hero {
@@ -270,6 +322,7 @@
 }
 
 .mapSection {
+  --divider-scale: 1;
   position: relative;
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;
@@ -292,7 +345,8 @@
       rgba(31, 77, 59, 0.28) 18%,
       rgba(31, 77, 59, 0.28) 82%,
       transparent);
-  transform: translateX(-50%);
+  transform: translateX(-50%) scaleX(var(--divider-scale));
+  transform-origin: center;
 }
 
 .mapSection::after {
@@ -499,6 +553,11 @@
   align-self: flex-end;
   margin-top: 18px;
   font-size: 1.3rem;
+  transition: transform 200ms ease;
+}
+
+.decadeCard:hover .cardArrow {
+  transform: translate(4px, -4px);
 }
 
 .story {
@@ -555,10 +614,22 @@
 }
 
 .finalCall {
+  --call-reveal: 1;
+  position: relative;
+  isolation: isolate;
   padding: 100px 24px;
   color: white;
-  background: var(--orange);
   text-align: center;
+}
+
+.finalCall::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: var(--orange);
+  transform: scaleY(var(--call-reveal));
+  transform-origin: bottom;
 }
 
 .finalCall p {
@@ -597,9 +668,13 @@
 }
 
 .footerLogo {
-  width: min(300px, 100%);
+  display: inline-block;
+  width: 50px;
   height: auto;
+  vertical-align: middle;
 }
+
+.footerBrandName { display:inline-block; margin-left:8px; color:var(--paper); font-size:2.8rem; line-height:1; vertical-align:middle; }
 
 .footerBrand p {
   margin: 18px 0 26px;
@@ -667,7 +742,7 @@
 }
 
 @media (max-width: 900px) {
-  .heroShell::before {
+  .heroMapBackdrop {
     background-size: auto 92%;
   }
 
@@ -743,20 +818,28 @@
   }
 
   .brand {
-    width: 138px;
+    gap: 6px;
   }
+
+  .headerLogo { width: 34px; }
+  .brandName { font-size: 2rem; }
 
   .navLink {
     padding: 9px 12px;
     font-size: 0.68rem;
   }
 
+  .navActions { gap: 7px; }
+  .navSecondary { font-size: 0.64rem; }
+  .navUser,
+  .navLogout span { display: none; }
+
   .hero {
     min-height: calc(100svh - 70px);
     padding: 24px 0 32px;
   }
 
-  .heroShell::before {
+  .heroMapBackdrop {
     background-position: center;
     background-size: auto 88%;
     opacity: 0.21;
@@ -861,8 +944,11 @@
 
 @media (max-width: 380px) {
   .brand {
-    width: 118px;
+    gap: 4px;
   }
+
+  .headerLogo { width: 28px; }
+  .brandName { font-size: 1.7rem; }
 
   .navLink {
     padding: 10px 12px;
@@ -926,7 +1012,12 @@
   .navLink,
   .primaryAction,
   .lightAction,
-  .decadeCard {
+  .decadeCard,
+  .cardArrow {
     transition: none;
+  }
+
+  .heroMapBackdrop {
+    transform: none !important;
   }
 }

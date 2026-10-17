@@ -1,42 +1,24 @@
 import { categories, type Category, type Memory } from "./types";
+export { API_BASE_URL } from "./apiConfig";
+import { API_BASE_URL } from "./apiConfig";
+import {
+    clearStoredSession,
+    getStoredSession,
+    storeSession,
+} from "./components/auth/authStorage";
+import type { AuthSession } from "./components/auth/authTypes";
+import { apiFetch } from "./components/auth/apiClient";
+import { loginRequest, registerRequest } from "./components/auth/authApi";
 
-export const API_BASE_URL = "http://localhost:5199";
+export type UsuarioSesion = AuthSession;
+export const getSesion = getStoredSession;
+export const guardarSesion = storeSession;
+export const cerrarSesion = clearStoredSession;
 
-export interface UsuarioSesion {
-    token: string;
-    usuarioId: number;
-    username: string;
-    email: string;
-    esAdmin: boolean;
-}
-
-let memorySesion: UsuarioSesion | null = null;
-
-export function getSesion(): UsuarioSesion | null {
-    if (memorySesion) return memorySesion;
-    if (typeof window !== "undefined" && window.localStorage) {
-        try {
-            const raw = window.localStorage.getItem("nostalgia_auth");
-            return raw ? JSON.parse(raw) : null;
-        } catch {
-            return null;
-        }
-    }
-    return null;
-}
-
-export function guardarSesion(sesion: UsuarioSesion): void {
-    memorySesion = sesion;
-    if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.setItem("nostalgia_auth", JSON.stringify(sesion));
-    }
-}
-
-export function cerrarSesion(): void {
-    memorySesion = null;
-    if (typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.removeItem("nostalgia_auth");
-    }
+function requireSession(): AuthSession {
+    const session = getSesion();
+    if (!session) throw new Error("Tenés que iniciar sesión para realizar esta acción.");
+    return session;
 }
 
 export function isOwnMemory(memory: { author?: string; source?: string } | null | undefined): boolean {
@@ -56,65 +38,27 @@ export function getMemoryAuthorDisplay(memory: { author?: string; source?: strin
 }
 
 export async function login(email: string, contrasena: string): Promise<UsuarioSesion> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'X-Nostalgiar-Request': '1'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ email, contrasena, contraseña: contrasena })
-    });
-
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({ mensaje: "Credenciales inválidas" }));
-        throw new Error(err.mensaje || `Error ${response.status}`);
-    }
-
-    const data: UsuarioSesion = await response.json();
-    guardarSesion(data);
-    return data;
+    const sesion = await loginRequest({ email, contrasena });
+    guardarSesion(sesion);
+    return sesion;
 }
 
 export async function registro(datos: { username: string; email: string; contrasena: string; esAdmin?: boolean }): Promise<UsuarioSesion> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/registro`, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'X-Nostalgiar-Request': '1'
-        },
-        credentials: 'include',
-        body: JSON.stringify(datos)
-    });
-
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({ mensaje: "Error al registrarse" }));
-        throw new Error(err.mensaje || `Error ${response.status}`);
-    }
-
-    const data: UsuarioSesion = await response.json();
-    guardarSesion(data);
-    return data;
+    const sesion = await registerRequest({ username: datos.username, email: datos.email, contrasena: datos.contrasena });
+    guardarSesion(sesion);
+    return sesion;
 }
 
 export async function compartirPublicacion(originalId: string, descripcion: string, autorId?: number) {
-    const sesion = getSesion();
-    const token = sesion?.token;
-    const finalAutorId = sesion?.usuarioId ?? autorId;
-    if (!finalAutorId) {
-        throw new Error("Debés iniciar sesión para compartir una publicación.");
-    }
+    const sesion = requireSession();
+    const finalAutorId = sesion.usuarioId;
     const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1; 
 
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'X-Nostalgiar-Request': '1',
     };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/publicaciones/compartir`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/compartir`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -132,25 +76,16 @@ export async function compartirPublicacion(originalId: string, descripcion: stri
 }
 
 export async function eliminarRepost(originalId: string, autorId?: number) {
-    const sesion = getSesion();
-    const token = sesion?.token;
-    const finalAutorId = sesion?.usuarioId ?? autorId;
+    const sesion = requireSession();
+    const finalAutorId = sesion.usuarioId;
     const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1;
-
-    const headers: Record<string, string> = {
-        'X-Nostalgiar-Request': '1',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const url = finalAutorId !== undefined
         ? `${API_BASE_URL}/api/publicaciones/compartir/${numericId}?autorId=${finalAutorId}`
         : `${API_BASE_URL}/api/publicaciones/compartir/${numericId}`;
 
-    const response = await fetch(url, {
-        method: 'DELETE',
-        headers
+    const response = await apiFetch(url, {
+        method: 'DELETE'
     });
 
     if (!response.ok) {
@@ -161,25 +96,16 @@ export async function eliminarRepost(originalId: string, autorId?: number) {
 }
 
 export async function eliminarPublicacion(id: string, autorId?: number) {
-    const sesion = getSesion();
-    const token = sesion?.token;
-    const finalAutorId = sesion?.usuarioId ?? autorId;
+    const sesion = requireSession();
+    const finalAutorId = sesion.usuarioId;
     const numericId = parseInt(id.replace(/\D/g, ''), 10) || 1;
-
-    const headers: Record<string, string> = {
-        'X-Nostalgiar-Request': '1',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const url = finalAutorId !== undefined
         ? `${API_BASE_URL}/api/publicaciones/${numericId}?autorId=${finalAutorId}`
         : `${API_BASE_URL}/api/publicaciones/${numericId}`;
 
-    const response = await fetch(url, {
-        method: 'DELETE',
-        headers
+    const response = await apiFetch(url, {
+        method: 'DELETE'
     });
 
     if (!response.ok) {
@@ -354,12 +280,8 @@ export async function getMemories(): Promise<Memory[]> {
 }
 
 export async function crearPublicacion(memory: any, autorId?: number): Promise<any> {
-    const sesion = getSesion();
-    const token = sesion?.token;
-    const finalAutorId = sesion?.usuarioId ?? autorId;
-    if (!finalAutorId) {
-        throw new Error("Debés iniciar sesión para crear una publicación.");
-    }
+    const sesion = requireSession();
+    const finalAutorId = sesion.usuarioId;
     const formData = new FormData();
     formData.append('Titulo', memory.title);
     formData.append('Descripcion', memory.description);
@@ -399,16 +321,8 @@ export async function crearPublicacion(memory: any, autorId?: number): Promise<a
         }
     }
 
-    const headers: Record<string, string> = {
-        'X-Nostalgiar-Request': '1',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/api/publicaciones`, {
+    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones`, {
         method: 'POST',
-        headers,
         body: formData
     });
 
@@ -472,4 +386,3 @@ export async function listarSeguidos(idUsuario: number): Promise<Array<{ id: num
     }
     return await response.json();
 }
-

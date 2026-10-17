@@ -106,6 +106,15 @@ export default function MapboxMap(
       return;
     }
     instance.current = map;
+    const reportBounds = () => {
+      const b = map.getBounds();
+      if (!b) return;
+      const west = b.getWest(), east = b.getEast();
+      const normalize = (value: number) => ((value + 180) % 360 + 360) % 360 - 180;
+      latest.current.onBoundsChange?.({ minLatitud: Math.max(-90,b.getSouth()), maxLatitud: Math.min(90,b.getNorth()), minLongitud: east-west >= 360 ? -180 : normalize(west), maxLongitud: east-west >= 360 ? 180 : normalize(east) });
+    };
+    map.on('load', reportBounds);
+    map.on('moveend', reportBounds);
     let loaded = false;
     const timeout = window.setTimeout(() => {
       if (!loaded) setError(true);
@@ -171,32 +180,28 @@ export default function MapboxMap(
       }
     };
     canvas.addEventListener("keydown", key);
-    const observer = new ResizeObserver(() => map.resize());
+    const observer = new ResizeObserver(() => { if (container.current?.clientWidth) map.resize(); });
     observer.observe(container.current);
     return () => {
       clearTimeout(timeout);
       observer.disconnect();
       canvas.removeEventListener("keydown", key);
-      const hadCamera = savedCamera !== null;
-      if (!map.isMoving()) {
-        const center = map.getCenter();
-        savedCamera = {
-          center: [center.lng, center.lat],
-          zoom: map.getZoom(),
-          pitch: map.getPitch(),
-          bearing: map.getBearing(),
-        };
-      } else if (!hadCamera) {
-        // The camera never settled, so an intro may have been cut off before it
-        // reached its destination. Let it play again next time instead of
-        // reopening on the globe with nothing left to set it off.
-        introSeen = false;
-      }
+      map.stop();
+      const center = map.getCenter();
+      savedCamera = {
+        center: [center.lng, center.lat],
+        zoom: map.getZoom(),
+        pitch: map.getPitch(),
+        bearing: map.getBearing(),
+      };
       map.remove();
       instance.current = null;
       styleReady.current = false;
     };
   }, [props.token]);
+  useEffect(() => {
+    if (props.active === false) instance.current?.stop();
+  }, [props.active]);
   useEffect(() => {
     const map = instance.current;
     if (!map || !ready) return;
@@ -208,6 +213,7 @@ export default function MapboxMap(
     if (
       !map ||
       !ready ||
+      props.active === false ||
       !props.locationResolved ||
       initialLocationApplied.current
     ) {
@@ -261,7 +267,7 @@ export default function MapboxMap(
         essential: true,
       });
     }
-  }, [props.locationResolved, props.userLocation, ready]);
+  }, [props.locationResolved, props.userLocation, props.active, ready]);
   useEffect(() => {
     const map = instance.current;
     if (!map) return;
@@ -367,40 +373,7 @@ export default function MapboxMap(
       aria-label="Globo Mapbox de recuerdos de Argentina"
     >
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
-      <details className="globe-tools" open={window.innerWidth >= 900 ? true : undefined}><summary>Opciones del mapa</summary><div className="globe-tool-buttons">
-        <button
-          onClick={() => {
-            userInteracted.current = true;
-            instance.current?.flyTo({
-              ...responsiveOverview(),
-              duration: duration(),
-            });
-          }}
-        >
-          Ver globo
-        </button>
-        <button
-          onClick={() => {
-            userInteracted.current = true;
-            instance.current?.flyTo({
-              center: [-64.4, -38.4],
-              zoom: 4,
-              pitch: 0,
-              bearing: 0,
-              duration: duration(),
-            });
-          }}
-        >
-          Ver Argentina
-        </button>
-        <button
-          aria-expanded={controls}
-          aria-controls="mapbox-settings"
-          onClick={() => setControls((v) => !v)}
-        >
-          Estilo del mapa
-        </button>
-      </div></details>
+      
       {controls && (
         <aside
           id="mapbox-settings"
@@ -488,7 +461,7 @@ export default function MapboxMap(
           <button onClick={() => setError(false)}>Cerrar aviso</button>
         </div>
       )}
-      {!props.memories.length && !props.picking && (
+      {props.showEmptyState !== false && !props.memories.length && !props.picking && (
         <div className="map-empty">
           No hay recuerdos con esta combinación.
           <br />

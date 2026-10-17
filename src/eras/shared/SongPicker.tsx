@@ -14,7 +14,7 @@ export default function SongPicker({ title, tracks, track, onSelect }: {
     function outside(event: PointerEvent) {
       if (!dialog.current?.contains(event.target as Node) && !trigger.current?.contains(event.target as Node)) dialog.current?.close();
     }
-    function escape(event: KeyboardEvent) { if (event.key === 'Escape') { dialog.current?.close(); trigger.current?.focus(); } }
+    function escape(event: KeyboardEvent) { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); dialog.current?.close(); trigger.current?.focus(); } }
     document.addEventListener('pointerdown', outside);
     document.addEventListener('keydown', escape);
     return () => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', escape); };
@@ -46,7 +46,7 @@ export default function SongPicker({ title, tracks, track, onSelect }: {
           <span className="song-selected" aria-hidden="true">{item.spotifyId === track.spotifyId ? <Check size={17}/> : <ChevronRight size={17}/>}</span>
         </button>)}
       </div>
-      <footer>Elegí un tema o arrastralo al equipo. Abrí Spotify para escucharlo.</footer>
+      <footer>Elegí un tema o arrastralo al equipo y abrí el reproductor para escucharlo.</footer>
     </dialog>
   </>;
 }

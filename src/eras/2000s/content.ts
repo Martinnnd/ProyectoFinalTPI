@@ -8,7 +8,7 @@ export const content = {
   },
   memories: [
 {
-    "id": "cine-2000-1", hashtags: ["nochesdecine", "conamigos"],
+    "id": "cine-2000-1",
     "groupId": "cine-2000",
     "title": "La fila para ver El retorno del rey",
     "year": 2004,
@@ -21,7 +21,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "cine-2000-2", hashtags: ["nochesdecine", "conamigos"],
+    "id": "cine-2000-2",
     "groupId": "cine-2000",
     "title": "Harry Potter y una salida después del colegio",
     "year": 2005,
@@ -34,7 +34,7 @@ export const content = {
     "source": "demo"
 },
 {
-    "id": "cine-2000-3", hashtags: ["nochesdecine"],
+    "id": "cine-2000-3",
     "groupId": "cine-2000",
     "title": "Shrek en DVD y el sillón lleno",
     "year": 2002,
@@ -51,7 +51,6 @@ export const content = {
       lat: -34.6065,
       lng: -58.4355,
       id: "demo-14",
-      hashtags: ["recuerdosdelbarrio"],
       title: "La foto del Fotolog, junto al lago",
       year: 2007,
       category: "Personales",

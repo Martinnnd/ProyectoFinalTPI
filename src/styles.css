@@ -1,9 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
 
 @font-face {
-  font-family: 'Ananda';
+  font-family: 'Avenue de Madison';
   font-display: swap;
-  src: url('../fonts/AnandaBlack.ttf') format('truetype');
+  src: url('../fonts/AvenueDeMadison.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -960,6 +960,7 @@ textarea {
 }
 
 /* Real recordings are played by Spotify, only after opening the player. */
+.app .music-card.player-hidden { display: none; }
 .music-card {
   position: absolute;
   bottom: 26px;
@@ -1047,6 +1048,11 @@ textarea {
 }
 .music-heading .eyebrow {
   font-size: 8px;
+}
+.local-music-player {
+  display: block;
+  width: 100%;
+  margin: 12px 0;
 }
 .spotify-player {
   display: block;
@@ -1664,3 +1670,10 @@ textarea {
  .app .era-fact-popup.fact-reader { bottom:120px; max-height:calc(100dvh - 235px); }
  .fact-photo { height:150px; }
 }
+
+.music-volume-control { position:relative; }
+.music-buttons { flex-shrink:0; }
+.music-volume-panel { position:absolute; right:0; bottom:calc(100% + 8px); z-index:800; width:150px; padding:10px; background:var(--surface); color:var(--ink); border:1px solid var(--line); box-shadow:var(--shadow); }
+.music-volume-panel label { display:block; font-size:12px; margin-bottom:6px; }
+.music-volume-panel input { display:block; width:100%; accent-color:var(--accent); }
+.music-playback-error { position:absolute; bottom:100%; left:0; right:0; margin:0; padding:10px; background:var(--surface); color:var(--ink); border:1px solid var(--line); z-index:800; }

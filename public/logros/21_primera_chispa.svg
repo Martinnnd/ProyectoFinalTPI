@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Insignia Primera chispa">
+  <defs>
+    <radialGradient id="gold"><stop stop-color="#fff3b1"/><stop offset=".72" stop-color="#efbe4f"/><stop offset="1" stop-color="#b66d25"/></radialGradient>
+    <linearGradient id="shine" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#d9e1d8"/></linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="59" fill="#33293b" stroke="#f6d475" stroke-width="4"/>
+  <circle cx="64" cy="64" r="50" fill="url(#gold)" stroke="#fff2bc" stroke-width="2"/>
+  <circle cx="64" cy="64" r="39" fill="#33293b" opacity=".9"/>
+  <path d="M27 63h46l20-17v36L73 65H27z" fill="#161719"/>
+  <path d="M59 38h34v44L73 65H59z" fill="url(#shine)"/>
+  <path d="m20 27 4 8 8 4-8 4-4 8-4-8-8-4 8-4zM106 77l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="#fff5bc"/>
+  <path d="M42 104h44" stroke="#fff1b1" stroke-width="4" stroke-linecap="round"/>
+  <text x="64" y="113" fill="#fff1b1" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="12">5 PUNTOS</text>
+</svg>

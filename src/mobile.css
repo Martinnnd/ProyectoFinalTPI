@@ -31,8 +31,8 @@
  .app .map-canvas .mapboxgl-ctrl-bottom-left { bottom:0; }
  .app .map-canvas .mapboxgl-ctrl-attrib { font-size:9px; }
  .app .map-canvas .map-notice { left:12px; right:12px; top:12px; bottom:auto; width:auto; max-width:none; }
- .app .music-card:not(.expanded) { display:none; }
- .app .music-card.expanded,.app .era-fact-popup.fact-reader,.app .stories-drawer { position:absolute; inset:auto 10px calc(var(--mobile-bottom) + 10px); width:auto; max-width:none; max-height:calc(100dvh - var(--mobile-top) - var(--mobile-bottom) - 24px); z-index:650; overflow:auto; }
+ .app .music-card.player-hidden { display:none; }
+ .app .music-card.player-visible,.app .era-fact-popup.fact-reader,.app .stories-drawer { position:absolute; inset:auto 10px calc(var(--mobile-bottom) + 10px); width:auto; max-width:none; max-height:calc(100dvh - var(--mobile-top) - var(--mobile-bottom) - 24px); z-index:650; overflow:auto; }
  .app .era-fact-popup.fact-reader { overflow:hidden; }
  .app .stories-drawer .stories-content { max-height:55dvh; overflow:auto; }
  .app .social-layout { inset:var(--mobile-top) 0 var(--mobile-bottom); display:block; padding:0; }
