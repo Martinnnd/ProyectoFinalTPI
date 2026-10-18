@@ -1,4 +1,4 @@
-import { UserRound, X } from "lucide-react";
+import { MessageCircle, UserRound, X } from "lucide-react";
 import { useRef, useState } from "react";
 import type { Achievement, Period } from "../../types";
 import type { FollowedUser } from "../../seguimientosApi";
@@ -22,6 +22,7 @@ export default function ProfileHeader({
   onBack,
   onOpenAchievements,
   onOpenTiers,
+  onIniciarChat,
 }: {
   author?: string;
   username: string;
@@ -38,6 +39,7 @@ export default function ProfileHeader({
   onBack?: () => void;
   onOpenAchievements: () => void;
   onOpenTiers: () => void;
+  onIniciarChat?: (username: string) => void;
 }) {
   const followDialog = useRef<HTMLDialogElement>(null);
   const [followList, setFollowList] = useState<FollowList>("followers");
@@ -97,6 +99,15 @@ export default function ProfileHeader({
               )}
             </div>
           </div>
+          {!isOwnProfile && onIniciarChat && (
+            <button
+              className="secondary-button"
+              onClick={() => onIniciarChat(author!)}
+              style={{ display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", marginTop: "8px" }}
+            >
+              <MessageCircle size={14} /> Iniciar chat
+            </button>
+          )}
           {isOwnProfile && (
             <div className="achievements">
               <div className="achievements-heading">
@@ -159,4 +170,3 @@ export default function ProfileHeader({
     </>
   );
 }
-

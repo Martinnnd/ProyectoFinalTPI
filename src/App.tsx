@@ -89,6 +89,7 @@ export default function App() {
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const currentUserId = session?.usuarioId;
   const following = followingUsers.map(user => user.username);
+  const [chatearCon, setChatearCon] = useState<{ usuarioId: number; username: string; ts: number } | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -275,6 +276,22 @@ export default function App() {
     setFactsOpen(false);
     setPanelOpen(false);
   }
+  async function iniciarChatConUsuario(username: string) {
+    try {
+      const { obtenerUsuarioPorUsername } = await import("./chat/chatApi");
+      const usuario = await obtenerUsuarioPorUsername(username);
+      setChatearCon({ usuarioId: usuario.usuarioId, username: usuario.username, ts: Date.now() });
+      setView("chat");
+      setPanelOpen(false);
+      setFactsOpen(false);
+      setPicking(false);
+      setSelectedId(null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "No se pudo iniciar el chat.";
+      setNotice(msg);
+    }
+  }
+
   function openProfile(memory: Memory) {
     setProfileAuthor(isOwnMemory(memory) ? null : memory.author);
     setSelectedId(null); setPanelOpen(false); setFactsOpen(false); setPicking(false);
@@ -616,6 +633,7 @@ export default function App() {
           earned={earned}
           onSelect={(m) => setSelectedId(m?.id ?? null)}
           onAdd={startAdding}
+          onIniciarChat={profileAuthor ? iniciarChatConUsuario : undefined}
         />
       )}
       <div hidden={view !== "feed"}>
@@ -665,7 +683,7 @@ export default function App() {
           onRepostCreated={id => setRepostedPublicationIds(current => [...new Set([...current, id])])}
         />
       </div>
-      {session && <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft}/>}
+      {session && <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft} chatearCon={chatearCon}/>}
       <Player
         key={period.decade}
         decade={period.decade}

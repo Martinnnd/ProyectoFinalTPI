@@ -35,6 +35,7 @@ export default function Profile({
   onSelect,
   onOpen,
   onAdd,
+  onIniciarChat,
 }: {
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
@@ -53,6 +54,7 @@ export default function Profile({
   onOpen?: (memory: Memory) => void;
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
+  onIniciarChat?: (username: string) => void;
 }) {
   const album = useRef<HTMLElement>(null);
   const mapDialog = useRef<HTMLDialogElement>(null);
@@ -132,6 +134,7 @@ export default function Profile({
           onBack={onBack}
           onOpenAchievements={openCatalogue}
           onOpenTiers={openTiers}
+          onIniciarChat={onIniciarChat}
         />
         <ProfileShortcuts
           author={author}
