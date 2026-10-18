@@ -138,15 +138,20 @@ export default function SocialFeed({
 
     pendingLikes.current.add(memoryId);
     setLikeError('');
+    const wasLiked = interactions.isLiked(memoryId, memory.viewerLiked);
+    interactions.setLiked(memoryId, !wasLiked);
     try {
-      const wasLiked = interactions.isLiked(memoryId, memory.viewerLiked);
       const summary = wasLiked
         ? await unlikePublication(serverId)
         : await likePublication(serverId);
       interactions.setLiked(memoryId, summary.dioLike);
       remote.updateLikeSummary(memoryId, summary);
-      if (tab === 'all') remote.reload();
+      if (tab === 'all') {
+        if (summary.dioLike) window.setTimeout(() => remote.reload(), 450);
+        else remote.reload();
+      }
     } catch (error) {
+      interactions.setLiked(memoryId, wasLiked);
       setLikeError(error instanceof Error ? error.message : 'No se pudo actualizar el Me gusta.');
     } finally {
       pendingLikes.current.delete(memoryId);
