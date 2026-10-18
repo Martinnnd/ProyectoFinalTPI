@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FeedError, getFeed, type RemoteFeed } from '../feedApi';
+import type { LikeSummary } from '../publicationsApi';
 import type { Memory } from '../types';
 
 export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) {
@@ -42,6 +43,11 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
     const controller = new AbortController(); request.current = controller;
     void load(true, controller);
   }
+  function updateLikeSummary(publicationId: string, summary: LikeSummary) {
+    setItems(current => current.map(item => item.id === publicationId || item.repost?.originalId === publicationId
+      ? { ...item, likeCount: summary.cantidadLikes, viewerLiked: summary.dioLike }
+      : item));
+  }
   useEffect(() => () => request.current?.abort(), [feed, active, revision]);
-  return { items, loading, error, expired, hayMas: hayMas && !!cursor, more, reload: () => { request.current?.abort(); setRevision(value => value + 1); } };
+  return { items, loading, error, expired, hayMas: hayMas && !!cursor, more, updateLikeSummary, reload: () => { request.current?.abort(); setRevision(value => value + 1); } };
 }

@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://localhost:7014";
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://localhost:7014").replace(/\/+$/, "");
 
 export interface UsuarioSesion {
     token: string;
@@ -56,8 +56,12 @@ export function getMemoryAuthorDisplay(memory: { author?: string; source?: strin
 export async function login(email: string, contrasena: string): Promise<UsuarioSesion> {
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, contrasena, contraseña: contrasena })
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Nostalgiar-Request': '1'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, contrasena })
     });
 
     if (!response.ok) {
@@ -73,7 +77,11 @@ export async function login(email: string, contrasena: string): Promise<UsuarioS
 export async function registro(datos: { username: string; email: string; contrasena: string; esAdmin?: boolean }): Promise<UsuarioSesion> {
     const response = await fetch(`${API_BASE_URL}/api/auth/registro`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Nostalgiar-Request': '1'
+        },
+        credentials: 'include',
         body: JSON.stringify(datos)
     });
 

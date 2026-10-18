@@ -7,6 +7,7 @@ export type MapBounds = { minLatitud: number; maxLatitud: number; minLongitud: n
 type Pin = { id: number; latitud: number; longitud: number; categoria: number | string };
 export type Publication = { cantidadLikes?: number; cantidadComentarios?: number; dioLike?: boolean; id: number; titulo: string; descripcion?: string; descripcionBreve?: string; fecha: string; fechaCreacion?: string; categoria: number | string; urlMultimedia: string; tipoMultimedia: number | string; autor: { id: number; username: string }; lugar?: { nombre: string; latitud: number; longitud: number } };
 type Comment = { id: number; contenido: string; fechaCreacion: string; autor: { id: number; username: string } };
+export type LikeSummary = { publicacionId: number; cantidadLikes: number; dioLike: boolean };
 
 export async function publicationRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
@@ -52,6 +53,17 @@ export async function getPublication(memory: Memory, summary: boolean, signal?: 
   const id = publicationId(memory);
   if (!id) throw new Error('Esta publicación no tiene un identificador del servidor.');
   return toMemory(await publicationRequest<Publication>(`/${id}${summary ? '/resumen' : ''}`, { signal }), memory);
+}
+function validateLikePublicationId(id: string): string {
+  if (!/^[1-9]\d*$/.test(id)) throw new Error('Esta publicación no tiene un identificador válido del servidor.');
+  if (!getSesion()?.token) throw new Error('Iniciá sesión para dar o quitar un Me gusta.');
+  return id;
+}
+export function likePublication(id: string): Promise<LikeSummary> {
+  return publicationRequest<LikeSummary>(`/${validateLikePublicationId(id)}/like`, { method: 'POST' });
+}
+export function unlikePublication(id: string): Promise<LikeSummary> {
+  return publicationRequest<LikeSummary>(`/${validateLikePublicationId(id)}/like`, { method: 'DELETE' });
 }
 function toComment(data: Comment, memoryId: string): MemoryComment {
   return { id: String(data.id), memoryId, text: data.contenido, author: data.autor.username, createdAt: data.fechaCreacion, reactions: {} };

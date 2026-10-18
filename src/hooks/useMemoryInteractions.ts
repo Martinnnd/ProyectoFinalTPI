@@ -40,6 +40,10 @@ export default function useMemoryInteractions() {
     setLikes(current => ({ ...current, [memoryId]: !(current[memoryId] ?? initial) }));
   }
 
+  function setLiked(memoryId: string, liked: boolean) {
+    setLikes(current => ({ ...current, [memoryId]: liked }));
+  }
+
   function getComments(memoryId: string) {
     return commentsByMemory[memoryId] ?? [];
   }
@@ -81,6 +85,7 @@ export default function useMemoryInteractions() {
     addComment,
     getComments,
     isLiked,
+    setLiked,
     reactToComment,
     toggleLike,
   };

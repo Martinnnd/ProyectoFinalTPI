@@ -32,6 +32,7 @@ Es un frontend completo de demostración, no una red social con backend. No hay 
 Crear .env.local en la raíz, tomando .env.example como plantilla:
 
 ```dotenv
+NEXT_PUBLIC_API_BASE_URL=https://localhost:7014
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=TU_TOKEN_PUBLICO
 NEXT_PUBLIC_MAP_MODE=auto
 ```
@@ -100,7 +101,7 @@ Validación: `npm run check`, `npm test`, `npm run build` y `npx playwright test
 
 ## Conexión con el Backend y Usuarios de Prueba (Data Seeder)
 
-El frontend se conecta con la API en `http://localhost:5199` (configurado en `src/api.ts`).
+El frontend obtiene las publicaciones, el mapa y los feeds desde la API; no se conecta directamente a PostgreSQL ni a Neo4j. La URL se configura con `NEXT_PUBLIC_API_BASE_URL` en `.env.local`. El valor predeterminado es `https://localhost:7014`, correspondiente al perfil HTTPS del backend. Si se inicia solo el perfil HTTP, usar `http://localhost:5199`. Reiniciar `npm run dev` después de cambiar esta variable.
 
 Cuando el backend se inicia por primera vez en desarrollo, su **Data Seeder** puebla automáticamente la base de datos con los usuarios y publicaciones históricas desde `seed.json`.
 

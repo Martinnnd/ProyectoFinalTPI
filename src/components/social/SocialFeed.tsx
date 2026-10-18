@@ -9,7 +9,8 @@ import FeedPost from "./FeedPost";
 import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
 import RepostDialog from "./RepostDialog";
-import { compartirPublicacion, eliminarRepost, isOwnMemory } from "../../api";
+import { compartirPublicacion, eliminarRepost, getSesion, isOwnMemory } from "../../api";
+import { publicationId, likePublication, unlikePublication } from '../../publicationsApi';
 import { memoryHashtags, weeklyTrends } from "../../hashtags";
 import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
@@ -62,6 +63,7 @@ export default function SocialFeed({
   onRate,
   onReloadMemories,
   onRepostCreated,
+  onRequireLogin,
 }: {
   active: boolean;
   onItems: (items: Memory[]) => void;
@@ -90,8 +92,11 @@ export default function SocialFeed({
   onTabChange: (tab: FeedTab) => void;
   onReloadMemories?: () => void | Promise<void>;
   onRepostCreated: (id: string) => void;
+  onRequireLogin: () => void;
 }) {
   const interactions = useMemoryInteractions();
+  const pendingLikes = useRef(new Set<string>());
+  const [likeError, setLikeError] = useState('');
   const desktopDetail = !!selected && (decade === 1990 || decade === 2000);
   const [maximized, setMaximized] = useState(false);
   const [reposts, setReposts] = useState<string[]>([]);
@@ -118,6 +123,35 @@ export default function SocialFeed({
   const stream = useRef<HTMLDivElement>(null);
   
   const allMemories = tab === 'groups' ? memories : filterFeed(remote.items);
+
+  async function handleLike(memoryId: string, memory: Memory) {
+    if (pendingLikes.current.has(memoryId)) return;
+    const serverId = publicationId({ ...memory, id: memoryId });
+    if (!serverId) {
+      interactions.toggleLike(memoryId, memory.viewerLiked);
+      return;
+    }
+    if (!getSesion()?.token) {
+      onRequireLogin();
+      return;
+    }
+
+    pendingLikes.current.add(memoryId);
+    setLikeError('');
+    try {
+      const wasLiked = interactions.isLiked(memoryId, memory.viewerLiked);
+      const summary = wasLiked
+        ? await unlikePublication(serverId)
+        : await likePublication(serverId);
+      interactions.setLiked(memoryId, summary.dioLike);
+      remote.updateLikeSummary(memoryId, summary);
+      if (tab === 'all') remote.reload();
+    } catch (error) {
+      setLikeError(error instanceof Error ? error.message : 'No se pudo actualizar el Me gusta.');
+    } finally {
+      pendingLikes.current.delete(memoryId);
+    }
+  }
 
   useEffect(() => () => cancelTurn.current(), []);
   useEffect(() => {
@@ -251,6 +285,7 @@ export default function SocialFeed({
             onBack={() => setHashtag(null)} onAdd={() => { setTab("all"); onAddHashtag(hashtag); }} />
         )}
         <div className="feed-posts">
+          {likeError && <p role="alert" className="feed-error">{likeError}</p>}
           {(selected ? [selected] : posts).map((memory) => {
             const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
             const isQuote = Boolean(memory.repost?.comment);
@@ -296,7 +331,7 @@ export default function SocialFeed({
                 onOpen={(memToOpen) => open(memToOpen || targetMemory)}
                 onMap={onMap}
                 onRate={(value) => onRate(isSimpleRepost ? rootId : memory.id, value)}
-                onLike={() => interactions.toggleLike(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
+                onLike={() => { void handleLike(isSimpleRepost ? rootId : memory.id, targetMemory); }}
                 onRepost={() => {
                   if (isReposted) {
                     handleUnrepost(memory);

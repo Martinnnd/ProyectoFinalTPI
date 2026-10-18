@@ -658,6 +658,7 @@ export default function App() {
           onAdd={startAdding}
           onReloadMemories={reloadMemories}
           onRepostCreated={id => setRepostedPublicationIds(current => [...new Set([...current, id])])}
+          onRequireLogin={() => setLoginOpen(true)}
         />
       </div>
       <Chat decade={period.decade} fullPage={view === "chat"} onOpenPage={() => {setView("chat");setPanelOpen(false);setFactsOpen(false);setPicking(false);}} hidden={picking || !!draft}/>
