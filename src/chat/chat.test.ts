@@ -7,7 +7,7 @@ vi.mock('../api', () => ({
 }));
 
 import { getSesion } from '../api';
-import { obtenerConversaciones, obtenerUsuarioPorUsername } from './chatApi';
+import { obtenerConversaciones, obtenerUsuarioPorUsername, eliminarConversacion } from './chatApi';
 import type { ConversacionResumenDto, UsuarioResumenDto } from './types';
 
 // Sesión de prueba reutilizable
@@ -204,6 +204,80 @@ describe('chatApi', () => {
       fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
 
       await expect(obtenerUsuarioPorUsername('lucia')).rejects.toThrow('Failed to fetch');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  describe('eliminarConversacion', () => {
+    it('lanza un error si no hay sesión activa', async () => {
+      vi.mocked(getSesion).mockReturnValue(null);
+
+      await expect(eliminarConversacion(2)).rejects.toThrow('No hay sesión activa.');
+    });
+
+    it('llama al endpoint correcto con method DELETE y el header de autorización', async () => {
+      vi.mocked(getSesion).mockReturnValue(sesionMock);
+      fetchMock.mockResolvedValue({ ok: true, status: 204 });
+
+      await eliminarConversacion(2);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://localhost:5199/api/chat/conversaciones/2',
+        expect.objectContaining({
+          method: 'DELETE',
+          headers: expect.objectContaining({ Authorization: 'Bearer jwt-valido' }),
+        }),
+      );
+    });
+
+    it('resuelve sin valor cuando el servidor responde 204', async () => {
+      vi.mocked(getSesion).mockReturnValue(sesionMock);
+      fetchMock.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(eliminarConversacion(2)).resolves.toBeUndefined();
+    });
+
+    it('lanza error descriptivo cuando no existe la conversación (404)', async () => {
+      vi.mocked(getSesion).mockReturnValue(sesionMock);
+      fetchMock.mockResolvedValue({ ok: false, status: 404 });
+
+      await expect(eliminarConversacion(2)).rejects.toThrow(
+        'No existe una conversación activa con este usuario.',
+      );
+    });
+
+    it('lanza error descriptivo al intentar eliminar una conversación con uno mismo (400)', async () => {
+      vi.mocked(getSesion).mockReturnValue(sesionMock);
+      fetchMock.mockResolvedValue({ ok: false, status: 400 });
+
+      await expect(eliminarConversacion(1)).rejects.toThrow(
+        'No podés eliminar una conversación con vos mismo.',
+      );
+    });
+
+    it('lanza error de sesión expirada cuando el servidor responde 401', async () => {
+      vi.mocked(getSesion).mockReturnValue(sesionMock);
+      fetchMock.mockResolvedValue({ ok: false, status: 401 });
+
+      await expect(eliminarConversacion(2)).rejects.toThrow(
+        'Sesión expirada. Iniciá sesión de nuevo.',
+      );
+    });
+
+    it('lanza error genérico con el código de estado para otros errores HTTP', async () => {
+      vi.mocked(getSesion).mockReturnValue(sesionMock);
+      fetchMock.mockResolvedValue({ ok: false, status: 500 });
+
+      await expect(eliminarConversacion(2)).rejects.toThrow(
+        'Error al eliminar la conversación (500).',
+      );
+    });
+
+    it('propaga errores de red sin modificarlos', async () => {
+      vi.mocked(getSesion).mockReturnValue(sesionMock);
+      fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      await expect(eliminarConversacion(2)).rejects.toThrow('Failed to fetch');
     });
   });
 });

@@ -1,10 +1,10 @@
 import { createPortal } from "react-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowUpRight, ChevronUp, MessageCircle, Minus, Send, X } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, ChevronUp, MessageCircle, Minus, Send, Trash2, X } from "lucide-react";
 import type { Decade } from "../types";
 import { useAuth } from "./auth/AuthProvider";
 import type { MensajeChatDto, ConversacionResumenDto } from "../chat/types";
-import { obtenerConversaciones } from "../chat/chatApi";
+import { eliminarConversacion, obtenerConversaciones } from "../chat/chatApi";
 import { useChatConnection } from "../chat/useChatConnection";
 
 const titulosPorDecada: Record<Decade, string> = {
@@ -40,8 +40,6 @@ export default function Chat({
   fullPage: boolean;
   onOpenPage: () => void;
   hidden: boolean;
-  /** Abre automáticamente una conversación. El campo `ts` garantiza que el
-   *  efecto se dispare aunque sea el mismo usuario dos veces seguidas. */
   chatearCon?: { usuarioId: number; username: string; ts: number } | null;
 }) {
   const { session } = useAuth();
@@ -66,11 +64,12 @@ export default function Chat({
   const [cargandoMensajes, setCargandoMensajes] = useState(false);
   const [inputTexto, setInputTexto] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [eliminando, setEliminando] = useState(false);
+  const [confirmandoBorrar, setConfirmandoBorrar] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const trigger = useRef<HTMLButtonElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  // Ref para acceder a la conversación activa dentro de callbacks de SignalR
   const conversacionActivaRef = useRef<ConversacionActiva | null>(null);
   useEffect(() => { conversacionActivaRef.current = conversacionActiva; }, [conversacionActiva]);
 
@@ -140,6 +139,7 @@ export default function Chat({
 
   // --- Cargar historial al seleccionar una conversación ---
   useEffect(() => {
+    setConfirmandoBorrar(false);
     if (!conversacionActiva || !connected) return;
     let cancelado = false;
     setCargandoMensajes(true);
@@ -169,7 +169,7 @@ export default function Chat({
   // --- Resetear conversación al cambiar de época ---
   useEffect(() => { setConversacionActiva(null); }, [decade]);
 
-  // --- Envío ---
+  // --- Envío de mensaje ---
   async function handleEnviar() {
     if (!conversacionActiva || !inputTexto.trim() || !connected || enviando) return;
     const texto = inputTexto.trim();
@@ -184,6 +184,26 @@ export default function Chat({
       setInputTexto(texto);
     } finally {
       setEnviando(false);
+    }
+  }
+
+  // --- Eliminación de conversación ---
+  async function handleEliminarConversacion() {
+    if (!conversacionActiva) return;
+    setEliminando(true);
+    setError(null);
+    try {
+      await eliminarConversacion(conversacionActiva.usuarioId);
+      setConversaciones(prev => prev.filter(c => c.otroUsuarioId !== conversacionActiva.usuarioId));
+      setConversacionActiva(null);
+      setMensajes([]);
+      setConfirmandoBorrar(false);
+    } catch (err: unknown) {
+      const mensaje = err instanceof Error ? err.message : "No se pudo eliminar la conversación.";
+      setError(mensaje);
+      setConfirmandoBorrar(false);
+    } finally {
+      setEliminando(false);
     }
   }
 
@@ -232,7 +252,11 @@ export default function Chat({
   const vistaConversacion = conversacionActiva ? (
     <div className="chat-conversation">
       <header>
-        <button className="icon-button" aria-label="Volver a conversaciones" onClick={() => { setConversacionActiva(null); setError(null); }}>
+        <button
+          className="icon-button"
+          aria-label="Volver a conversaciones"
+          onClick={() => { setConversacionActiva(null); setError(null); }}
+        >
           <ArrowLeft size={18} />
         </button>
         <span className="chat-avatar">
@@ -243,7 +267,39 @@ export default function Chat({
           <strong>{conversacionActiva.username}</strong>
           <small>{connected ? "Conectados" : "Conectando…"}</small>
         </div>
+        {confirmandoBorrar ? (
+          <>
+            <button
+              className="icon-button"
+              aria-label="Confirmar eliminación de conversación"
+              onClick={handleEliminarConversacion}
+              disabled={eliminando}
+              style={{ marginLeft: "auto", color: "var(--error, #c0392b)" }}
+            >
+              <Check size={18} />
+            </button>
+            <button
+              className="icon-button"
+              aria-label="Cancelar eliminación"
+              onClick={() => setConfirmandoBorrar(false)}
+              disabled={eliminando}
+            >
+              <X size={18} />
+            </button>
+          </>
+        ) : (
+          <button
+            className="icon-button"
+            aria-label="Eliminar conversación"
+            onClick={() => setConfirmandoBorrar(true)}
+            style={{ marginLeft: "auto" }}
+            title="Eliminar conversación"
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
       </header>
+
       <div className="chat-messages">
         {cargandoMensajes && (
           <span className="chat-date">Cargando historial…</span>
@@ -262,11 +318,13 @@ export default function Chat({
         ))}
         <div ref={bottomRef} />
       </div>
+
       {error && (
         <div className="chat-demo-note" style={{ color: "var(--error, #c0392b)" }}>
           {error}
         </div>
       )}
+
       <div className="chat-composer">
         <input
           type="text"
