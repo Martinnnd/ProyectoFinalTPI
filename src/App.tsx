@@ -3,8 +3,8 @@ import DeleteMemoryDialog from "./components/DeleteMemoryDialog";
 
 import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
-import { demoGroups, loadGroups, filterCommunity } from "./groups";
-import { demoGroupMemories } from "./groupMemories";
+import { filterCommunity } from "./groups";
+import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, type CreateGroupInput } from "./groupsApi";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
@@ -56,10 +56,10 @@ export default function App() {
   const selectedSeed = useRef<Memory | null>(null);
   const [apiStatus, setApiStatus] = useState('');
   const [mapRevision, setMapRevision] = useState(0);
-  const [groups,setGroups] = useState<CommunityGroup[]>(demoGroups);
+  const [groups,setGroups] = useState<CommunityGroup[]>([]);
   const [scope,setScope] = useState('all');
   const [query,setQuery] = useState('');
-  useEffect(()=>setGroups(loadGroups()),[]);
+  const [publishingGroupId,setPublishingGroupId] = useState<string | null>(null);
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
   const mapExpandButton = useRef<HTMLButtonElement>(null);
@@ -85,6 +85,7 @@ export default function App() {
   });
   const [category, setCategory] = useState<Category | "Todas">("Todas");
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
+  const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
   const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const currentUserId = session?.usuarioId;
@@ -148,6 +149,36 @@ export default function App() {
   const [draft, setDraft] = useState<Point | null>(null);
   const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
+  useEffect(() => {
+    const controller = new AbortController();
+    getGroups(controller.signal)
+      .then(remoteGroups => {
+        if (!controller.signal.aborted) setGroups(remoteGroups);
+      })
+      .catch(error => {
+        if (!controller.signal.aborted) {
+          setNotice(error instanceof Error ? error.message : 'No se pudieron cargar los grupos.');
+        }
+      });
+    return () => controller.abort();
+  }, [session]);
+  useEffect(() => {
+    const activeGroup = groups.find(group => group.id === scope);
+    setGroupMemories([]);
+    if (!activeGroup) return;
+
+    const controller = new AbortController();
+    getGroupMemories(activeGroup.id, controller.signal)
+      .then(memories => {
+        if (!controller.signal.aborted) setGroupMemories(memories);
+      })
+      .catch(error => {
+        if (!controller.signal.aborted) {
+          setNotice(error instanceof Error ? error.message : 'No se pudieron cargar los recuerdos del grupo.');
+        }
+      });
+    return () => controller.abort();
+  }, [groups, scope]);
   const [celebrating, setCelebrating] = useState<Achievement | null>(null);
   const [ratings, setRatings] = useState<NostalgiaRatings>({});
   const [firstFiveEarned, setFirstFiveEarned] = useState(false);
@@ -224,8 +255,11 @@ export default function App() {
     }).catch(error => { if (!controller.signal.aborted) { setRemoteSelected(null); setApiStatus(`No se pudo abrir la publicación: ${error.message}`); } });
     return () => controller.abort();
   }, [selectedId, view, mapRevision]);
+  const viewingGroup = groups.some(group => group.id === scope);
+  const communityMemories = viewingGroup ? groupMemories : dbMemories;
+  const feedSource = viewingGroup ? groupMemories : feedItems;
   const memories = filterMemories(
-    filterCommunity(view === 'map' ? remotePins : view === 'feed' ? feedItems : dbMemories,view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
+    filterCommunity(view === 'map' ? remotePins : view === 'feed' ? feedSource : dbMemories,view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
     period,
     category,
   );
@@ -240,13 +274,16 @@ export default function App() {
     if(group){setPeriod({decade:group.decade,year:null});setCategory('Todas');}
     setPanelOpen(false);
   }
-  function createGroup(group:CommunityGroup) {
+  async function createGroup(group:CreateGroupInput): Promise<string | null> {
     if(groups.some(g=>g.name.toLocaleLowerCase()===group.name.toLocaleLowerCase())) return 'Ya existe un grupo con ese nombre.';
-    const next=[...groups,group];
-    try {localStorage.setItem('nostalgia.groups.v1',JSON.stringify(next.filter(g=>!demoGroups.some(d=>d.id===g.id))));} catch {return 'No se pudo guardar el grupo. Revisá el espacio del navegador.';}
-    setGroups(next);setScope(group.id);setSelectedId(null);setQuery('');setCategory('Todas');setPeriod({decade:group.decade,year:null});return null;
+    try {
+      const created = await createRemoteGroup(group);
+      setGroups(current => [...current, created]);setScope(created.id);setSelectedId(null);setQuery('');setCategory('Todas');setPeriod({decade:created.decade,year:null});return null;
+    } catch (error) {
+      return error instanceof Error ? error.message : 'No se pudo crear el grupo.';
+    }
   }
-  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} canCreate={!!session} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup}/>;
+  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} canCreate={!!session} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup} onAddToGroup={startAddingToGroup}/>;
   const eraTransition = useRef<ViewTransition | null>(null);
   useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
   function changePeriod(next: Period) {
@@ -316,11 +353,12 @@ export default function App() {
     setSelectedId(null);
     storiesButton.current?.focus();
   }
-  function startAdding() {
+  function beginAdding(groupId: string | null) {
     if (!session) {
       router.push("/auth/login?returnTo=/explorar");
       return;
     }
+    setPublishingGroupId(groupId);
     setDraftHashtags([]);
     creationOrigin.current = view === "profile";
     setProfileAuthor(null);
@@ -331,11 +369,23 @@ export default function App() {
     setFactsOpen(false);
     setMusicOpen(false);
   }
+  function startAdding() {
+    beginAdding(null);
+  }
+  function startAddingToGroup(groupId: string) {
+    const group = groups.find(candidate => candidate.id === groupId);
+    if (!group) return;
+    setScope(group.id);
+    setPeriod({ decade: group.decade, year: null });
+    setCategory('Todas');
+    beginAdding(group.id);
+  }
   function cancel() {
     if (draftHashtags.length) setView("feed");
     if (creationOrigin.current) setView("profile");
     setPicking(false);
     setDraft(null);
+    setPublishingGroupId(null);
     window.setTimeout(() => addButton.current?.focus(), 0);
   }
   useEffect(() => {
@@ -387,23 +437,34 @@ export default function App() {
     return null;
   }
   async function save(memory: Memory) {
-    const destinationGroup=groups.find(g=>g.id===scope);
+    const destinationGroup=groups.find(g=>g.id===publishingGroupId);
     if(destinationGroup) {
       if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
-      memory={...memory,groupId:scope};
+      memory={...memory,groupId:destinationGroup.id};
     }
     const isFirstMemory = dbMemories.filter(m => isOwnMemory(m)).length === 0;
 
     try {
-      const { crearPublicacion } = await import("./api");
-      const res = await crearPublicacion(memory);
+      const res = destinationGroup
+        ? await createGroupMemory(destinationGroup.id, memory)
+        : await import("./api").then(({ crearPublicacion }) => crearPublicacion(memory));
       if (res && res.id) {
         memory = { ...memory, id: res.id.toString() };
       }
       await reloadMemories();
+      if (destinationGroup) {
+        setGroupMemories(current => [memory, ...current.filter(item => item.id !== memory.id)]);
+        try {
+          setGroupMemories(await getGroupMemories(destinationGroup.id));
+        } catch (refreshError) {
+          console.warn("El recuerdo se guardÃ³, pero no se pudo refrescar el grupo.", refreshError);
+        }
+      }
     } catch (err) {
       console.warn("Backend falló al crear publicación.", err);
-      return "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
+      return err instanceof Error
+        ? err.message
+        : "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
     }
 
     setMapRevision(value => value + 1);
@@ -414,6 +475,7 @@ export default function App() {
     setCategory("Todas");
     setDraft(null);
     setPicking(false);
+    setPublishingGroupId(null);
     select(memory);
     if (creationOrigin.current) {
       setView("profile");
@@ -661,7 +723,7 @@ export default function App() {
           community={communityControls()}
           groupName={groups.find(g=>g.id===scope)?.name}
           decade={period.decade}
-          memories={filterMemories(filterCommunity([...dbMemories, ...demoGroupMemories], scope, groups, query), period, category)}
+          memories={filterMemories(filterCommunity(communityMemories, scope, groups, query), period, category)}
           following={following}
           followingRevision={followingRevision}
           onFollow={toggleFollow}
@@ -733,9 +795,9 @@ export default function App() {
       {draft && (
         <MemoryForm
           defaultHashtags={draftHashtags}
-          groupName={groups.find(g=>g.id===scope)?.name}
+          groupName={groups.find(g=>g.id===publishingGroupId)?.name}
           point={draft}
-          decade={period.decade}
+          decade={groups.find(g=>g.id===publishingGroupId)?.decade ?? period.decade}
           onCancel={cancel}
           onSave={save}
         />

@@ -10,8 +10,10 @@
 .community-filters { display:grid; grid-template-columns:minmax(160px,1fr) minmax(180px,1.3fr); gap:14px; }
 .community-controls label { display:grid; gap:7px; min-width:0; font-size:12px; }
 .community-controls label > span { display:flex; align-items:center; gap:6px; }
-.community-controls :is(input,select) { box-sizing:border-box; width:100%; min-width:0; height:40px; padding:8px 10px; font:13px var(--font-body); background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--radius); }
-.community-controls :is(button,input,select):focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.community-controls :is(input,select,textarea) { box-sizing:border-box; width:100%; min-width:0; padding:8px 10px; font:13px var(--font-body); background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--radius); }
+.community-controls :is(input,select) { height:40px; }
+.community-controls textarea { min-height:78px; resize:vertical; line-height:1.45; }
+.community-controls :is(button,input,select,textarea):focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .community-controls p { margin:0; font-size:13px; line-height:1.5; }
 .community-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:12px; }
 .community-cards button { display:flex; align-items:center; gap:14px; padding:16px; text-align:left; min-width:0; }
@@ -21,10 +23,16 @@
 .community-card-copy { display:grid; gap:8px; flex:1; min-width:0; }
 .community-card-copy strong { font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
 .community-card-copy small { font-size:11px; line-height:1.5; color:var(--muted); }
+.community-group-detail { display:grid; gap:12px; }
+.community-group-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.community-group-actions button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:40px; padding:9px 12px; }
+.community-group-actions .community-publish { background:var(--accent); color:var(--surface); }
 .community-local { display:block; padding-top:10px; border-top:1px solid var(--line); font-size:10px; line-height:1.5; color:var(--muted); }
 .community-controls form { display:grid; gap:12px; padding:14px; border:1px solid var(--line); background:var(--soft); }
 .community-controls form button { padding:10px; }
 .community-controls form small { font-size:11px; }
+.community-controls form button:disabled { cursor:wait; opacity:.7; }
+.community-form-error { color:#b42318; overflow-wrap:anywhere; }
 .map-community { position:absolute; z-index:505; left:94px; top:235px; width:350px; max-height:calc(100dvh - 585px); min-height:110px; overflow:auto; scrollbar-width:thin; }
 .map-community .community-controls { margin:0; }
 .map-community .community-filters { grid-template-columns:1fr; }
@@ -35,7 +43,7 @@
 .app .memory-marker.community-marker.selected img { filter:drop-shadow(0 0 5px white); }
 @media(max-height:850px) and (min-width:900px) { .map-community { left:461px; top:155px; max-height:calc(100dvh - 240px); width:300px; } }
 @media(max-width:1100px) { .community-filters { grid-template-columns:1fr; } .community-heading { flex-wrap:wrap; } }
-@media(max-width:899px) { .community-controls { padding:12px; } .community-heading strong { font-size:14px; } .community-cards button { padding:12px; gap:10px; } .map-community { left:12px; top:280px; width:calc(100% - 24px); max-height:calc(100dvh - 510px); min-height:100px; } }
+@media(max-width:899px) { .community-controls { padding:12px; } .community-heading strong { font-size:14px; } .community-create { width:100%; } .community-cards button { padding:12px; gap:10px; } .community-create-form { padding:12px; } .community-group-actions { display:grid; grid-template-columns:1fr; } .community-group-actions button { width:100%; } .map-community { left:12px; top:280px; width:calc(100% - 24px); max-height:calc(100dvh - 510px); min-height:100px; } }
 
 .post-attachment { margin:16px 0; width:100%; max-width:100%; min-width:0; box-sizing:border-box; overflow:hidden; border:1px solid var(--line); border-radius:var(--radius); }
 .post-attachment :is(img,video) { display:block; width:100%; max-width:100%; height:auto; max-height:420px; object-fit:contain; background:#14171b; }
