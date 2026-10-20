@@ -5,7 +5,7 @@ import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
 import GroupInfoModal from "./components/GroupInfoModal";
 import { filterCommunity } from "./groups";
-import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, joinGroup as joinRemoteGroup, type CreateGroupInput } from "./groupsApi";
+import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, joinGroup as joinRemoteGroup, type CreateGroupInput, type GroupMember } from "./groupsApi";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
@@ -355,6 +355,12 @@ export default function App() {
     setSelectedId(null); setPanelOpen(false); setFactsOpen(false); setPicking(false);
     setCategory("Todas"); setPeriod(p => ({...p, year: null}));
     setView("profile");
+  }
+  function openMemberProfile(member:GroupMember) {
+    setGroupInfoId(null);
+    setProfileAuthor(member.id===currentUserId?null:member.username);
+    setSelectedId(null);setPanelOpen(false);setFactsOpen(false);setPicking(false);
+    setCategory("Todas");setPeriod(current=>({...current,year:null}));setView("profile");
   }
   function openPublication(memory: Memory) {
     selectedSeed.current = memory;
@@ -814,7 +820,7 @@ export default function App() {
         />
       )}
       {deleting && <DeleteMemoryDialog memory={deleting} onCancel={() => setDeleting(null)} onConfirm={() => confirmDelete(deleting)}/>}
-      {groupInfo && <GroupInfoModal key={groupInfo.id} group={groupInfo} memoryCount={scope===groupInfo.id?groupMemories.length:0} onClose={()=>setGroupInfoId(null)} onUpdated={groupUpdated} onDeleted={groupId=>groupRemoved(groupId,'Grupo eliminado. Sus recuerdos se conservaron como publicaciones generales.')} onLeft={groupId=>groupRemoved(groupId,'Saliste del grupo.')}/>}
+      {groupInfo && <GroupInfoModal key={groupInfo.id} group={groupInfo} memoryCount={scope===groupInfo.id?groupMemories.length:0} onClose={()=>setGroupInfoId(null)} onUpdated={groupUpdated} onDeleted={groupId=>groupRemoved(groupId,'Grupo eliminado. Sus recuerdos se conservaron como publicaciones generales.')} onLeft={groupId=>groupRemoved(groupId,'Saliste del grupo.')} onOpenMember={openMemberProfile}/>}
       {editing && <MemoryForm key={editing.id} initial={editing} point={{lat:editing.lat,lng:editing.lng}} decade={Math.floor(editing.year / 10) * 10 as Decade} groupName={myGroups.find(g => g.id === editing.groupId)?.name} onCancel={() => setEditing(null)} onSave={saveEdit}/>}
       {draft && (
         <MemoryForm

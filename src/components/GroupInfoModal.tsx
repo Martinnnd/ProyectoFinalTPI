@@ -18,6 +18,7 @@ type GroupInfoModalProps = {
   onUpdated: (group: CommunityGroup) => void;
   onDeleted: (groupId: string) => void;
   onLeft: (groupId: string) => void;
+  onOpenMember: (member: GroupMember) => void;
 };
 
 function formatDate(value?: string) {
@@ -25,7 +26,7 @@ function formatDate(value?: string) {
   return new Intl.DateTimeFormat('es-AR', { dateStyle: 'medium' }).format(new Date(value));
 }
 
-export default function GroupInfoModal({ group, memoryCount, onClose, onUpdated, onDeleted, onLeft }: GroupInfoModalProps) {
+export default function GroupInfoModal({ group, memoryCount, onClose, onUpdated, onDeleted, onLeft, onOpenMember }: GroupInfoModalProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [detail, setDetail] = useState(group);
   const [members, setMembers] = useState<GroupMember[]>([]);
@@ -126,7 +127,7 @@ export default function GroupInfoModal({ group, memoryCount, onClose, onUpdated,
           </section>
           <section className="group-member-list">
             <h3>Integrantes</h3>
-            {members.length ? <ul>{members.map(member => <li key={member.id}><span className="group-member-avatar"><UserRound size={17}/></span><span><strong>{member.username}</strong><small>Se unió el {formatDate(member.joinedAt)}</small></span>{member.isCreator&&<em>Creador</em>}</li>)}</ul>:<p>No hay integrantes para mostrar.</p>}
+            {members.length ? <ul>{members.map(member => <li key={member.id}><button type="button" className="group-member-profile" onClick={()=>onOpenMember(member)} aria-label={`Ver perfil de ${member.username}`}><span className="group-member-avatar"><UserRound size={17}/></span><span><strong>{member.username}</strong><small>Se unió el {formatDate(member.joinedAt)}</small></span></button>{member.isCreator&&<em>Creador</em>}</li>)}</ul>:<p>No hay integrantes para mostrar.</p>}
           </section>
         </>}
 

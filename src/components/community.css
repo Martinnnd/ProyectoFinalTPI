@@ -61,9 +61,11 @@
 .group-info-dialog h3 { margin:0; font:700 16px var(--font-display); }
 .group-info-description > small { color:var(--muted); }
 .group-member-list ul { display:grid; list-style:none; margin:0; padding:0; border:1px solid var(--line); }
-.group-member-list li { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; padding:11px 12px; border-bottom:1px solid var(--line); }
+.group-member-list li { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; padding:8px 10px; border-bottom:1px solid var(--line); }
 .group-member-list li:last-child { border-bottom:0; }
-.group-member-list li > span:nth-child(2) { display:grid; gap:3px; min-width:0; }
+.group-info-dialog .group-member-profile { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; justify-content:stretch; gap:10px; min-width:0; min-height:0; padding:3px; text-align:left; background:transparent; border:0; }
+.group-info-dialog .group-member-profile:hover strong { color:var(--accent); text-decoration:underline; }
+.group-info-dialog .group-member-profile > span:last-child { display:grid; gap:3px; min-width:0; }
 .group-member-list li small { color:var(--muted); }
 .group-member-list li em { padding:4px 7px; color:var(--accent); background:var(--soft); border:1px solid var(--line); font-size:9px; font-style:normal; }
 .group-member-avatar { display:grid; place-items:center; width:34px; height:34px; color:var(--accent); background:var(--soft); border:1px solid var(--line); }
@@ -89,7 +91,7 @@
 .app .memory-marker.community-marker.selected img { filter:drop-shadow(0 0 5px white); }
 @media(max-height:850px) and (min-width:900px) { .map-community { left:461px; top:155px; max-height:calc(100dvh - 240px); width:300px; } }
 @media(max-width:1100px) { .community-filters { grid-template-columns:1fr; } .community-heading { flex-wrap:wrap; } }
-@media(max-width:899px) { .community-controls { padding:12px; } .community-heading strong { font-size:14px; } .community-create { width:100%; } .community-cards button { padding:12px; gap:10px; } .community-create-form { padding:12px; } .community-group-actions { display:grid; grid-template-columns:1fr; } .community-group-actions button { width:100%; } .group-info-dialog { width:calc(100vw - 20px); max-height:92dvh; } .group-info-content { max-height:calc(92dvh - 150px); padding:14px; } .group-info-heading { padding:14px; } .group-info-heading h2 { font-size:18px; } .group-info-stats { grid-template-columns:1fr; } .group-info-actions { display:grid; grid-template-columns:1fr; padding:12px 14px; } .group-info-actions button { width:100%; } .group-member-list li { grid-template-columns:auto minmax(0,1fr); } .group-member-list li em { grid-column:2; justify-self:start; } .map-community { left:12px; top:280px; width:calc(100% - 24px); max-height:calc(100dvh - 510px); min-height:100px; } }
+@media(max-width:899px) { .community-controls { padding:12px; } .community-heading strong { font-size:14px; } .community-create { width:100%; } .community-cards button { padding:12px; gap:10px; } .community-create-form { padding:12px; } .community-group-actions { display:grid; grid-template-columns:1fr; } .community-group-actions button { width:100%; } .group-info-dialog { width:calc(100vw - 20px); max-height:92dvh; } .group-info-content { max-height:calc(92dvh - 150px); padding:14px; } .group-info-heading { padding:14px; } .group-info-heading h2 { font-size:18px; } .group-info-stats { grid-template-columns:1fr; } .group-info-actions { display:grid; grid-template-columns:1fr; padding:12px 14px; } .group-info-actions button { width:100%; } .group-member-list li { grid-template-columns:minmax(0,1fr); } .group-member-list li em { justify-self:start; margin-left:47px; } .map-community { left:12px; top:280px; width:calc(100% - 24px); max-height:calc(100dvh - 510px); min-height:100px; } }
 
 .post-attachment { margin:16px 0; width:100%; max-width:100%; min-width:0; box-sizing:border-box; overflow:hidden; border:1px solid var(--line); border-radius:var(--radius); }
 .post-attachment :is(img,video) { display:block; width:100%; max-width:100%; height:auto; max-height:420px; object-fit:contain; background:#14171b; }
