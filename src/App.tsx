@@ -420,7 +420,7 @@ export default function App() {
       style={theme.tokens}
       className={`app map-app view-${view} era-${period.decade} ${panelOpen ? "stories-open" : ""} ${musicOpen ? "music-open" : ""}`}
     >
-      <EraTimeline period={period} onChange={changePeriod} action={
+      <EraTimeline period={period} onChange={changePeriod} memories={view === 'profile' ? profileMemories : undefined} action={
         <button
           ref={addButton}
           aria-label="Recordar"
@@ -528,7 +528,7 @@ export default function App() {
           <div id="place-search-slot" />
           <details className="filters compact-menu">
             <summary>
-              {category === "Personales" ? "Recuerdos personales" : category}
+              {category === "Todas" ? "Categorías" : category === "Personales" ? "Recuerdos personales" : category}
               <span aria-hidden="true">...</span>
               <span className="sr-only">Elegir categoría</span>
             </summary>

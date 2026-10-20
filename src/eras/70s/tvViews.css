@@ -96,3 +96,107 @@
   .app.era-1970.view-feed .social-stream { padding:12px; }
   .app.era-1970.view-feed .social-stream,.app.era-1970.view-profile .profile-main,.app.era-1970 .chat-window { border-width:4px; border-radius:16px; }
 }
+
+/* Cabinet finishes: quiet walnut grain, satin trim and moulded CRT bezels.
+   Material-only overrides keep each destination's existing geometry intact. */
+.app.era-1970 {
+  --tv-walnut: #493124;
+  --tv-trim: #998974;
+  --tv-wood-grain:
+    repeating-linear-gradient(2deg, transparent 0 3px, #170d0714 4px, transparent 6px 13px),
+    repeating-linear-gradient(178deg, transparent 0 17px, #d4a16a0b 19px, #160d0812 21px, transparent 24px 41px),
+    linear-gradient(94deg, #271b1645, transparent 24%, #c3905c12 48%, transparent 72%, #1a100b40),
+    linear-gradient(0deg, #36251c, #513729 48%, #624432);
+}
+
+.app.era-1970.map-app,
+.app.era-1970 .time-navigation,
+.app.era-1970 .navigation-rail,
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail,
+.app.era-1970 .device-1970,
+.app.era-1970 .profile-era-device,
+.app.era-1970 .song-picker {
+  background-color: var(--tv-walnut);
+  background-image: var(--tv-wood-grain);
+}
+
+.app.era-1970 .time-navigation {
+  border-bottom-color: var(--tv-trim);
+  border-bottom-style: solid;
+  box-shadow: inset 0 1px #d6b28b42, inset 0 -1px #20150ed9, 0 2px 5px #100b0980;
+}
+
+.app.era-1970 .navigation-rail,
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail {
+  border-right-color: #8b7963;
+  border-right-style: solid;
+  box-shadow: inset -1px 0 #21150ed9, inset 1px 0 #cca67d30;
+}
+
+.app.era-1970 .era-atmosphere {
+  border-color: #292825;
+  background: radial-gradient(ellipse at 40% 12%, #fffaf00b, transparent 54%, #100f0d24);
+  box-shadow: 0 0 0 1px #151411, 0 0 0 3px #b2a38c,
+    0 0 0 5px #706251, 0 0 0 10px #2b2019,
+    0 5px 12px 9px #150e0966,
+    inset 0 2px 3px #e5dfcb52, inset 0 -3px 5px #0009,
+    inset 0 0 36px #14171266;
+}
+
+.app.era-1970 .era-atmosphere::after {
+  background: repeating-linear-gradient(0deg, #00000009 0 1px, transparent 1px 4px);
+  box-shadow: inset 0 12px 20px #fff9e80a;
+}
+
+.app.era-1970 .device-1970,
+.app.era-1970 .profile-era-device,
+.app.era-1970 .song-picker {
+  border-color: #75573e;
+  border-style: solid;
+  box-shadow: inset 0 1px #e5ba8659, inset 1px 0 #c89e7130,
+    inset 0 -2px #21160fc2, 0 5px 12px #130d094d;
+}
+
+.app.era-1970 .device-1970 .device-illustration {
+  border-color: #302a22;
+  background: linear-gradient(115deg, #ffffff26, transparent 42%, #28262014),
+    repeating-linear-gradient(0deg, #ffffff0a 0 1px, #24221c06 1px 3px),
+    linear-gradient(#c3bdad, #a9a493);
+  box-shadow: inset 0 2px 4px #17150f80, 0 1px #d4b38b70;
+}
+
+.app.era-1970 .era-activity-dock,
+.app.era-1970 #chat-taskbar-slot {
+  background: linear-gradient(#ffffff08, #00000024), var(--tv-wood-grain);
+  border-color: #8e7759;
+  border-style: solid;
+  box-shadow: inset 0 1px #e0bf8d38, inset 0 -1px #1a130ddb, 0 2px 5px #120d0966;
+}
+
+.app.era-1970 .activity-dock-options button {
+  color: #f0e7d5;
+  background: linear-gradient(#575046, #38342e);
+  border-color: #8c8170;
+  border-bottom-color: #211e19;
+  box-shadow: inset 0 1px #e2d5bc30, 0 1px 2px #0006;
+}
+
+.app.era-1970 .activity-dock-options button:hover {
+  background: linear-gradient(#655c4e, #443c32);
+}
+
+.app.era-1970 .activity-dock-options button[aria-expanded="true"] {
+  color: #e2edb8;
+  background: linear-gradient(#34382d, #414537);
+  border-color: #929b77;
+  box-shadow: inset 0 2px 4px #0008;
+}
+
+.app.era-1970.view-feed .social-stream,
+.app.era-1970.view-profile .profile-main,
+.app.era-1970 .chat-window {
+  border-color: #2d2c28;
+  box-shadow: 0 0 0 1px #141411, 0 0 0 2px #b2a38c,
+    0 0 0 5px #3a2c21, inset 0 1px 3px #fff9e861,
+    inset 0 0 18px #333c3025, 0 7px 14px #140d0959;
+}
