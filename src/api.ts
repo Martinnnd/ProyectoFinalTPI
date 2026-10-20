@@ -7,6 +7,8 @@ import {
 } from "./components/auth/authStorage";
 import type { AuthSession } from "./components/auth/authTypes";
 import { apiFetch } from "./components/auth/apiClient";
+import { buildPublicationFormData } from "./publicationFormData";
+import type { Memory } from "./types";
 
 export type UsuarioSesion = AuthSession;
 export const getSesion = getStoredSession;
@@ -100,17 +102,6 @@ export async function eliminarPublicacion(id: string, autorId?: number) {
     return await response.json().catch(() => ({}));
 }
 
-function dataURItoBlob(dataURI: string) {
-    const byteString = atob(dataURI.split(',')[1]);
-    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([ab], { type: mimeString });
-}
-
 export async function getMemories() {
     const response = await apiFetch(`${API_BASE_URL}/api/publicaciones`);
     if (!response.ok) {
@@ -119,47 +110,10 @@ export async function getMemories() {
     return await response.json();
 }
 
-export async function crearPublicacion(memory: any, autorId?: number): Promise<any> {
+export async function crearPublicacion(memory: Memory, autorId?: number): Promise<any> {
     const sesion = requireSession();
     const finalAutorId = sesion.usuarioId;
-    const formData = new FormData();
-    formData.append('Titulo', memory.title);
-    formData.append('Descripcion', memory.description);
-    formData.append('Fecha', new Date(memory.year, 0, 1).toISOString());
-    
-    const mapCategory = (cat: string) => {
-        switch(cat) {
-            case "Lugares": return "Lugares";
-            case "Música": return "Música";
-            case "Cine": return "Cine";
-            case "Televisión": return "Televisión";
-            case "Videojuegos": return "Videojuegos";
-            case "Acontecimientos": return "Acontecimientos";
-            case "Personales": return "Recuerdos_Personales";
-            default: return "Recuerdos_Personales";
-        }
-    }
-    formData.append('Categoria', mapCategory(memory.category));
-    formData.append('NombreLugar', memory.place);
-    formData.append('Latitud', memory.lat.toString().replace('.', ',')); 
-    formData.set('Latitud', memory.lat.toString());
-    formData.set('Longitud', memory.lng.toString());
-    formData.append('AutorId', finalAutorId.toString());
-
-    let mediaUrl = memory.image || (memory.media ? memory.media.url : '');
-    let isVideo = memory.media && memory.media.kind !== 'image';
-    
-    formData.append('TipoMultimedia', isVideo ? 'Video' : 'Foto');
-
-    if (mediaUrl) {
-        if (mediaUrl.startsWith('data:')) {
-            const blob = dataURItoBlob(mediaUrl);
-            const ext = blob.type.split('/')[1] || 'jpg';
-            formData.append('Archivo', blob, `upload.${ext}`);
-        } else {
-            formData.append('UrlArchivo', mediaUrl);
-        }
-    }
+    const formData = buildPublicationFormData(memory, finalAutorId);
 
     const response = await apiFetch(`${API_BASE_URL}/api/publicaciones`, {
         method: 'POST',

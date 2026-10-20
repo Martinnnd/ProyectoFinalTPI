@@ -1,14 +1,46 @@
-import { useState } from 'react';
-import { Users, Plus, Search, ArrowUpRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Users, Plus, Search, ArrowUpRight, Info } from 'lucide-react';
 import type { CommunityGroup, Decade } from '../types';
-export default function CommunityControls({groups,scope,onScope,query,onQuery,onCreate,decade,profile=false,canCreate=true}:{groups:CommunityGroup[];scope:string;onScope:(value:string)=>void;query:string;onQuery:(value:string)=>void;onCreate:(group:CommunityGroup)=>string|null;decade:Decade;profile?:boolean;canCreate?:boolean}) {
- const [creating,setCreating]=useState(false);const [name,setName]=useState('');const [error,setError]=useState('');
+import type { CreateGroupInput } from '../groupsApi';
+import GroupCreateForm from './GroupCreateForm';
+import GroupSearch from './GroupSearch';
+
+type CommunityControlsProps = {
+ groups: CommunityGroup[];
+ searchGroups: CommunityGroup[];
+ scope: string;
+ onScope: (value: string) => void;
+ query: string;
+ onQuery: (value: string) => void;
+ onCreate: (group: CreateGroupInput) => Promise<string | null>;
+ onJoinGroup: (groupId: string) => Promise<string | null>;
+ onAddToGroup: (groupId: string) => void;
+ onShowInfo: (groupId: string) => void;
+ decade: Decade;
+ profile?: boolean;
+ canCreate?: boolean;
+};
+
+export default function CommunityControls({groups,searchGroups,scope,onScope,query,onQuery,onCreate,onJoinGroup,onAddToGroup,onShowInfo,decade,profile=false,canCreate=true}:CommunityControlsProps) {
+ const [creating,setCreating]=useState(false);
+ const [joining,setJoining]=useState(false);
+ const [membershipError,setMembershipError]=useState('');
+ const selectedGroup=searchGroups.find(group=>group.id===scope);
+ useEffect(()=>{setJoining(false);setMembershipError('');},[scope]);
+ async function joinSelectedGroup() {
+  if (!selectedGroup || joining) return;
+  setJoining(true);setMembershipError('');
+  const error=await onJoinGroup(selectedGroup.id);
+  setJoining(false);
+  if(error)setMembershipError(error);
+ }
  return <section className="community-controls" aria-label="Grupos en común">
- <header className="community-heading"><span className="community-heading-icon"><Users size={22}/></span><div><small>LA COMUNIDAD</small><strong>{profile?'Mis grupos':'Explorá recuerdos y grupos'}</strong></div>{canCreate&&<button className="community-create" aria-expanded={creating} onClick={()=>setCreating(v=>!v)}><Plus size={15}/>{creating?'Cancelar':'Crear grupo'}</button>}</header>
- {!profile && <div className="community-filters"><label><span><Search size={13}/> Buscar recuerdos</span><input type="search" placeholder="Título, autor o recuerdo" value={query} onChange={e=>onQuery(e.target.value)}/></label></div>}
- {(profile || scope==='groups') && <div className="community-cards">{groups.map(g=><button key={g.id} onClick={()=>onScope(g.id)}><span className="community-emblem" aria-hidden="true">{g.id==='autos-80'?<img src="/groups/fierros-80.svg" width={36} height={28} alt="" />:<Users size={26}/>}</span><span className="community-card-copy"><strong>{g.name}</strong><small>{g.decade}–{g.decade+9} · Ver publicaciones</small></span><ArrowUpRight size={18}/></button>)}</div>}
- {groups.find(g=>g.id===scope) && <div><p>{groups.find(g=>g.id===scope)?.description}</p><button onClick={()=>onScope('all')}>Ver todos los recuerdos</button></div>}
- {creating && <form onSubmit={e=>{e.preventDefault();if(!name.trim())return;const message=onCreate({id:crypto.randomUUID(),name:name.trim(),decade,description:`Grupo de la década ${decade}–${decade+9}.`});if(message){setError(message);return;}setCreating(false);setName('');setError('');}}><label>Nombre del grupo<input required maxLength={60} value={name} onChange={e=>setName(e.target.value)}/></label><small>Se creará para {decade}–{decade+9} y se guardará en este navegador.</small><button type="submit">Crear grupo</button>{error&&<p role="alert">{error}</p>}</form>}
+ <header className="community-heading"><span className="community-heading-icon"><Users size={22}/></span><div><small>LA COMUNIDAD</small><strong>{scope==='groups'?'Elegí un grupo':profile?'Mis grupos':'Explorá recuerdos y grupos'}</strong></div>{canCreate&&<button type="button" className="community-create" aria-expanded={creating} onClick={()=>setCreating(v=>!v)}><Plus size={15}/>{creating?'Cancelar':'Crear grupo'}</button>}</header>
+ {!profile && scope!=='groups' && <div className="community-filters"><label><span><Search size={13}/> Buscar recuerdos</span><input type="search" placeholder="Título, autor o recuerdo" value={query} onChange={e=>onQuery(e.target.value)}/></label></div>}
+ {(profile || scope==='groups') && searchGroups.length>0 && <GroupSearch groups={searchGroups} onSelect={onScope}/>}
+ {(profile || scope==='groups') && (groups.length ? <div className="community-cards">{groups.map(g=><button type="button" key={g.id} onClick={()=>onScope(g.id)}><span className="community-emblem" aria-hidden="true">{g.id==='autos-80'?<img src="/groups/fierros-80.svg" width={36} height={28} alt="" />:<Users size={26}/>}</span><span className="community-card-copy"><strong>{g.name}</strong><small>{g.decade}–{g.decade+9} · Ver publicaciones</small></span><ArrowUpRight size={18}/></button>)}</div>:<p className="community-empty">Todavía no tenés grupos disponibles. Podés crear el primero desde acá.</p>)}
+ {selectedGroup && <div className="community-group-detail"><p>{selectedGroup.description}</p>{!selectedGroup.isMember&&<p className="community-membership-note">Podés explorar sus recuerdos y unirte cuando quieras para poder publicar.</p>}<div className="community-group-actions"><button type="button" onClick={()=>onShowInfo(selectedGroup.id)}><Info size={15}/>Información del grupo</button>{canCreate&&!selectedGroup.isMember&&<button type="button" className="community-join" disabled={joining} onClick={()=>void joinSelectedGroup()}><Plus size={15}/>{joining?'Uniéndome…':'Unirme al grupo'}</button>}{canCreate&&selectedGroup.isMember&&<button type="button" className="community-publish" onClick={()=>onAddToGroup(selectedGroup.id)}><Plus size={15}/>Publicar recuerdo en este grupo</button>}<button type="button" onClick={()=>onScope('groups')}>Volver a mis grupos</button></div>{membershipError&&<p role="alert" className="community-form-error">{membershipError}</p>}</div>}
+ {creating && <GroupCreateForm decade={decade} onCreate={onCreate} onCreated={()=>setCreating(false)}/>}
 
  </section>;
 }

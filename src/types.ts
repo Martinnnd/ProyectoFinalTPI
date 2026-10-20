@@ -97,4 +97,14 @@ export function filterMemories(
   );
 }
 
-export interface CommunityGroup { id: string; name: string; decade: Decade; description: string; }
+export interface CommunityGroup {
+  id: string;
+  name: string;
+  decade: Decade;
+  description: string;
+  isMember: boolean;
+  isCreator: boolean;
+  createdAt?: string;
+  memberCount?: number;
+  creator?: { id: number; username: string };
+}
