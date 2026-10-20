@@ -1,9 +1,32 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styles from "../../app/landing.module.css";
 
 export default function MemoryMapSection() {
+  const [era, setEra] = useState('1970');
+  const section = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let inView = false;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const sync = () => {
+      clearInterval(timer);
+      if (motion.matches || document.hidden || !inView) return;
+      timer = setInterval(() => setEra(current => {
+        const eras = ['1970', '1980', '1990', '2000'];
+        return eras[(eras.indexOf(current) + 1) % eras.length];
+      }), 6500);
+    };
+    const observer = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; sync(); }, { threshold: .2 });
+    if (section.current) observer.observe(section.current);
+    motion.addEventListener('change', sync);
+    document.addEventListener('visibilitychange', sync);
+    return () => { clearInterval(timer); observer.disconnect(); motion.removeEventListener('change', sync); document.removeEventListener('visibilitychange', sync); };
+  }, []);
   return (
-    <section className={styles.mapSection} id="mapa" aria-labelledby="map-title" data-map-section>
+    <section ref={section} className={`${styles.mapSection} ${styles.temporalMapSection}`} id="mapa" aria-labelledby="map-title" data-map-section data-map-era={era}>
       <div className={styles.memoryMap} aria-hidden="true" data-memory-map data-landing-animate>
         <span className={`${styles.ring} ${styles.ringOne}`} data-map-ring="outer" data-landing-animate />
         <span className={`${styles.ring} ${styles.ringTwo}`} data-map-ring="inner" data-landing-animate />

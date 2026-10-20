@@ -18,6 +18,16 @@ export default function DecadeAtmosphere() {
               <i className={styles.tvPower} />
             </span>
           )}
+          {era.id === "1980" && <span className={styles.arcadeCabinet}>
+            <span className={styles.screenGlass} />
+            <span className={styles.arcadeMarquee}>NOSTALGIAR <small>ARCADE SYSTEM · 1980</small></span>
+            <span className={styles.arcadeDeck}><i className={styles.joystick} /><span className={styles.arcadeButtons}><i /><i /><i /></span><small>1 PLAYER · INSERT COIN</small></span>
+          </span>}
+          {(era.id === "1990" || era.id === "2000") && <span className={styles.monitorCabinet}>
+            <span className={styles.screenGlass} />
+            <span className={styles.monitorChin}><b>NOSTALGIAR</b><span className={styles.monitorVents} /><span className={styles.monitorControls}><i /><i /><i /><em /></span></span>
+            <span className={styles.monitorStand} />
+          </span>}
         </span>
       ))}
       <span className={styles.texture} />
