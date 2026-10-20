@@ -20,7 +20,7 @@ export default function DecadesSection() {
         <div className={styles.eraIndicator} aria-hidden="true">
           <span className={styles.indicatorDefault}>Canal 70 · En el aire</span>
           <span data-era-label="1970">Canal 70 · En el aire</span>
-          <span data-era-label="1980">VHS · Reproduciendo</span>
+          <span data-era-label="1980">Arcade · Player one</span>
           <span data-era-label="1990">Nostalgiar 95</span>
           <span data-era-label="2000">Messenger · Conectado</span>
         </div>

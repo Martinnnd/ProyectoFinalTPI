@@ -1,8 +1,9 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { MapPin } from "lucide-react";
 import styles from "../../app/landing.module.css";
 
-export default function Hero() {
+export default function Hero({ dial }: { dial?: ReactNode }) {
   return (
     <section className={styles.hero} aria-labelledby="landing-title">
       <div className={styles.heroPins} aria-hidden="true">
@@ -34,6 +35,7 @@ export default function Hero() {
           </a>
         </div>
       </div>
+      {dial}
     </section>
   );
 }

@@ -1021,3 +1021,242 @@
     transform: none !important;
   }
 }
+
+/* The landing tuner owns its palette; the rest of the page keeps its identity. */
+.eraHero {
+  --dial-accent: #efc178;
+  --hero-title: #f4dfb2;
+  --paper: #272922;
+  --green: #eee2c8;
+  --orange: #edbd7c;
+  --ink: #f4ecd9;
+  --muted: #c0b9a5;
+  background: #282920;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 8px #503a2a, inset 0 0 0 10px #a68c65, inset 0 0 100px #0009;
+  transition: background-color 800ms, color 800ms, box-shadow 800ms;
+}
+.eraHero::after {
+  background: repeating-linear-gradient(0deg,#0000000b 0 1px,transparent 1px 4px), radial-gradient(ellipse,#25292033,#151b18b3);
+  transition: background 800ms;
+}
+.eraHero .heroMapBackdrop { filter: grayscale(1); opacity: .19; transition: filter 800ms, opacity 800ms; }
+.eraHero .heroTitle { color: var(--hero-title); text-shadow: 0 0 35px #efc17826; transition: color 800ms, text-shadow 800ms; }
+.eraHero .heroCopy { position: relative; z-index: 2; }
+.eraHero .primaryAction { color: var(--paper); background: var(--green); }
+.eraHero .heroTagline { font-size: clamp(1.8rem,3.5vw,3.2rem); }
+.eraHero[data-era="1980"] {
+  --paper: #170d2a; --green: #74f2ed; --orange: #ff94ce; --ink: #f8eafa;
+  --muted: #d7bdda; --dial-accent: #ff72c3; --hero-title: #ffb9e8;
+  background: #170d2a;
+  box-shadow: inset 0 0 0 2px #e868bb, inset 0 -60px 120px #b1229b33;
+}
+.eraHero[data-era="1980"]::after { background: linear-gradient(transparent 65%,#b436b61c), radial-gradient(ellipse,transparent,#180f2c99); }
+.eraHero[data-era="1980"] .heroMapBackdrop { filter: sepia(1) saturate(2) hue-rotate(235deg); opacity: .22; }
+.eraHero[data-era="1980"] .heroTitle { text-shadow: 0 0 24px #ee49b36b, 3px 3px #4c2879; }
+.eraHero[data-era="1990"] {
+  --paper: #c9cec9; --green: #102f62; --orange: #205a57; --ink: #182c35;
+  --muted: #43595c; --dial-accent: #214d8c; --hero-title: #173963;
+  background: #bacdc6;
+  box-shadow: inset 3px 3px #fff9, inset -3px -3px #556d72;
+}
+.eraHero[data-era="1990"]::after { background: radial-gradient(ellipse,#dce6ddaa,transparent); }
+.eraHero[data-era="1990"] .heroMapBackdrop { filter: grayscale(.8) sepia(.15); opacity: .22; }
+.eraHero[data-era="1990"] .primaryAction { border-radius: 0; box-shadow: 2px 2px #fff8,4px 4px #20364466; }
+.eraHero[data-era="2000"] {
+  --paper: #e4f3fd; --green: #195a99; --orange: #34784c; --ink: #183e61;
+  --muted: #49677b; --dial-accent: #2b78bd; --hero-title: #2469a8;
+  background: #ddecf9;
+  box-shadow: inset 0 4px #ffffffcc, inset 0 -80px 140px #a8cde966;
+}
+.eraHero[data-era="2000"]::after { background: radial-gradient(ellipse,#ffffffb3,transparent); }
+.eraHero[data-era="2000"] .heroMapBackdrop { filter: grayscale(1) sepia(.3) hue-rotate(155deg); opacity: .24; }
+.eraHero[data-era="2000"] .primaryAction { border-radius: 20px; background: linear-gradient(#438dd0,#195a99); color: white; box-shadow: inset 0 1px #fff9,0 5px 18px #195a9926; }
+.eraControl { display: flex; align-items: center; justify-content: center; gap: 22px; margin: 32px auto 0; text-align: left; }
+.eraDial { position: relative; flex: 0 0 100px; height: 100px; border-radius: 50%; touch-action: none; cursor: grab; background: repeating-conic-gradient(from -1deg,#b8ac9277 0 1deg,transparent 1deg 10deg); box-shadow: 0 6px 18px #0003; }
+.eraDial:active { cursor: grabbing; }
+.dialRotor { position: absolute; inset: 7px; border-radius: 50%; border: 2px solid #a49a86; background: radial-gradient(circle at 35% 25%,#6b6e65,#292e2a 62%,#151c19); box-shadow: inset 0 2px 3px #ffffff40, inset 0 -3px 5px #0009,0 2px 5px #0007; transition: transform 650ms cubic-bezier(.2,.8,.2,1); }
+.dialRotor i { position: absolute; width: 4px; height: 14px; border-radius: 3px; top: 6px; left: calc(50% - 2px); background: var(--dial-accent); box-shadow: 0 0 9px var(--dial-accent); }
+.dialCenter { position: absolute; inset: 0; display: grid; place-items: center; color: #f7eedc; font: 700 17px monospace; pointer-events: none; }
+.dialEyebrow { font-size: 9px; font-weight: 800; letter-spacing: .17em; color: var(--orange); }
+.dialInfo p { margin: 7px 0 10px; font-size: 14px; color: var(--ink); }
+.dialInfo small { display: block; margin-top: 8px; font-size: 10px; color: var(--muted); }
+.dialChoices { display: flex; gap: 5px; }
+.dialChoices button { padding: 5px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; font: 700 11px Arial,sans-serif; }
+.dialChoices button[aria-pressed="true"] { color: var(--ink); border-color: var(--dial-accent); background: color-mix(in srgb,var(--dial-accent) 12%,transparent); }
+.dialChoices button:hover { color: var(--ink); background: color-mix(in srgb,var(--dial-accent) 18%,transparent); }
+.eraControl :focus-visible { outline: 2px solid var(--dial-accent); outline-offset: 4px; }
+@media(max-width:560px) {
+  .eraControl { gap: 12px; margin-top: 26px; }
+  .eraDial { flex-basis: 82px; height: 82px; }
+  .dialInfo p { font-size: 12px; }
+  .dialChoices button { padding: 5px 6px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .eraHero, .eraHero::after, .eraHero .heroMapBackdrop, .eraHero .heroTitle, .dialRotor { transition: none; }
+}
+
+/* An atlas-sized temporal compass, with interaction confined to its rim. */
+.eraHero .hero { min-height: max(740px, calc(100svh - 82px)); padding-bottom: 160px; }
+.eraHero .heroCopy { pointer-events: none; }
+.eraHero .heroCopy a { pointer-events: auto; }
+.eraControl { position: absolute; inset: 0; margin: 0; display: block; pointer-events: none; z-index: 1; }
+.eraDial {
+  position: absolute;
+  width: min(1000px, 85vw, 95svh);
+  height: auto;
+  aspect-ratio: 1;
+  left: 50%; top: 44%;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: none;
+  box-shadow: none;
+  pointer-events: none;
+}
+.dialHitArea { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.dialHitArea circle { fill: none; stroke: transparent; stroke-width: 32px; pointer-events: stroke; }
+.dialRotor {
+  inset: 3.5%;
+  border: 1px solid color-mix(in srgb,var(--dial-accent) 38%,transparent);
+  background: repeating-conic-gradient(from -1deg, var(--dial-accent) 0 .12deg, transparent .12deg 3deg);
+  mask-image: radial-gradient(circle, transparent 0 67%, #000 67.2% 71%, transparent 71.2%);
+  box-shadow: none;
+  opacity: .55;
+  pointer-events: none;
+  transition: transform 1100ms cubic-bezier(.2,.8,.2,1);
+}
+.eraDial::before, .eraDial::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; }
+.eraDial::before { inset: 7%; border: 1px solid color-mix(in srgb,var(--dial-accent) 24%,transparent); }
+.eraDial::after { inset: 2%; border: 1px dashed color-mix(in srgb,var(--dial-accent) 20%,transparent); }
+.dialRotor i { top: 0; left: calc(50% - 2.5px); height: 24px; width: 5px; box-shadow: 0 0 6px var(--dial-accent), 0 0 16px var(--dial-accent); }
+.dialEraLabel { position: absolute; inset: 0; text-align: center; pointer-events: none; }
+.dialEraLabel b { display: inline-block; padding: 4px 9px; font: 700 11px monospace; color: var(--muted); letter-spacing: .12em; }
+.dialEraLabel[data-active="true"] b { color: var(--dial-accent); text-shadow: 0 0 14px color-mix(in srgb,var(--dial-accent) 40%,transparent); }
+.dialInfo { position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); width: max-content; max-width: 100%; text-align: center; pointer-events: auto; }
+.dialChoices { justify-content: center; }
+.eraDial:focus-visible { outline-offset: 5px; outline-style: dashed; }
+@media(max-width:560px) {
+  .eraHero .hero { min-height: max(680px, calc(100svh - 82px)); padding-bottom: 170px; }
+  .eraDial { width: 94vw; top: 38%; }
+  .dialInfo { bottom: 35px; }
+  .dialEraLabel b { font-size: 9px; padding: 3px 5px; }
+}
+@media(prefers-reduced-motion:reduce) { .dialRotor { transition: none; } }
+
+/* Light and glass tie the compass to the atlas, without obscuring its center. */
+.eraHero .heroMapBackdrop {
+  mask-image: radial-gradient(ellipse at 50% 46%,#0009 0%,#000 48%,#000b 78%,transparent 100%);
+}
+.eraDial::before {
+  background: radial-gradient(ellipse at 28% 16%,#ffffff0a,transparent 46%),
+    radial-gradient(circle,transparent 54%,color-mix(in srgb,var(--dial-accent) 4%,transparent) 86%,color-mix(in srgb,var(--dial-accent) 10%,transparent));
+  border-color: color-mix(in srgb,var(--dial-accent) 32%,transparent);
+  box-shadow: inset 0 1px 0 #ffffff14,
+    inset 0 0 42px color-mix(in srgb,var(--dial-accent) 7%,transparent),
+    0 0 36px color-mix(in srgb,var(--dial-accent) 5%,transparent);
+}
+.eraDial::after {
+  border-style: solid;
+  border-color: color-mix(in srgb,var(--dial-accent) 12%,transparent);
+  box-shadow: 0 0 0 10px color-mix(in srgb,var(--dial-accent) 2%,transparent),
+    0 0 0 26px color-mix(in srgb,var(--dial-accent) 2%,transparent);
+}
+.dialAtmosphere {
+  position: absolute;
+  inset: -5%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(from -18deg,
+    transparent 0deg,
+    color-mix(in srgb,var(--dial-accent) 8%,transparent) 8deg,
+    color-mix(in srgb,var(--dial-accent) 26%,transparent) 14deg,
+    color-mix(in srgb,var(--dial-accent) 58%,transparent) 18deg,
+    color-mix(in srgb,var(--dial-accent) 26%,transparent) 22deg,
+    color-mix(in srgb,var(--dial-accent) 8%,transparent) 28deg,
+    transparent 36deg 360deg);
+  mask-image: radial-gradient(circle,transparent 55%,#0003 58%,#000 59.5%,#0006 60.2%,transparent 68%);
+  transition: transform 1100ms cubic-bezier(.2,.8,.2,1);
+}
+.eraDial .dialRotor { opacity: .62; }
+.dialEraLabel b { transition: color 650ms, text-shadow 650ms; }
+.dialEraLabel[data-active="true"] b {
+  text-shadow: 0 0 8px color-mix(in srgb,var(--dial-accent) 60%,transparent),
+    0 0 24px color-mix(in srgb,var(--dial-accent) 35%,transparent);
+}
+@media(max-width:560px) {
+  .eraDial::before { box-shadow: inset 0 0 20px color-mix(in srgb,var(--dial-accent) 6%,transparent); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .dialAtmosphere, .dialEraLabel b { transition: none; }
+}
+
+/* A temporal atlas continues the hardware and light of the preceding scenes. */
+.temporalMapSection {
+  --map-accent: #ebbd79;
+  --map-screen: #202620;
+  --paper: #202620;
+  --ink: #f3e9d2;
+  --muted: #c0beae;
+  --green: #ebbd79;
+  --orange: #ebbd79;
+  width: 100%;
+  margin: 0;
+  padding: 110px max(40px,calc((100% - 1180px) / 2));
+  min-height: 760px;
+  background: radial-gradient(ellipse at 25% 48%,#b58d4d12,transparent 55%),#171d19;
+  color: var(--ink);
+  transition: background-color 650ms,color 650ms;
+}
+.temporalMapSection::before { width: 100%; background: linear-gradient(90deg,transparent,var(--map-accent),transparent); opacity: .25; }
+.temporalMapSection::after { border-color: var(--paper); background: var(--map-accent); box-shadow: 0 0 16px color-mix(in srgb,var(--map-accent) 35%,transparent); }
+.temporalMapSection[data-map-era="1980"] { --map-accent:#66e5e0; --map-screen:#1c142b; --paper:#1c142b; --ink:#f4e8fc; --muted:#c6b9d3; --green:#66e5e0; --orange:#e18ac3; background-color:#140f20; }
+.temporalMapSection[data-map-era="1990"] { --map-accent:#95d8c4; --map-screen:#164b49; --paper:#164b49; --ink:#eff3e9; --muted:#bdd1c6; --green:#95d8c4; --orange:#d3d0b9; background-color:#132f2e; }
+.temporalMapSection[data-map-era="2000"] { --map-accent:#8fcaf5; --map-screen:#17334e; --paper:#17334e; --ink:#eef7ff; --muted:#b9cede; --green:#8fcaf5; --orange:#a9d7b4; background-color:#112438; }
+.temporalMapSection .eyebrow { color: var(--map-accent); font-size: 11px; letter-spacing: .17em; }
+.temporalMapSection .mapSectionCopy h2 { font-size: clamp(2.6rem,4.2vw,4.3rem); line-height: 1.07; letter-spacing: -.04em; }
+.temporalMapSection .memoryMap {
+  border: 8px solid #353b35;
+  background: radial-gradient(circle,transparent 48%,#0005),linear-gradient(115deg,#ffffff0a,transparent 45%),url("/landing/hero-temporal-map.webp") center / cover,var(--map-screen);
+  background-blend-mode: normal,normal,soft-light,normal;
+  box-shadow: 0 0 0 1px #b2a08466,0 0 0 5px #0c1310,inset 0 0 45px #0009,0 20px 45px #0004;
+  transition: background-color 650ms,border-color 650ms,box-shadow 650ms;
+}
+.temporalMapSection .memoryMap::before { content:""; position:absolute; inset:3%; border-radius:50%; border:1px solid color-mix(in srgb,var(--map-accent) 25%,transparent); pointer-events:none; }
+.temporalMapSection .ring { border-color: color-mix(in srgb,var(--map-accent) 40%,transparent); box-shadow: 0 0 15px color-mix(in srgb,var(--map-accent) 5%,transparent); }
+.temporalMapSection .ringOne { border-style: solid; }
+.temporalMapSection .pin { border-width: 3px; border-color: var(--map-screen); background: var(--map-accent); color: #16251f; box-shadow: 0 4px 14px #0006,0 0 18px color-mix(in srgb,var(--map-accent) 15%,transparent); font-family: monospace; }
+.temporalMapSection .mapMessage { border:1px solid color-mix(in srgb,var(--map-accent) 50%,transparent); background:var(--map-screen); color:var(--ink); box-shadow:inset 0 1px #ffffff15,0 0 30px #0005; }
+.temporalMapSection[data-map-era="1980"] .memoryMap { border-color:#36273d; box-shadow:0 0 0 1px #cf70b388,0 0 24px #cf70b31a,inset 0 0 35px #0009; }
+.temporalMapSection[data-map-era="1990"] .memoryMap { border-color:#b9b6a2; box-shadow:0 0 0 2px #777968,inset 0 0 35px #001f1c99,0 18px 35px #0004; }
+.temporalMapSection[data-map-era="2000"] .memoryMap { border-color:#34434f; box-shadow:0 0 0 1px #8097aa,inset 0 0 35px #0006,0 18px 35px #0004; }
+.mapEraChoices { display:flex; gap:8px; margin:0 0 25px; }
+.mapEraChoices button { min-width:48px; min-height:36px; padding:7px 12px; color:var(--muted); background:transparent; border:1px solid color-mix(in srgb,var(--map-accent) 22%,transparent); border-radius:5px; font:700 12px monospace; cursor:pointer; transition:background 200ms,color 200ms,box-shadow 200ms; }
+.mapEraChoices button[aria-pressed="true"] { color:var(--map-accent); background:color-mix(in srgb,var(--map-accent) 12%,transparent); border-color:var(--map-accent); box-shadow:0 0 12px color-mix(in srgb,var(--map-accent) 10%,transparent); }
+.mapEraChoices button:hover { background:color-mix(in srgb,var(--map-accent) 18%,transparent); color:var(--ink); }
+.mapEraChoices button:focus-visible, .temporalMapSection .mapAction:focus-visible { outline:2px solid var(--map-accent); outline-offset:4px; }
+.temporalMapSection .mapAction { color:var(--map-accent); }
+@media(max-width:900px) { .temporalMapSection { padding:90px 40px; gap:55px; } }
+@media(max-width:560px) { .temporalMapSection { padding:75px 24px; min-height:0; } .temporalMapSection .mapSectionCopy h2 { font-size:2.6rem; } }
+@media(prefers-reduced-motion:reduce) { .temporalMapSection, .temporalMapSection .memoryMap, .mapEraChoices button { transition:none; } }
+
+/* A clearer atlas crop, with one persistent color for each decade. */
+.temporalMapSection .memoryMap {
+  width: min(100%,480px);
+  justify-self: center;
+  border-width: 5px;
+  background-size: auto,auto,auto 100%,auto;
+  background-position: center,center,44% center,center;
+  background-repeat: no-repeat;
+}
+.temporalMapSection .memoryMap::before { inset: 2%; border-color: color-mix(in srgb,var(--map-accent) 30%,transparent); }
+.temporalMapSection .ringOne { inset: 12%; }
+.temporalMapSection .ringTwo { inset: 30%; }
+.temporalMapSection .mapMessage { inset: 37%; z-index: 1; background: color-mix(in srgb,var(--map-screen) 94%,transparent); }
+.temporalMapSection .pin { width: 50px; height: 50px; font-size: 12px; }
+.temporalMapSection .pinOne { background:#efc180; top:14%; left:47%; }
+.temporalMapSection .pinTwo { background:#e9a1d2; top:39%; right:10%; }
+.temporalMapSection .pinThree { background:#a9d7b9; bottom:12%; left:47%; }
+.temporalMapSection .pinFour { background:#99cfee; top:44%; left:9%; }
+.temporalMapSection .mapMessage, .temporalMapSection .pin, .temporalMapSection .ring { transition: background-color 900ms,border-color 900ms,box-shadow 900ms,color 900ms; }
+@media(max-width:560px) { .temporalMapSection .pin { width:42px; height:42px; font-size:10px; } }
+@media(prefers-reduced-motion:reduce) { .temporalMapSection .mapMessage, .temporalMapSection .pin, .temporalMapSection .ring { transition:none; } }
