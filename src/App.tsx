@@ -3,8 +3,9 @@ import DeleteMemoryDialog from "./components/DeleteMemoryDialog";
 
 import Chat from "./components/Chat";
 import CommunityControls from "./components/CommunityControls";
+import GroupInfoModal from "./components/GroupInfoModal";
 import { filterCommunity } from "./groups";
-import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, type CreateGroupInput } from "./groupsApi";
+import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, joinGroup as joinRemoteGroup, type CreateGroupInput } from "./groupsApi";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
@@ -57,9 +58,11 @@ export default function App() {
   const [apiStatus, setApiStatus] = useState('');
   const [mapRevision, setMapRevision] = useState(0);
   const [groups,setGroups] = useState<CommunityGroup[]>([]);
+  const myGroups = groups.filter(group => group.isMember);
   const [scope,setScope] = useState('all');
   const [query,setQuery] = useState('');
   const [publishingGroupId,setPublishingGroupId] = useState<string | null>(null);
+  const [groupInfoId,setGroupInfoId] = useState<string | null>(null);
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
   const mapExpandButton = useRef<HTMLButtonElement>(null);
@@ -283,7 +286,25 @@ export default function App() {
       return error instanceof Error ? error.message : 'No se pudo crear el grupo.';
     }
   }
-  const communityControls = (profile=false) => <CommunityControls groups={groups} scope={scope} query={query} decade={period.decade} profile={profile} canCreate={!!session} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup} onAddToGroup={startAddingToGroup}/>;
+  async function joinGroup(groupId:string): Promise<string | null> {
+    try {
+      await joinRemoteGroup(groupId);
+      setGroups(current => current.map(group => group.id === groupId ? {...group,isMember:true} : group));
+      setNotice('Ya sos integrante del grupo.');
+      return null;
+    } catch (error) {
+      return error instanceof Error ? error.message : 'No se pudo completar la unión al grupo.';
+    }
+  }
+  function groupUpdated(updated:CommunityGroup) {
+    setGroups(current=>current.map(group=>group.id===updated.id?updated:group));
+    if(scope===updated.id)setPeriod({decade:updated.decade,year:null});
+  }
+  function groupRemoved(groupId:string, message:string) {
+    setGroups(current=>current.filter(group=>group.id!==groupId));
+    setGroupMemories([]);setGroupInfoId(null);setScope('groups');setSelectedId(null);setQuery('');setNotice(message);
+  }
+  const communityControls = (profile=false) => <CommunityControls groups={myGroups} searchGroups={groups} scope={scope} query={query} decade={period.decade} profile={profile} canCreate={!!session} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup} onJoinGroup={joinGroup} onAddToGroup={startAddingToGroup} onShowInfo={setGroupInfoId}/>;
   const eraTransition = useRef<ViewTransition | null>(null);
   useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
   function changePeriod(next: Period) {
@@ -373,7 +394,7 @@ export default function App() {
     beginAdding(null);
   }
   function startAddingToGroup(groupId: string) {
-    const group = groups.find(candidate => candidate.id === groupId);
+    const group = myGroups.find(candidate => candidate.id === groupId);
     if (!group) return;
     setScope(group.id);
     setPeriod({ decade: group.decade, year: null });
@@ -437,7 +458,7 @@ export default function App() {
     return null;
   }
   async function save(memory: Memory) {
-    const destinationGroup=groups.find(g=>g.id===publishingGroupId);
+    const destinationGroup=myGroups.find(g=>g.id===publishingGroupId);
     if(destinationGroup) {
       if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
       memory={...memory,groupId:destinationGroup.id};
@@ -506,6 +527,7 @@ export default function App() {
     if (destination === "map") setSelectedId(null);
   }
   const theme = eraThemes[period.decade];
+  const groupInfo = groups.find(group=>group.id===groupInfoId) ?? null;
   return (
     <div
       style={theme.tokens}
@@ -703,13 +725,14 @@ export default function App() {
           key={session?.usuarioId ?? 'guest'}
           active={view === 'feed'}
           onItems={setFeedItems}
-          filterFeed={items => filterMemories(filterCommunity(items, scope, groups, query), period, category)}
+          filterFeed={items => filterMemories(filterCommunity(items, scope, myGroups, query), period, category)}
           onAddHashtag={tag => { startAdding(); setDraftHashtags([tag]); }}
           onTabChange={(tab: FeedTab) => {
-            if (tab !== 'groups' && groups.some(group => group.id === scope)) {
-              setScope('all');
-              setQuery('');
+            if (tab === 'groups') {
+              chooseScope('groups');
+              return;
             }
+            if (scope === 'groups' || groups.some(group => group.id === scope)) chooseScope('all');
           }}
           onEdit={editMemory}
           onDelete={deleteMemory}
@@ -791,13 +814,14 @@ export default function App() {
         />
       )}
       {deleting && <DeleteMemoryDialog memory={deleting} onCancel={() => setDeleting(null)} onConfirm={() => confirmDelete(deleting)}/>}
-      {editing && <MemoryForm key={editing.id} initial={editing} point={{lat:editing.lat,lng:editing.lng}} decade={Math.floor(editing.year / 10) * 10 as Decade} groupName={groups.find(g => g.id === editing.groupId)?.name} onCancel={() => setEditing(null)} onSave={saveEdit}/>}
+      {groupInfo && <GroupInfoModal key={groupInfo.id} group={groupInfo} memoryCount={scope===groupInfo.id?groupMemories.length:0} onClose={()=>setGroupInfoId(null)} onUpdated={groupUpdated} onDeleted={groupId=>groupRemoved(groupId,'Grupo eliminado. Sus recuerdos se conservaron como publicaciones generales.')} onLeft={groupId=>groupRemoved(groupId,'Saliste del grupo.')}/>}
+      {editing && <MemoryForm key={editing.id} initial={editing} point={{lat:editing.lat,lng:editing.lng}} decade={Math.floor(editing.year / 10) * 10 as Decade} groupName={myGroups.find(g => g.id === editing.groupId)?.name} onCancel={() => setEditing(null)} onSave={saveEdit}/>}
       {draft && (
         <MemoryForm
           defaultHashtags={draftHashtags}
-          groupName={groups.find(g=>g.id===publishingGroupId)?.name}
+          groupName={myGroups.find(g=>g.id===publishingGroupId)?.name}
           point={draft}
-          decade={groups.find(g=>g.id===publishingGroupId)?.decade ?? period.decade}
+          decade={myGroups.find(g=>g.id===publishingGroupId)?.decade ?? period.decade}
           onCancel={cancel}
           onSave={save}
         />

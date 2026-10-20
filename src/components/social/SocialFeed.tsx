@@ -147,6 +147,7 @@ export default function SocialFeed({
   });
   const authors = [...new Map([...feedAuthors, ...suggestedAuthors.map(author => [author.name, author] as const)]
     .filter(([, author]) => author.id && !isOwnMemory({ author: author.name }))).values()];
+  const browsingGroups = tab === "groups" && !groupName;
   const tabPosts =
     tab === "groups"
         ? allMemories.filter(
@@ -154,7 +155,8 @@ export default function SocialFeed({
               !!memory.groupId && groupIds.includes(memory.groupId),
           )
         : allMemories;
-  const posts = hashtag ? tabPosts.filter(memory => memoryHashtags(memory).includes(hashtag)) : tabPosts;
+  const filteredPosts = hashtag ? tabPosts.filter(memory => memoryHashtags(memory).includes(hashtag)) : tabPosts;
+  const posts = browsingGroups ? [] : filteredPosts;
   const trends = weeklyTrends(tabPosts);
 
   function chooseHashtag(tag: string) {
@@ -256,7 +258,7 @@ export default function SocialFeed({
         onToggleMaximize={() => setMaximized((current) => !current)}
       >
         <FeedHeader
-          title={groupName ?? "Feed"}
+          title={groupName ?? (tab === "groups" ? "Mis grupos" : "Feed")}
           tab={tab}
           selected={!!selected}
           onBack={() => open(null)}
@@ -267,6 +269,11 @@ export default function SocialFeed({
           <HashtagThread key={hashtag} tag={hashtag} count={posts.length}
             hasDemo={posts.some(memory => memory.source === "demo")}
             onBack={() => setHashtag(null)} onAdd={() => { setTab("all"); onAddHashtag(hashtag); }} />
+        )}
+        {!selected && browsingGroups && community && (
+          <div className="feed-group-directory">
+            {community}
+          </div>
         )}
         <div className="feed-posts">
           {(selected ? [selected] : posts).map((memory) => {
@@ -334,13 +341,13 @@ export default function SocialFeed({
               />
             );
           })}
-          {!selected && !posts.length && (tab === 'groups' || (!remote.loading && !remote.error)) && (
+          {!selected && !browsingGroups && !posts.length && (tab === 'groups' || (!remote.loading && !remote.error)) && (
             <div className="feed-empty">
               <h3>
                 {tab === "following"
                   ? "Todavía no hay publicaciones de tus seguidos"
                   : tab === "groups"
-                    ? "No hay publicaciones de tus grupos para esta época y categoría"
+                    ? "Este grupo no tiene publicaciones para esta época y categoría"
                     : "No hay recuerdos con estos filtros"}
               </h3>
               <p>
@@ -353,7 +360,7 @@ export default function SocialFeed({
         </div>
       </PostDetailFrame>
       <FeedSidebar
-        community={community}
+        community={browsingGroups ? undefined : community}
         trends={<WeeklyTrends trends={trends} onSelect={chooseHashtag} />}
         authors={authors}
         following={following}

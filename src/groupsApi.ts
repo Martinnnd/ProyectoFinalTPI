@@ -9,9 +9,27 @@ type ApiGroup = {
   nombre: string;
   descripcion: string;
   decada: number;
+  esIntegrante: boolean;
+  esCreador: boolean;
+  fechaCreacion?: string;
+  cantidadIntegrantes?: number;
+  creador?: { id: number; username: string };
 };
 
-export type CreateGroupInput = Omit<CommunityGroup, 'id'>;
+export type CreateGroupInput = Pick<CommunityGroup, 'name' | 'description' | 'decade'>;
+export type UpdateGroupInput = CreateGroupInput;
+export type GroupMember = {
+  id: number;
+  username: string;
+  joinedAt: string;
+  isCreator: boolean;
+};
+
+type ApiGroupMember = {
+  usuario: { id: number; username: string };
+  fechaUnion: string;
+  esCreador: boolean;
+};
 
 const supportedDecades = new Set<Decade>([1970, 1980, 1990, 2000]);
 
@@ -25,7 +43,18 @@ function mapGroup(group: ApiGroup): CommunityGroup {
     name: group.nombre,
     description: group.descripcion,
     decade: group.decada as Decade,
+    isMember: group.esIntegrante,
+    isCreator: group.esCreador,
+    createdAt: group.fechaCreacion,
+    memberCount: group.cantidadIntegrantes,
+    creator: group.creador,
   };
+}
+
+function requireGroupId(groupId: string) {
+  if (!/^[1-9]\d*$/.test(groupId)) {
+    throw new Error('El grupo no tiene un identificador válido.');
+  }
 }
 
 async function groupRequest<T>(path = '', options: RequestInit = {}): Promise<T> {
@@ -50,6 +79,7 @@ async function groupRequest<T>(path = '', options: RequestInit = {}): Promise<T>
     );
   }
 
+  if (response.status === 204) return undefined as T;
   return response.json();
 }
 
@@ -72,13 +102,56 @@ export async function createGroup(input: CreateGroupInput): Promise<CommunityGro
   return mapGroup(group);
 }
 
+export async function getGroup(groupId: string, signal?: AbortSignal): Promise<CommunityGroup> {
+  requireGroupId(groupId);
+  return mapGroup(await groupRequest<ApiGroup>(`/${groupId}`, { signal }));
+}
+
+export async function getGroupMembers(groupId: string, signal?: AbortSignal): Promise<GroupMember[]> {
+  requireGroupId(groupId);
+  const members = await groupRequest<ApiGroupMember[]>(`/${groupId}/integrantes`, { signal });
+  return members.map(member => ({
+    id: member.usuario.id,
+    username: member.usuario.username,
+    joinedAt: member.fechaUnion,
+    isCreator: member.esCreador,
+  }));
+}
+
+export async function updateGroup(groupId: string, input: UpdateGroupInput): Promise<CommunityGroup> {
+  requireGroupId(groupId);
+  const group = await groupRequest<ApiGroup>(`/${groupId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      nombre: input.name,
+      descripcion: input.description,
+      decada: input.decade,
+    }),
+  });
+  return mapGroup(group);
+}
+
+export async function deleteGroup(groupId: string): Promise<void> {
+  requireGroupId(groupId);
+  await groupRequest<void>(`/${groupId}`, { method: 'DELETE' });
+}
+
+export async function leaveGroup(groupId: string): Promise<void> {
+  requireGroupId(groupId);
+  await groupRequest<void>(`/${groupId}/salir`, { method: 'DELETE' });
+}
+
+export async function joinGroup(groupId: string): Promise<void> {
+  requireGroupId(groupId);
+  await groupRequest<void>(`/${groupId}/unirse`, { method: 'POST' });
+}
+
 export async function createGroupMemory(
   groupId: string,
   memory: Memory,
 ): Promise<{ id: number }> {
-  if (!/^[1-9]\d*$/.test(groupId)) {
-    throw new Error('El grupo no tiene un identificador válido.');
-  }
+  requireGroupId(groupId);
 
   return groupRequest<{ id: number }>(`/${groupId}/recuerdos`, {
     method: 'POST',
@@ -90,9 +163,7 @@ export async function getGroupMemories(
   groupId: string,
   signal?: AbortSignal,
 ): Promise<Memory[]> {
-  if (!/^[1-9]\d*$/.test(groupId)) {
-    throw new Error('El grupo no tiene un identificador vÃ¡lido.');
-  }
+  requireGroupId(groupId);
 
   const publications = await groupRequest<Publication[]>(`/${groupId}/recuerdos`, { signal });
   return publications.map((publication) => toMemory(publication, {

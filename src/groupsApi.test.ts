@@ -29,6 +29,11 @@ it('carga y adapta los grupos del backend', async () => {
     name: 'Cine de los 90',
     description: 'Películas que marcaron la década.',
     decade: 1990,
+    isMember: true,
+    isCreator: true,
+    createdAt: '2026-10-20T18:00:00Z',
+    memberCount: 1,
+    creator: { id: 1, username: 'ana' },
   }]);
   expect(new URL(fetch.mock.calls[0][0]).pathname).toBe('/api/grupos');
 });

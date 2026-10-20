@@ -9,6 +9,8 @@ const group: CommunityGroup = {
  name: 'Fierros de los 80',
  decade: 1980,
  description: 'Autos y recuerdos de los ochenta.',
+ isMember: true,
+ isCreator: true,
 };
 
 describe('Grupos en común',()=>{
