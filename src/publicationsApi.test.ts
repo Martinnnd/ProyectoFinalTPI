@@ -25,6 +25,10 @@ describe('Publicaciones del backend', () => {
     expect(toMemory(data, pin)).toMatchObject({ likeCount: 12, commentCount: 47, viewerLiked: true });
     expect(toMemory({ ...data, cantidadLikes: 0, cantidadComentarios: 0, dioLike: false }, pin)).toMatchObject({ likeCount: 0, commentCount: 0, viewerLiked: false });
   });
+  it('conserva el grupo informado por el backend', () => {
+    const data = { id: 25, titulo: 'Recuerdo del grupo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, grupo: { id: 12 } };
+    expect(toMemory(data, pin)).toMatchObject({ groupId: '12' });
+  });
   it('envía el área visible y el rango exclusivo de fecha, y adapta los pines', async () => {
     const fetch = respond({ pines: [{ id: 25, latitud: -34, longitud: -58, categoria: 6 }], hayMas: true });
     vi.stubGlobal('fetch', fetch);

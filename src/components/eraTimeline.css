@@ -41,6 +41,156 @@
 .time-navigation :is(button,input):focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
 .app .era-shell-top, .app .newspaper-edition { display:none; }
 
+/* A quieter instrument scale. Geometry and era-change animations stay shared. */
+.app .time-scale {
+  --time-light: var(--accent);
+  --time-label: var(--ink);
+  --time-selected: var(--surface);
+  --time-bed: color-mix(in srgb, var(--line) 55%, var(--surface));
+}
+.app.era-1970 .time-scale {
+  --time-light: #e6bf7c;
+  --time-label: #eee3ce;
+  --time-selected: #30281b;
+  --time-bed: #776852;
+}
+.app.era-1980 .time-scale {
+  --time-light: #70e7e4;
+  --time-label: #ded2ec;
+  --time-selected: #171127;
+  --time-bed: #5b426f;
+}
+.app.era-1990 .time-scale {
+  --time-light: #173f80;
+  --time-label: #283343;
+  --time-selected: #fff;
+  --time-bed: #969ca4;
+}
+.app.era-2000 .time-scale {
+  --time-light: #266eaf;
+  --time-label: #315a7d;
+  --time-selected: #fff;
+  --time-bed: #a6bfd4;
+}
+.app .time-decades button {
+  color: var(--time-label);
+  text-shadow: none;
+  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+.app .time-decades button[aria-pressed="true"] {
+  color: var(--time-selected);
+  background: linear-gradient(#ffffff15, #0000000c), var(--time-light);
+  border-color: color-mix(in srgb, var(--time-light) 70%, var(--time-label));
+  box-shadow: inset 0 1px #ffffff40, 0 1px 3px #00000025;
+}
+.app .time-decades button:hover:not([aria-pressed="true"]) {
+  background: color-mix(in srgb, var(--time-light) 12%, transparent);
+  box-shadow: inset 0 -1px color-mix(in srgb, var(--time-light) 45%, transparent);
+}
+.app .time-track {
+  position: relative;
+  background: none;
+}
+.app .time-track::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  pointer-events: none;
+  background: repeating-linear-gradient(90deg,
+    color-mix(in srgb, var(--time-label) 28%, transparent) 0 1px,
+    transparent 1px calc(100% / 39));
+  mask-image: linear-gradient(#000, #0005);
+}
+.app .time-track input { position: relative; }
+.app .time-track input::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, var(--time-light) var(--time-progress), var(--time-bed) var(--time-progress));
+  box-shadow: inset 0 1px 1px #00000026, 0 1px #ffffff20;
+}
+.app .time-track input::-moz-range-track {
+  background: linear-gradient(to right, var(--time-light) var(--time-progress), var(--time-bed) var(--time-progress));
+  box-shadow: inset 0 1px 1px #00000026, 0 1px #ffffff20;
+}
+.app .time-track input::-webkit-slider-thumb {
+  background: radial-gradient(circle at 35% 25%, #ffffff66, transparent 65%), var(--time-light);
+  border-color: var(--surface);
+  box-shadow: 0 0 0 1px var(--time-light), 0 2px 4px #0005;
+  transition: box-shadow 180ms ease;
+}
+.app .time-track input::-moz-range-thumb {
+  background: radial-gradient(circle at 35% 25%, #ffffff66, transparent 65%), var(--time-light);
+  border-color: var(--surface);
+  box-shadow: 0 0 0 1px var(--time-light), 0 2px 4px #0005;
+  transition: box-shadow 180ms ease;
+}
+.app .time-track input:is(:hover, :focus-visible)::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px var(--time-light), 0 0 0 4px color-mix(in srgb, var(--time-light) 18%, transparent), 0 2px 4px #0004;
+}
+.app .time-track input:is(:hover, :focus-visible)::-moz-range-thumb {
+  box-shadow: 0 0 0 1px var(--time-light), 0 0 0 4px color-mix(in srgb, var(--time-light) 18%, transparent), 0 2px 4px #0004;
+}
+.app .time-scale :is(button, input):focus-visible { outline-color: var(--time-light); }
+.app .time-decades button {
+  position: relative;
+  letter-spacing: .035em;
+}
+.app .time-decades button[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: calc(50% - 9px);
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--time-light);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--time-light) 30%, transparent);
+  pointer-events: none;
+}
+.app .time-track::after {
+  content: "";
+  position: absolute;
+  inset: -1px 8px 0;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    var(--time-label) 0 1px, transparent 1px calc(100% * 10 / 39),
+    var(--time-label) calc(100% * 10 / 39) calc(100% * 10 / 39 + 1px),
+    transparent calc(100% * 10 / 39 + 1px) calc(100% * 20 / 39),
+    var(--time-label) calc(100% * 20 / 39) calc(100% * 20 / 39 + 1px),
+    transparent calc(100% * 20 / 39 + 1px) calc(100% * 30 / 39),
+    var(--time-label) calc(100% * 30 / 39) calc(100% * 30 / 39 + 1px),
+    transparent calc(100% * 30 / 39 + 1px) calc(100% - 1px),
+    var(--time-label) calc(100% - 1px));
+  opacity: .48;
+}
+.app .time-track input { z-index: 1; }
+.app.era-1970 .time-decades button[aria-pressed="true"] {
+  color: #f4d49a;
+  background: linear-gradient(#3d3b30, #25271f);
+  border-color: #95876c;
+  box-shadow: inset 0 1px 3px #0009, 0 1px #ffffff20;
+  text-shadow: 0 0 7px #e6bf7c33;
+}
+.app.era-1980 .time-decades button[aria-pressed="true"] {
+  color: #a6f6f0;
+  background: linear-gradient(#292039, #191225);
+  border-color: #63c8c6;
+  box-shadow: inset 0 0 8px #70e7e410, 0 0 7px #70e7e41a;
+}
+.app.era-1990 .time-decades button[aria-pressed="true"] {
+  background: linear-gradient(90deg, #18386f, #32629c);
+  box-shadow: inset 0 0 0 1px #ffffff20;
+}
+.app.era-2000 .time-decades button[aria-pressed="true"] {
+  background: linear-gradient(#6cafe1 0%, #3a86c3 48%, #266eaf 49%, #337fba);
+  border-color: #407ead;
+  box-shadow: inset 0 1px #ffffff80, 0 1px 3px #1b527c30;
+  text-shadow: 0 1px #164c7c80;
+}
+@media(prefers-reduced-motion:reduce) {
+  .app .time-decades button,
+  .app .time-track input::-webkit-slider-thumb { transition: none; }
+  .app .time-track input::-moz-range-thumb { transition: none; }
+}
+
 /* Each era keeps its own typography and material treatment. */
 .era-1970 .time-brand > img,
 .era-1980 .time-brand > img { filter:drop-shadow(0 0 2px rgb(255 255 255 / 30%)) drop-shadow(0 0 4px rgb(255 255 255 / 20%)); }
