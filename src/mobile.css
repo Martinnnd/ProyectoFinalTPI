@@ -82,6 +82,7 @@
  .mobile-options-done { width:100%; min-height:48px; justify-content:center; }
  .app .memory-dialog { width:calc(100% - 16px); max-width:none; max-height:calc(100dvh - 24px); padding:18px 14px; overflow:auto; }
  .app .memory-dialog .form-row { display:flex; flex-direction:column; gap:14px; }
+ .app.era-2000 .memory-dialog .dialog-heading { margin-inline:-14px; }
  .app input,.app textarea { font-size:16px; min-width:0; max-width:100%; }
  .app .dialog-actions { display:flex; gap:8px; flex-wrap:wrap; }
  .app .dialog-actions button { min-height:44px; flex:1; }
