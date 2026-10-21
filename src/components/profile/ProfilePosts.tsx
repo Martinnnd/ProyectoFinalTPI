@@ -39,7 +39,12 @@ const ProfilePosts = forwardRef<HTMLElement, {
       </div>
       {memories.length ? (
         <div className="personal-grid profile-post-list">
-          {[...memories].reverse().map((memory) => (
+          {[...memories].sort((a, b) => {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            if (timeA !== timeB) return timeB - timeA;
+            return Number(b.id) - Number(a.id);
+          }).map((memory) => (
             <article
               key={memory.id}
               className="personal-memory profile-post"

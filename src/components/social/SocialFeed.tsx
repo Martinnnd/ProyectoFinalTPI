@@ -61,6 +61,7 @@ export default function SocialFeed({
   followingRevision,
   onFollow,
   ratings,
+  pointsMap,
   canRate,
   onRate,
   onReloadMemories,
@@ -77,6 +78,7 @@ export default function SocialFeed({
   followingRevision: number;
   onFollow: (author: string, authorId?: number) => void;
   ratings: Record<string, number>;
+  pointsMap?: Record<string, number>;
   canRate: boolean;
   onRate: (postId: string, score: number) => void;
   groupIds: string[];
@@ -296,10 +298,19 @@ export default function SocialFeed({
               : undefined;
             const isReposted = isMemoryRepostedByMe(memory);
 
+            const targetKey = isSimpleRepost ? rootId : memory.id;
+            const effectivePoints = pointsMap?.[targetKey] ?? targetMemory.points ?? 0;
+            const effectiveRating = ratings[targetKey] ?? targetMemory.viewerRating;
+            const effectiveMemory = {
+              ...memory,
+              points: effectivePoints,
+              viewerRating: effectiveRating,
+            };
+
             return (
               <FeedPost
                 key={memory.id}
-                memory={memory}
+                memory={effectiveMemory}
                 quotedMemory={quotedMemory}
                 selected={selected?.id === memory.id}
                 following={following.includes(
@@ -309,7 +320,7 @@ export default function SocialFeed({
                 )}
                 liked={interactions.isLiked(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
                 commentMemoryId={publicationId(targetMemory) ? rootId : undefined}
-                rating={ratings[isSimpleRepost ? rootId : memory.id]}
+                rating={effectiveRating}
                 canRate={canRate}
                 reposted={isReposted}
                 saved={saves.includes(memory.id)}

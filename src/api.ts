@@ -102,14 +102,6 @@ export async function eliminarPublicacion(id: string, autorId?: number) {
     return await response.json().catch(() => ({}));
 }
 
-export async function getMemories() {
-    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones`);
-    if (!response.ok) {
-        throw new Error(`Error fetching memories: ${response.statusText}`);
-    }
-    return await response.json();
-}
-
 export async function crearPublicacion(memory: Memory, autorId?: number): Promise<any> {
     const sesion = requireSession();
     const finalAutorId = sesion.usuarioId;
