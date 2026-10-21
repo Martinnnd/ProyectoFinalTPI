@@ -69,7 +69,7 @@ test("mapa a pantalla completa, filtros, historias y creación persistente", asy
   await page
     .getByRole("textbox", { name: "Título del recuerdo" })
     .fill("Mi paseo por Caballito");
-  await page.getByRole("spinbutton", { name: "Año", exact: true }).fill("1994");
+  await page.getByLabel("Fecha del recuerdo", { exact: true }).fill("1994-04-15");
   await page
     .getByRole("textbox", { name: "Nombre del lugar" })
     .fill("Parque Centenario, Buenos Aires");
@@ -420,7 +420,7 @@ test("1970: revista, datos, musica y recuerdo persistente", async ({
   await page.locator(".add-button").click();
   await page.locator(".memory-map").click({ position: { x: 500, y: 390 } });
   await page.locator('input[name="title"]').fill("Un recuerdo de 1970");
-  await page.locator('input[name="year"]').fill("1970");
+  await page.getByLabel("Fecha del recuerdo", { exact: true }).fill("1970-05-20");
   await page.locator('input[name="place"]').fill("Plaza San Martin, Cordoba");
   await page
     .locator("textarea")

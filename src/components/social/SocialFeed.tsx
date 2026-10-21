@@ -101,6 +101,8 @@ export default function SocialFeed({
   const interactions = useMemoryInteractions();
   const desktopDetail = !!selected && (decade === 1990 || decade === 2000);
   const [maximized, setMaximized] = useState(false);
+  const [relatedHistory, setRelatedHistory] = useState<Memory[]>([]);
+  useEffect(() => { if (!selected) setRelatedHistory([]); }, [selected?.id]);
   const [reposts, setReposts] = useState<string[]>([]);
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
@@ -167,8 +169,9 @@ export default function SocialFeed({
     setNow(Date.now());
   }
 
-  function open(memory: Memory | null) {
+  function open(memory: Memory | null, preserveHistory = false) {
     if (memory?.id === selected?.id) return;
+    if (!preserveHistory) setRelatedHistory([]);
     setMaximized(false);
     cancelTurn.current();
     if (stream.current) {
@@ -266,6 +269,11 @@ export default function SocialFeed({
           onBack={() => open(null)}
           onTabChange={changeTab}
         />
+        {!!selected && !!relatedHistory.length && <button className="feed-back" onClick={() => {
+          const previous = relatedHistory[relatedHistory.length - 1];
+          setRelatedHistory(current => current.slice(0, -1));
+          open(previous, true);
+        }}>← Volver a {relatedHistory[relatedHistory.length - 1].title}</button>}
         
         {!selected && hashtag && (
           <HashtagThread key={hashtag} tag={hashtag} count={posts.length}
@@ -311,6 +319,7 @@ export default function SocialFeed({
               <FeedPost
                 key={memory.id}
                 memory={effectiveMemory}
+                active={active}
                 quotedMemory={quotedMemory}
                 selected={selected?.id === memory.id}
                 following={following.includes(
@@ -329,6 +338,10 @@ export default function SocialFeed({
                 onProfile={onProfile}
                 onFollow={onFollow}
                 onOpen={(memToOpen) => open(memToOpen || targetMemory)}
+                onOpenRelated={next => {
+                  setRelatedHistory(current => [...current, memory]);
+                  open(next, true);
+                }}
                 onMap={onMap}
                 onRate={(value) => onRate(isSimpleRepost ? rootId : memory.id, value)}
                 onLike={() => {

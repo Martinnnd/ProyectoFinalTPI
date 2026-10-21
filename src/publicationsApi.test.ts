@@ -20,6 +20,10 @@ it('crea comentarios con la identidad de la sesión', async () => {
   expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
 });
 describe('Publicaciones del backend', () => {
+  it('conserva la fecha histórica completa en UTC al cargar una publicación', () => {
+    const data = { id: 25, titulo: 'Recuerdo', fecha: '1991-04-15T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' } };
+    expect(toMemory(data, pin)).toMatchObject({ year: 1991, date: '1991-04-15' });
+  });
   it('conserva los contadores, el estado de like y la puntuación, incluyendo ceros', () => {
     const data = { id: 25, titulo: 'Recuerdo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, cantidadLikes: 12, cantidadComentarios: 47, dioLike: true, puntosTotales: 15, miPuntuacion: 5 };
     expect(toMemory(data, pin)).toMatchObject({ likeCount: 12, commentCount: 47, viewerLiked: true, points: 15, viewerRating: 5 });

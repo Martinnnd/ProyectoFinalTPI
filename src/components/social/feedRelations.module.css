@@ -1,0 +1,19 @@
+.section { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.section button { font: inherit; color: var(--ink); cursor: pointer; }
+.links > button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 0; border: 0; background: transparent; box-shadow: none; text-align: left; font-size: 12px; }
+.links > button svg { flex-shrink: 0; }
+.links > button[aria-expanded="true"] { text-decoration: underline; text-underline-offset: 4px; color: var(--accent); }
+.panel { margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--soft); }
+.panel > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.panel h4 { margin: 0; font-size: 14px; }
+.panel > header button { padding: 3px 8px; background: var(--surface); border: 1px solid var(--line); }
+.cards { display: flex; gap: 12px; overflow-x: auto; padding: 12px 3px; overscroll-behavior-x: contain; }
+.cards .card { flex: 0 0 145px; width: 145px; display: flex; flex-direction: column; gap: 5px; padding: 6px; text-align: left; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.card img, .media { width: 131px; height: 90px; object-fit: cover; }
+.media { display: grid; place-items: center; font-size: 24px; }
+.card strong { font-size: 12px; line-height: 1.4; }
+.card time { color: var(--muted); font-size: 11px; }
+.section button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.section button:disabled { cursor: wait; opacity: .6; }
+@media (max-width: 899px) { .links { gap: 5px 12px; } .panel { padding: 10px; } }

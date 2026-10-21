@@ -1,5 +1,5 @@
-import { memoryThumbnail } from "./memoryThumbnail";
-import { getMemoryAuthorDisplay } from "../api";
+import PinMemoryPreview from './PinMemoryPreview';
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -80,6 +80,8 @@ export default function MapboxMap(
   const [options, setOptions] = useState(initial);
   const optionsRef = useRef(options);
   optionsRef.current = options;
+  const [previewContent, setPreviewContent] = useState<HTMLElement | null>(null);
+  const previewPopup = useRef<mapboxgl.Popup | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
   const [controls, setControls] = useState(false);
@@ -276,7 +278,9 @@ export default function MapboxMap(
   useEffect(() => {
     const map = instance.current;
     if (!map || !ready) return;
-    const markers = props.memories.map((memory) => {
+    const visiblePins = props.selected && !props.memories.some(memory => memory.id === props.selected!.id)
+      ? [...props.memories, props.selected] : props.memories;
+    const markers = visiblePins.map((memory) => {
       const button = document.createElement("button");
       button.className = "mapbox-memory-pin";
       button.setAttribute(
@@ -332,16 +336,11 @@ export default function MapboxMap(
     const memory=props.selected;
     if(!map || !ready || !memory || props.picking || props.searchTarget)return;
     const content=document.createElement('div');
-    const meta=document.createElement('small');meta.textContent=`${getMemoryAuthorDisplay(memory)} · ${memory.year}`;
-    const title=document.createElement('strong');title.textContent=memory.title;
-    const excerpt=document.createElement('p');excerpt.textContent=memory.description.length>140?memory.description.slice(0,140)+'…':memory.description;
-    const photoUrl=memoryThumbnail(memory);
-    if(photoUrl){const photo=document.createElement('img');photo.src=photoUrl;photo.alt='';photo.className='pin-preview-photo';photo.onerror=()=>{photo.hidden=true;};content.append(photo);}
-    content.append(meta,title,excerpt);
-    if(props.onOpen){const open=document.createElement('button');open.textContent='Ver publicación →';open.addEventListener('click',()=>latest.current.onOpen?.(memory));content.append(open);}
-    const preview=new mapboxgl.Popup({className:'pin-message-preview',anchor:'left',offset:25,maxWidth:'230px',closeButton:true,closeOnClick:false,focusAfterOpen:false})
+    setPreviewContent(content);
+    const preview=new mapboxgl.Popup({className:'pin-message-preview',anchor:'left',offset:25,maxWidth:'230px',closeButton:false,closeOnClick:false,focusAfterOpen:false})
       .setLngLat([memory.lng,memory.lat]).setDOMContent(content).addTo(map);
-    return ()=>{preview.remove();};
+    previewPopup.current = preview;
+    return ()=>{setPreviewContent(null);preview.remove();};
   }, [props.selected, props.picking, props.searchTarget, ready]);
   useEffect(() => {
     const map = instance.current;
@@ -372,6 +371,7 @@ export default function MapboxMap(
       className="map-section mapbox-section"
       aria-label="Globo Mapbox de recuerdos de Argentina"
     >
+      {previewContent && props.selected && createPortal(<PinMemoryPreview key={props.selected.id} memory={props.selected} onSelect={memory => (latest.current.onSelectRelated ?? latest.current.onSelect)(memory)} onOpen={props.onOpen} onMoment={props.onMoment ? id => latest.current.onMoment?.(id, props.selected!) : undefined} onClose={() => { previewPopup.current?.remove(); setPreviewContent(null); }} />, previewContent)}
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
       
       {controls && (

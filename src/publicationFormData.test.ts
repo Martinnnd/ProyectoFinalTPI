@@ -35,3 +35,18 @@ it('omite AutorId cuando el backend obtiene el usuario del token', () => {
   const form = buildPublicationFormData(memory);
   expect(form.has('AutorId')).toBe(false);
 });
+
+it('envía el día y mes elegidos a medianoche UTC', () => {
+  const form = buildPublicationFormData({ ...memory, date: '1991-04-15', year: 1991 });
+  expect(form.get('Fecha')).toBe('1991-04-15T00:00:00.000Z');
+});
+
+it('acepta el 29 de febrero bisiesto y rechaza fechas inexistentes', () => {
+  expect(buildPublicationFormData({ ...memory, date: '2000-02-29', year: 2000 }).get('Fecha')).toBe('2000-02-29T00:00:00.000Z');
+  expect(() => buildPublicationFormData({ ...memory, date: '1991-02-29' })).toThrow('fecha');
+  expect(() => buildPublicationFormData({ ...memory, date: '1991-04-31' })).toThrow('fecha');
+});
+
+it('mantiene las fechas antiguas con solo año en UTC', () => {
+  expect(buildPublicationFormData(memory).get('Fecha')).toBe('1985-01-01T00:00:00.000Z');
+});

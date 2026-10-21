@@ -1,7 +1,9 @@
-import { lazy, Suspense, useEffect, useState, type ComponentProps } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ComponentProps } from "react";
 import { createPortal } from "react-dom";
 import MemoryMap, { type Point } from "./MemoryMap";
 import PlaceSearch from "./PlaceSearch";
+import MomentExplorer from './MomentExplorer';
+import type { Memory } from '../types';
 const MapboxMap = lazy(() => import("./MapboxMap"));
 export type MapProps = ComponentProps<typeof MemoryMap>;
 export default function MainMap(props: MapProps) {
@@ -10,6 +12,8 @@ export default function MainMap(props: MapProps) {
       ? undefined
       : process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim();
   const [fallback, setFallback] = useState(false);
+  const [journey, setJourney] = useState<{ id: number; origin: Memory } | null>(null);
+  const momentTrigger = useRef<HTMLElement | null>(null);
   const [searchTarget, setSearchTarget] = useState<Point | null>(null);
   const [userLocation, setUserLocation] = useState<Point | null>(null);
   const [locationResolved, setLocationResolved] = useState(false);
@@ -52,6 +56,10 @@ export default function MainMap(props: MapProps) {
     ...props,
     searchTarget,
     onSearchMove: setSearchTarget,
+    onMoment: (id: number, origin: Memory) => {
+      momentTrigger.current = document.activeElement as HTMLElement | null;
+      setJourney({ id, origin });
+    },
     onSelect: (memory: Parameters<MapProps["onSelect"]>[0]) => {
       setSearchTarget(null);
       props.onSelect(memory);
@@ -59,9 +67,14 @@ export default function MainMap(props: MapProps) {
   };
 
   const useFallback = !token?.startsWith("pk.") || fallback;
+  const panelHost = journey ? document.querySelector('.app') : null;
 
   return (
     <div className="main-map-shell">
+      {journey && panelHost && props.active !== false && !props.picking && createPortal(<MomentExplorer key={journey.id} id={journey.id} origin={journey.origin} selectedId={props.selected?.id}
+        onSelect={memory => { setSearchTarget(null); (props.onSelectRelated ?? props.onSelect)(memory); }}
+        onMoment={id => setJourney(current => current ? { ...current, id } : null)}
+        onClose={() => { setJourney(null); if (momentTrigger.current?.isConnected) momentTrigger.current.focus({ preventScroll: true }); }} />, panelHost)}
       {useFallback ? (
         <>
           <MemoryMap {...mapProps} />

@@ -56,6 +56,7 @@ export function toMemory(data: Publication, pin: Memory): Memory {
     title: data.titulo,
     description: data.descripcion ?? data.descripcionBreve ?? '',
     year: new Date(data.fecha).getUTCFullYear(),
+    date: new Date(data.fecha).toISOString().slice(0, 10),
     category: category(data.categoria),
     author: data.autor.username,
     authorId: data.autor.id,

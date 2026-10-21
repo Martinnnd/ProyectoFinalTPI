@@ -25,6 +25,7 @@ test("trends, hilo persistente y publicación con hashtags editables", async ({ 
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByLabel("Hashtags · opcional")).toHaveValue("#cassettes");
   await dialog.getByLabel("Título del recuerdo").fill("Mi cinta del colegio");
+  await dialog.getByLabel("Fecha del recuerdo", { exact: true }).fill("1991-04-15");
   await dialog.getByLabel("Nombre del lugar").fill("La plaza");
   await dialog.getByLabel("Tu historia").fill("Una tarde escuchando música con mis amigos.");
   await dialog.getByLabel("Hashtags · opcional").fill("#CASSETTES, #micolegio #cassettes");
