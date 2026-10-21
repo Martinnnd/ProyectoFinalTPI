@@ -2,6 +2,7 @@ import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../medi
 import { eraRegistry } from "../eras/registry";
 import { parseHashtags } from "../hashtags";
 import { memoryDateIso } from "../memoryDate";
+import GooglePhotosPicker from "./GooglePhotosPicker";
   import { useEffect, useRef, useState } from "react";
   import { X, MapPin, Save, Loader2 } from "lucide-react";
   import { categories, type Memory, type Decade } from "../types";
@@ -33,6 +34,7 @@ import { memoryDateIso } from "../memoryDate";
     const [mediaKind,setMediaKind]=useState<'image'|'video'|'youtube'>(initial?.media?.kind ?? (youtubeId(initial?.image ?? '') ? 'youtube' : 'image'));
     const [mediaUrl,setMediaUrl]=useState(initial?.media?.url ?? initial?.image ?? '');
     const [loadingFile,setLoadingFile]=useState(false);
+    const [googlePhotosBusy, setGooglePhotosBusy] = useState(false);
     const fileVersion=useRef(0);
     const [musicChoice,setMusicChoice]=useState(initial?.music ? 'custom' : '');
     const tracks=eraRegistry[decade].content.music;
@@ -43,10 +45,12 @@ import { memoryDateIso } from "../memoryDate";
       const kind=file.type.startsWith('image/')?'image':file.type.startsWith('video/')?'video':null;
       if(!kind){setError('Elegí una foto o video compatible.');return;}
       setLoadingFile(true);setError('');
-      const reader=new FileReader();
-      reader.onload=()=>{if(version!==fileVersion.current)return;setMediaKind(kind);setMediaUrl(String(reader.result));setLoadingFile(false);};
-      reader.onerror=()=>{if(version===fileVersion.current){setError('No se pudo leer el archivo.');setLoadingFile(false);}};
-      reader.readAsDataURL(file);
+      await new Promise<void>(resolve => {
+        const reader=new FileReader();
+        reader.onload=()=>{if(version===fileVersion.current){dirty.current=true;setMediaKind(kind);setMediaUrl(String(reader.result));setLoadingFile(false);}resolve();};
+        reader.onerror=()=>{if(version===fileVersion.current){setError('No se pudo leer el archivo.');setLoadingFile(false);}resolve();};
+        reader.readAsDataURL(file);
+      });
     }
     const [error, setError] = useState("");
     useEffect(() => {
@@ -54,13 +58,14 @@ import { memoryDateIso } from "../memoryDate";
       dialog.current?.showModal();
       titleInput.current?.focus();
       return () => {
+        fileVersion.current++;
         previous?.focus();
       };
     }, []);
     const [saving, setSaving] = useState(false);
     async function submit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
-      if (saving) return;
+      if (saving || googlePhotosBusy) return;
       const data = new FormData(event.currentTarget);
       const title = String(data.get("title")).trim(),
         place = String(data.get("place")).trim(),
@@ -207,12 +212,14 @@ import { memoryDateIso } from "../memoryDate";
             <small id="hashtags-help">Hasta 5 etiquetas separadas por espacios o comas. Compartí un hashtag para sumar tu recuerdo a su hilo.</small>
           </label>
           <fieldset className="media-fields"><legend>Foto o video · obligatorio</legend>
-            <label>Tipo de adjunto<select value={mediaKind} onChange={e=>{fileVersion.current++;setLoadingFile(false);setMediaKind(e.target.value as typeof mediaKind);setMediaUrl('');}}><option value="image">Foto</option><option value="video">Video</option><option value="youtube">YouTube</option></select></label>
-            {mediaKind!=='youtube'&&<label>Subir archivo (hasta 2 MB)<input type="file" accept={mediaKind==='image'?'image/jpeg,image/png,image/webp,image/gif':'video/mp4,video/webm,video/ogg'} onChange={e=>readFile(e.target.files?.[0])}/></label>}
-            <label>{mediaKind==='youtube'?'Enlace de YouTube':'O pegá un enlace HTTPS al archivo'}<input type="url" value={mediaUrl.startsWith('data:')?'':mediaUrl} placeholder={mediaKind==='youtube'?'https://www.youtube.com/watch?v=…':'https://…'} onChange={e=>{fileVersion.current++;setLoadingFile(false);const url=e.target.value.trim();setMediaUrl(url);if(youtubeId(url))setMediaKind('youtube');}}/></label>
+            <label>Tipo de adjunto<select disabled={googlePhotosBusy || saving} value={mediaKind} onChange={e=>{fileVersion.current++;setLoadingFile(false);setMediaKind(e.target.value as typeof mediaKind);setMediaUrl('');}}><option value="image">Foto</option><option value="video">Video</option><option value="youtube">YouTube</option></select></label>
+            {mediaKind!=='youtube'&&<label>Subir archivo (hasta 2 MB)<input type="file" disabled={googlePhotosBusy || saving} accept={mediaKind==='image'?'image/jpeg,image/png,image/webp,image/gif':'video/mp4,video/webm,video/ogg'} onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>}
+            <GooglePhotosPicker disabled={saving || loadingFile} onFile={readFile} onBusyChange={setGooglePhotosBusy} />
+            <label>{mediaKind==='youtube'?'Enlace de YouTube':'O pegá un enlace HTTPS al archivo'}<input type="url" disabled={googlePhotosBusy || saving} value={mediaUrl.startsWith('data:')?'':mediaUrl} placeholder={mediaKind==='youtube'?'https://www.youtube.com/watch?v=…':'https://…'} onChange={e=>{fileVersion.current++;setLoadingFile(false);const url=e.target.value.trim();setMediaUrl(url);if(youtubeId(url))setMediaKind('youtube');}}/></label>
             {loadingFile&&<small role="status">Cargando archivo…</small>}
             {mediaUrl.startsWith('data:')&&<small>Archivo adjunto listo.</small>}
             {mediaKind==='image'&&safeMediaUrl(mediaUrl,'image')&&<img className="attachment-preview" src={mediaUrl} alt="Vista previa del adjunto"/>}
+            {mediaUrl && <button type="button" className="secondary-button" disabled={googlePhotosBusy || saving} onClick={() => { fileVersion.current++; setLoadingFile(false); setMediaUrl(''); dirty.current=true; }}>Quitar adjunto</button>}
           </fieldset>
           <fieldset className="media-fields"><legend>Música de fondo · opcional</legend><label>Elegir canción<select value={musicChoice} onChange={e=>setMusicChoice(e.target.value)}><option value="">Sin música</option>{tracks.map(track=><option key={track.spotifyId} value={track.spotifyId}>{track.title} — {track.artist}</option>)}<option value="custom">Otra canción de Spotify…</option></select></label>
           {musicChoice==='custom'&&<><label>Enlace de Spotify<input name="spotifyUrl" defaultValue={initial?.music ? `https://open.spotify.com/track/${initial.music.spotifyId}` : ""} type="url" required placeholder="https://open.spotify.com/track/…"/></label><label>Tema<input name="songTitle" defaultValue={initial?.music?.title} required maxLength={120}/></label><label>Artista<input name="songArtist" defaultValue={initial?.music?.artist} required maxLength={120}/></label></>}
@@ -223,14 +230,13 @@ import { memoryDateIso } from "../memoryDate";
             </p>
           )}
           <p className="local-note">
-            Se guarda solo en este navegador. No se comparte con otros
-            dispositivos.
+            Revisá tu historia y el adjunto antes de guardar el recuerdo.
           </p>
           <div className="dialog-actions">
             <button type="button" className="secondary-button" onClick={requestClose} disabled={saving}>
               Cancelar
             </button>
-            <button className="primary-button" type="submit" disabled={saving || loadingFile}>
+            <button className="primary-button" type="submit" disabled={saving || loadingFile || googlePhotosBusy}>
               {saving ? (
                 <><Loader2 size={17} style={{ animation: "device-spin 1s linear infinite" }} /> Guardando...</>
               ) : (
