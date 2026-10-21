@@ -1,6 +1,7 @@
 import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../media";
 import { eraRegistry } from "../eras/registry";
 import { parseHashtags } from "../hashtags";
+import { memoryDateIso } from "../memoryDate";
   import { useEffect, useRef, useState } from "react";
   import { X, MapPin, Save, Loader2 } from "lucide-react";
   import { categories, type Memory, type Decade } from "../types";
@@ -64,18 +65,19 @@ import { parseHashtags } from "../hashtags";
       const title = String(data.get("title")).trim(),
         place = String(data.get("place")).trim(),
         description = String(data.get("description")).trim();
-      const year = Number(data.get("year"));
+      const date = String(data.get("date") ?? "");
+      const year = Number(date.slice(0, 4));
       const hashtags = parseHashtags(String(data.get("hashtags") ?? ""));
       if (hashtags.error) { setError(hashtags.error); return; }
       if (
         !title ||
         !place ||
         !description ||
-        !Number.isInteger(year) ||
+        !memoryDateIso(date) ||
         year < 1970 ||
         year > 2009
       ) {
-        setError("Completá los campos y elegí un año entre 1970 y 2009.");
+        setError("Completá los campos y elegí una fecha válida entre 1970 y 2009.");
         return;
       }
       if(loadingFile){setError('Esperá a que termine de cargar el archivo.');return;}
@@ -102,6 +104,7 @@ import { parseHashtags } from "../hashtags";
         title,
         place,
         year,
+        date,
         category: data.get("category") as Memory["category"],
         description,
         hashtags: hashtags.tags,
@@ -158,14 +161,14 @@ import { parseHashtags } from "../hashtags";
           </label>
           <div className="form-row">
             <label>
-              Año
+              Fecha del recuerdo
               <input
-                name="year"
-                type="number"
+                name="date"
+                type="date"
                 required
-                min="1970"
-                max="2009"
-                defaultValue={initial?.year ?? decade + 5}
+                min="1970-01-01"
+                max="2009-12-31"
+                defaultValue={initial?.date ?? ""}
               />
             </label>
             <label>

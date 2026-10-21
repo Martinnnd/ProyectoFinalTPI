@@ -1,4 +1,5 @@
 import type { Memory } from './types';
+import { memoryDateIso } from './memoryDate';
 
 function dataUriToBlob(dataUri: string): Blob {
   const byteString = atob(dataUri.split(',')[1]);
@@ -18,7 +19,11 @@ export function buildPublicationFormData(memory: Memory, authorId?: number): For
   const formData = new FormData();
   formData.append('Titulo', memory.title);
   formData.append('Descripcion', memory.description);
-  formData.append('Fecha', new Date(memory.year, 0, 1).toISOString());
+  // Keep year-only legacy records compatible; new submissions require a full date.
+  const date = memory.date ?? `${memory.year}-01-01`;
+  const iso = memoryDateIso(date);
+  if (!iso) throw new Error('La fecha del recuerdo no es válida.');
+  formData.append('Fecha', iso);
   formData.append('Categoria', backendCategory(memory.category));
   formData.append('NombreLugar', memory.place);
   formData.append('Latitud', String(memory.lat));

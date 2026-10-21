@@ -374,9 +374,9 @@ export default function App() {
   const communityControls = (profile=false) => <CommunityControls groups={myGroups} searchGroups={groups} scope={scope} query={query} decade={period.decade} profile={profile} canCreate={!!session} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup} onJoinGroup={joinGroup} onAddToGroup={startAddingToGroup} onShowInfo={setGroupInfoId}/>;
   const eraTransition = useRef<ViewTransition | null>(null);
   useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
-  function changePeriod(next: Period) {
-    if (next.decade === period.decade && next.year === period.year) return;
-    const update = () => applyPeriod(next);
+  function changePeriod(next: Period, afterChange?: () => void) {
+    if (next.decade === period.decade && next.year === period.year) { afterChange?.(); return; }
+    const update = () => { applyPeriod(next); afterChange?.(); };
     if (next.decade === period.decade || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { update(); return; }
     if (document.startViewTransition) {
       eraTransition.current?.skipTransition();
@@ -436,11 +436,23 @@ export default function App() {
   }
   function select(memory: Memory) {
     selectedSeed.current = memory;
+    setRemoteSelected(memory);
     setSelectedId(memory.id);
     setPanelOpen(false);
     if (window.innerWidth < 900) {
       setFactsOpen(false);
     }
+  }
+  function selectRelatedMemory(memory: Memory) {
+    const decade = Math.floor(memory.year / 10) * 10 as Decade;
+    if (!availableDecades.includes(decade)) {
+      setNotice('Este recuerdo pertenece a una década que todavía no está disponible en el mapa.');
+      return;
+    }
+    changePeriod({ decade, year: null }, () => {
+      setCategory('Todas');
+      select(memory);
+    });
   }
   function closeStories() {
     setPanelOpen(false);
@@ -642,6 +654,7 @@ export default function App() {
             memories={filterMemories(remotePins, period, category)}
             selected={view === 'map' ? selected : null}
             onSelect={select}
+            onSelectRelated={selectRelatedMemory}
             onOpen={openPublication}
             picking={picking}
             onPick={(point) => {
