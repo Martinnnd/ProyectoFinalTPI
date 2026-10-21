@@ -1,6 +1,6 @@
 import { API_BASE_URL, guardarSesion, cerrarSesion } from './api';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getMapPublications, getPublication, publicationId, toMemory } from './publicationsApi';
+import { getMapPublications, getPublication, publicationId, toMemory, ratePublication } from './publicationsApi';
 import { createComment, getComments } from './commentsApi';
 import type { Memory } from './types';
 
@@ -20,10 +20,19 @@ it('crea comentarios con la identidad de la sesión', async () => {
   expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
 });
 describe('Publicaciones del backend', () => {
-  it('conserva los contadores y el estado de like, incluyendo ceros', () => {
-    const data = { id: 25, titulo: 'Recuerdo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, cantidadLikes: 12, cantidadComentarios: 47, dioLike: true };
-    expect(toMemory(data, pin)).toMatchObject({ likeCount: 12, commentCount: 47, viewerLiked: true });
-    expect(toMemory({ ...data, cantidadLikes: 0, cantidadComentarios: 0, dioLike: false }, pin)).toMatchObject({ likeCount: 0, commentCount: 0, viewerLiked: false });
+  it('conserva los contadores, el estado de like y la puntuación, incluyendo ceros', () => {
+    const data = { id: 25, titulo: 'Recuerdo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, cantidadLikes: 12, cantidadComentarios: 47, dioLike: true, puntosTotales: 15, miPuntuacion: 5 };
+    expect(toMemory(data, pin)).toMatchObject({ likeCount: 12, commentCount: 47, viewerLiked: true, points: 15, viewerRating: 5 });
+    expect(toMemory({ ...data, cantidadLikes: 0, cantidadComentarios: 0, dioLike: false, puntosTotales: 0, miPuntuacion: null }, pin)).toMatchObject({ likeCount: 0, commentCount: 0, viewerLiked: false, points: 0, viewerRating: undefined });
+  });
+  it('envía PUT para puntuar publicación con JWT y parsea respuesta', async () => {
+    guardarSesion({ usuarioId: 42, token: 'token-test', username: 'Ana', email: 'ana@example.com', esAdmin: false });
+    const fetch = respond({ publicacionId: 25, puntosTotales: 20, miPuntuacion: 5 });
+    vi.stubGlobal('fetch', fetch);
+    const res = await ratePublication('25', 5);
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ puntaje: 5 });
+    expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
+    expect(res).toEqual({ publicacionId: 25, puntosTotales: 20, miPuntuacion: 5 });
   });
   it('conserva el grupo informado por el backend', () => {
     const data = { id: 25, titulo: 'Recuerdo del grupo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, grupo: { id: 12 } };

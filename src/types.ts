@@ -21,6 +21,8 @@ export interface Memory {
   likeCount?: number;
   commentCount?: number;
   viewerLiked?: boolean;
+  points?: number;
+  viewerRating?: number;
   lat: number;
   lng: number;
   source: "demo" | "local" | "backend" | "community" | "db";
