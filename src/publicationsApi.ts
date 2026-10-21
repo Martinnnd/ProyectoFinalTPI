@@ -5,7 +5,7 @@ import { youtubeId } from './media';
 
 export type MapBounds = { minLatitud: number; maxLatitud: number; minLongitud: number; maxLongitud: number };
 type Pin = { id: number; latitud: number; longitud: number; categoria: number | string };
-export type Publication = { cantidadLikes?: number; cantidadComentarios?: number; dioLike?: boolean; puntosTotales?: number; miPuntuacion?: number; id: number; titulo: string; descripcion?: string; descripcionBreve?: string; fecha: string; fechaCreacion?: string; categoria: number | string; urlMultimedia: string; tipoMultimedia: number | string; autor: { id: number; username: string }; lugar?: { nombre: string; latitud: number; longitud: number }; grupo?: { id: number } | null };
+export type Publication = { cantidadLikes?: number; cantidadComentarios?: number; dioLike?: boolean; puntosTotales?: number; miPuntuacion?: number | null; id: number; titulo: string; descripcion?: string; descripcionBreve?: string; fecha: string; fechaCreacion?: string; categoria: number | string; urlMultimedia: string; tipoMultimedia: number | string; autor: { id: number; username: string }; lugar?: { nombre: string; latitud: number; longitud: number }; grupo?: { id: number } | null };
 
 export async function publicationRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
