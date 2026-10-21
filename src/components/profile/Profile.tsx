@@ -22,6 +22,9 @@ export default function Profile({
   onDelete,
   username,
   author,
+  reputation,
+  followerCount,
+  followingCount,
   onBack,
   community,
   allMemories,
@@ -41,6 +44,9 @@ export default function Profile({
   onDelete: (memory: Memory) => void;
   username: string;
   author?: string;
+  reputation?: string;
+  followerCount?: number;
+  followingCount?: number;
   onBack?: () => void;
   community?: ReactNode;
   allMemories: Memory[];
@@ -70,7 +76,7 @@ export default function Profile({
   const presentation = presentations[period.decade];
   const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
-  const userCategory = resolveUserCategory(tierProgress);
+  const userCategory = reputation ?? resolveUserCategory(tierProgress);
   const tiers = useMemo(() => describeTiers(tierProgress), [tierProgress]);
 
   useEffect(() => () => clearTimeout(mapCloseTimer.current), []);
@@ -126,6 +132,8 @@ export default function Profile({
           memoryCount={allMemories.length}
           followers={followers}
           followedUsers={followedUsers}
+          followerCount={followerCount}
+          followingCount={followingCount}
           userCategory={userCategory}
           unlocked={unlocked}
           achievementCount={catalogue.length}

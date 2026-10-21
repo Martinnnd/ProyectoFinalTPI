@@ -244,6 +244,7 @@ export default function FeedPost({
       <PostRating
         memoryTitle={memory.title}
         value={rating}
+        totalPoints={memory.points ?? 0}
         canRate={canRate}
         onRate={onRate}
       />

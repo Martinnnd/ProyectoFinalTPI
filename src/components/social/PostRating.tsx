@@ -3,11 +3,13 @@ const SCORES = [1, 2, 3, 4, 5] as const;
 export default function PostRating({
   memoryTitle,
   value,
+  totalPoints = 0,
   canRate,
   onRate,
 }: {
   memoryTitle: string;
   value?: number;
+  totalPoints?: number;
   canRate: boolean;
   onRate: (value: number) => void;
 }) {
@@ -31,7 +33,8 @@ export default function PostRating({
         </button>
       ))}
       <small className="post-rating-value">
-        {!canRate ? "Disponible desde Nostálgico" : value ? `${value} de 5 puntos de nostalgia` : "Sin puntuar"}
+        <strong>{totalPoints} {totalPoints === 1 ? "punto" : "puntos"}</strong>
+        {!canRate ? " • Disponible desde Nostálgico" : value ? ` • Le diste ${value} ${value === 1 ? "punto" : "puntos"}` : " • Sin puntuar"}
       </small>
     </div>
   );

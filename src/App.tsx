@@ -23,7 +23,9 @@ import {
 } from "./types";
 import { achievements, eraContent, resolveUserCategory } from "./data";
 import { totalGivenNostalgia, updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
-import { getMemories, isOwnMemory, eliminarPublicacion } from "./api";
+import { isOwnMemory, eliminarPublicacion } from "./api";
+import { ratePublication } from "./publicationsApi";
+import { getPerfilUsuario, getPublicacionesUsuario, type UsuarioPerfil } from "./userApi";
 import AuthMenu from "./components/auth/AuthMenu";
 import { useAuth } from "./components/auth/AuthProvider";
 import AchievementToast from "./components/AchievementToast";
@@ -91,9 +93,39 @@ export default function App() {
   const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
   const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
+  const [profileMemories, setProfileMemories] = useState<Memory[]>([]);
+  const [profileUser, setProfileUser] = useState<UsuarioPerfil | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
   const currentUserId = session?.usuarioId;
   const following = followingUsers.map(user => user.username);
   const [chatearCon, setChatearCon] = useState<{ usuarioId: number; username: string; ts: number } | null>(null);
+
+  useEffect(() => {
+    if (view !== 'profile') return;
+    const targetUsername = profileAuthor ?? session?.username;
+    if (!targetUsername) return;
+
+    const controller = new AbortController();
+    setProfileLoading(true);
+
+    getPerfilUsuario(targetUsername, controller.signal)
+      .then(async (perfil) => {
+        if (controller.signal.aborted) return;
+        setProfileUser(perfil);
+        const userMems = await getPublicacionesUsuario(perfil.id, controller.signal);
+        if (controller.signal.aborted) return;
+        setProfileMemories(userMems);
+        setProfileLoading(false);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setProfileLoading(false);
+          setNotice(error instanceof Error ? error.message : 'No se pudo cargar el perfil del usuario.');
+        }
+      });
+
+    return () => controller.abort();
+  }, [view, profileAuthor, session?.username]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -133,18 +165,6 @@ export default function App() {
     }
   }
 
-  const reloadMemories = async () => {
-    try {
-      const data = await getMemories();
-      setDbMemories(data);
-    } catch (e) {
-      console.error("Error al cargar publicaciones:", e);
-    }
-  };
-
-  useEffect(() => {
-    reloadMemories();
-  }, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [deleting, setDeleting] = useState<Memory | null>(null);
@@ -184,24 +204,74 @@ export default function App() {
   }, [groups, scope]);
   const [celebrating, setCelebrating] = useState<Achievement | null>(null);
   const [ratings, setRatings] = useState<NostalgiaRatings>({});
+  const [pointsMap, setPointsMap] = useState<Record<string, number>>({});
   const [firstFiveEarned, setFirstFiveEarned] = useState(false);
   const earned: Achievement[] = [
     ...(dbMemories.some(m => isOwnMemory(m)) ? [achievements[0]] : []),
     ...(firstFiveEarned ? [achievements.find(achievement => achievement.id === '21')!] : []),
   ];
   const tierProgress: TierProgress = {
-    memories: dbMemories.filter(m => isOwnMemory(m)).length,
-    points: 0,
+    memories: profileUser?.cantidadPublicaciones ?? profileMemories.length,
+    points: profileUser?.puntosNostalgia ?? Math.max(0, ...profileMemories.map(m => pointsMap[m.id] ?? m.points ?? 0)),
     subscribed: false,
   };
-  const canRate = resolveUserCategory(tierProgress) !== 'Errante';
-  function rateMemory(postId: string, score: number) {
-    if (!canRate) return;
+  const canRate = (profileUser?.reputacion ?? resolveUserCategory(tierProgress)) !== 'Errante';
+  async function rateMemory(postId: string, score: number) {
+    if (!currentUserId) {
+      router.push("/auth/login?returnTo=/explorar");
+      return;
+    }
+    if (!canRate) {
+      setNotice('Disponible desde la categoría Nostálgico.');
+      return;
+    }
+    const previousRating = ratings[postId];
     const next = updateNostalgiaRating(ratings, postId, score);
     setRatings(next);
     if (!firstFiveEarned && totalGivenNostalgia(next) >= 5) {
       setFirstFiveEarned(true);
       setCelebrating(achievements.find(achievement => achievement.id === '21')!);
+    }
+
+    try {
+      const res = await ratePublication(postId, score);
+      setPointsMap(current => ({
+        ...current,
+        [postId]: res.puntosTotales,
+      }));
+      if (res.miPuntuacion === null || res.miPuntuacion === undefined) {
+        setRatings(current => {
+          const updated = { ...current };
+          delete updated[postId];
+          return updated;
+        });
+      } else {
+        setRatings(current => ({
+          ...current,
+          [postId]: res.miPuntuacion!,
+        }));
+      }
+
+      const updateMem = (m: Memory): Memory =>
+        m.id === postId
+          ? {
+              ...m,
+              points: res.puntosTotales,
+              viewerRating: res.miPuntuacion ?? undefined,
+            }
+          : m;
+
+      setDbMemories(current => current.map(updateMem));
+      setGroupMemories(current => current.map(updateMem));
+      setProfileMemories(current => current.map(updateMem));
+    } catch (error) {
+      setRatings(current => {
+        const reverted = { ...current };
+        if (previousRating !== undefined) reverted[postId] = previousRating;
+        else delete reverted[postId];
+        return reverted;
+      });
+      setNotice(error instanceof Error ? error.message : 'No se pudo registrar la puntuación.');
     }
   }
   const [panelOpen, setPanelOpen] = useState(false);
@@ -264,11 +334,8 @@ export default function App() {
   const memories = filterMemories(
     filterCommunity(view === 'map' ? remotePins : view === 'feed' ? feedSource : dbMemories,view === "map" ? "all" : scope,groups,view === "map" ? "" : query),
     period,
-    category,
+    category
   );
-  const profileMemories = profileAuthor === null
-    ? dbMemories.filter(m => isOwnMemory(m))
-    : dbMemories.filter(m => m.author === profileAuthor);
   const visibleMemories = view === "profile" ? profileMemories : memories;
   const selected = remoteSelected?.id === selectedId ? remoteSelected : visibleMemories.find((m) => m.id === selectedId) ?? remotePins.find(m => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
@@ -430,7 +497,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handler);
   }, [picking, panelOpen, draft, mapExpanded]);
   function editMemory(memory: Memory) {
-    if (dbMemories.some(m => m.id === memory.id && isOwnMemory(m))) setEditing(memory);
+    if (isOwnMemory(memory)) setEditing(memory);
   }
   function deleteMemory(memory: Memory) {
     setDeleting(memory);
@@ -440,24 +507,25 @@ export default function App() {
       .then(() => {
         setMapRevision(value => value + 1);
         setRemoteSelected(current => current?.id === memory.id ? null : current);
-        getMemories().then(data => setDbMemories(data)).catch(console.error);
       })
       .catch((err) =>
         console.warn("Backend falló al eliminar publicación:", err)
       );
 
     setDbMemories(prev => prev.filter(m => m.id !== memory.id));
+    setProfileMemories(prev => prev.filter(m => m.id !== memory.id));
     if (selectedId === memory.id) setSelectedId(null);
     setNotice("Recuerdo eliminado.");
     return null;
   }
   function saveEdit(memory: Memory): string | null {
-    const original = dbMemories.find(m => m.id === editing?.id);
+    const original = [...dbMemories, ...profileMemories].find(m => m.id === editing?.id);
     if (!original) return "Este recuerdo ya no está disponible.";
     const group = groups.find(g => g.id === original.groupId);
     if (group && (memory.year < group.decade || memory.year > group.decade + 9)) return `Elegí un año entre ${group.decade} y ${group.decade + 9} para este grupo.`;
     const updated = {...memory, id: original.id, groupId: original.groupId, source: original.source, author: original.author};
     setDbMemories(prev => prev.map(m => m.id === original.id ? updated : m));
+    setProfileMemories(prev => prev.map(m => m.id === original.id ? updated : m));
     setEditing(null);
     setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");setQuery("");
     setNotice("Recuerdo actualizado.");
@@ -476,9 +544,10 @@ export default function App() {
         ? await createGroupMemory(destinationGroup.id, memory)
         : await import("./api").then(({ crearPublicacion }) => crearPublicacion(memory));
       if (res && res.id) {
-        memory = { ...memory, id: res.id.toString() };
+        memory = { ...memory, id: res.id.toString(), source: 'backend' };
       }
-      await reloadMemories();
+      setDbMemories(current => [memory, ...current.filter(item => item.id !== memory.id)]);
+      setProfileMemories(current => [memory, ...current.filter(item => item.id !== memory.id)]);
       if (destinationGroup) {
         setGroupMemories(current => [memory, ...current.filter(item => item.id !== memory.id)]);
         try {
@@ -711,6 +780,9 @@ export default function App() {
           key={profileAuthor ?? "own"}
           username={session.username}
           author={profileAuthor ?? undefined}
+          reputation={profileUser?.reputacion}
+          followerCount={profileUser?.cantidadSeguidores}
+          followingCount={profileUser?.cantidadSeguidos}
           onBack={() => {setSelectedId(null);setView("feed");}}
           community={profileAuthor === null ? communityControls(true) : undefined}
           allMemories={profileMemories}
@@ -757,6 +829,7 @@ export default function App() {
           followingRevision={followingRevision}
           onFollow={toggleFollow}
           ratings={ratings}
+          pointsMap={pointsMap}
           canRate={canRate}
           onRate={rateMemory}
           selected={selected}
@@ -770,7 +843,6 @@ export default function App() {
             setFactsOpen(false);
           }}
           onAdd={startAdding}
-          onReloadMemories={reloadMemories}
           onRepostCreated={id => setRepostedPublicationIds(current => [...new Set([...current, id])])}
         />
       </div>
