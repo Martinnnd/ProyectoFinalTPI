@@ -14,6 +14,8 @@ export default function ProfileHeader({
   memoryCount,
   followers,
   followedUsers,
+  followerCount,
+  followingCount,
   userCategory,
   unlocked,
   achievementCount,
@@ -31,6 +33,8 @@ export default function ProfileHeader({
   memoryCount: number;
   followers: FollowedUser[];
   followedUsers: FollowedUser[];
+  followerCount?: number;
+  followingCount?: number;
   userCategory: string;
   unlocked: Achievement[];
   achievementCount: number;
@@ -45,6 +49,8 @@ export default function ProfileHeader({
   const [followList, setFollowList] = useState<FollowList>("followers");
   const isOwnProfile = !author;
   const displayName = author ?? username;
+  const totalFollowers = followerCount ?? followers.length;
+  const totalFollowed = followingCount ?? followedUsers.length;
 
   function openFollowList(list: FollowList) {
     setFollowList(list);
@@ -74,7 +80,7 @@ export default function ProfileHeader({
             <span className="eyebrow">{presentation.label}</span>
             <div className="profile-name-row">
               <h2>{displayName}</h2>
-              {isOwnProfile && (
+              {isOwnProfile ? (
                 <button
                   className="profile-note"
                   onClick={onOpenTiers}
@@ -83,18 +89,25 @@ export default function ProfileHeader({
                 >
                   {userCategory}
                 </button>
-              )}
+              ) : userCategory ? (
+                <span className="profile-note">{userCategory}</span>
+              ) : null}
             </div>
             <div className="personal-counts">
               <span><strong>{memoryCount}</strong> Recuerdos</span>
-              {isOwnProfile && (
+              {isOwnProfile ? (
                 <>
                   <button type="button" aria-haspopup="dialog" onClick={() => openFollowList("followers")}>
-                    <strong>{followers.length}</strong> Seguidores
+                    <strong>{totalFollowers}</strong> Seguidores
                   </button>
                   <button type="button" aria-haspopup="dialog" onClick={() => openFollowList("following")}>
-                    <strong>{followedUsers.length}</strong> Seguidos
+                    <strong>{totalFollowed}</strong> Seguidos
                   </button>
+                </>
+              ) : (
+                <>
+                  <span><strong>{totalFollowers}</strong> Seguidores</span>
+                  <span><strong>{totalFollowed}</strong> Seguidos</span>
                 </>
               )}
             </div>
