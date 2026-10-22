@@ -12,12 +12,17 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
   const [revision, setRevision] = useState(0);
   const request = useRef<AbortController | null>(null);
   const busy = useRef(false);
+  const loadedCursors = useRef(new Set<string>());
   async function load(more: boolean, controller: AbortController) {
     if (!feed) return;
     busy.current = true; setLoading(true); setError('');
     try {
       const page = await getFeed(feed, more ? cursor ?? undefined : undefined, controller.signal);
       if (controller.signal.aborted) return;
+      if (more && page.hayMas && page.siguienteCursor && (page.siguienteCursor === cursor || loadedCursors.current.has(page.siguienteCursor))) {
+        throw new Error('No pudimos continuar la lista de recuerdos. Volvé a intentar.');
+      }
+      if (more && cursor) loadedCursors.current.add(cursor);
       if (feed === 'para-vos') {
         void registrarImpresionesFeed(page.items.map(item => item.id)).catch((err) => {
           console.warn('No se pudieron registrar las impresiones del feed.', err);
@@ -38,6 +43,7 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
   useEffect(() => {
     if (!active || !feed) return;
     const controller = new AbortController(); request.current = controller;
+    loadedCursors.current.clear();
     setItems([]); setCursor(null); setHayMas(false); setExpired(false);
     void load(false, controller);
     return () => { controller.abort(); busy.current = false; };

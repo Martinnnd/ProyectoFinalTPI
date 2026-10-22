@@ -1,4 +1,18 @@
 
+.era-1990 {
+  --picking-bg: #000080;
+  --picking-ink: #ffffff;
+  --picking-border: 3px outset #c0c0c0;
+  --picking-radius: 0px;
+  --picking-shadow: 4px 4px 0 #0006, 0 8px 28px #0005;
+  --picking-highlight: #ffffd0;
+  --picking-button-bg: #c0c0c0;
+  --picking-button-ink: #000000;
+  --picking-button-border: 0px;
+  --picking-button-radius: 0px;
+  --picking-button-shadow: var(--raised);
+  --picking-button-hover: #dedede;
+}
 .era-1990 .decades .active {
   border-radius: 3px;
   box-shadow: 2px 2px 0 #153d2b40;
@@ -471,7 +485,7 @@
 .era-1990 .dialog-heading {
   margin: 0 -15px 18px;
 }
-.era-1990 :is(input, textarea, select) {
+.era-1990 :is(input, textarea, select, .memory-select-control) {
   border: 0;
   border-radius: 0;
   box-shadow: var(--sunken);

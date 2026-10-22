@@ -1,6 +1,5 @@
-import { memoryThumbnail } from "./memoryThumbnail";
+import PinMemoryPreview from "./PinMemoryPreview";
 import type { MapBounds } from '../publicationsApi';
-import { getMemoryAuthorDisplay } from "../api";
 import { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
@@ -17,6 +16,7 @@ import { symbols, type Memory } from "../types";
 export type Point = { lat: number; lng: number; label?: string };
 const center: [number, number] = [-38.4, -64.4];
 function MapActions({
+  active,
   picking,
   onPick,
   selected,
@@ -25,6 +25,7 @@ function MapActions({
   searchTarget,
   onBoundsChange,
 }: {
+  active?: boolean;
   picking: boolean;
   onPick: (p: Point) => void;
   selected: Memory | null;
@@ -54,6 +55,7 @@ function MapActions({
     return () => observer.disconnect();
   }, [map]);
   const selectedRef = useRef(selected);
+  const focusedPin = useRef<string | null>(null);
   selectedRef.current = selected;
   useEffect(() => {
     const fit = () => {
@@ -70,11 +72,16 @@ function MapActions({
     return () => observer.disconnect();
   }, [reset, map, fitPoints]);
   useEffect(() => {
+    if (active === false) return;
+    if (!selected) { focusedPin.current = null; return; }
+    const locationKey = `${selected.id}:${selected.lat}:${selected.lng}`;
+    if (focusedPin.current === locationKey) return;
+    focusedPin.current = locationKey;
     if (selected)
       map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
         animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
       });
-  }, [selected, map]);
+  }, [selected, active, map]);
   useEffect(() => {
     if (searchTarget) map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
       animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .8,
@@ -131,6 +138,7 @@ function icon(memory?: Memory, selected = false) {
   });
 }
 export default function MemoryMap({
+  active,
   showEmptyState = true,
   onBoundsChange,
   searchTarget,
@@ -139,6 +147,9 @@ export default function MemoryMap({
   memories,
   selected,
   onSelect,
+  onSelectRelated,
+  onClosePreview,
+  onMoment,
   onOpen,
   picking,
   onPick,
@@ -154,6 +165,9 @@ export default function MemoryMap({
   memories: Memory[];
   selected: Memory | null;
   onSelect: (m: Memory) => void;
+  onSelectRelated?: (m: Memory) => void;
+  onClosePreview?: () => void;
+  onMoment?: (id: number, memory: Memory) => void;
   onOpen?: (m: Memory) => void;
   picking: boolean;
   onPick: (p: Point) => void;
@@ -197,6 +211,7 @@ export default function MemoryMap({
             }}
           />
           <MapActions
+            active={active}
             onBoundsChange={onBoundsChange}
             picking={picking}
             onPick={onPick}
@@ -205,7 +220,7 @@ export default function MemoryMap({
             searchTarget={searchTarget}
             fitPoints={fitMemories ? JSON.stringify(memories.map(m => [m.lat,m.lng])) : undefined}
           />
-          {memories.map((m) => (
+          {(selected && !memories.some(memory => memory.id === selected.id) ? [...memories, selected] : memories).map((m) => (
             <Marker
               key={m.id}
               position={[m.lat, m.lng]}
@@ -230,7 +245,7 @@ export default function MemoryMap({
               <Tooltip direction="top">{m.title} · {m.year}</Tooltip>
             </Marker>
           ))}
-          {selected && !picking && !searchTarget && <CircleMarker key={selected.id} center={[selected.lat,selected.lng]} radius={0} opacity={0} fillOpacity={0} interactive={false}><Tooltip position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{getMemoryAuthorDisplay(selected)} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip></CircleMarker>}
+          {selected && !picking && !searchTarget && <CircleMarker key={selected.id} center={[selected.lat,selected.lng]} radius={0} opacity={0} fillOpacity={0} interactive={false}><Tooltip position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><PinMemoryPreview memory={selected} onClose={onClosePreview} onSelect={onSelectRelated ?? onSelect} onOpen={onOpen} onMoment={onMoment ? id => onMoment(id, selected) : undefined} /></Tooltip></CircleMarker>}
           {searchTarget && <Marker position={[searchTarget.lat, searchTarget.lng]} icon={icon()} draggable title="Arrastrá para ajustar la ubicación" eventHandlers={{ dragend: event => {
             const point = event.target.getLatLng(); onSearchMove?.({ ...searchTarget, lat: point.lat, lng: point.lng });
           }}}><Tooltip>Ubicación encontrada · Arrastrá para ajustar</Tooltip></Marker>}
@@ -251,7 +266,7 @@ export default function MemoryMap({
         </button>
         {picking && (
           <div className="map-notice picking" role="status">
-            <MapPin size={19} />
+            <MapPin size={22} aria-hidden="true" />
             <span>Elegí un lugar en el mapa para tu recuerdo.</span>
             <button onClick={onCancel}>Cancelar</button>
           </div>

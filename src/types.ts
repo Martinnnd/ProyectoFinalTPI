@@ -13,6 +13,8 @@ export interface Memory {
   id: string;
   title: string;
   year: number;
+  /** Historical calendar date (YYYY-MM-DD), independent of publication time. */
+  date?: string;
   category: Category;
   description: string;
   place: string;

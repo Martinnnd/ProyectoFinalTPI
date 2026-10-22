@@ -8,7 +8,7 @@ import { filterCommunity } from "./groups";
 import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, joinGroup as joinRemoteGroup, type CreateGroupInput, type GroupMember } from "./groupsApi";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
+import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown, CircleCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   categories,
@@ -25,8 +25,9 @@ import { achievements, eraContent, resolveUserCategory } from "./data";
 import { totalGivenNostalgia, updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
 import { isOwnMemory, eliminarPublicacion } from "./api";
 import { ratePublication } from "./publicationsApi";
-import { getPerfilUsuario, getPublicacionesUsuario, type UsuarioPerfil } from "./userApi";
+import { getPerfilUsuario, getPublicacionesUsuario, type UsuarioBusqueda, type UsuarioPerfil } from "./userApi";
 import AuthMenu from "./components/auth/AuthMenu";
+import UserSearch from "./components/UserSearch";
 import { useAuth } from "./components/auth/AuthProvider";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
@@ -44,13 +45,17 @@ import EraFacts from "./components/EraFacts";
 import EraChrome, { EraIcon } from "./components/EraChrome";
 import { availableDecades } from "./eras/registry";
 import { eraThemes } from "./themes";
+import { readNavigation, navigationUrl } from './navigationState';
 
 import { getMapPublications, getPublication, publicationId, type MapBounds } from './publicationsApi';
 import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from './seguimientosApi';
 
+const MEMORY_SAVED_NOTICE = "¡Recuerdo guardado! Ya tiene su lugar en el mapa.";
+
 export default function App() {
   const router = useRouter();
-  const { session } = useAuth();
+  const { session, status: authStatus } = useAuth();
+  const [initialNavigation] = useState(() => readNavigation(window.location.search));
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const reportBounds = useCallback((next: MapBounds) => setBounds(current => JSON.stringify(current) === JSON.stringify(next) ? current : next), []);
   const [remotePins, setRemotePins] = useState<Memory[]>([]);
@@ -74,21 +79,13 @@ export default function App() {
   const [followingRevision, setFollowingRevision] = useState(0);
   const pendingFollows = useRef(new Set<number>());
   const creationOrigin = useRef(false);
-  const [profileAuthor, setProfileAuthor] = useState<string | null>(null);
-  const [view, setView] = useState<"map" | "feed" | "profile" | "chat">("map");
+  const [profileAuthor, setProfileAuthor] = useState<string | null>(initialNavigation.profileAuthor);
+  const [view, setView] = useState<"map" | "feed" | "profile" | "chat">(initialNavigation.view);
   useEffect(() => {
-    if (!session && (view === "chat" || view === "profile")) setView("feed");
-  }, [session, view]);
-  const [period, setPeriod] = useState<Period>(() => {
-    const requested = Number(
-      new URLSearchParams(window.location.search).get("era"),
-    );
-    return {
-      decade: availableDecades.find((year) => year === requested) ?? 1990,
-      year: null,
-    };
-  });
-  const [category, setCategory] = useState<Category | "Todas">("Todas");
+    if (authStatus !== 'loading' && !session && (view === "chat" || view === "profile")) setView("feed");
+  }, [session, view, authStatus]);
+  const [period, setPeriod] = useState<Period>(initialNavigation.period);
+  const [category, setCategory] = useState<Category | "Todas">(initialNavigation.category);
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
   const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
   const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
@@ -148,15 +145,21 @@ export default function App() {
     const targetId = authorId ?? [...feedItems, ...dbMemories].find(memory => memory.author === author)?.authorId;
     if (!targetId) { setNotice(`No se puede seguir a ${author}: falta su identificador de usuario.`); return; }
     if (targetId === currentUserId || pendingFollows.current.has(targetId)) return;
+    const wasFollowing = followingUsers.some(user => user.id === targetId);
     pendingFollows.current.add(targetId);
     try {
-      if (followingUsers.some(user => user.id === targetId)) {
+      if (wasFollowing) {
         await dejarDeSeguir(currentUserId, targetId);
         setFollowingUsers(current => current.filter(user => user.id !== targetId));
       } else {
         await seguir(currentUserId, targetId);
         setFollowingUsers(current => [...current, { id: targetId, username: author }]);
       }
+      setProfileUser(current => current?.id === targetId ? {
+        ...current,
+        loSigo: !wasFollowing,
+        cantidadSeguidores: Math.max(0, current.cantidadSeguidores + (wasFollowing ? -1 : 1)),
+      } : current);
       setFollowingRevision(revision => revision + 1);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'No se pudo actualizar el seguimiento.');
@@ -165,13 +168,18 @@ export default function App() {
     }
   }
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialNavigation.selectedId);
   const [picking, setPicking] = useState(false);
   const [deleting, setDeleting] = useState<Memory | null>(null);
   const [editing, setEditing] = useState<Memory | null>(null);
   const [draft, setDraft] = useState<Point | null>(null);
   const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
+  useEffect(() => {
+    if (notice !== MEMORY_SAVED_NOTICE) return;
+    const timer = window.setTimeout(() => setNotice(""), 3000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
   useEffect(() => {
     const controller = new AbortController();
     getGroups(controller.signal)
@@ -274,8 +282,22 @@ export default function App() {
       setNotice(error instanceof Error ? error.message : 'No se pudo registrar la puntuación.');
     }
   }
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [factsOpen, setFactsOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(initialNavigation.panelOpen);
+  const [factsOpen, setFactsOpen] = useState(initialNavigation.factsOpen);
+  useEffect(() => {
+    const url = navigationUrl(window.location.href, { period, view, selectedId, profileAuthor, category, panelOpen, factsOpen });
+    window.history.replaceState(window.history.state, '', url);
+  }, [period, view, selectedId, profileAuthor, category, panelOpen, factsOpen]);
+  useEffect(() => {
+    const restore = () => {
+      const next = readNavigation(window.location.search);
+      setPeriod(next.period); setView(next.view); setSelectedId(next.selectedId);
+      setProfileAuthor(next.profileAuthor); setCategory(next.category);
+      setPanelOpen(next.panelOpen); setFactsOpen(next.factsOpen);
+    };
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, []);
   const [musicOpen, setMusicOpen] = useState(false);
   useEffect(() => { setMusicOpen(window.innerWidth >= 900); }, []);
   const addButton = useRef<HTMLButtonElement>(null);
@@ -317,17 +339,17 @@ export default function App() {
   }, [bounds, period, category, view, mapRevision]);
   useEffect(() => {
     setRemoteSelected(current => current?.id === selectedId ? current : null);
-    if (!selectedId) return;
+    if (!selectedId || authStatus === 'loading') return;
     const pin = [selectedSeed.current, remoteSelected, ...remotePins, ...dbMemories].find(memory => memory?.id === selectedId);
-    if (!pin || !publicationId(pin)) return;
+    if (pin ? !publicationId(pin) : !/^[1-9]\d*$/.test(selectedId)) return;
     const controller = new AbortController();
     setApiStatus(view === 'map' ? 'Cargando resumen…' : 'Cargando publicación…');
-    getPublication(pin, view === 'map', controller.signal).then(memory => {
+    getPublication(pin ?? selectedId, view === 'map', controller.signal).then(memory => {
       if (controller.signal.aborted) return;
       setRemoteSelected(memory); setApiStatus('');
     }).catch(error => { if (!controller.signal.aborted) { setRemoteSelected(null); setApiStatus(`No se pudo abrir la publicación: ${error.message}`); } });
     return () => controller.abort();
-  }, [selectedId, view, mapRevision]);
+  }, [selectedId, view, mapRevision, authStatus]);
   const viewingGroup = groups.some(group => group.id === scope);
   const communityMemories = viewingGroup ? groupMemories : dbMemories;
   const feedSource = viewingGroup ? groupMemories : feedItems;
@@ -374,9 +396,9 @@ export default function App() {
   const communityControls = (profile=false) => <CommunityControls groups={myGroups} searchGroups={groups} scope={scope} query={query} decade={period.decade} profile={profile} canCreate={!!session} onQuery={value=>{setQuery(value);setSelectedId(null);}} onScope={value=>{chooseScope(value);if(profile){setGroupOpenRequest(current=>current+1);setView('feed');}}} onCreate={createGroup} onJoinGroup={joinGroup} onAddToGroup={startAddingToGroup} onShowInfo={setGroupInfoId}/>;
   const eraTransition = useRef<ViewTransition | null>(null);
   useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
-  function changePeriod(next: Period) {
-    if (next.decade === period.decade && next.year === period.year) return;
-    const update = () => applyPeriod(next);
+  function changePeriod(next: Period, afterChange?: () => void) {
+    if (next.decade === period.decade && next.year === period.year) { afterChange?.(); return; }
+    const update = () => { applyPeriod(next); afterChange?.(); };
     if (next.decade === period.decade || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { update(); return; }
     if (document.startViewTransition) {
       eraTransition.current?.skipTransition();
@@ -429,18 +451,51 @@ export default function App() {
     setSelectedId(null);setPanelOpen(false);setFactsOpen(false);setPicking(false);
     setCategory("Todas");setPeriod(current=>({...current,year:null}));setView("profile");
   }
+  function openSearchedUserProfile(user: UsuarioBusqueda) {
+    setProfileAuthor(user.id === currentUserId ? null : user.username);
+    setSelectedId(null);setPanelOpen(false);setFactsOpen(false);setPicking(false);
+    setCategory("Todas");setPeriod(current => ({...current, year: null}));setView("profile");
+  }
   function openPublication(memory: Memory) {
+    if (view === 'map') {
+      const origin = { period, view, selectedId, profileAuthor, category, panelOpen, factsOpen };
+      window.history.replaceState(window.history.state, '', navigationUrl(window.location.href, origin));
+      const publication = { ...origin, period: { decade: Math.floor(memory.year / 10) * 10 as Decade, year: null }, view: 'feed' as const, selectedId: memory.id, category: 'Todas' as const, panelOpen: false };
+      window.history.pushState(null, '', navigationUrl(window.location.href, publication));
+    }
     selectedSeed.current = memory;
     setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
   }
   function select(memory: Memory) {
     selectedSeed.current = memory;
+    setRemoteSelected(memory);
     setSelectedId(memory.id);
     setPanelOpen(false);
     if (window.innerWidth < 900) {
       setFactsOpen(false);
     }
+  }
+  function closeMapPreview() {
+    selectedSeed.current = null;
+    setRemoteSelected(null);
+    setSelectedId(null);
+    setApiStatus('');
+  }
+  function selectMapPin(memory: Memory) {
+    if (selectedId === memory.id) { closeMapPreview(); return; }
+    select(memory);
+  }
+  function selectRelatedMemory(memory: Memory) {
+    const decade = Math.floor(memory.year / 10) * 10 as Decade;
+    if (!availableDecades.includes(decade)) {
+      setNotice('Este recuerdo pertenece a una década que todavía no está disponible en el mapa.');
+      return;
+    }
+    changePeriod({ decade, year: null }, () => {
+      setCategory('Todas');
+      select(memory);
+    });
   }
   function closeStories() {
     setPanelOpen(false);
@@ -581,7 +636,7 @@ export default function App() {
       setView("feed"); setSelectedId(null); setPanelOpen(false); setQuery("");
       setDraftHashtags([]);
     }
-    setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
+    setNotice(MEMORY_SAVED_NOTICE);
     // Hardcoded unlock: the very first memory the visitor creates earns badge 01.
     // It only sets this state, so the popup never moves them off the current view.
     if (isFirstMemory) setCelebrating(achievements[0]);
@@ -600,6 +655,15 @@ export default function App() {
     setPanelOpen(destination === "stories" && (view !== "map" || !panelOpen));
     setFactsOpen(destination === "facts" && (view !== "map" || !factsOpen));
     if (destination === "map") setSelectedId(null);
+  }
+  function openOwnProfile() {
+    setProfileAuthor(null);
+    setView("profile");
+    setMusicOpen(false);
+    setSelectedId(null);
+    setPanelOpen(false);
+    setFactsOpen(false);
+    setPicking(false);
   }
   const theme = eraThemes[period.decade];
   const groupInfo = groups.find(group=>group.id===groupInfoId) ?? null;
@@ -641,7 +705,9 @@ export default function App() {
             onBoundsChange={reportBounds}
             memories={filterMemories(remotePins, period, category)}
             selected={view === 'map' ? selected : null}
-            onSelect={select}
+            onSelect={selectMapPin}
+            onClosePreview={closeMapPreview}
+            onSelectRelated={selectRelatedMemory}
             onOpen={openPublication}
             picking={picking}
             onPick={(point) => {
@@ -686,23 +752,15 @@ export default function App() {
         {session && <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {
           setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);
         }}><MessageCircle/><span>Chat</span></button>}
-        {session && <button
-            aria-current={view === "profile" ? "page" : undefined}
-            className={`rail-profile ${view === "profile" ? "rail-active" : ""}`}
-            onClick={() => {
-              setProfileAuthor(null);
-              setView("profile");
-              setMusicOpen(false);
-              setSelectedId(null);
-              setPanelOpen(false);
-              setFactsOpen(false);
-              setPicking(false);
-            }}
-          >
-            <UserRound />
-            <span>Perfil</span>
-          </button>}
-        <AuthMenu />
+        {session ? <div className="account-navigation">
+          <UserSearch
+            currentUserId={session.usuarioId}
+            followedUsers={followingUsers}
+            onFollow={toggleFollow}
+            onOpenProfile={openSearchedUserProfile}
+          />
+          <AuthMenu profileActive={view === "profile" && profileAuthor === null} onOpenProfile={openOwnProfile} />
+        </div> : <AuthMenu profileActive={false} onOpenProfile={openOwnProfile} />}
       </nav>
       <header className="map-toolbar">
         <div className="compact-selectors">
@@ -783,6 +841,7 @@ export default function App() {
           reputation={profileUser?.reputacion}
           followerCount={profileUser?.cantidadSeguidores}
           followingCount={profileUser?.cantidadSeguidos}
+          isFollowing={profileUser ? followingUsers.some(user => user.id === profileUser.id) : false}
           onBack={() => {setSelectedId(null);setView("feed");}}
           community={profileAuthor === null ? communityControls(true) : undefined}
           allMemories={profileMemories}
@@ -796,6 +855,7 @@ export default function App() {
           onSelect={(m) => setSelectedId(m?.id ?? null)}
           onAdd={startAdding}
           onIniciarChat={profileAuthor ? iniciarChatConUsuario : undefined}
+          onToggleFollow={profileAuthor && profileUser ? () => toggleFollow(profileUser.username, profileUser.id) : undefined}
         />
       )}
       <div hidden={view !== "feed"}>
@@ -833,7 +893,10 @@ export default function App() {
           canRate={canRate}
           onRate={rateMemory}
           selected={selected}
-          onSelect={(m) => { selectedSeed.current = m; setRemoteSelected(m); setSelectedId(m?.id ?? null); }}
+          onSelect={(m) => {
+            if (m) selectRelatedMemory(m);
+            else { selectedSeed.current = null; setRemoteSelected(null); setSelectedId(null); }
+          }}
           onMap={(m) => {
             selectedSeed.current = m;
             setRemoteSelected(m);
@@ -861,14 +924,15 @@ export default function App() {
       />
       {apiStatus && <div className="toast" role="status">{apiStatus}{apiStatus.startsWith('No se pud') && <button onClick={() => setMapRevision(value => value + 1)}>Reintentar</button>}</div>}
       {notice && (
-        <div className="toast" role="status">
+        <div className={`toast${notice === MEMORY_SAVED_NOTICE ? ' memory-saved-notice' : ''}`} role="status" aria-atomic="true">
+          {notice === MEMORY_SAVED_NOTICE && <CircleCheck size={24} aria-hidden="true" />}
           <span>{notice}</span>
           <button
             className="icon-button"
             aria-label="Cerrar aviso"
             onClick={() => setNotice("")}
           >
-            <X size={17} />
+            <X size={20} />
           </button>
         </div>
       )}

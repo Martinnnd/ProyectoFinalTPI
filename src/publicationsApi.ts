@@ -56,6 +56,7 @@ export function toMemory(data: Publication, pin: Memory): Memory {
     title: data.titulo,
     description: data.descripcion ?? data.descripcionBreve ?? '',
     year: new Date(data.fecha).getUTCFullYear(),
+    date: new Date(data.fecha).toISOString().slice(0, 10),
     category: category(data.categoria),
     author: data.autor.username,
     authorId: data.autor.id,
@@ -68,10 +69,19 @@ export function toMemory(data: Publication, pin: Memory): Memory {
     media: url && (video || youtubeId(url)) ? { kind: youtubeId(url) ? 'youtube' : 'video', url } : undefined
   };
 }
-export async function getPublication(memory: Memory, summary: boolean, signal?: AbortSignal) {
+export async function getPublication(input: Memory | string, summary: boolean, signal?: AbortSignal) {
+  const memory: Memory = typeof input === 'string'
+    ? { id: input, title: '', description: '', author: '', place: '', year: 0, lat: NaN, lng: NaN, category: 'Personales', source: 'backend' }
+    : input;
   const id = publicationId(memory);
   if (!id) throw new Error('Esta publicación no tiene un identificador del servidor.');
-  return toMemory(await publicationRequest<Publication>(`/${id}${summary ? '/resumen' : ''}`, { signal }), memory);
+  // The summary omits location. A direct URL has no map pin to supply it.
+  const useSummary = summary && typeof input !== 'string';
+  const result = toMemory(await publicationRequest<Publication>(`/${id}${useSummary ? '/resumen' : ''}`, { signal }), memory);
+  if (!Number.isFinite(result.lat) || !Number.isFinite(result.lng) || Math.abs(result.lat) > 90 || Math.abs(result.lng) > 180) {
+    throw new Error('Este recuerdo no tiene una ubicación válida para mostrar en el mapa.');
+  }
+  return result;
 }
 
 export type RatingState = {

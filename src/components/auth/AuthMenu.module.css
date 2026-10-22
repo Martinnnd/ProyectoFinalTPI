@@ -1,6 +1,6 @@
 .slot {
   position: relative;
-  margin-top: 0;
+  margin-top: auto;
   min-height: 64px;
 }
 
@@ -45,6 +45,19 @@
   flex-direction: row !important;
   justify-content: flex-start !important;
   padding: 8px 10px;
+}
+
+.menu .profileAction {
+  margin: 10px 0 6px;
+  color: var(--ink) !important;
+  background: var(--soft) !important;
+}
+
+.menu .profileAction[aria-current="page"] {
+  color: var(--accent) !important;
+}
+
+.menu .logoutAction {
   color: #a63f2f !important;
   background: color-mix(in srgb, #a63f2f 10%, transparent) !important;
 }

@@ -8,9 +8,12 @@ import RemoteComments from './RemoteComments';
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
 import { memoryHashtags } from "../../hashtags";
+import { publicationId } from '../../publicationsApi';
+import FeedRelations from './FeedRelations';
 
 export default function FeedPost({
   memory,
+  active = true,
   selected,
   following,
   liked,
@@ -25,6 +28,7 @@ export default function FeedPost({
   onProfile,
   onFollow,
   onOpen,
+  onOpenRelated,
   onMap,
   onRate,
   onLike,
@@ -33,6 +37,7 @@ export default function FeedPost({
   onHashtag,
 }: {
   memory: Memory;
+  active?: boolean;
   selected: boolean;
   following: boolean;
   liked: boolean;
@@ -47,6 +52,7 @@ export default function FeedPost({
   onProfile: (memory: Memory) => void;
   onFollow: (author: string, authorId?: number) => void;
   onOpen: (memory: Memory) => void;
+  onOpenRelated?: (memory: Memory) => void;
   onMap: (memory: Memory) => void;
   onRate: (value: number) => void;
   onLike: () => void;
@@ -58,6 +64,7 @@ export default function FeedPost({
   useEffect(() => setCommentCount(memory.commentCount ?? 0), [memory.id, memory.commentCount]);
   const hasInlineImage =
     memory.image && !memory.media && !youtubeId(memory.image);
+  const splitPhoto = Boolean(hasInlineImage && !selected && !memory.repost?.comment);
 
   const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
 
@@ -83,6 +90,8 @@ export default function FeedPost({
           <span>{isReposterOwn ? "Has reposteado" : `${reposterDisplay} ha reposteado`}</span>
         </div>
       )}
+      <div className={`post-composition${splitPhoto ? ' has-split-photo' : ''}`}>
+      <div className="post-details">
       <header>
         <button
           className="social-avatar author-avatar"
@@ -151,7 +160,7 @@ export default function FeedPost({
 
         return (
           <div
-            className={isQuote ? "quoted-post-box" : undefined}
+            className={isQuote ? "quoted-post-box" : "post-body"}
             onClick={isQuote ? (e) => {
               e.stopPropagation();
               onOpen(targetQuoted);
@@ -260,9 +269,15 @@ export default function FeedPost({
         onRepost={onRepost}
         onSave={onSave}
       />
+      </div>
+      {splitPhoto && <button className="post-photo-open" onClick={() => onOpen(memory)} aria-label={`Abrir recuerdo: ${memory.title}`}>
+        <img src={memory.image} alt={`Fotografía de ${memory.title} en ${memory.place}, ${memory.year}`} loading="lazy" decoding="async" onError={event => { event.currentTarget.hidden = true; }} />
+      </button>}
+      </div>
+      {publicationId(memory) && <FeedRelations key={`relations-${memory.id}`} id={memory.id} active={active} onOpen={onOpenRelated ?? onOpen} />}
       {selected && commentMemoryId && (
         <RemoteComments
-          key={commentMemoryId}
+          key={`comments-${commentMemoryId}`}
           memoryId={commentMemoryId}
           onCommentCreated={() => setCommentCount((count) => count + 1)}
           onCommentDeleted={() => setCommentCount((count) => Math.max(0, count - 1))}
