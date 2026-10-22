@@ -445,6 +445,12 @@ export default function App() {
     setCategory("Todas");setPeriod(current=>({...current,year:null}));setView("profile");
   }
   function openPublication(memory: Memory) {
+    if (view === 'map') {
+      const origin = { period, view, selectedId, profileAuthor, category, panelOpen, factsOpen };
+      window.history.replaceState(window.history.state, '', navigationUrl(window.location.href, origin));
+      const publication = { ...origin, period: { decade: Math.floor(memory.year / 10) * 10 as Decade, year: null }, view: 'feed' as const, selectedId: memory.id, category: 'Todas' as const, panelOpen: false };
+      window.history.pushState(null, '', navigationUrl(window.location.href, publication));
+    }
     selectedSeed.current = memory;
     setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
@@ -457,6 +463,16 @@ export default function App() {
     if (window.innerWidth < 900) {
       setFactsOpen(false);
     }
+  }
+  function closeMapPreview() {
+    selectedSeed.current = null;
+    setRemoteSelected(null);
+    setSelectedId(null);
+    setApiStatus('');
+  }
+  function selectMapPin(memory: Memory) {
+    if (selectedId === memory.id) { closeMapPreview(); return; }
+    select(memory);
   }
   function selectRelatedMemory(memory: Memory) {
     const decade = Math.floor(memory.year / 10) * 10 as Decade;
@@ -668,7 +684,8 @@ export default function App() {
             onBoundsChange={reportBounds}
             memories={filterMemories(remotePins, period, category)}
             selected={view === 'map' ? selected : null}
-            onSelect={select}
+            onSelect={selectMapPin}
+            onClosePreview={closeMapPreview}
             onSelectRelated={selectRelatedMemory}
             onOpen={openPublication}
             picking={picking}

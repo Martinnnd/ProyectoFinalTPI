@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { getMemoryAuthorDisplay } from '../api';
 import { API_BASE_URL } from '../apiConfig';
-import { safeMediaUrl } from '../media';
+import { safeMediaUrl, youtubeId } from '../media';
 import { publicationId } from '../publicationsApi';
 import { getMemoryRelations, getRelatedMapMemory, getRelatedMemories, type MemoryRelations, type RelatedPage } from '../recuerdosRelationsApi';
 import type { Memory } from '../types';
 import { memoryThumbnail } from './memoryThumbnail';
 import styles from './pinMemoryPreview.module.css';
 import PublicationMoments from './PublicationMoments';
+import { X } from 'lucide-react';
 
 export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, onMoment }: {
   memory: Memory;
@@ -17,6 +18,7 @@ export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, on
   onMoment?: (id: number) => void;
 }) {
   const id = publicationId(memory);
+  const thumbnail = memoryThumbnail(memory);
   const [relations, setRelations] = useState<MemoryRelations | null>(null);
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
@@ -34,8 +36,8 @@ export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, on
   return <div className={styles.stack}>
     {relations && <RelatedCarousel key={`${id}-lugar`} id={id!} tipo="lugar" initialPage={relations.lugar} onSelect={onSelect} />}
     <div className={styles.card}>
-    {onClose && <button className={styles.close} aria-label="Cerrar vista previa" onClick={onClose}>×</button>}
-    {memoryThumbnail(memory) && <img className="pin-preview-photo" src={memoryThumbnail(memory)} alt="" onError={event => { event.currentTarget.hidden = true; }} />}
+    {onClose && <button className={styles.close} aria-label="Cerrar vista previa" onClick={onClose}><X size={11} strokeWidth={2.5} aria-hidden="true" /></button>}
+    {thumbnail && <img key={thumbnail} className="pin-preview-photo" src={thumbnail} alt={youtubeId(memory.media?.url ?? memory.image ?? '') ? 'Miniatura del video de YouTube' : ''} onError={event => { event.currentTarget.hidden = true; }} />}
     <small>{getMemoryAuthorDisplay(memory)} · {memory.year}</small>
     <strong>{memory.title}</strong>
     <p>{memory.description.length > 140 ? `${memory.description.slice(0, 140)}…` : memory.description}</p>

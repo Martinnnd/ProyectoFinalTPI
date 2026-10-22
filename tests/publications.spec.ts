@@ -14,6 +14,7 @@ for (const { mobile, era } of [{ mobile: false, era: 1970 }, { mobile: true, era
 test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mobile ? ' en móvil' : ''}, década ${era}`, async ({ page }, testInfo) => {
   if (mobile) await page.setViewportSize({ width: 390, height: 844 });
   let body = '';
+  const publishedUrl = era === 1990 ? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' : 'https://example.com/foto.jpg';
   await page.route('**/api/**', async route => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
@@ -24,7 +25,10 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
       body = request.postDataBuffer()?.toString('utf8') ?? '';
       return route.fulfill({ status: 201, headers, json: { id: 999 } });
     }
-    if (path.endsWith('/mapa')) return route.fulfill({ headers, json: { pines: [], hayMas: false } });
+    if (path === '/api/publicaciones/999' || path === '/api/publicaciones/999/resumen') return route.fulfill({ headers, json: {
+      id: 999, titulo: 'Un día preciso', descripcion: 'Nos encontramos ese día. #Amigos #amigos, #Música', fecha: '1991-04-15T00:00:00Z', categoria: 'Personales', urlMultimedia: publishedUrl, tipoMultimedia: era === 1990 ? 'Video' : 'Foto', autor: { id: 1, username: 'Ana' }, lugar: { nombre: 'La plaza', latitud: -34.6, longitud: -58.5 },
+    } });
+    if (path.endsWith('/mapa')) return route.fulfill({ headers, json: { pines: body && era === 1990 ? [{ id: 999, latitud: -34.6, longitud: -58.5, categoria: 'Personales' }] : [], hayMas: false } });
     if (path.startsWith('/api/feed/')) return route.fulfill({ headers, json: { items: [], siguienteCursor: null, hayMas: false } });
     return route.fulfill({ headers, json: [] });
   });
@@ -69,12 +73,14 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
   await expect(thumbnail).toBeVisible();
   await expect(thumbnail).toHaveAttribute('src', 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
   await expect(dialog.getByRole('button', { name: 'Enlace', exact: true })).toBeDisabled();
+  if (era !== 1990) {
   await dialog.getByRole('button', { name: 'Quitar adjunto', exact: true }).click();
   await dialog.getByLabel('Tipo de adjunto').selectOption('image');
   await dialog.getByLabel('O pegá un enlace HTTPS al archivo').fill('https://example.com/foto.jpg');
   await dialog.getByRole('button', { name: 'Archivo', exact: true }).click();
   await dialog.getByRole('button', { name: 'Enlace', exact: true }).click();
   await expect(dialog.getByLabel('O pegá un enlace HTTPS al archivo')).toHaveValue('https://example.com/foto.jpg');
+  }
   await dialog.getByRole('button', { name: 'Continuar', exact: true }).click();
   await dialog.getByLabel('Título del recuerdo').fill('Un día preciso');
   await dialog.getByLabel('Tu historia').fill('Nos encontramos ese día. #Amigos #amigos, #Música');
@@ -143,6 +149,11 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
   await expect(dialog).not.toBeVisible();
   expect(body).toContain('name="Fecha"\r\n\r\n1991-04-15T00:00:00.000Z');
   expect(body).toContain('Nos encontramos ese día. #Amigos #amigos, #Música');
+  if (era === 1990) {
+    const pinThumbnail = page.locator('#explore .pin-message-preview .pin-preview-photo');
+    await expect(pinThumbnail).toHaveAttribute('src', 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
+    await expect(pinThumbnail).toBeVisible();
+  }
   const savedNotice = page.locator('.memory-saved-notice');
   await expect(savedNotice).toContainText('¡Recuerdo guardado! Ya tiene su lugar en el mapa.');
   const savedNoticeBox = await savedNotice.boundingBox();
@@ -156,10 +167,64 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
     await savedNotice.getByRole('button', { name: 'Cerrar aviso', exact: true }).click();
     await expect(savedNotice).toHaveCount(0);
   }
+  if (era === 1990) {
+    await page.reload();
+    const pinThumbnail = page.locator('#explore .pin-message-preview .pin-preview-photo');
+    await expect(pinThumbnail).toBeVisible();
+    await expect(pinThumbnail).toHaveAttribute('src', 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
+    await page.screenshot({ path: testInfo.outputPath('youtube-pin-preview.png') });
+  }
 });
 }
 
+test('recargar un pin recupera su ubicación real aunque el resumen no tenga coordenadas', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'geolocation', { configurable: true, value: {
+      getCurrentPosition(success: PositionCallback) {
+        window.setTimeout(() => {
+          success({ coords: { latitude: -34.9, longitude: -58.4, accuracy: 100, altitude: null, altitudeAccuracy: null, heading: null, speed: null }, timestamp: Date.now() } as GeolocationPosition);
+          document.documentElement.dataset.locationDelivered = 'true';
+        }, 5000);
+      },
+    } });
+  });
+  const detail = { id: 125, titulo: 'Recorriendo Ramos', descripcion: 'Mi recuerdo de Ramos Mejía', fecha: '1990-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, lugar: { nombre: 'Ramos Mejía', latitud: -34.64, longitud: -58.56 } };
+  const requested: string[] = [];
+  await page.route('**/api/**', route => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    requested.push(path);
+    const headers = { 'access-control-allow-origin': request.headers().origin ?? 'http://localhost:3001', 'access-control-allow-credentials': 'true', 'access-control-allow-headers': 'authorization, content-type, x-nostalgiar-request' };
+    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
+    if (path.includes('/auth/')) return route.fulfill({ status: 401, headers });
+    if (path.endsWith('/mapa')) return route.fulfill({ headers, json: { pines: [], hayMas: false } });
+    if (path === '/api/publicaciones/125') return route.fulfill({ headers, json: detail });
+    if (path === '/api/publicaciones/125/resumen') return route.fulfill({ headers, json: { ...detail, lugar: undefined } });
+    return route.fulfill({ headers, json: [] });
+  });
+  await mockNoMoments(page);
+  await page.goto('/explorar?era=1990&view=map&post=125');
+  const assertRestoredPin = async () => {
+    await expect(page.locator('#explore .pin-message-preview')).toContainText('Recorriendo Ramos');
+    await expect(page.locator('html')).toHaveAttribute('data-location-delivered', 'true', { timeout: 10000 });
+    await expect.poll(async () => {
+      const href = await page.getByRole('link', { name: 'Improve this map', exact: true }).getAttribute('href');
+      return href?.split('#/')[1]?.split('/').slice(0, 2).map(Number);
+    }).toEqual([-58.56, -34.64]);
+  };
+  await assertRestoredPin();
+  await page.reload();
+  await assertRestoredPin();
+  expect(requested.filter(path => path === '/api/publicaciones/125')).toHaveLength(2);
+  expect(requested).not.toContain('/api/publicaciones/125/resumen');
+  await page.screenshot({ path: testInfo.outputPath('restored-pin-location.png') });
+});
+
 test('el carrusel del día continúa su cursor y abre la preview de otro pin', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  let documentLoads = 0;
+  page.on('request', request => { if (request.isNavigationRequest() && request.frame() === page.mainFrame()) documentLoads++; });
   const requests: string[] = [];
   const empty = { items: [], siguienteCursor: null, hayMas: false };
   await page.route('https://fixtures.nostalgiar.test/recuerdo.jpg', route => route.fulfill({ path: 'public/facts/bttf.jpg', contentType: 'image/jpeg' }));
@@ -189,6 +254,26 @@ test('el carrusel del día continúa su cursor y abre la preview de otro pin', a
   await page.getByRole('button', { name: 'Recuerdo, 1990, Lugares', exact: true }).click();
   const preview = page.locator('#explore .pin-message-preview');
   await expect(preview.getByRole('heading', { name: 'También ese día' })).toBeVisible();
+  const originalPin = page.getByRole('button', { name: 'Recuerdo, 1990, Lugares', exact: true });
+  await expect(preview.locator('.pin-preview-photo')).toBeVisible();
+  const detailRequests = () => requests.filter(path => path === '/api/publicaciones/25/resumen' || path === '/api/publicaciones/25/relaciones').length;
+  const requestsBeforeClose = detailRequests();
+  await originalPin.click();
+  await expect(preview).toHaveCount(0);
+  expect(detailRequests()).toBe(requestsBeforeClose);
+  expect(new URL(page.url()).searchParams.has('post')).toBe(false);
+  await originalPin.click();
+  await expect(preview.locator('.pin-preview-photo')).toBeVisible();
+  const closePreview = preview.getByRole('button', { name: 'Cerrar vista previa', exact: true });
+  const closeBounds = await closePreview.boundingBox();
+  expect(closeBounds!.width).toBe(22);
+  expect(closeBounds!.height).toBe(22);
+  await closePreview.click();
+  await expect(preview).toHaveCount(0);
+  expect(new URL(page.url()).searchParams.has('post')).toBe(false);
+  await originalPin.click();
+  await expect(preview.locator('.pin-preview-photo')).toBeVisible();
+  await expect(preview.getByRole('heading', { name: 'También ese día' })).toBeVisible();
   await preview.getByRole('button', { name: 'Ver más', exact: true }).click();
   await expect(preview.getByRole('button', { name: 'Ver en el mapa: Recuerdo 26', exact: true })).toHaveCount(1);
   await expect.poll(() => preview.getByRole('button', { name: 'Ver en el mapa: Recuerdo 26', exact: true }).locator('img').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
@@ -199,6 +284,34 @@ test('el carrusel del día continúa su cursor y abre la preview de otro pin', a
   expect(requests).toContain('/api/publicaciones/27');
   expect(requests).toContain('/api/publicaciones/27/relaciones');
   await expect(page.locator('.app.view-map')).toBeVisible();
+  const canvas = page.locator('#explore .mapboxgl-canvas');
+  const originalCanvas = await canvas.elementHandle();
+  const panned = page.waitForResponse(response => new URL(response.url()).pathname.endsWith('/api/publicaciones/mapa'));
+  await canvas.focus();
+  await canvas.press('ArrowRight');
+  await panned;
+  const marker = page.getByRole('button', { name: 'Recuerdo 27, 1992, Lugares', exact: true });
+  await expect(marker).toBeVisible();
+  const markerBefore = await marker.boundingBox();
+  const mapUrl = page.url();
+  const initialDocumentLoads = documentLoads;
+  await preview.getByRole('button', { name: 'Ver publicación →', exact: true }).click();
+  await expect(page.locator('.app.view-feed')).toBeVisible();
+  await expect(page).toHaveURL(/view=feed/);
+  await page.goBack();
+  await expect(page.locator('.app.view-map')).toBeVisible();
+  await expect(page).toHaveURL(mapUrl);
+  await expect(preview.locator('strong').filter({ hasText: /^Recuerdo 27$/ })).toBeVisible();
+  expect(await canvas.evaluate((element, original) => element === original, originalCanvas)).toBe(true);
+  await expect(marker).toBeVisible();
+  const markerAfter = await marker.boundingBox();
+  expect(markerAfter!.x).toBeCloseTo(markerBefore!.x, 0);
+  expect(markerAfter!.y).toBeCloseTo(markerBefore!.y, 0);
+  expect(documentLoads).toBe(initialDocumentLoads);
+  await page.goForward();
+  await expect(page.locator('.app.view-feed')).toBeVisible();
+  await page.goBack();
+  await expect(preview.locator('strong').filter({ hasText: /^Recuerdo 27$/ })).toBeVisible();
 });
 
 test('el carrusel flotante de lugar conserva cursores y salta a otra década', async ({ page }, testInfo) => {

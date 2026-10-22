@@ -83,6 +83,7 @@ export default function MapboxMap(
   optionsRef.current = options;
   const [previewContent, setPreviewContent] = useState<HTMLElement | null>(null);
   const previewPopup = useRef<mapboxgl.Popup | null>(null);
+  const focusedPin = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
@@ -240,6 +241,12 @@ export default function MapboxMap(
       return;
     }
 
+    if (props.selected) {
+      introSeen = true;
+      initialLocationApplied.current = true;
+      return;
+    }
+
     // Si ya se había mostrado la introducción, no alteramos
     // la cámara guardada al volver a entrar al mapa.
     if (introSeen) {
@@ -287,7 +294,7 @@ export default function MapboxMap(
         essential: true,
       });
     }
-  }, [props.locationResolved, props.userLocation, props.active, ready]);
+  }, [props.locationResolved, props.userLocation, props.active, props.selected?.id, ready]);
   useEffect(() => {
     const map = instance.current;
     if (!map) return;
@@ -340,15 +347,20 @@ export default function MapboxMap(
           .addTo(map),
       );
     return () => markers.forEach((marker) => marker.remove());
-  }, [props.memories, props.selected?.id, props.draft, ready]);
+  }, [props.memories, props.selected?.id, props.selected?.lat, props.selected?.lng, props.draft, ready]);
   useEffect(() => {
-    if (ready && props.selected)
+    if (!ready || props.active === false) return;
+    if (!props.selected) { focusedPin.current = null; return; }
+    const locationKey = `${props.selected.id}:${props.selected.lat}:${props.selected.lng}`;
+    if (focusedPin.current === locationKey) return;
+    focusedPin.current = locationKey;
+    if (props.selected)
       instance.current?.flyTo({
         center: [props.selected.lng, props.selected.lat],
         zoom: Math.max(instance.current.getZoom(), 14),
         duration: duration(),
       });
-  }, [props.selected?.id, ready]);
+  }, [props.selected?.id, props.selected?.lat, props.selected?.lng, props.active, ready]);
   useEffect(() => {
     const map=instance.current;
     const memory=props.selected;
@@ -389,7 +401,7 @@ export default function MapboxMap(
       className="map-section mapbox-section"
       aria-label="Globo Mapbox de recuerdos de Argentina"
     >
-      {previewContent && props.selected && createPortal(<PinMemoryPreview key={props.selected.id} memory={props.selected} onSelect={memory => (latest.current.onSelectRelated ?? latest.current.onSelect)(memory)} onOpen={props.onOpen} onMoment={props.onMoment ? id => latest.current.onMoment?.(id, props.selected!) : undefined} onClose={() => { previewPopup.current?.remove(); setPreviewContent(null); }} />, previewContent)}
+      {previewContent && props.selected && createPortal(<PinMemoryPreview key={props.selected.id} memory={props.selected} onSelect={memory => (latest.current.onSelectRelated ?? latest.current.onSelect)(memory)} onOpen={props.onOpen} onMoment={props.onMoment ? id => latest.current.onMoment?.(id, props.selected!) : undefined} onClose={() => { if (latest.current.onClosePreview) latest.current.onClosePreview(); else { previewPopup.current?.remove(); setPreviewContent(null); } }} />, previewContent)}
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
       
       {controls && (
