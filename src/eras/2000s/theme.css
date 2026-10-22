@@ -1,3 +1,17 @@
+.era-2000 {
+  --picking-bg: linear-gradient(#267ae5, #004bbb);
+  --picking-ink: #ffffff;
+  --picking-border: 2px solid #123c9b;
+  --picking-radius: 9px;
+  --picking-shadow: inset 0 1px 0 #85b5fc, 0 8px 28px #0006;
+  --picking-highlight: #fff0ad;
+  --picking-button-bg: linear-gradient(#ffffff, #dceaff);
+  --picking-button-ink: #174083;
+  --picking-button-border: 1px solid #83a9d3;
+  --picking-button-radius: 5px;
+  --picking-button-shadow: inset 0 1px 0 #ffffff;
+  --picking-button-hover: #ffffff;
+}
 .era-2000 .primary-button {
   color: white;
   background: linear-gradient(#4794cc, #266da6);
@@ -433,7 +447,7 @@
   margin: 0 -26px 20px;
   border-radius: 7px 7px 0 0;
 }
-.era-2000 :is(input, textarea, select) {
+.era-2000 :is(input, textarea, select, .memory-select-control) {
   border-radius: 0;
   border: 1px solid #7f9db9;
   background: #fff;

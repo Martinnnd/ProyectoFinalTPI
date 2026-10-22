@@ -254,7 +254,7 @@ export default function MemoryMap({
         </button>
         {picking && (
           <div className="map-notice picking" role="status">
-            <MapPin size={19} />
+            <MapPin size={22} aria-hidden="true" />
             <span>Elegí un lugar en el mapa para tu recuerdo.</span>
             <button onClick={onCancel}>Cancelar</button>
           </div>

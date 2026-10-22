@@ -8,7 +8,7 @@ import { filterCommunity } from "./groups";
 import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, joinGroup as joinRemoteGroup, type CreateGroupInput, type GroupMember } from "./groupsApi";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
+import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown, CircleCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   categories,
@@ -48,6 +48,8 @@ import { readNavigation, navigationUrl } from './navigationState';
 
 import { getMapPublications, getPublication, publicationId, type MapBounds } from './publicationsApi';
 import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from './seguimientosApi';
+
+const MEMORY_SAVED_NOTICE = "¡Recuerdo guardado! Ya tiene su lugar en el mapa.";
 
 export default function App() {
   const router = useRouter();
@@ -166,6 +168,11 @@ export default function App() {
   const [draft, setDraft] = useState<Point | null>(null);
   const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
+  useEffect(() => {
+    if (notice !== MEMORY_SAVED_NOTICE) return;
+    const timer = window.setTimeout(() => setNotice(""), 3000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
   useEffect(() => {
     const controller = new AbortController();
     getGroups(controller.signal)
@@ -601,7 +608,7 @@ export default function App() {
       setView("feed"); setSelectedId(null); setPanelOpen(false); setQuery("");
       setDraftHashtags([]);
     }
-    setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
+    setNotice(MEMORY_SAVED_NOTICE);
     // Hardcoded unlock: the very first memory the visitor creates earns badge 01.
     // It only sets this state, so the popup never moves them off the current view.
     if (isFirstMemory) setCelebrating(achievements[0]);
@@ -885,14 +892,15 @@ export default function App() {
       />
       {apiStatus && <div className="toast" role="status">{apiStatus}{apiStatus.startsWith('No se pud') && <button onClick={() => setMapRevision(value => value + 1)}>Reintentar</button>}</div>}
       {notice && (
-        <div className="toast" role="status">
+        <div className={`toast${notice === MEMORY_SAVED_NOTICE ? ' memory-saved-notice' : ''}`} role="status" aria-atomic="true">
+          {notice === MEMORY_SAVED_NOTICE && <CircleCheck size={24} aria-hidden="true" />}
           <span>{notice}</span>
           <button
             className="icon-button"
             aria-label="Cerrar aviso"
             onClick={() => setNotice("")}
           >
-            <X size={17} />
+            <X size={20} />
           </button>
         </div>
       )}
