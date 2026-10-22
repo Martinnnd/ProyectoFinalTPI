@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadContributions, memoryHashtags, parseHashtags, weeklyTrends } from "./hashtags";
+import { extractHashtags, loadContributions, memoryHashtags, parseHashtags, weeklyTrends } from "./hashtags";
 import { isMemory, loadMemories, saveMemories } from "./storage";
 import type { Memory } from "./types";
 
@@ -12,6 +12,16 @@ const memory: Memory = {
 };
 
 describe("Hashtags", () => {
+  it("extrae hashtags de la historia sin confundir fragmentos de enlaces y normaliza Unicode", () => {
+    expect(extractHashtags("Volvimos al #Barrio, con #MÚSICA. (#barrio) https://example.com/#ignorar texto#ignorar #rock_90")).toEqual({ tags: ["barrio", "música", "rock_90"], error: null });
+    expect(extractHashtags("Una historia sin etiquetas, # y C#.")).toEqual({ tags: [], error: null });
+    expect(extractHashtags("#a #b #c #d #e #f").error).toBeTruthy();
+    expect(extractHashtags(`#${"a".repeat(33)}`).error).toBeTruthy();
+  });
+  it("recupera etiquetas desde la descripción del servidor y permite quitarlas al editar", () => {
+    expect(memoryHashtags({ ...memory, hashtags: undefined, description: "Mi #Barrio" })).toEqual(["barrio"]);
+    expect(memoryHashtags({ ...memory, hashtags: [], description: "Sin etiquetas" })).toEqual([]);
+  });
   it("normaliza mayúsculas, Unicode y separadores, sin repetir etiquetas", () => {
     expect(parseHashtags(" #Cassettes, cassettes #MÚSICA #rock_90 ")).toEqual({ tags: ["cassettes", "música", "rock_90"], error: null });
     expect(parseHashtags("")).toEqual({ tags: [], error: null });
