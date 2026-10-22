@@ -8,7 +8,7 @@ import { filterCommunity } from "./groups";
 import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, joinGroup as joinRemoteGroup, type CreateGroupInput, type GroupMember } from "./groupsApi";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown } from "lucide-react";
+import { Compass, Plus, X, Newspaper, MessageCircle, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   categories,
@@ -25,8 +25,9 @@ import { achievements, eraContent, resolveUserCategory } from "./data";
 import { totalGivenNostalgia, updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
 import { isOwnMemory, eliminarPublicacion } from "./api";
 import { ratePublication } from "./publicationsApi";
-import { getPerfilUsuario, getPublicacionesUsuario, type UsuarioPerfil } from "./userApi";
+import { getPerfilUsuario, getPublicacionesUsuario, type UsuarioBusqueda, type UsuarioPerfil } from "./userApi";
 import AuthMenu from "./components/auth/AuthMenu";
+import UserSearch from "./components/UserSearch";
 import { useAuth } from "./components/auth/AuthProvider";
 import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
@@ -142,15 +143,21 @@ export default function App() {
     const targetId = authorId ?? [...feedItems, ...dbMemories].find(memory => memory.author === author)?.authorId;
     if (!targetId) { setNotice(`No se puede seguir a ${author}: falta su identificador de usuario.`); return; }
     if (targetId === currentUserId || pendingFollows.current.has(targetId)) return;
+    const wasFollowing = followingUsers.some(user => user.id === targetId);
     pendingFollows.current.add(targetId);
     try {
-      if (followingUsers.some(user => user.id === targetId)) {
+      if (wasFollowing) {
         await dejarDeSeguir(currentUserId, targetId);
         setFollowingUsers(current => current.filter(user => user.id !== targetId));
       } else {
         await seguir(currentUserId, targetId);
         setFollowingUsers(current => [...current, { id: targetId, username: author }]);
       }
+      setProfileUser(current => current?.id === targetId ? {
+        ...current,
+        loSigo: !wasFollowing,
+        cantidadSeguidores: Math.max(0, current.cantidadSeguidores + (wasFollowing ? -1 : 1)),
+      } : current);
       setFollowingRevision(revision => revision + 1);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'No se pudo actualizar el seguimiento.');
@@ -437,6 +444,11 @@ export default function App() {
     setSelectedId(null);setPanelOpen(false);setFactsOpen(false);setPicking(false);
     setCategory("Todas");setPeriod(current=>({...current,year:null}));setView("profile");
   }
+  function openSearchedUserProfile(user: UsuarioBusqueda) {
+    setProfileAuthor(user.id === currentUserId ? null : user.username);
+    setSelectedId(null);setPanelOpen(false);setFactsOpen(false);setPicking(false);
+    setCategory("Todas");setPeriod(current => ({...current, year: null}));setView("profile");
+  }
   function openPublication(memory: Memory) {
     selectedSeed.current = memory;
     setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
@@ -621,6 +633,15 @@ export default function App() {
     setFactsOpen(destination === "facts" && (view !== "map" || !factsOpen));
     if (destination === "map") setSelectedId(null);
   }
+  function openOwnProfile() {
+    setProfileAuthor(null);
+    setView("profile");
+    setMusicOpen(false);
+    setSelectedId(null);
+    setPanelOpen(false);
+    setFactsOpen(false);
+    setPicking(false);
+  }
   const theme = eraThemes[period.decade];
   const groupInfo = groups.find(group=>group.id===groupInfoId) ?? null;
   return (
@@ -707,23 +728,15 @@ export default function App() {
         {session && <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {
           setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);
         }}><MessageCircle/><span>Chat</span></button>}
-        {session && <button
-            aria-current={view === "profile" ? "page" : undefined}
-            className={`rail-profile ${view === "profile" ? "rail-active" : ""}`}
-            onClick={() => {
-              setProfileAuthor(null);
-              setView("profile");
-              setMusicOpen(false);
-              setSelectedId(null);
-              setPanelOpen(false);
-              setFactsOpen(false);
-              setPicking(false);
-            }}
-          >
-            <UserRound />
-            <span>Perfil</span>
-          </button>}
-        <AuthMenu />
+        {session ? <div className="account-navigation">
+          <UserSearch
+            currentUserId={session.usuarioId}
+            followedUsers={followingUsers}
+            onFollow={toggleFollow}
+            onOpenProfile={openSearchedUserProfile}
+          />
+          <AuthMenu profileActive={view === "profile" && profileAuthor === null} onOpenProfile={openOwnProfile} />
+        </div> : <AuthMenu profileActive={false} onOpenProfile={openOwnProfile} />}
       </nav>
       <header className="map-toolbar">
         <div className="compact-selectors">
@@ -804,6 +817,7 @@ export default function App() {
           reputation={profileUser?.reputacion}
           followerCount={profileUser?.cantidadSeguidores}
           followingCount={profileUser?.cantidadSeguidos}
+          isFollowing={profileUser ? followingUsers.some(user => user.id === profileUser.id) : false}
           onBack={() => {setSelectedId(null);setView("feed");}}
           community={profileAuthor === null ? communityControls(true) : undefined}
           allMemories={profileMemories}
@@ -817,6 +831,7 @@ export default function App() {
           onSelect={(m) => setSelectedId(m?.id ?? null)}
           onAdd={startAdding}
           onIniciarChat={profileAuthor ? iniciarChatConUsuario : undefined}
+          onToggleFollow={profileAuthor && profileUser ? () => toggleFollow(profileUser.username, profileUser.id) : undefined}
         />
       )}
       <div hidden={view !== "feed"}>
