@@ -464,6 +464,16 @@ export default function App() {
       setFactsOpen(false);
     }
   }
+  function closeMapPreview() {
+    selectedSeed.current = null;
+    setRemoteSelected(null);
+    setSelectedId(null);
+    setApiStatus('');
+  }
+  function selectMapPin(memory: Memory) {
+    if (selectedId === memory.id) { closeMapPreview(); return; }
+    select(memory);
+  }
   function selectRelatedMemory(memory: Memory) {
     const decade = Math.floor(memory.year / 10) * 10 as Decade;
     if (!availableDecades.includes(decade)) {
@@ -674,7 +684,8 @@ export default function App() {
             onBoundsChange={reportBounds}
             memories={filterMemories(remotePins, period, category)}
             selected={view === 'map' ? selected : null}
-            onSelect={select}
+            onSelect={selectMapPin}
+            onClosePreview={closeMapPreview}
             onSelectRelated={selectRelatedMemory}
             onOpen={openPublication}
             picking={picking}

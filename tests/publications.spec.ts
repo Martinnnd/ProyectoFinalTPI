@@ -177,6 +177,50 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
 });
 }
 
+test('recargar un pin recupera su ubicación real aunque el resumen no tenga coordenadas', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'geolocation', { configurable: true, value: {
+      getCurrentPosition(success: PositionCallback) {
+        window.setTimeout(() => {
+          success({ coords: { latitude: -34.9, longitude: -58.4, accuracy: 100, altitude: null, altitudeAccuracy: null, heading: null, speed: null }, timestamp: Date.now() } as GeolocationPosition);
+          document.documentElement.dataset.locationDelivered = 'true';
+        }, 5000);
+      },
+    } });
+  });
+  const detail = { id: 125, titulo: 'Recorriendo Ramos', descripcion: 'Mi recuerdo de Ramos Mejía', fecha: '1990-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, lugar: { nombre: 'Ramos Mejía', latitud: -34.64, longitud: -58.56 } };
+  const requested: string[] = [];
+  await page.route('**/api/**', route => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    requested.push(path);
+    const headers = { 'access-control-allow-origin': request.headers().origin ?? 'http://localhost:3001', 'access-control-allow-credentials': 'true', 'access-control-allow-headers': 'authorization, content-type, x-nostalgiar-request' };
+    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
+    if (path.includes('/auth/')) return route.fulfill({ status: 401, headers });
+    if (path.endsWith('/mapa')) return route.fulfill({ headers, json: { pines: [], hayMas: false } });
+    if (path === '/api/publicaciones/125') return route.fulfill({ headers, json: detail });
+    if (path === '/api/publicaciones/125/resumen') return route.fulfill({ headers, json: { ...detail, lugar: undefined } });
+    return route.fulfill({ headers, json: [] });
+  });
+  await mockNoMoments(page);
+  await page.goto('/explorar?era=1990&view=map&post=125');
+  const assertRestoredPin = async () => {
+    await expect(page.locator('#explore .pin-message-preview')).toContainText('Recorriendo Ramos');
+    await expect(page.locator('html')).toHaveAttribute('data-location-delivered', 'true', { timeout: 10000 });
+    await expect.poll(async () => {
+      const href = await page.getByRole('link', { name: 'Improve this map', exact: true }).getAttribute('href');
+      return href?.split('#/')[1]?.split('/').slice(0, 2).map(Number);
+    }).toEqual([-58.56, -34.64]);
+  };
+  await assertRestoredPin();
+  await page.reload();
+  await assertRestoredPin();
+  expect(requested.filter(path => path === '/api/publicaciones/125')).toHaveLength(2);
+  expect(requested).not.toContain('/api/publicaciones/125/resumen');
+  await page.screenshot({ path: testInfo.outputPath('restored-pin-location.png') });
+});
+
 test('el carrusel del día continúa su cursor y abre la preview de otro pin', async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   let documentLoads = 0;
@@ -209,6 +253,26 @@ test('el carrusel del día continúa su cursor y abre la preview de otro pin', a
   await page.goto('/explorar?era=1990');
   await page.getByRole('button', { name: 'Recuerdo, 1990, Lugares', exact: true }).click();
   const preview = page.locator('#explore .pin-message-preview');
+  await expect(preview.getByRole('heading', { name: 'También ese día' })).toBeVisible();
+  const originalPin = page.getByRole('button', { name: 'Recuerdo, 1990, Lugares', exact: true });
+  await expect(preview.locator('.pin-preview-photo')).toBeVisible();
+  const detailRequests = () => requests.filter(path => path === '/api/publicaciones/25/resumen' || path === '/api/publicaciones/25/relaciones').length;
+  const requestsBeforeClose = detailRequests();
+  await originalPin.click();
+  await expect(preview).toHaveCount(0);
+  expect(detailRequests()).toBe(requestsBeforeClose);
+  expect(new URL(page.url()).searchParams.has('post')).toBe(false);
+  await originalPin.click();
+  await expect(preview.locator('.pin-preview-photo')).toBeVisible();
+  const closePreview = preview.getByRole('button', { name: 'Cerrar vista previa', exact: true });
+  const closeBounds = await closePreview.boundingBox();
+  expect(closeBounds!.width).toBe(22);
+  expect(closeBounds!.height).toBe(22);
+  await closePreview.click();
+  await expect(preview).toHaveCount(0);
+  expect(new URL(page.url()).searchParams.has('post')).toBe(false);
+  await originalPin.click();
+  await expect(preview.locator('.pin-preview-photo')).toBeVisible();
   await expect(preview.getByRole('heading', { name: 'También ese día' })).toBeVisible();
   await preview.getByRole('button', { name: 'Ver más', exact: true }).click();
   await expect(preview.getByRole('button', { name: 'Ver en el mapa: Recuerdo 26', exact: true })).toHaveCount(1);
