@@ -83,6 +83,7 @@ export default function MapboxMap(
   optionsRef.current = options;
   const [previewContent, setPreviewContent] = useState<HTMLElement | null>(null);
   const previewPopup = useRef<mapboxgl.Popup | null>(null);
+  const focusedPin = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
@@ -342,13 +343,17 @@ export default function MapboxMap(
     return () => markers.forEach((marker) => marker.remove());
   }, [props.memories, props.selected?.id, props.draft, ready]);
   useEffect(() => {
-    if (ready && props.selected)
+    if (!ready || props.active === false) return;
+    if (!props.selected) { focusedPin.current = null; return; }
+    if (focusedPin.current === props.selected.id) return;
+    focusedPin.current = props.selected.id;
+    if (props.selected)
       instance.current?.flyTo({
         center: [props.selected.lng, props.selected.lat],
         zoom: Math.max(instance.current.getZoom(), 14),
         duration: duration(),
       });
-  }, [props.selected?.id, ready]);
+  }, [props.selected?.id, props.active, ready]);
   useEffect(() => {
     const map=instance.current;
     const memory=props.selected;

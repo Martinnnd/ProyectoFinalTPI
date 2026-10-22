@@ -16,6 +16,7 @@ import { symbols, type Memory } from "../types";
 export type Point = { lat: number; lng: number; label?: string };
 const center: [number, number] = [-38.4, -64.4];
 function MapActions({
+  active,
   picking,
   onPick,
   selected,
@@ -24,6 +25,7 @@ function MapActions({
   searchTarget,
   onBoundsChange,
 }: {
+  active?: boolean;
   picking: boolean;
   onPick: (p: Point) => void;
   selected: Memory | null;
@@ -53,6 +55,7 @@ function MapActions({
     return () => observer.disconnect();
   }, [map]);
   const selectedRef = useRef(selected);
+  const focusedPin = useRef<string | null>(null);
   selectedRef.current = selected;
   useEffect(() => {
     const fit = () => {
@@ -69,11 +72,15 @@ function MapActions({
     return () => observer.disconnect();
   }, [reset, map, fitPoints]);
   useEffect(() => {
+    if (active === false) return;
+    if (!selected) { focusedPin.current = null; return; }
+    if (focusedPin.current === selected.id) return;
+    focusedPin.current = selected.id;
     if (selected)
       map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
         animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
       });
-  }, [selected, map]);
+  }, [selected, active, map]);
   useEffect(() => {
     if (searchTarget) map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
       animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .8,
@@ -130,6 +137,7 @@ function icon(memory?: Memory, selected = false) {
   });
 }
 export default function MemoryMap({
+  active,
   showEmptyState = true,
   onBoundsChange,
   searchTarget,
@@ -200,6 +208,7 @@ export default function MemoryMap({
             }}
           />
           <MapActions
+            active={active}
             onBoundsChange={onBoundsChange}
             picking={picking}
             onPick={onPick}

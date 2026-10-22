@@ -445,6 +445,12 @@ export default function App() {
     setCategory("Todas");setPeriod(current=>({...current,year:null}));setView("profile");
   }
   function openPublication(memory: Memory) {
+    if (view === 'map') {
+      const origin = { period, view, selectedId, profileAuthor, category, panelOpen, factsOpen };
+      window.history.replaceState(window.history.state, '', navigationUrl(window.location.href, origin));
+      const publication = { ...origin, period: { decade: Math.floor(memory.year / 10) * 10 as Decade, year: null }, view: 'feed' as const, selectedId: memory.id, category: 'Todas' as const, panelOpen: false };
+      window.history.pushState(null, '', navigationUrl(window.location.href, publication));
+    }
     selectedSeed.current = memory;
     setPeriod({decade: Math.floor(memory.year / 10) * 10 as Decade, year: null});setCategory("Todas");
     setScope('all');setQuery('');setSelectedId(memory.id);setPanelOpen(false);setMapExpanded(false);setView('feed');
