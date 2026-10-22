@@ -5,18 +5,20 @@ export default function FeedHeader({
   title,
   tab,
   selected,
+  scrollHidden = false,
   onBack,
   onTabChange,
 }: {
   title: string;
   tab: FeedTab;
   selected: boolean;
+  scrollHidden?: boolean;
   onBack: () => void;
   onTabChange: (tab: FeedTab) => void;
 }) {
   return (
     <>
-      <header className="feed-heading">
+      <header className={`feed-heading${scrollHidden ? ' is-scroll-hidden' : ''}`}>
         <h2>{title}</h2>
         <div className="feed-tabs" role="group" aria-label="Publicaciones">
           <button

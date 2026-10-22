@@ -320,7 +320,7 @@ test('el carrusel flotante de lugar conserva cursores y salta a otra década', a
   const mapYears: string[] = [];
   await page.route('https://fixtures.nostalgiar.test/recuerdo.jpg', route => route.fulfill({ path: 'public/facts/bttf.jpg', contentType: 'image/jpeg' }));
   const publication = (id: number) => ({ id, titulo: `Recuerdo ${id}`, descripcionBreve: `Resumen ${id}`, fecha: id === 27 ? '1985-06-20T00:00:00Z' : '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: 'https://fixtures.nostalgiar.test/recuerdo.jpg', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, lugar: { nombre: 'San Justo', latitud: -34.67 + (id - 25) * .0001, longitud: -58.56 } });
-  const related = (id: number) => ({ ...publication(id), autorId: 1, autorUsername: 'Ana', nombreLugar: 'San Justo', distanciaMetros: 15, mismoDia: id !== 27, mismoLugar: true });
+  const related = (id: number) => ({ ...publication(id), autorId: 1, autorUsername: 'Ana', nombreLugar: 'San Justo', distanciaMetros: 15, mismoDia: id === 26 || id === 29, mismoLugar: true });
   await page.route('**/api/**', async route => {
     const request = route.request();
     const url = new URL(request.url());
@@ -335,7 +335,7 @@ test('el carrusel flotante de lugar conserva cursores y salta a otra década', a
       const id = Number(url.pathname.split('/')[3]);
       return route.fulfill({ headers, json: { publicacionId: id, radioMetros: 200,
         dia: id === 25 ? { items: [related(26)], siguienteCursor: 'dia+/=', hayMas: true } : empty,
-        lugar: id === 25 ? { items: [related(26), related(27)], siguienteCursor: 'lugar+/= &?', hayMas: true } : empty } });
+        lugar: id === 25 ? { items: [related(26), related(27), related(24)], siguienteCursor: 'lugar+/= &?', hayMas: true } : empty } });
     }
     if (url.pathname.endsWith('/relacionadas')) {
       const tipo = url.searchParams.get('tipo')!;
@@ -357,24 +357,35 @@ test('el carrusel flotante de lugar conserva cursores y salta a otra década', a
   await expect(floating.getByRole('heading')).toHaveCount(0);
   await expect(floating.locator('time').filter({ hasText: /^1985$/ })).toHaveCount(1);
   await expect(day).toBeVisible();
-  // A shared result remains available in both relation blocks.
-  await expect(preview.getByRole('button', { name: 'Ver en el mapa: Recuerdo 26', exact: true })).toHaveCount(2);
+  // Same-day memories appear only in the day block.
+  await expect(day.getByRole('button', { name: 'Ver en el mapa: Recuerdo 26', exact: true })).toHaveCount(1);
+  await expect(floating.getByRole('button', { name: 'Ver en el mapa: Recuerdo 26', exact: true })).toHaveCount(0);
   const panelBounds = (await floating.boundingBox())!;
   const photoBounds = (await preview.locator('.pin-preview-photo').boundingBox())!;
   expect(panelBounds.y + panelBounds.height + 12).toBeLessThan(photoBounds.y);
   await day.getByRole('button', { name: 'Ver más', exact: true }).click();
   await floating.getByRole('button', { name: 'Más recuerdos de este lugar', exact: true }).click();
+  await floating.getByRole('button', { name: 'Más recuerdos de este lugar', exact: true }).click();
   await expect(floating.getByRole('button', { name: 'Ver en el mapa: Recuerdo 28', exact: true })).toBeAttached();
   await expect(floating.locator('time')).toHaveText(['1985', '1992', '1992']);
   const track = floating.getByRole('group', { name: 'Recuerdos de este lugar' });
-  await expect.poll(() => track.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await expect(floating.locator('[data-active=true]')).toContainText('Recuerdo 28');
+  await floating.getByRole('button', { name: 'Más recuerdos de este lugar', exact: true }).click();
+  await expect(floating.locator('[data-active=true]')).toContainText('Recuerdo 27');
+  await floating.getByRole('button', { name: 'Más recuerdos de este lugar', exact: true }).click();
   const trackBounds = (await track.boundingBox())!;
   await page.mouse.move(trackBounds.x + 30, trackBounds.y + 25);
   await page.mouse.down();
   await page.mouse.move(trackBounds.x + 120, trackBounds.y + 25, { steps: 8 });
   await page.mouse.up();
-  await expect.poll(() => track.evaluate(element => element.scrollLeft)).toBeLessThan(5);
+  await expect(floating.locator('[data-active=true]')).toContainText('Recuerdo 27');
   await expect(preview.locator('strong').filter({ hasText: /^Recuerdo 25$/ })).toBeVisible();
+  await expect.poll(async () => {
+    const cards = await floating.locator('[data-active]').evaluateAll(elements => elements.map(element => ({ active: element.getAttribute('data-active') === 'true', x: element.getBoundingClientRect().x })));
+    const front = cards.find(card => card.active)!;
+    return cards.some(card => card.x < front.x - 30) && cards.some(card => card.x > front.x + 30);
+  }).toBe(true);
+  await floating.screenshot({ path: testInfo.outputPath('carrusel-tres-frente.png') });
   await preview.screenshot({ path: testInfo.outputPath('carrusel-lugar-flotante.png') });
   await floating.getByRole('button', { name: 'Ver en el mapa: Recuerdo 27', exact: true }).click();
   await expect(page.locator('.app')).toHaveClass(/era-1980/);
@@ -437,3 +448,48 @@ test('pines, resumen, detalle y comentarios del backend', async ({ page }) => {
   await expect(page.getByText('Mi comentario', { exact: true })).toBeVisible();
   for (const path of ['/mapa', '/25/resumen', '/25', '/25/comentarios']) expect(requests).toContain(`/api/publicaciones${path}`);
 });
+
+for (const count of [4, 5, 6]) {
+  test(`el anillo se cierra con ${count} recuerdos relacionados`, async ({ page }, testInfo) => {
+    const empty = { items: [], siguienteCursor: null, hayMas: false };
+    const publication = (id: number) => ({
+      id, titulo: `Recuerdo ${id}`, descripcionBreve: 'En este lugar', fecha: '1992-01-01T00:00:00Z',
+      categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' },
+      lugar: { nombre: 'San Justo', latitud: -34.67, longitud: -58.56 },
+    });
+    await page.route('**/api/**', route => {
+      const request = route.request();
+      const path = new URL(request.url()).pathname;
+      const headers = { 'access-control-allow-origin': request.headers().origin ?? 'http://localhost:3001', 'access-control-allow-credentials': 'true', 'access-control-allow-headers': 'content-type, authorization, x-nostalgiar-request', 'access-control-allow-methods': 'GET, POST, OPTIONS' };
+      if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
+      if (path.includes('/auth/')) return route.fulfill({ status: 401, headers });
+      if (path.endsWith('/mapa')) return route.fulfill({ headers, json: { pines: [{ id: 25, latitud: -34.67, longitud: -58.56, categoria: 0 }], hayMas: false } });
+      if (path.endsWith('/relaciones')) return route.fulfill({ headers, json: { publicacionId: 25, radioMetros: 200, dia: empty,
+        lugar: { ...empty, items: Array.from({ length: count }, (_, index) => ({
+          ...publication(index + 26), autorId: 1, autorUsername: 'Ana', nombreLugar: 'San Justo',
+          distanciaMetros: 0, mismoDia: false, mismoLugar: true,
+        })) } } });
+      return route.fulfill({ headers, json: /\/publicaciones\/25(?:\/resumen)?$/.test(path) ? publication(25) : [] });
+    });
+    await mockNoMoments(page);
+    await page.goto('/explorar?era=1990');
+    await page.getByRole('button', { name: 'Recuerdo, 1990, Lugares', exact: true }).click();
+    const carousel = page.getByRole('region', { name: 'A través de los años', exact: true });
+    await expect(carousel.locator('[data-active]')).toHaveCount(count);
+    const cards = await carousel.locator('[data-active]').evaluateAll(elements => elements.map(element => ({
+      active: element.getAttribute('data-active') === 'true',
+      x: element.getBoundingClientRect().x,
+      y: element.getBoundingClientRect().y,
+    })));
+    const front = cards.find(card => card.active)!;
+    const back = cards.filter(card => card.y < front.y - 40);
+    expect(back.length).toBeGreaterThanOrEqual(count === 4 ? 1 : 2);
+    if (count === 4) expect(Math.abs(back[0].x - front.x)).toBeLessThan(20);
+    else {
+      expect(back.some(card => card.x < front.x)).toBe(true);
+      expect(back.some(card => card.x > front.x)).toBe(true);
+    }
+    await carousel.screenshot({ path: testInfo.outputPath('anillo.png') });
+  });
+}
+

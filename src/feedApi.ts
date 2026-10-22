@@ -20,5 +20,6 @@ export async function getFeed(feed: RemoteFeed, cursor?: string, signal?: AbortS
     throw new FeedError(fields || problem?.mensaje || problem?.detail || problem?.title || `No se pudo cargar el feed (${response.status}).`, response.status);
   }
   const page: { items: Publication[]; siguienteCursor: string | null; hayMas: boolean } = await response.json();
-  return { ...page, items: page.items.map(item => toMemory(item, { id: String(item.id), title: '', description: '', author: '', place: '', year: 1990, category: 'Personales', lat: 0, lng: 0, source: 'backend' })) };
+  const discoveries = feed === 'para-vos' ? page.items.filter(item => item.autor.id !== session.usuarioId) : page.items;
+  return { ...page, items: discoveries.map(item => toMemory(item, { id: String(item.id), title: '', description: '', author: '', place: '', year: 1990, category: 'Personales', lat: 0, lng: 0, source: 'backend' })) };
 }
