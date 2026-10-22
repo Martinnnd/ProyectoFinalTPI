@@ -69,7 +69,10 @@ export function toMemory(data: Publication, pin: Memory): Memory {
     media: url && (video || youtubeId(url)) ? { kind: youtubeId(url) ? 'youtube' : 'video', url } : undefined
   };
 }
-export async function getPublication(memory: Memory, summary: boolean, signal?: AbortSignal) {
+export async function getPublication(input: Memory | string, summary: boolean, signal?: AbortSignal) {
+  const memory: Memory = typeof input === 'string'
+    ? { id: input, title: '', description: '', author: '', place: '', year: 0, lat: 0, lng: 0, category: 'Personales', source: 'backend' }
+    : input;
   const id = publicationId(memory);
   if (!id) throw new Error('Esta publicación no tiene un identificador del servidor.');
   return toMemory(await publicationRequest<Publication>(`/${id}${summary ? '/resumen' : ''}`, { signal }), memory);

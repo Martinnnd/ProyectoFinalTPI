@@ -83,10 +83,13 @@ export default function MapboxMap(
   const [previewContent, setPreviewContent] = useState<HTMLElement | null>(null);
   const previewPopup = useRef<mapboxgl.Popup | null>(null);
   const [ready, setReady] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
   const [controls, setControls] = useState(false);
   useEffect(() => {
     if (!container.current) return;
+    setReady(false);
+    setError(null);
     if (!mapboxgl.supported()) {
       latest.current.onFallback();
       return;
@@ -96,7 +99,7 @@ export default function MapboxMap(
       map = new mapboxgl.Map({
         container: container.current,
         accessToken: props.token,
-        style: "mapbox://styles/mapbox/standard",
+        style: `mapbox://styles/mapbox/${optionsRef.current.satellite ? "standard-satellite" : "standard"}`,
         projection: "globe",
         ...(savedCamera ?? responsiveOverview()),
         minZoom: 0.5,
@@ -119,7 +122,7 @@ export default function MapboxMap(
     map.on('moveend', reportBounds);
     let loaded = false;
     const timeout = window.setTimeout(() => {
-      if (!loaded) setError(true);
+      if (!loaded) setError("El mapa está tardando en cargar. Podés reintentar o usar el mapa 2D.");
     }, 20000);
     map.on("style.load", () => {
       styleReady.current = true;
@@ -127,7 +130,21 @@ export default function MapboxMap(
     });
     map.on("webglcontextlost", () => latest.current.onFallback());
     
-    map.on("error", () => setError(true));
+    let resourceFailed = false;
+    map.on("error", (event) => {
+      resourceFailed = true;
+      const status = (event.error as Error & { status?: number }).status;
+      setError(status === 401 || status === 403
+        ? "Mapbox rechazó el acceso al mapa. Revisá el token y sus dominios permitidos."
+        : status === 429
+          ? "Mapbox alcanzó su límite de solicitudes. Esperá un momento antes de reintentar."
+          : "No se pudieron cargar algunos recursos del mapa. Reintentá la carga; si persiste, revisá la conexión o los bloqueadores del navegador.");
+    });
+    map.on("idle", () => {
+      // An idle map may still contain failed tiles. Only clear a slow-load
+      // warning when this instance has not reported a resource failure.
+      if (!resourceFailed) setError(null);
+    });
     map.on("load", () => {
       loaded = true;
       clearTimeout(timeout);
@@ -200,7 +217,7 @@ export default function MapboxMap(
       instance.current = null;
       styleReady.current = false;
     };
-  }, [props.token]);
+  }, [props.token, reload]);
   useEffect(() => {
     if (props.active === false) instance.current?.stop();
   }, [props.active]);
@@ -361,7 +378,7 @@ export default function MapboxMap(
     optionsRef.current = next;
     setOptions(next);
     styleReady.current = false;
-    setError(false);
+    setError(null);
     instance.current?.setStyle(
       `mapbox://styles/mapbox/${value ? "standard-satellite" : "standard"}`,
     );
@@ -455,10 +472,10 @@ export default function MapboxMap(
       )}
       {error && (
         <div className="mapbox-status" role="alert">
-          Mapbox no pudo cargar parte del mapa. Revisá la conexión o la
-          configuración del token.
+          {error}
+          <button onClick={() => setReload(value => value + 1)}>Reintentar mapa</button>
           <button onClick={props.onFallback}>Usar mapa 2D</button>
-          <button onClick={() => setError(false)}>Cerrar aviso</button>
+          <button onClick={() => setError(null)}>Cerrar aviso</button>
         </div>
       )}
       {props.showEmptyState !== false && !props.memories.length && !props.picking && (

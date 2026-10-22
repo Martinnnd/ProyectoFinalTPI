@@ -44,13 +44,15 @@ import EraFacts from "./components/EraFacts";
 import EraChrome, { EraIcon } from "./components/EraChrome";
 import { availableDecades } from "./eras/registry";
 import { eraThemes } from "./themes";
+import { readNavigation, navigationUrl } from './navigationState';
 
 import { getMapPublications, getPublication, publicationId, type MapBounds } from './publicationsApi';
 import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from './seguimientosApi';
 
 export default function App() {
   const router = useRouter();
-  const { session } = useAuth();
+  const { session, status: authStatus } = useAuth();
+  const [initialNavigation] = useState(() => readNavigation(window.location.search));
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const reportBounds = useCallback((next: MapBounds) => setBounds(current => JSON.stringify(current) === JSON.stringify(next) ? current : next), []);
   const [remotePins, setRemotePins] = useState<Memory[]>([]);
@@ -74,21 +76,13 @@ export default function App() {
   const [followingRevision, setFollowingRevision] = useState(0);
   const pendingFollows = useRef(new Set<number>());
   const creationOrigin = useRef(false);
-  const [profileAuthor, setProfileAuthor] = useState<string | null>(null);
-  const [view, setView] = useState<"map" | "feed" | "profile" | "chat">("map");
+  const [profileAuthor, setProfileAuthor] = useState<string | null>(initialNavigation.profileAuthor);
+  const [view, setView] = useState<"map" | "feed" | "profile" | "chat">(initialNavigation.view);
   useEffect(() => {
-    if (!session && (view === "chat" || view === "profile")) setView("feed");
-  }, [session, view]);
-  const [period, setPeriod] = useState<Period>(() => {
-    const requested = Number(
-      new URLSearchParams(window.location.search).get("era"),
-    );
-    return {
-      decade: availableDecades.find((year) => year === requested) ?? 1990,
-      year: null,
-    };
-  });
-  const [category, setCategory] = useState<Category | "Todas">("Todas");
+    if (authStatus !== 'loading' && !session && (view === "chat" || view === "profile")) setView("feed");
+  }, [session, view, authStatus]);
+  const [period, setPeriod] = useState<Period>(initialNavigation.period);
+  const [category, setCategory] = useState<Category | "Todas">(initialNavigation.category);
   const [dbMemories, setDbMemories] = useState<Memory[]>([]);
   const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
   const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
@@ -165,7 +159,7 @@ export default function App() {
     }
   }
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialNavigation.selectedId);
   const [picking, setPicking] = useState(false);
   const [deleting, setDeleting] = useState<Memory | null>(null);
   const [editing, setEditing] = useState<Memory | null>(null);
@@ -274,8 +268,22 @@ export default function App() {
       setNotice(error instanceof Error ? error.message : 'No se pudo registrar la puntuación.');
     }
   }
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [factsOpen, setFactsOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(initialNavigation.panelOpen);
+  const [factsOpen, setFactsOpen] = useState(initialNavigation.factsOpen);
+  useEffect(() => {
+    const url = navigationUrl(window.location.href, { period, view, selectedId, profileAuthor, category, panelOpen, factsOpen });
+    window.history.replaceState(window.history.state, '', url);
+  }, [period, view, selectedId, profileAuthor, category, panelOpen, factsOpen]);
+  useEffect(() => {
+    const restore = () => {
+      const next = readNavigation(window.location.search);
+      setPeriod(next.period); setView(next.view); setSelectedId(next.selectedId);
+      setProfileAuthor(next.profileAuthor); setCategory(next.category);
+      setPanelOpen(next.panelOpen); setFactsOpen(next.factsOpen);
+    };
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, []);
   const [musicOpen, setMusicOpen] = useState(false);
   useEffect(() => { setMusicOpen(window.innerWidth >= 900); }, []);
   const addButton = useRef<HTMLButtonElement>(null);
@@ -317,17 +325,17 @@ export default function App() {
   }, [bounds, period, category, view, mapRevision]);
   useEffect(() => {
     setRemoteSelected(current => current?.id === selectedId ? current : null);
-    if (!selectedId) return;
+    if (!selectedId || authStatus === 'loading') return;
     const pin = [selectedSeed.current, remoteSelected, ...remotePins, ...dbMemories].find(memory => memory?.id === selectedId);
-    if (!pin || !publicationId(pin)) return;
+    if (pin ? !publicationId(pin) : !/^[1-9]\d*$/.test(selectedId)) return;
     const controller = new AbortController();
     setApiStatus(view === 'map' ? 'Cargando resumen…' : 'Cargando publicación…');
-    getPublication(pin, view === 'map', controller.signal).then(memory => {
+    getPublication(pin ?? selectedId, view === 'map', controller.signal).then(memory => {
       if (controller.signal.aborted) return;
       setRemoteSelected(memory); setApiStatus('');
     }).catch(error => { if (!controller.signal.aborted) { setRemoteSelected(null); setApiStatus(`No se pudo abrir la publicación: ${error.message}`); } });
     return () => controller.abort();
-  }, [selectedId, view, mapRevision]);
+  }, [selectedId, view, mapRevision, authStatus]);
   const viewingGroup = groups.some(group => group.id === scope);
   const communityMemories = viewingGroup ? groupMemories : dbMemories;
   const feedSource = viewingGroup ? groupMemories : feedItems;
