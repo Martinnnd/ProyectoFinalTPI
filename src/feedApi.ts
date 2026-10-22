@@ -22,3 +22,19 @@ export async function getFeed(feed: RemoteFeed, cursor?: string, signal?: AbortS
   const page: { items: Publication[]; siguienteCursor: string | null; hayMas: boolean } = await response.json();
   return { ...page, items: page.items.map(item => toMemory(item, { id: String(item.id), title: '', description: '', author: '', place: '', year: 1990, category: 'Personales', lat: 0, lng: 0, source: 'backend' })) };
 }
+
+export async function registrarImpresionesFeed(publicacionesIds: string[]): Promise<void> {
+  const session = getSesion();
+  if (!session || publicacionesIds.length === 0) return;
+  const ids = [...new Set(publicacionesIds.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))];
+  if (ids.length === 0) return;
+
+  const response = await apiFetch(`${API_BASE_URL}/api/feed/impresiones`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ publicacionesIds: ids }),
+  });
+  if (!response.ok) {
+    throw new FeedError(`No se pudieron registrar las impresiones (${response.status}).`, response.status);
+  }
+}

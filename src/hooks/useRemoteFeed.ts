@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FeedError, getFeed, type RemoteFeed } from '../feedApi';
+import { FeedError, getFeed, registrarImpresionesFeed, type RemoteFeed } from '../feedApi';
 import type { Memory } from '../types';
 
 export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) {
@@ -18,6 +18,11 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
     try {
       const page = await getFeed(feed, more ? cursor ?? undefined : undefined, controller.signal);
       if (controller.signal.aborted) return;
+      if (feed === 'para-vos') {
+        void registrarImpresionesFeed(page.items.map(item => item.id)).catch((err) => {
+          console.warn('No se pudieron registrar las impresiones del feed.', err);
+        });
+      }
       setItems(current => more ? [...new Map([...current, ...page.items].map(item => [item.id, item])).values()] : page.items);
       setCursor(page.siguienteCursor); setHayMas(page.hayMas); setExpired(false);
     } catch (err) {
