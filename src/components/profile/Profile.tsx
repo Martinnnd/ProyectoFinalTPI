@@ -25,6 +25,7 @@ export default function Profile({
   reputation,
   followerCount,
   followingCount,
+  isFollowing,
   onBack,
   community,
   allMemories,
@@ -39,6 +40,7 @@ export default function Profile({
   onOpen,
   onAdd,
   onIniciarChat,
+  onToggleFollow,
 }: {
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
@@ -47,6 +49,7 @@ export default function Profile({
   reputation?: string;
   followerCount?: number;
   followingCount?: number;
+  isFollowing?: boolean;
   onBack?: () => void;
   community?: ReactNode;
   allMemories: Memory[];
@@ -61,6 +64,7 @@ export default function Profile({
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
   onIniciarChat?: (username: string) => void;
+  onToggleFollow?: () => void | Promise<void>;
 }) {
   const album = useRef<HTMLElement>(null);
   const mapDialog = useRef<HTMLDialogElement>(null);
@@ -134,6 +138,7 @@ export default function Profile({
           followedUsers={followedUsers}
           followerCount={followerCount}
           followingCount={followingCount}
+          isFollowing={isFollowing}
           userCategory={userCategory}
           unlocked={unlocked}
           achievementCount={catalogue.length}
@@ -143,6 +148,7 @@ export default function Profile({
           onOpenAchievements={openCatalogue}
           onOpenTiers={openTiers}
           onIniciarChat={onIniciarChat}
+          onToggleFollow={onToggleFollow}
         />
         <ProfileShortcuts
           author={author}

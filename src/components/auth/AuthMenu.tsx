@@ -6,7 +6,12 @@ import { LogIn, LogOut, UserRound } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import styles from "./AuthMenu.module.css";
 
-export default function AuthMenu() {
+type AuthMenuProps = {
+  profileActive?: boolean;
+  onOpenProfile: () => void;
+};
+
+export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthMenuProps) {
   const router = useRouter();
   const { session, status, logout } = useAuth();
   const [open, setOpen] = useState(false);
@@ -35,6 +40,7 @@ export default function AuthMenu() {
     <div className={styles.slot}>
       <button
         type="button"
+        aria-label="Abrir menú de usuario"
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((current) => !current)}
@@ -51,6 +57,19 @@ export default function AuthMenu() {
           <button
             type="button"
             role="menuitem"
+            aria-current={profileActive ? "page" : undefined}
+            className={styles.profileAction}
+            onClick={() => {
+              onOpenProfile();
+              setOpen(false);
+            }}
+          >
+            <UserRound size={16} /> Perfil
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className={styles.logoutAction}
             onClick={async () => {
               setLogoutError("");
               try {
