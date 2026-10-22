@@ -25,8 +25,14 @@ export function parseHashtags(value: string): { tags: string[]; error: string | 
   return { tags, error: null };
 }
 
+/** Extract standalone hashtags, preserving accents and ignoring URL fragments. */
+export function extractHashtags(description: string): { tags: string[]; error: string | null } {
+  const matches = description.normalize("NFKC").matchAll(/(?:^|[\s(¿¡.,;:!?])#([\p{L}\p{N}_]+)/gu);
+  return parseHashtags(Array.from(matches, match => match[1]).join(" "));
+}
+
 export function memoryHashtags(memory: Memory): string[] {
-  return [...new Set((memory.hashtags ?? []).map(normalizeHashtag).filter(isHashtag))];
+  return [...new Set((memory.hashtags ?? extractHashtags(memory.description).tags).map(normalizeHashtag).filter(isHashtag))];
 }
 
 export interface WeeklyTrend {

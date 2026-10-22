@@ -10,7 +10,9 @@ async function mockNoMoments(page: Page) {
   });
 }
 
-test('crear un recuerdo exige fecha completa y envía el día elegido en UTC', async ({ page }) => {
+for (const { mobile, era } of [{ mobile: false, era: 1970 }, { mobile: true, era: 1980 }, { mobile: false, era: 1990 }, { mobile: true, era: 2000 }]) {
+test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mobile ? ' en móvil' : ''}, década ${era}`, async ({ page }, testInfo) => {
+  if (mobile) await page.setViewportSize({ width: 390, height: 844 });
   let body = '';
   await page.route('**/api/**', async route => {
     const request = route.request();
@@ -27,22 +29,135 @@ test('crear un recuerdo exige fecha completa y envía el día elegido en UTC', a
     return route.fulfill({ headers, json: [] });
   });
   await mockNoMoments(page);
-  await page.goto('/explorar?era=1990');
+  await page.goto(`/explorar?era=${era}`);
   await page.getByRole('button', { name: 'Recordar', exact: true }).click();
-  await page.locator('#explore .memory-map').click({ position: { x: 500, y: 350 } });
+  await page.locator('#explore .memory-map').click({ position: { x: 180, y: 250 } });
   const dialog = page.getByRole('dialog');
-  await dialog.getByLabel('Título del recuerdo').fill('Un día preciso');
-  await dialog.getByLabel('Nombre del lugar').fill('La plaza');
-  await dialog.getByLabel('Tu historia').fill('Nos encontramos ese día.');
+  await expect(dialog.getByRole('heading', { name: 'Paso 1 de 4: Foto o video' })).toBeVisible();
+  await expect(dialog.getByLabel('Título del recuerdo')).not.toBeVisible();
+  await expect(dialog.getByLabel('Subir foto o video (hasta 2 MB)')).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Elegir desde Google Photos' })).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Google Photos', exact: true }).click();
+  await expect(dialog.getByRole('button', { name: 'Elegir desde Google Photos' })).toBeVisible();
+  await expect(dialog.locator('input[type="file"]')).toHaveCount(0);
+  await dialog.screenshot({ path: testInfo.outputPath('memory-form-media.png') });
+  await dialog.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await expect(dialog.getByRole('alert')).toContainText('Adjuntá una foto');
+  await dialog.getByRole('button', { name: 'Archivo', exact: true }).click();
+  await dialog.locator('input[type="file"]').setInputFiles({ name: 'grande.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(2 * 1024 * 1024 + 1) });
+  await expect(dialog.getByRole('alert')).toContainText('El archivo supera 2 MB');
+  await expect(dialog.getByRole('button', { name: 'Continuar', exact: true })).toBeEnabled();
+  await dialog.locator('input[type="file"]').setInputFiles('public/facts/bttf.jpg');
+  await expect(dialog.getByAltText('Vista previa del adjunto')).toBeVisible();
+  await expect(dialog.getByRole('alert')).toHaveCount(0);
+  await expect(dialog.getByLabel('Subir foto o video (hasta 2 MB)')).not.toBeVisible();
+  await expect(dialog.getByText('Archivo adjunto listo.', { exact: true })).toHaveCount(0);
+  for (const name of ['Archivo', 'Google Photos', 'Enlace']) {
+    await expect(dialog.getByRole('button', { name, exact: true })).toBeDisabled();
+  }
+  const previewWidth = await dialog.getByAltText('Vista previa del adjunto').evaluate(image => ({ width: image.getBoundingClientRect().width, container: image.parentElement!.clientWidth }));
+  expect(Math.abs(previewWidth.width - previewWidth.container)).toBeLessThanOrEqual(1);
+  await dialog.screenshot({ path: testInfo.outputPath('memory-form-selected-photo.png') });
+  await dialog.getByRole('button', { name: 'Quitar adjunto', exact: true }).click();
+  await expect(dialog.getByRole('button', { name: 'Enlace', exact: true })).toBeEnabled();
+  await expect(dialog.getByLabel('Subir foto o video (hasta 2 MB)')).toBeVisible();
+  await dialog.getByRole('button', { name: 'Enlace', exact: true }).click();
+  await page.route('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg', route => route.fulfill({ path: 'public/facts/bttf.jpg', contentType: 'image/jpeg' }));
+  await dialog.getByLabel('O pegá un enlace HTTPS al archivo').fill('https://youtu.be/dQw4w9WgXcQ');
+  await dialog.getByRole('button', { name: 'Usar enlace', exact: true }).click();
+  const thumbnail = dialog.getByAltText('Miniatura del video de YouTube adjunto');
+  await expect(thumbnail).toBeVisible();
+  await expect(thumbnail).toHaveAttribute('src', 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
+  await expect(dialog.getByRole('button', { name: 'Enlace', exact: true })).toBeDisabled();
+  await dialog.getByRole('button', { name: 'Quitar adjunto', exact: true }).click();
+  await dialog.getByLabel('Tipo de adjunto').selectOption('image');
   await dialog.getByLabel('O pegá un enlace HTTPS al archivo').fill('https://example.com/foto.jpg');
-  await dialog.getByRole('button', { name: 'Guardar recuerdo', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Archivo', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Enlace', exact: true }).click();
+  await expect(dialog.getByLabel('O pegá un enlace HTTPS al archivo')).toHaveValue('https://example.com/foto.jpg');
+  await dialog.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await dialog.getByLabel('Título del recuerdo').fill('Un día preciso');
+  await dialog.getByLabel('Tu historia').fill('Nos encontramos ese día. #Amigos #amigos, #Música');
+  await expect(dialog.locator('.memory-form-tags > span')).toHaveText(['#amigos', '#música']);
+  await dialog.screenshot({ path: testInfo.outputPath('memory-form-story.png') });
+  await expect(dialog.locator('input[name="hashtags"]')).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await dialog.getByLabel('Nombre del lugar').fill('La plaza');
+  await dialog.getByRole('button', { name: 'Continuar', exact: true }).click();
   expect(body).toBe('');
   await expect(dialog.getByLabel('Fecha del recuerdo', { exact: true })).toHaveValue('');
-  await dialog.getByLabel('Fecha del recuerdo', { exact: true }).fill('1991-04-15');
+  const dialogBeforeCalendar = await dialog.boundingBox();
+  await dialog.getByRole('button', { name: 'Elegir fecha en el calendario', exact: true }).click();
+  const calendar = dialog.getByRole('region', { name: 'Calendario del recuerdo' });
+  await expect(calendar.getByRole('button', { name: `Elegir año: ${era}`, exact: true })).toBeVisible();
+  const controlStyles = await calendar.locator('.memory-select-control').evaluateAll(controls => controls.map(control => {
+    const style = getComputedStyle(control);
+    return { background: style.backgroundColor, color: style.color, border: style.border, radius: style.borderRadius, shadow: style.boxShadow, font: style.font, height: style.height };
+  }));
+  expect(controlStyles[0]).toEqual(controlStyles[1]);
+  await expect(calendar.getByRole('button', { name: 'Elegir mes: Enero', exact: true })).toBeVisible();
+  if (!mobile) {
+    const dialogAfterCalendar = await dialog.boundingBox();
+    expect(dialogAfterCalendar!.height).toBeCloseTo(dialogBeforeCalendar!.height, 0);
+    const calendarBox = await calendar.boundingBox();
+    const dateBox = await dialog.locator('.memory-date-input').boundingBox();
+    expect(calendarBox!.y + calendarBox!.height).toBeLessThanOrEqual(dateBox!.y);
+  }
+  await expect(dialog.getByLabel('Fecha del recuerdo', { exact: true })).toHaveValue('');
+  await calendar.getByRole('button', { name: `Elegir año: ${era}`, exact: true }).click();
+  const yearList = calendar.getByRole('listbox', { name: 'Año', exact: true });
+  const visibleYears = await yearList.evaluate(list => {
+    const box = list.getBoundingClientRect();
+    return Array.from(list.querySelectorAll('[role="option"]')).filter(option => {
+      const item = option.getBoundingClientRect();
+      return item.top >= box.top && item.bottom <= box.bottom;
+    }).map(option => option.textContent);
+  });
+  expect(visibleYears[0]).toBe(String(era));
+  expect(visibleYears.at(-1)).toBe(String(Math.min(era + 10, 2009)));
+  const yearListStyle = await yearList.evaluate(list => {
+    const css = getComputedStyle(list);
+    return { background: css.backgroundColor, border: css.border, shadow: css.boxShadow, radius: css.borderRadius, height: css.height };
+  });
+  await page.screenshot({ path: testInfo.outputPath('calendar-year-dropdown.png') });
+  await yearList.getByRole('option', { name: '1991', exact: true }).click();
+  await calendar.getByRole('button', { name: 'Elegir mes: Enero', exact: true }).click();
+  const monthList = calendar.getByRole('listbox', { name: 'Mes', exact: true });
+  const monthListStyle = await monthList.evaluate(list => {
+    const css = getComputedStyle(list);
+    return { background: css.backgroundColor, border: css.border, shadow: css.boxShadow, radius: css.borderRadius, height: css.height };
+  });
+  expect(monthListStyle).toEqual(yearListStyle);
+  await page.screenshot({ path: testInfo.outputPath('calendar-month-dropdown.png') });
+  await monthList.getByRole('option', { name: 'Abril', exact: true }).click();
+  await dialog.screenshot({ path: testInfo.outputPath('memory-calendar.png') });
+  await calendar.getByRole('button', { name: '15 de abril de 1991', exact: true }).click();
+  await expect(calendar).not.toBeVisible();
+  await dialog.getByRole('button', { name: 'Atrás', exact: true }).click();
+  await expect(dialog.getByLabel('Título del recuerdo')).toHaveValue('Un día preciso');
+  await dialog.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await expect(dialog.getByLabel('Fecha del recuerdo', { exact: true })).toHaveValue('1991-04-15');
+  await dialog.getByRole('button', { name: 'Continuar', exact: true }).click();
+  await expect(dialog.getByRole('heading', { name: 'Paso 4 de 4: Música · opcional' })).toBeVisible();
   await dialog.getByRole('button', { name: 'Guardar recuerdo', exact: true }).click();
   await expect(dialog).not.toBeVisible();
   expect(body).toContain('name="Fecha"\r\n\r\n1991-04-15T00:00:00.000Z');
+  expect(body).toContain('Nos encontramos ese día. #Amigos #amigos, #Música');
+  const savedNotice = page.locator('.memory-saved-notice');
+  await expect(savedNotice).toContainText('¡Recuerdo guardado! Ya tiene su lugar en el mapa.');
+  const savedNoticeBox = await savedNotice.boundingBox();
+  expect(savedNoticeBox!.y).toBeGreaterThan(page.viewportSize()!.height / 2);
+  await expect(page.locator('#explore .memory-map')).toBeVisible();
+  await expect(savedNotice.getByRole('button', { name: 'Cerrar aviso', exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('memory-saved-notice.png') });
+  if (mobile) {
+    await expect(savedNotice).toHaveCount(0, { timeout: 4000 });
+  } else {
+    await savedNotice.getByRole('button', { name: 'Cerrar aviso', exact: true }).click();
+    await expect(savedNotice).toHaveCount(0);
+  }
 });
+}
 
 test('el carrusel del día continúa su cursor y abre la preview de otro pin', async ({ page }, testInfo) => {
   const requests: string[] = [];

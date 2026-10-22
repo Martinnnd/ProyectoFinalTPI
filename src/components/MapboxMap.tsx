@@ -1,5 +1,6 @@
 import PinMemoryPreview from './PinMemoryPreview';
 import { createPortal } from 'react-dom';
+import { MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -466,6 +467,7 @@ export default function MapboxMap(
       )}
       {props.picking && (
         <div className="map-notice picking" role="status">
+          <MapPin size={22} aria-hidden="true" />
           <span>Elegí un lugar en el mapa para tu recuerdo.</span>
           <button onClick={props.onCancel}>Cancelar</button>
         </div>

@@ -274,10 +274,10 @@ export default function FeedPost({
         <img src={memory.image} alt={`Fotografía de ${memory.title} en ${memory.place}, ${memory.year}`} loading="lazy" decoding="async" onError={event => { event.currentTarget.hidden = true; }} />
       </button>}
       </div>
-      {publicationId(memory) && <FeedRelations key={memory.id} id={memory.id} active={active} onOpen={onOpenRelated ?? onOpen} />}
+      {publicationId(memory) && <FeedRelations key={`relations-${memory.id}`} id={memory.id} active={active} onOpen={onOpenRelated ?? onOpen} />}
       {selected && commentMemoryId && (
         <RemoteComments
-          key={commentMemoryId}
+          key={`comments-${commentMemoryId}`}
           memoryId={commentMemoryId}
           onCommentCreated={() => setCommentCount((count) => count + 1)}
           onCommentDeleted={() => setCommentCount((count) => Math.max(0, count - 1))}
