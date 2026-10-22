@@ -846,7 +846,10 @@ export default function App() {
           canRate={canRate}
           onRate={rateMemory}
           selected={selected}
-          onSelect={(m) => { selectedSeed.current = m; setRemoteSelected(m); setSelectedId(m?.id ?? null); }}
+          onSelect={(m) => {
+            if (m) selectRelatedMemory(m);
+            else { selectedSeed.current = null; setRemoteSelected(null); setSelectedId(null); }
+          }}
           onMap={(m) => {
             selectedSeed.current = m;
             setRemoteSelected(m);
