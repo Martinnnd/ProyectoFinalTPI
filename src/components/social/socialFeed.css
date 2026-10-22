@@ -17,6 +17,11 @@
 }
 
 .feed-heading {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--surface);
+  transition: transform .18s ease, opacity .18s ease;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -24,6 +29,9 @@
   padding: 0 0 18px;
   border-bottom: 2px solid var(--line);
 }
+.feed-heading.is-scroll-hidden { transform:translateY(calc(-100% - 2px)); opacity:0; pointer-events:none; }
+.feed-heading.is-scroll-hidden:has(:focus-visible) { transform:none; opacity:1; pointer-events:auto; }
+@media(prefers-reduced-motion:reduce) { .feed-heading { transition:none; } }
 
 .feed-heading h2 {
   margin: 0;
@@ -907,3 +915,11 @@
     transition: none;
   }
 }
+/* The sentinel follows the actual scroll container on desktop and mobile. */
+.feed-load-target { height:1px; flex-shrink:0; }
+.feed-loading { display:flex; align-items:center; justify-content:center; gap:10px; padding:20px; color:var(--ink); font:14px var(--font-body); }
+.feed-loading svg { flex-shrink:0; animation:feed-loading-spin .8s linear infinite; }
+.feed-load-error { padding:16px; border:1px solid var(--line); border-radius:var(--radius); background:var(--soft); color:var(--ink); text-align:center; }
+.feed-load-error p { margin:0 0 12px; }
+@keyframes feed-loading-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .feed-loading svg { animation:none; } }

@@ -17,9 +17,19 @@ import HashtagThread from "./HashtagThread";
 import useRemoteFeed from '../../hooks/useRemoteFeed';
 import { useAuth } from '../auth/AuthProvider';
 import { publicationId } from '../../publicationsApi';
+import { LoaderCircle } from 'lucide-react';
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
+}
+
+function authorsFromMemories(memories: Memory[]) {
+  return memories.map(memory => {
+    const simpleRepost = memory.repost && !memory.repost.comment && memory.repost.author;
+    const name = simpleRepost ? memory.repost!.author : memory.author;
+    const id = simpleRepost ? memory.repost?.authorId : memory.authorId;
+    return [name, { name, id }] as const;
+  });
 }
 
 function getTargetToRepost(mem: Memory, allMemories: Memory[]): { targetId: string; targetMemory: Memory } {
@@ -97,7 +107,7 @@ export default function SocialFeed({
   onRepostCreated: (id: string) => void;
 }) {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, session } = useAuth();
   const interactions = useMemoryInteractions();
   const desktopDetail = !!selected && (decade === 1990 || decade === 2000);
   const [maximized, setMaximized] = useState(false);
@@ -107,6 +117,7 @@ export default function SocialFeed({
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
   const [tab, setTab] = useState<FeedTab>("all");
+  const [knownAuthors, setKnownAuthors] = useState<{ name: string; id: number }[]>([]);
 
   function requireAuthentication(): boolean {
     if (isAuthenticated) return true;
@@ -120,6 +131,16 @@ export default function SocialFeed({
     }
   }, [groupName, groupOpenRequest]);
   const remote = useRemoteFeed(tab === 'groups' ? null : tab === 'following' ? 'seguidos' : 'para-vos', active && isAuthenticated);
+  useEffect(() => {
+    setKnownAuthors(previous => {
+      const candidates = new Map(previous.map(author => [author.id, author]));
+      for (const [, author] of authorsFromMemories(remote.items)) {
+        if (author.id && author.id !== session?.usuarioId) candidates.set(author.id, { name: author.name, id: author.id });
+      }
+      const next = [...candidates.values()];
+      return next.length === previous.length && next.every((author, index) => author.id === previous[index].id && author.name === previous[index].name) ? previous : next;
+    });
+  }, [remote.items, session?.usuarioId]);
   useEffect(() => { if (followingRevision && tab === 'following') remote.reload(); }, [followingRevision]);
   useEffect(() => {
     if (isAuthenticated && tab !== 'groups') onItems(remote.items);
@@ -133,6 +154,34 @@ export default function SocialFeed({
   const openingRect = useRef<DOMRect | undefined>(undefined);
   const cancelTurn = useRef<() => void>(() => {});
   const stream = useRef<HTMLDivElement>(null);
+  const loadTarget = useRef<HTMLDivElement>(null);
+  const [headerHidden, setHeaderHidden] = useState(false);
+  useEffect(() => {
+    setHeaderHidden(false);
+    if (!active || selected || !stream.current) return;
+    let detach = () => {};
+    const attach = () => {
+      detach();
+      let root: HTMLElement | null = stream.current;
+      while (root && !/(auto|scroll)/.test(getComputedStyle(root).overflowY)) root = root.parentElement;
+      if (!root) return;
+      const scrollRoot = root;
+      let previous = Math.max(0, scrollRoot.scrollTop);
+      const onScroll = () => {
+        const next = Math.max(0, scrollRoot.scrollTop);
+        const delta = next - previous;
+        if (next > 8 && Math.abs(delta) < 3) return;
+        previous = next;
+        setHeaderHidden(next > 8 && delta > 0);
+      };
+      scrollRoot.addEventListener('scroll', onScroll, { passive: true });
+      detach = () => scrollRoot.removeEventListener('scroll', onScroll);
+      setHeaderHidden(false);
+    };
+    attach();
+    window.addEventListener('resize', attach);
+    return () => { detach(); window.removeEventListener('resize', attach); };
+  }, [active, selected?.id, tab, hashtag]);
   
   const allMemories = tab === 'groups' || !isAuthenticated
     ? filterFeed(memories)
@@ -143,14 +192,9 @@ export default function SocialFeed({
     if (stream.current) stream.current.scrollTop = 0;
   }, [selected?.id, tab, hashtag]);
 
-  const feedAuthors = allMemories.map(memory => {
-    const simpleRepost = memory.repost && !memory.repost.comment && memory.repost.author;
-    const name = simpleRepost ? memory.repost!.author : memory.author;
-    const id = simpleRepost ? memory.repost?.authorId : memory.authorId;
-    return [name, { name, id }] as const;
-  });
-  const authors = [...new Map([...feedAuthors, ...suggestedAuthors.map(author => [author.name, author] as const)]
-    .filter(([, author]) => author.id && !isOwnMemory({ author: author.name }))).values()];
+  const feedAuthors = authorsFromMemories(allMemories);
+  const authors = [...new Map([...feedAuthors, ...knownAuthors.map(author => [author.name, author] as const), ...suggestedAuthors.map(author => [author.name, author] as const)]
+    .filter(([, author]) => author.id && author.id !== session?.usuarioId && !isOwnMemory({ author: author.name }))).values()];
   const browsingGroups = tab === "groups" && !groupName;
   const tabPosts =
     tab === "groups"
@@ -162,6 +206,16 @@ export default function SocialFeed({
   const filteredPosts = hashtag ? tabPosts.filter(memory => memoryHashtags(memory).includes(hashtag)) : tabPosts;
   const posts = browsingGroups ? [] : filteredPosts;
   const trends = weeklyTrends(tabPosts);
+  useEffect(() => {
+    if (!active || !isAuthenticated || selected || tab === 'groups' || remote.loading || remote.error || remote.expired || !remote.hayMas || !loadTarget.current) return;
+    let root: HTMLElement | null = stream.current;
+    while (root && !/(auto|scroll)/.test(getComputedStyle(root).overflowY)) root = root.parentElement;
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) remote.more();
+    }, { root, rootMargin: '0px 0px 120px 0px' });
+    observer.observe(loadTarget.current);
+    return () => observer.disconnect();
+  }, [active, isAuthenticated, selected?.id, tab, hashtag, posts.length, remote.loading, remote.error, remote.expired, remote.hayMas, remote.more]);
 
   function chooseHashtag(tag: string) {
     setHashtag(tag);
@@ -266,6 +320,7 @@ export default function SocialFeed({
           title={groupName ?? (tab === "groups" ? "Mis grupos" : "Feed")}
           tab={tab}
           selected={!!selected}
+          scrollHidden={headerHidden}
           onBack={() => open(null)}
           onTabChange={changeTab}
         />
@@ -365,7 +420,7 @@ export default function SocialFeed({
               />
             );
           })}
-          {!selected && !browsingGroups && !posts.length && (tab === 'groups' || (!remote.loading && !remote.error)) && (
+          {!selected && !browsingGroups && !posts.length && (tab === 'groups' || (!remote.loading && !remote.error && !remote.hayMas)) && (
             <div className="feed-empty">
               <h3>
                 {tab === "following"
@@ -380,7 +435,11 @@ export default function SocialFeed({
               </p>
             </div>
           )}
-          {!selected && tab !== 'groups' && remote.hayMas && <button className="primary-button" type="button" disabled={remote.loading || remote.expired} onClick={remote.more}>Ver más publicaciones</button>}
+          {!selected && tab !== 'groups' && isAuthenticated && <>
+            <div ref={loadTarget} className="feed-load-target" aria-hidden="true" />
+            {remote.loading && <div className="feed-loading" role="status"><LoaderCircle size={20} aria-hidden="true" /><span>Cargando recuerdos…</span></div>}
+            {remote.error && <div className="feed-load-error" role="alert"><p>{remote.error}</p><button type="button" className="secondary-button" onClick={remote.expired || !remote.hayMas ? remote.reload : remote.more}>{remote.expired ? 'Nueva selección' : 'Reintentar'}</button></div>}
+          </>}
         </div>
       </PostDetailFrame>
       <FeedSidebar

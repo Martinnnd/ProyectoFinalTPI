@@ -12,6 +12,18 @@ it('usa la sesión del login para personalizar el feed', async () => {
   expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
 });
 const item = { id: 25, titulo: 'Desde el servidor', descripcion: 'Texto abreviado', fecha: '1992-01-01T00:00:00Z', fechaCreacion: '2026-10-13T15:00:00Z', categoria: 0, tipoMultimedia: 0, urlMultimedia: '/uploads/foto.jpg', autor: { id: 2, username: 'Ana' }, lugar: { nombre: 'Mi barrio', latitud: -34, longitud: -58 } };
+it('excluye publicaciones propias de Para vos por ID y conserva el cursor del servidor', async () => {
+  const fetch = vi.fn().mockImplementation(async () => new Response(JSON.stringify({ items: [item, { ...item, id: 26, autor: { id: 42, username: 'Ana' } }], siguienteCursor: 'next+/=', hayMas: true })));
+  vi.stubGlobal('fetch', fetch);
+  const page = await getFeed('para-vos');
+  expect(page.items.map(memory => memory.id)).toEqual(['25']);
+  expect(page).toMatchObject({ siguienteCursor: 'next+/=', hayMas: true });
+  expect((await getFeed('seguidos')).items.map(memory => memory.id)).toEqual(['25', '26']);
+});
+it('permite continuar cuando una página solo contiene publicaciones propias', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [{ ...item, autor: { id: 42, username: 'Ana' } }], siguienteCursor: 'otra-pagina', hayMas: true }))));
+  expect(await getFeed('para-vos')).toEqual({ items: [], siguienteCursor: 'otra-pagina', hayMas: true });
+});
 it('consulta Para vos sin cursor y adapta ubicación, autor y multimedia', async () => {
   const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [item], siguienteCursor: 'next+/=', hayMas: true })));
   vi.stubGlobal('fetch', fetch);
