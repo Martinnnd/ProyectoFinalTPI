@@ -4,6 +4,7 @@ import { extractHashtags } from "../hashtags";
 import { memoryDateIso } from "../memoryDate";
 import GooglePhotosPicker from "./GooglePhotosPicker";
 import MemoryDatePicker from "./MemoryDatePicker";
+import DiscardDraftDialog from './DiscardDraftDialog';
   import { useEffect, useRef, useState } from "react";
   import { X, Save, Loader2, Upload, Images, Link } from "lucide-react";
   import { categories, type Memory, type Decade } from "../types";
@@ -25,8 +26,10 @@ import MemoryDatePicker from "./MemoryDatePicker";
     onSave: (m: Memory) => string | null | Promise<string | null | void> | void;
   }) {
     const dirty = useRef(false);
+    const [confirmDiscard, setConfirmDiscard] = useState(false);
     function requestClose() {
-      if (dirty.current && !window.confirm("¿Descartar los cambios sin guardar?")) return;
+      if (saving) return;
+      if (dirty.current) { setConfirmDiscard(true); return; }
       onCancel();
     }
     const dialog = useRef<HTMLDialogElement>(null);
@@ -304,6 +307,7 @@ import MemoryDatePicker from "./MemoryDatePicker";
             </button>
           </div>
         </form>
+        {confirmDiscard && <DiscardDraftDialog decade={decade} onContinue={() => setConfirmDiscard(false)} onDiscard={onCancel}/>}
       </dialog>
     );
   }
