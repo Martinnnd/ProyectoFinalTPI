@@ -36,10 +36,14 @@ export default function Profile({
   period,
   selected,
   earned,
+  currentUserId,
+  myFollowingUsers,
   onSelect,
   onOpen,
   onAdd,
   onIniciarChat,
+  onNavigateToProfile,
+  onFollow,
   onToggleFollow,
 }: {
   onEdit: (memory: Memory) => void;
@@ -60,10 +64,14 @@ export default function Profile({
   period: Period;
   selected: Memory | null;
   earned: Achievement[];
+  currentUserId?: number;
+  myFollowingUsers?: FollowedUser[];
   onOpen?: (memory: Memory) => void;
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
   onIniciarChat?: (username: string) => void;
+  onNavigateToProfile?: (username: string) => void;
+  onFollow?: (author: string, authorId: number) => void;
   onToggleFollow?: () => void | Promise<void>;
 }) {
   const album = useRef<HTMLElement>(null);
@@ -148,7 +156,11 @@ export default function Profile({
           onOpenAchievements={openCatalogue}
           onOpenTiers={openTiers}
           onIniciarChat={onIniciarChat}
+          currentUserId={currentUserId}
+          myFollowingUsers={myFollowingUsers}
+          onNavigateToProfile={onNavigateToProfile}
           onToggleFollow={onToggleFollow}
+          onToggleFollowUser={onFollow}
         />
         <ProfileShortcuts
           author={author}
