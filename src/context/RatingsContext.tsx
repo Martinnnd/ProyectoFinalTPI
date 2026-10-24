@@ -4,7 +4,9 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { useAuth } from "../components/auth/AuthProvider";
 import { useRouter } from "next/navigation";
 import { ratePublication } from "../publicationsApi";
-import { updateNostalgiaRating, type NostalgiaRatings } from "../nostalgiaRatings";
+import { updateNostalgiaRating, totalGivenNostalgia, type NostalgiaRatings } from "../nostalgiaRatings";
+import { achievements } from "../data";
+import type { Achievement } from "../types";
 
 interface RatingsContextType {
   ratings: NostalgiaRatings;
@@ -12,6 +14,8 @@ interface RatingsContextType {
   rateMemory: (postId: string, score: number, canRate?: boolean) => Promise<void>;
   notice: string | null;
   setNotice: (msg: string | null) => void;
+  celebrating: Achievement | null;
+  setCelebrating: (achievement: Achievement | null) => void;
 }
 
 const RatingsContext = createContext<RatingsContextType | undefined>(undefined);
@@ -24,6 +28,8 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
   const [ratings, setRatings] = useState<NostalgiaRatings>({});
   const [pointsMap, setPointsMap] = useState<Record<string, number>>({});
   const [notice, setNotice] = useState<string | null>(null);
+  const [firstFiveEarned, setFirstFiveEarned] = useState(false);
+  const [celebrating, setCelebrating] = useState<Achievement | null>(null);
 
   useEffect(() => {
     if (!notice) return;
@@ -44,6 +50,12 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
       const previousRating = ratings[postId];
       const next = updateNostalgiaRating(ratings, postId, score);
       setRatings(next);
+
+      if (!firstFiveEarned && totalGivenNostalgia(next) >= 5) {
+        setFirstFiveEarned(true);
+        const achievement21 = achievements.find((a) => a.id === "21");
+        if (achievement21) setCelebrating(achievement21);
+      }
 
       try {
         const res = await ratePublication(postId, score);
@@ -77,7 +89,7 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <RatingsContext.Provider value={{ ratings, pointsMap, rateMemory, notice, setNotice }}>
+    <RatingsContext.Provider value={{ ratings, pointsMap, rateMemory, notice, setNotice, celebrating, setCelebrating }}>
       {children}
     </RatingsContext.Provider>
   );

@@ -384,7 +384,8 @@ export default function SocialFeed({
                     : memory.author
                   ).toLowerCase()
                 )}
-                liked={interactions.isLiked(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
+                liked={interactions.isLiked(targetKey, targetMemory.viewerLiked)}
+                likeCount={interactions.getLikeCount(targetKey, targetMemory.likeCount ?? 0)}
                 commentMemoryId={publicationId(targetMemory) ? rootId : undefined}
                 rating={effectiveRating}
                 canRate={canRate}
@@ -403,7 +404,7 @@ export default function SocialFeed({
                 onRate={(value) => onRate(isSimpleRepost ? rootId : memory.id, value)}
                 onLike={() => {
                   if (!requireAuthentication()) return;
-                  interactions.toggleLike(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked);
+                  interactions.toggleLike(targetKey, targetMemory.viewerLiked, targetMemory.likeCount ?? 0);
                 }}
                 onRepost={() => {
                   if (!requireAuthentication()) return;

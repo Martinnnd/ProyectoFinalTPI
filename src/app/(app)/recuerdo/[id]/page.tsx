@@ -1,16 +1,19 @@
 "use client";
 
-import React, { useEffect, useState, use } from "react";
+import React, { useEffect, useState, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, LoaderCircle, MapPin } from "lucide-react";
-import FeedPost from "../../../../components/social/FeedPost";
+import { LoaderCircle } from "lucide-react";
+import SocialFeed from "../../../../components/social/SocialFeed";
+import DeleteMemoryDialog from "../../../../components/DeleteMemoryDialog";
+import MemoryForm from "../../../../components/MemoryForm";
 import { getPublication } from "../../../../publicationsApi";
+import { eliminarPublicacion } from "../../../../api";
 import { useEra } from "../../../../context/EraContext";
 import { useAuth } from "../../../../components/auth/AuthProvider";
 import { useFollow } from "../../../../context/FollowContext";
 import { useRatings } from "../../../../context/RatingsContext";
-import useMemoryInteractions from "../../../../hooks/useMemoryInteractions";
 import type { Decade, Memory } from "../../../../types";
+import type { FeedTab } from "../../../../socialTypes";
 
 export default function RecuerdoPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -18,18 +21,20 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   const { id } = resolvedParams;
 
   const { period, changePeriod } = useEra();
-  const { session } = useAuth();
-  const { followingUsers, toggleFollow } = useFollow();
-  const { ratings, rateMemory } = useRatings();
+  const { session, status } = useAuth();
+  const { followingUsers, toggleFollow, followingRevision } = useFollow();
+  const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
 
   const [memory, setMemory] = useState<Memory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<Memory | null>(null);
+  const [deleting, setDeleting] = useState<Memory | null>(null);
 
-  const { isLiked, toggleLike } = useMemoryInteractions();
+  const followingUsernames = followingUsers.map((u) => u.username);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || status === "loading") return;
     const controller = new AbortController();
     setLoading(true);
     setError(null);
@@ -41,7 +46,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         setLoading(false);
         const memoryDecade = (Math.floor(data.year / 10) * 10) as Decade;
         if (memoryDecade !== period.decade) {
-          changePeriod(memoryDecade, data.year);
+          changePeriod({ decade: memoryDecade, year: null });
         }
       })
       .catch((err) => {
@@ -52,77 +57,134 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
       });
 
     return () => controller.abort();
-  }, [id]);
+  }, [id, status, changePeriod, period.decade]);
 
-  const isFollowing = memory
-    ? followingUsers.some((u) => u.username.toLowerCase() === memory.author.toLowerCase())
-    : false;
+  const handleProfile = useCallback(
+    (targetMemory: Memory) => {
+      if (session && targetMemory.author === session.username) {
+        router.push("/perfil");
+      } else {
+        router.push(`/perfil/${targetMemory.author}`);
+      }
+    },
+    [router, session]
+  );
+
+  const handleMap = useCallback(
+    (targetMemory: Memory) => {
+      router.push(`/explorar?recuerdo=${targetMemory.id}`);
+    },
+    [router]
+  );
+
+  const handleSelect = useCallback(
+    (selectedMemory: Memory | null) => {
+      if (!selectedMemory) {
+        router.push("/feed");
+      } else if (selectedMemory.id !== id) {
+        router.push(`/recuerdo/${selectedMemory.id}`);
+      }
+    },
+    [id, router]
+  );
+
+  const confirmDelete = useCallback(
+    (targetMemory: Memory): string | null => {
+      eliminarPublicacion(targetMemory.id).catch(console.error);
+      setNotice("Recuerdo eliminado.");
+      router.push("/feed");
+      return null;
+    },
+    [router, setNotice]
+  );
+
+  const saveEdit = useCallback(
+    (updated: Memory): string | null => {
+      setMemory(updated);
+      setEditing(null);
+      setNotice("Recuerdo modificado.");
+      return null;
+    },
+    [setNotice]
+  );
+
+  if (loading) {
+    return (
+      <div className="feed-loading" role="status" style={{ padding: "60px 0" }}>
+        <LoaderCircle size={28} className="animate-spin" />
+        <span>Cargando recuerdo…</span>
+      </div>
+    );
+  }
+
+  if (error || !memory) {
+    return (
+      <div className="feed-load-error" role="alert" style={{ padding: "60px 0", textAlign: "center" }}>
+        <p>{error ?? "No se encontró el recuerdo solicitado."}</p>
+        <button type="button" className="secondary-button" onClick={() => router.push("/feed")}>
+          Volver al feed
+        </button>
+      </div>
+    );
+  }
+
+  const effectiveMemory: Memory = {
+    ...memory,
+    points: pointsMap[memory.id] ?? memory.points,
+    viewerRating: ratings[memory.id] ?? memory.viewerRating,
+  };
 
   return (
-    <div className="social-feed" style={{ maxWidth: "780px", margin: "0 auto", padding: "16px" }}>
-      <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={() => router.back()}
-          style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
-        >
-          <ArrowLeft size={16} /> Volver
-        </button>
-        {memory && (
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={() => router.push(`/explorar?recuerdo=${memory.id}`)}
-            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
-          >
-            <MapPin size={16} /> Ver en el mapa
-          </button>
-        )}
-      </div>
+    <>
+      <SocialFeed
+        key={memory.id}
+        active={true}
+        onItems={() => {}}
+        filterFeed={(items) => items}
+        onAddHashtag={(tag) =>
+          router.push(`/explorar?action=recordar&tag=${encodeURIComponent(tag)}`)
+        }
+        onTabChange={(_tab: FeedTab) => router.push("/feed")}
+        onEdit={(m) => setEditing(m)}
+        onDelete={(m) => setDeleting(m)}
+        onProfile={handleProfile}
+        groupIds={[]}
+        suggestedAuthors={[]}
+        groupOpenRequest={0}
+        onRepostCreated={(_repostId) => {}}
+        decade={period.decade}
+        memories={[effectiveMemory]}
+        following={followingUsernames}
+        followingRevision={followingRevision}
+        onFollow={toggleFollow}
+        ratings={ratings}
+        pointsMap={pointsMap}
+        canRate={true}
+        onRate={rateMemory}
+        selected={effectiveMemory}
+        onSelect={handleSelect}
+        onMap={handleMap}
+        onAdd={() => router.push("/explorar?action=recordar")}
+      />
 
-      {loading && (
-        <div className="feed-loading" role="status" style={{ padding: "40px 0" }}>
-          <LoaderCircle size={24} className="animate-spin" />
-          <span>Cargando recuerdo…</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="feed-load-error" role="alert" style={{ padding: "40px 0" }}>
-          <p>{error}</p>
-          <button type="button" className="secondary-button" onClick={() => window.location.reload()}>
-            Reintentar
-          </button>
-        </div>
-      )}
-
-      {memory && !loading && (
-        <FeedPost
-          memory={memory}
-          selected={true}
-          active={true}
-          following={isFollowing}
-          liked={isLiked(memory.id, memory.viewerLiked)}
-          commentMemoryId={memory.id}
-          rating={ratings[memory.id] ?? memory.viewerRating}
-          canRate={true}
-          reposted={false}
-          saved={false}
-          onDelete={() => {}}
-          onEdit={() => {}}
-          onProfile={(m) => router.push(session?.username === m.author ? "/perfil" : `/perfil/${m.author}`)}
-          onFollow={toggleFollow}
-          onOpen={() => {}}
-          onOpenRelated={(related) => router.push(`/recuerdo/${related.id}`)}
-          onMap={(m) => router.push(`/explorar?recuerdo=${m.id}`)}
-          onRate={(score) => rateMemory(memory.id, score)}
-          onLike={() => toggleLike(memory.id, memory.viewerLiked)}
-          onRepost={() => {}}
-          onSave={() => {}}
-          onHashtag={(tag) => router.push(`/feed?tag=${encodeURIComponent(tag)}`)}
+      {deleting && (
+        <DeleteMemoryDialog
+          memory={deleting}
+          onCancel={() => setDeleting(null)}
+          onConfirm={() => confirmDelete(deleting)}
         />
       )}
-    </div>
+
+      {editing && (
+        <MemoryForm
+          key={editing.id}
+          initial={editing}
+          point={{ lat: editing.lat, lng: editing.lng }}
+          decade={(Math.floor(editing.year / 10) * 10) as Decade}
+          onCancel={() => setEditing(null)}
+          onSave={saveEdit}
+        />
+      )}
+    </>
   );
 }

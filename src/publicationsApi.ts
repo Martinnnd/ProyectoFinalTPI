@@ -103,3 +103,21 @@ export async function removePublicationRating(id: number | string): Promise<Rati
     method: 'DELETE',
   });
 }
+
+export type LikeState = {
+  publicacionId: number;
+  cantidadLikes: number;
+  dioLike: boolean;
+};
+
+export async function likePublication(id: number | string): Promise<LikeState> {
+  return publicationRequest<LikeState>(`/${id}/like`, {
+    method: 'POST',
+  });
+}
+
+export async function unlikePublication(id: number | string): Promise<LikeState> {
+  return publicationRequest<LikeState>(`/${id}/like`, {
+    method: 'DELETE',
+  });
+}

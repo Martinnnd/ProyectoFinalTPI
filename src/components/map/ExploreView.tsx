@@ -32,6 +32,8 @@ function ExploreContent() {
   const searchParams = useSearchParams();
   const recuerdoParam = searchParams.get("recuerdo");
   const actionParam = searchParams.get("action");
+  const groupIdParam = searchParams.get("groupId");
+  const tagParam = searchParams.get("tag");
 
   const {
     period,
@@ -44,7 +46,7 @@ function ExploreContent() {
     setPanelOpen,
   } = useEra();
 
-  const { session } = useAuth();
+  const { session, status } = useAuth();
   const { setNotice } = useRatings();
 
   const [category, setCategory] = useState<Category | "Todas">("Todas");
@@ -97,6 +99,7 @@ function ExploreContent() {
       setRemoteSelected(null);
       return;
     }
+    if (status === "loading") return;
     const pin = [selectedSeed.current, remoteSelected, ...remotePins].find((m) => m?.id === selectedId);
     const controller = new AbortController();
 
@@ -115,7 +118,7 @@ function ExploreContent() {
       });
 
     return () => controller.abort();
-  }, [selectedId, mapRevision]);
+  }, [selectedId, mapRevision, status]);
 
   const memories = filterMemories(remotePins, period, category);
   const selected =
@@ -179,16 +182,23 @@ function ExploreContent() {
 
   async function saveCreation(memory: Memory) {
     try {
-      const { crearPublicacion } = await import("../../api");
-      const res = await crearPublicacion(memory);
+      let res;
+      if (groupIdParam) {
+        const { createGroupMemory } = await import("../../groupsApi");
+        res = await createGroupMemory(groupIdParam, memory);
+      } else {
+        const { crearPublicacion } = await import("../../api");
+        res = await crearPublicacion(memory);
+      }
       if (res && res.id) {
-        memory = { ...memory, id: res.id.toString(), source: "backend" };
+        memory = { ...memory, id: res.id.toString(), source: "backend", groupId: groupIdParam ?? undefined };
       }
       setRemotePins((curr) => [memory, ...curr.filter((m) => m.id !== memory.id)]);
       setMapRevision((r) => r + 1);
       setDraft(null);
       setPicking(false);
       selectMapPin(memory);
+      setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
       return null;
     } catch (err) {
       return err instanceof Error ? err.message : "No se pudo guardar el recuerdo.";
@@ -271,6 +281,7 @@ function ExploreContent() {
       {draft && (
         <MemoryForm
           point={draft}
+          defaultHashtags={tagParam ? [tagParam] : undefined}
           decade={period.decade}
           onCancel={cancelCreation}
           onSave={saveCreation}

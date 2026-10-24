@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus, X, Newspaper, MessageCircle, ChevronDown } from "lucide-react";
+import { Plus, X, Newspaper, MessageCircle, ChevronDown, CircleCheck } from "lucide-react";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
 import { useFollow } from "../../context/FollowContext";
@@ -12,6 +12,7 @@ import Player from "../Player";
 import UserSearch from "../UserSearch";
 import AuthMenu from "../auth/AuthMenu";
 import { useRatings } from "../../context/RatingsContext";
+import AchievementToast from "../AchievementToast";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -30,7 +31,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   } = useEra();
 
   const { followingUsers, toggleFollow } = useFollow();
-  const { notice, setNotice } = useRatings();
+  const { notice, setNotice, celebrating, setCelebrating } = useRatings();
 
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
@@ -252,7 +253,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       />
 
       {notice && (
-        <div className="toast" role="status" aria-atomic="true">
+        <div
+          className={`toast${notice === "¡Recuerdo guardado! Ya tiene su lugar en el mapa." ? " memory-saved-notice" : ""}`}
+          role="status"
+          aria-atomic="true"
+        >
+          {notice === "¡Recuerdo guardado! Ya tiene su lugar en el mapa." && (
+            <CircleCheck size={24} aria-hidden="true" />
+          )}
           <span>{notice}</span>
           <button
             className="icon-button"
@@ -262,6 +270,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <X size={20} />
           </button>
         </div>
+      )}
+
+      {celebrating && (
+        <AchievementToast
+          key={celebrating.id}
+          achievement={celebrating}
+          onDismiss={() => setCelebrating(null)}
+        />
       )}
     </div>
   );

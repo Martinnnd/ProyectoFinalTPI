@@ -5,14 +5,18 @@ export default function PostRating({
   value,
   totalPoints = 0,
   canRate,
+  isOwn = false,
   onRate,
 }: {
   memoryTitle: string;
   value?: number;
   totalPoints?: number;
   canRate: boolean;
+  isOwn?: boolean;
   onRate: (value: number) => void;
 }) {
+  const allowRate = canRate && !isOwn;
+
   return (
     <div
       className="post-ratings"
@@ -26,7 +30,7 @@ export default function PostRating({
           aria-label={`${value === score ? "Quitar" : "Dar"} ${score} ${score === 1 ? "punto" : "puntos"} de nostalgia a ${memoryTitle}`}
           aria-pressed={value === score}
           data-filled={score <= (value ?? 0)}
-          disabled={!canRate}
+          disabled={!allowRate}
           onClick={() => onRate(score)}
         >
           <img src="/nostalgiar-rail-logo.png" alt="" width={28} height={28} />
@@ -34,7 +38,13 @@ export default function PostRating({
       ))}
       <small className="post-rating-value">
         <strong>{totalPoints} {totalPoints === 1 ? "punto" : "puntos"}</strong>
-        {!canRate ? " • Disponible desde Nostálgico" : value ? ` • Le diste ${value} ${value === 1 ? "punto" : "puntos"}` : " • Sin puntuar"}
+        {isOwn
+          ? " • Tu publicación"
+          : !canRate
+            ? " • Disponible desde Nostálgico"
+            : value
+              ? ` • Le diste ${value} ${value === 1 ? "punto" : "puntos"}`
+              : " • Sin puntuar"}
       </small>
     </div>
   );
