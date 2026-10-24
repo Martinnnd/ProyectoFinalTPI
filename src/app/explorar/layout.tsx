@@ -7,6 +7,7 @@ import "../../components/social/socialFeed.css";
 import "../../components/social/hashtags.css";
 import "../../components/community.css";
 import "../../components/chat.css";
+import "../../components/notification.css";
 import "../../components/mapbox.css";
 import "../../eras/70s/theme.css";
 import "../../eras/80s/theme.css";
