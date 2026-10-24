@@ -38,7 +38,7 @@ export default function FeedSidebar({
 
   return (
     <aside className="feed-sidebar">
-      <details className="feed-sidebar-content" open={window.innerWidth >= 900}>
+      <details className="feed-sidebar-content" open={typeof window !== "undefined" ? window.innerWidth >= 900 : true}>
         <summary>Tendencias, búsqueda y comunidad</summary>
         
         <section>
