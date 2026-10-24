@@ -9,8 +9,9 @@ import { memoryThumbnail } from './memoryThumbnail';
 import styles from './pinMemoryPreview.module.css';
 import PublicationMoments from './PublicationMoments';
 
-export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, onMoment }: {
+export default function PinMemoryPreview({ memory, showRelations = true, onSelect, onOpen, onClose, onMoment }: {
   memory: Memory;
+  showRelations?: boolean;
   onSelect: (memory: Memory) => void;
   onOpen?: (memory: Memory) => void;
   onClose?: () => void;
@@ -22,7 +23,7 @@ export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, on
   const [revision, setRevision] = useState(0);
   useEffect(() => {
     setRelations(null); setError('');
-    if (!id) return;
+    if (!id || !showRelations) return;
     const controller = new AbortController();
     getMemoryRelations(id, controller.signal).then(result => {
       if (!controller.signal.aborted) setRelations(result);
@@ -30,9 +31,9 @@ export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, on
       if (!controller.signal.aborted) setError('No pudimos cargar los recuerdos relacionados.');
     });
     return () => controller.abort();
-  }, [id, revision]);
+  }, [id, revision, showRelations]);
   return <div className={styles.stack}>
-    {relations && <RelatedCarousel key={`${id}-lugar`} id={id!} tipo="lugar" initialPage={relations.lugar} onSelect={onSelect} />}
+    {showRelations && relations && <RelatedCarousel key={`${id}-lugar`} id={id!} tipo="lugar" initialPage={relations.lugar} onSelect={onSelect} />}
     <div className={styles.card}>
     {onClose && <button className={styles.close} aria-label="Cerrar vista previa" onClick={onClose}>×</button>}
     {memoryThumbnail(memory) && <img className="pin-preview-photo" src={memoryThumbnail(memory)} alt="" onError={event => { event.currentTarget.hidden = true; }} />}
@@ -41,7 +42,7 @@ export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, on
     <p>{memory.description.length > 140 ? `${memory.description.slice(0, 140)}…` : memory.description}</p>
     {id && onMoment && <PublicationMoments key={id} id={id} onOpen={onMoment} />}
     {onOpen && <button onClick={() => onOpen(memory)}>Ver publicación →</button>}
-    {relations && <RelatedCarousel key={`${id}-dia`} id={id!} tipo="dia" initialPage={relations.dia} onSelect={onSelect} />}
+    {showRelations && relations && <RelatedCarousel key={`${id}-dia`} id={id!} tipo="dia" initialPage={relations.dia} onSelect={onSelect} />}
     {error && <div role="alert"><p>{error}</p><button onClick={() => setRevision(value => value + 1)}>Reintentar</button></div>}
     </div>
   </div>;

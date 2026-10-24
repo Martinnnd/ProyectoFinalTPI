@@ -52,14 +52,20 @@
 .app.view-profile .personal-counts button:hover { text-decoration:none; color:var(--accent); background:color-mix(in srgb,var(--accent) 8%,transparent); box-shadow:0 0 12px color-mix(in srgb,var(--accent) 24%,transparent); text-shadow:0 0 8px color-mix(in srgb,var(--accent) 30%,transparent); }
 .app.view-profile .profile-achievements-trigger:focus-visible,
 .app.view-profile .personal-counts button:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
-.profile-follow-dialog { width:380px; max-width:calc(100vw - 32px); max-height:70dvh; padding:0; color:var(--ink); background:var(--surface); border:2px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+.profile-follow-dialog { width:400px; max-width:calc(100vw - 32px); max-height:75dvh; padding:0; color:var(--ink); background:var(--surface); border:2px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+.profile-follow-dialog:not([open]) { display:none; }
+.profile-follow-dialog[open] { display:flex; flex-direction:column; }
 .profile-follow-dialog::backdrop { background:#0008; }
-.profile-follow-dialog > header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); }
+.profile-follow-dialog > header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); flex-shrink:0; }
 .profile-follow-dialog h2 { margin:0; font:700 20px var(--font-display); }
-.profile-follow-dialog ul { list-style:none; padding:0 18px; margin:0; }
-.profile-follow-dialog li { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--line); font-size:14px; }
-.profile-follow-dialog li > span { display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:var(--soft); color:var(--accent); }
-.profile-follow-dialog > p { padding:20px; margin:0; font-size:14px; }
+.profile-follow-dialog ul { list-style:none; padding:0 18px; margin:0; overflow-y:auto; flex:1; min-height:0; }
+.profile-follow-dialog li.profile-follow-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14px; }
+.profile-follow-dialog .profile-follow-user { display:flex; align-items:center; gap:12px; background:none; border:none; padding:0; color:inherit; font:inherit; cursor:pointer; text-align:left; flex:1; min-width:0; border-radius:6px; }
+.profile-follow-dialog .profile-follow-user:hover strong { color:var(--accent); text-decoration:underline; }
+.profile-follow-dialog .profile-follow-user span { display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:var(--soft); color:var(--accent); font-weight:700; flex-shrink:0; }
+.profile-follow-dialog .profile-follow-user strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.profile-follow-dialog .follow-button { flex-shrink:0; padding:6px 14px; font-size:12px; cursor:pointer; }
+.profile-follow-dialog > p { padding:24px 18px; margin:0; font-size:14px; color:var(--muted); text-align:center; }
 .app.view-profile .profile-follow-lists { grid-column:2; justify-content:flex-start; gap:16px; margin:0; padding:0; font-size:11px; }
 .app.view-profile .profile-follow-lists details { min-width:0; }
 .app.view-profile .achievements { flex:0 1 140px; margin:0; }

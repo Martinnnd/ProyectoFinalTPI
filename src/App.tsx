@@ -94,6 +94,8 @@ export default function App() {
   const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const [profileMemories, setProfileMemories] = useState<Memory[]>([]);
+  const [profileFollowers, setProfileFollowers] = useState<FollowedUser[]>([]);
+  const [profileFollowed, setProfileFollowed] = useState<FollowedUser[]>([]);
   const [profileUser, setProfileUser] = useState<UsuarioPerfil | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const currentUserId = session?.usuarioId;
@@ -112,9 +114,15 @@ export default function App() {
       .then(async (perfil) => {
         if (controller.signal.aborted) return;
         setProfileUser(perfil);
-        const userMems = await getPublicacionesUsuario(perfil.id, controller.signal);
+        const [userMems, targetFollowers, targetFollowed] = await Promise.all([
+          getPublicacionesUsuario(perfil.id, controller.signal),
+          getSeguidores(perfil.id, controller.signal).catch(() => []),
+          getSeguidos(perfil.id, controller.signal).catch(() => []),
+        ]);
         if (controller.signal.aborted) return;
         setProfileMemories(userMems);
+        setProfileFollowers(targetFollowers);
+        setProfileFollowed(targetFollowed);
         setProfileLoading(false);
       })
       .catch((error) => {
@@ -153,9 +161,15 @@ export default function App() {
       if (followingUsers.some(user => user.id === targetId)) {
         await dejarDeSeguir(currentUserId, targetId);
         setFollowingUsers(current => current.filter(user => user.id !== targetId));
+        if (profileUser && profileUser.id === targetId) {
+          setProfileUser(prev => prev ? { ...prev, loSigo: false, cantidadSeguidores: Math.max(0, prev.cantidadSeguidores - 1) } : null);
+        }
       } else {
         await seguir(currentUserId, targetId);
         setFollowingUsers(current => [...current, { id: targetId, username: author }]);
+        if (profileUser && profileUser.id === targetId) {
+          setProfileUser(prev => prev ? { ...prev, loSigo: true, cantidadSeguidores: prev.cantidadSeguidores + 1 } : null);
+        }
       }
       setFollowingRevision(revision => revision + 1);
     } catch (error) {
@@ -428,6 +442,12 @@ export default function App() {
     setProfileAuthor(member.id===currentUserId?null:member.username);
     setSelectedId(null);setPanelOpen(false);setFactsOpen(false);setPicking(false);
     setCategory("Todas");setPeriod(current=>({...current,year:null}));setView("profile");
+  }
+  function openUserProfile(username: string) {
+    setProfileAuthor(username === session?.username ? null : username);
+    setSelectedId(null); setPanelOpen(false); setFactsOpen(false); setPicking(false);
+    setCategory("Todas"); setPeriod(p => ({...p, year: null}));
+    setView("profile");
   }
   function openPublication(memory: Memory) {
     selectedSeed.current = memory;
@@ -801,14 +821,18 @@ export default function App() {
           allMemories={profileMemories}
           repostedPublicationIds={repostedPublicationIds}
           tierProgress={tierProgress}
-          followers={followers}
-          followedUsers={followingUsers}
+          followers={profileAuthor ? profileFollowers : followers}
+          followedUsers={profileAuthor ? profileFollowed : followingUsers}
+          currentUserId={currentUserId}
+          myFollowingUsers={followingUsers}
           period={period}
           selected={selected}
           earned={earned}
           onSelect={(m) => setSelectedId(m?.id ?? null)}
           onAdd={startAdding}
           onIniciarChat={profileAuthor ? iniciarChatConUsuario : undefined}
+          onNavigateToProfile={openUserProfile}
+          onFollow={toggleFollow}
         />
       )}
       <div hidden={view !== "feed"}>
