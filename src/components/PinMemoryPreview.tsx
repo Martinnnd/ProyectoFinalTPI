@@ -8,6 +8,7 @@ import type { Memory } from '../types';
 import { memoryThumbnail } from './memoryThumbnail';
 import styles from './pinMemoryPreview.module.css';
 import PublicationMoments from './PublicationMoments';
+import RetroMediaPlaceholder from './RetroMediaPlaceholder';
 import { X } from 'lucide-react';
 
 export default function PinMemoryPreview({ memory, showRelations = true, onSelect, onOpen, onClose, onMoment }: {
@@ -20,9 +21,15 @@ export default function PinMemoryPreview({ memory, showRelations = true, onSelec
 }) {
   const id = publicationId(memory);
   const thumbnail = memoryThumbnail(memory);
+  const [thumbFailed, setThumbFailed] = useState(false);
   const [relations, setRelations] = useState<MemoryRelations | null>(null);
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
+
+  useEffect(() => {
+    setThumbFailed(false);
+  }, [thumbnail]);
+
   useEffect(() => {
     setRelations(null); setError('');
     if (!id || !showRelations) return;
@@ -39,7 +46,22 @@ export default function PinMemoryPreview({ memory, showRelations = true, onSelec
     {showRelations && relations && <RelatedCarousel key={`${id}-lugar`} id={id!} tipo="lugar" initialPage={relations.lugar} onSelect={onSelect} />}
     <div className={styles.card}>
     {onClose && <button className={styles.close} aria-label="Cerrar vista previa" onClick={onClose}><X size={11} strokeWidth={2.5} aria-hidden="true" /></button>}
-    {thumbnail && <img key={thumbnail} className="pin-preview-photo" src={thumbnail} alt={youtubeId(memory.media?.url ?? memory.image ?? '') ? 'Miniatura del video de YouTube' : ''} onError={event => { event.currentTarget.hidden = true; }} />}
+    {thumbnail && !thumbFailed ? (
+      <img
+        key={thumbnail}
+        className="pin-preview-photo"
+        src={thumbnail}
+        alt={youtubeId(memory.media?.url ?? memory.image ?? '') ? 'Miniatura del video de YouTube' : ''}
+        onError={() => setThumbFailed(true)}
+      />
+    ) : (
+      <RetroMediaPlaceholder
+        compact={true}
+        year={memory.year}
+        title={memory.title}
+        failed={thumbFailed}
+      />
+    )}
     <small>{getMemoryAuthorDisplay(memory)} · {memory.year}</small>
     <strong>{memory.title}</strong>
     <p>{memory.description.length > 140 ? `${memory.description.slice(0, 140)}…` : memory.description}</p>

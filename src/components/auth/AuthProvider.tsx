@@ -17,7 +17,9 @@ import {
 } from "./authApi";
 import {
   AUTH_CHANGE_EVENT,
+  beginAuthInit,
   clearStoredSession,
+  completeAuthInit,
   getStoredSession,
   storeSession,
   tokenExpiresAt,
@@ -44,6 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [status, setStatus] = useState<AuthStatus>("loading");
 
+  if (typeof window !== "undefined") {
+    beginAuthInit();
+  }
+
   useEffect(() => {
     let active = true;
     window.localStorage.removeItem("nostalgia_auth");
@@ -60,6 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearStoredSession();
         setSession(null);
         setStatus("anonymous");
+      })
+      .finally(() => {
+        completeAuthInit();
       });
 
     const syncSession = () => {

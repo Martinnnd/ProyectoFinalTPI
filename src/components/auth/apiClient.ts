@@ -3,6 +3,7 @@ import {
   clearStoredSession,
   getStoredSession,
   storeSession,
+  waitForAuthInit,
 } from "./authStorage";
 
 export async function apiFetch(
@@ -10,6 +11,8 @@ export async function apiFetch(
   init: RequestInit = {},
   allowRefresh = true,
 ): Promise<Response> {
+  await waitForAuthInit();
+
   const headers = new Headers(init.headers);
   const session = getStoredSession();
   if (session?.token) headers.set("Authorization", `Bearer ${session.token}`);

@@ -9,7 +9,7 @@ import styles from "./UserSearch.module.css";
 type UserSearchProps = {
   currentUserId: number;
   followedUsers: FollowedUser[];
-  onFollow: (username: string, userId: number) => void | Promise<void>;
+  onFollow: (username: string, userId: number) => unknown;
   onOpenProfile: (user: UsuarioBusqueda) => void;
 };
 
