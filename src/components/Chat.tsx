@@ -348,7 +348,7 @@ export default function Chat({
       </div>
     </div>
   ) : fullPage ? (
-    <div className="chat-conversation" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className="chat-conversation chat-conversation-empty">
       <p style={{ color: "var(--muted)", fontSize: "14px", textAlign: "center", padding: "24px" }}>
         Seleccioná una conversación para comenzar a chatear.
       </p>

@@ -18,6 +18,7 @@
 .chat-titlebar strong { flex:1; font-size:14px; }
 .chat-titlebar .icon-button { color:inherit; width:30px; height:30px; }
 .chat-content { display:flex; min-height:0; }
+.chat-conversation-empty { display:flex; align-items:center; justify-content:center; }
 .chat-page .chat-window { width:100%; max-width:none; flex:1; min-height:0; display:flex; flex-direction:column; }
 .chat-page .chat-titlebar,.chat-page .chat-demo-note,.chat-page .chat-conversation>header,.chat-page .chat-composer { flex-shrink:0; }
 .chat-page .chat-content { flex:1; min-height:0; }

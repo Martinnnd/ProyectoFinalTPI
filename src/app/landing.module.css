@@ -1260,3 +1260,37 @@
 .temporalMapSection .mapMessage, .temporalMapSection .pin, .temporalMapSection .ring { transition: background-color 900ms,border-color 900ms,box-shadow 900ms,color 900ms; }
 @media(max-width:560px) { .temporalMapSection .pin { width:42px; height:42px; font-size:10px; } }
 @media(prefers-reduced-motion:reduce) { .temporalMapSection .mapMessage, .temporalMapSection .pin, .temporalMapSection .ring { transition:none; } }
+
+@media(max-width:560px) {
+ .navigation { width:calc(100% - 40px); height:auto; min-height:120px; display:flex; flex-direction:column; align-items:stretch; gap:16px; padding:calc(18px + env(safe-area-inset-top,0px)) 0 16px; }
+ .brand { justify-content:center; }
+ .headerLogo { width:32px; }
+ .navActions { width:100%; min-width:0; flex-wrap:nowrap; justify-content:center; gap:10px; }
+ .navLink,.navSecondary { display:inline-flex; flex:1; align-items:center; justify-content:center; min-height:44px; padding:10px 12px; font-size:12px; letter-spacing:0; text-transform:none; white-space:nowrap; border-radius:10px; box-shadow:none; }
+ .navSecondary { border:1px solid color-mix(in srgb,var(--green) 30%,transparent); }
+ .brandName { font-size:clamp(1.5rem,7vw,2rem); }
+ .eraHero .hero { min-height:calc(100svh - 140px); padding:64px 0 80px; align-items:flex-start; }
+ .eraHero .heroCopy { width:100%; display:grid; grid-template-rows:60px calc(47vw - 30px) calc(47vw - 30px) auto; align-items:center; }
+ .eraHero .heroCopy>.eyebrow { margin:0 auto; width:76%; align-self:start; padding-top:clamp(44px,12vw,64px); font-size:10px; line-height:1.6; letter-spacing:1.3px; }
+ .eraHero .heroTitle,.eraHero .heroTagline { margin:0; }
+ .eraDial { width:94vw; top:calc(64px + 47vw); }
+ .heroTitle { font-size:clamp(3rem,15vw,5rem); }
+ /* Keep the actions in their own row, below the dial and its outer glow. */
+ .eraHero .actions { position:relative; z-index:2; gap:20px; width:min(82%,290px); margin:56px auto 0; }
+ .eraHero .primaryAction,.eraHero .secondaryAction { display:flex; align-items:center; min-height:44px; justify-content:center; width:100%; box-sizing:border-box; padding:10px 16px; border-radius:12px; font-size:13px; font-weight:700; letter-spacing:0; text-transform:none; }
+ .eraHero .primaryAction { border:1px solid color-mix(in srgb,var(--green) 65%,var(--paper)); box-shadow:inset 0 1px 0 #ffffff30,0 5px 16px #0002; gap:16px; }
+ .eraHero .secondaryAction { color:var(--green); background:color-mix(in srgb,var(--green) 7%,transparent); border:1px solid color-mix(in srgb,var(--green) 30%,transparent); }
+ .eraHero .actions a:focus-visible { outline:2px solid var(--green); outline-offset:4px; }
+ .eraHero[data-era="1990"] .actions a { border-radius:0; }
+ .dialInfo { bottom:24px; max-width:90%; }
+ .temporalMapSection { padding:60px 20px; gap:32px; }
+ .temporalMapSection .memoryMap { width:min(100%,350px); margin-inline:auto; }
+ .temporalMapSection .mapSectionCopy h2 { font-size:clamp(2rem,9vw,2.6rem); }
+ .decadeGrid { grid-template-columns:minmax(0,1fr); gap:16px; }
+ .decadeCard { min-width:0; }
+ .story { padding:60px 0; }
+ .story p:not(.eyebrow),.mapSectionCopy p,.finalCall p { font-size:16px; line-height:1.75; }
+ .story h2,.finalCall h2 { font-size:clamp(2rem,9vw,2.6rem); line-height:1.15; }
+ .finalCall { padding:64px 24px; }
+ .footer { padding-bottom:env(safe-area-inset-bottom,0px); }
+}

@@ -4,7 +4,7 @@ import SongPicker from './SongPicker';
 import { Disc3, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import type { PlayerFrameProps } from '../contracts';
 
-export default function PlayerFrame({ decade, expanded, track, failed, onError, onPrevious, onNext, label, pickerTitle, tracks, onSelect, children }: PlayerFrameProps) {
+export default function PlayerFrame({ decade, expanded, onToggle, track, failed, onError, onPrevious, onNext, label, pickerTitle, tracks, onSelect, children }: PlayerFrameProps) {
   const [playing, setPlaying] = useState(false);
   const [changing, setChanging] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -52,6 +52,7 @@ export default function PlayerFrame({ decade, expanded, track, failed, onError, 
   function select(index: number) { onSelect(index); animate(); }
   return <section className={`music-card device-${decade} ${expanded ? 'player-visible' : 'player-hidden'} ${changing ? 'device-changing' : ''} ${dragging ? 'device-dragging' : ''} ${playing ? 'device-playing' : ''}`} aria-label="Música de la época" id="music-player" onDragStart={() => setDragging(true)} onDragEnd={() => setDragging(false)}>
     <span className="device-change-status" role="status">{changing ? 'Tema cargado · animación de cambio' : ''}</span>
+    <div className="mobile-player-heading"><strong>Música de la época</strong><button type="button" onClick={onToggle} aria-label="Minimizar reproductor">Minimizar</button></div>
     <audio ref={audio} key={track.audioSrc} hidden preload="metadata" src={track.audioSrc} autoPlay={playing} onPlay={() => setPlaying(true)} onPause={event => { if (audio.current === event.currentTarget) setPlaying(false); }} onEnded={() => { setPlaying(true); onNext(); }} onError={() => { setPlaying(false); onError(); }}/>
     {failed && <p className="music-playback-error" role="alert">No se pudo reproducir este tema. Probá otra canción.</p>}
     <div className="device-body" onDragOver={event => { if (event.dataTransfer.types.includes('application/x-nostalgia-track')) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; } }} onDrop={event => {

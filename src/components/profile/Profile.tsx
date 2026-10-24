@@ -195,7 +195,7 @@ export default function Profile({
           onCloseTiers={closeTiers}
         />
       </div>
-      {community && <aside className="profile-groups" aria-label="Mis grupos">{community}</aside>}
+      {community && <aside className="profile-groups" aria-label="Mis grupos"><details className="profile-groups-disclosure"><summary>Mis grupos y comunidades</summary>{community}</details></aside>}
     </main>
   );
 }

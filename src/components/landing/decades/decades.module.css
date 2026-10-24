@@ -884,3 +884,15 @@
   .atmosphereLayer[data-era-scene="2000"] .monitorChin b { left: 0; transform: none; font-size: 8px; }
   .atmosphereLayer[data-era-scene="2000"] .monitorControls { gap: 7px; }
 }
+
+@media(max-width:560px) {
+ .decades { min-height:0; padding:76px 44px 88px; }
+ .sectionHeading { margin-bottom:28px; gap:18px; align-items:flex-start; }
+ .eyebrow { font-size:10px; line-height:1.7; letter-spacing:1.4px; }
+ .sectionHeading h2 { font-size:clamp(1.6rem,6.5vw,2.1rem); line-height:1.25; text-wrap:balance; }
+ .decadeGrid { display:flex; gap:18px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-inline:0; padding:8px 0 18px; scrollbar-width:thin; }
+ .decadeCard { flex:0 0 100%; min-width:0; min-height:280px; scroll-snap-align:start; opacity:1; }
+ .decadeCard:focus-visible { outline-offset:-4px; }
+ .cardBody { padding:20px 16px; }
+ .decadeNumber { font-size:5rem; }
+}

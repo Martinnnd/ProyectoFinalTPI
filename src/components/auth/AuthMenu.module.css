@@ -62,7 +62,7 @@
   background: color-mix(in srgb, #a63f2f 10%, transparent) !important;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 899px) {
   .slot {
     flex: 1;
     min-width: 0;
@@ -75,8 +75,10 @@
   }
 
   .menu {
-    right: 4px;
-    bottom: 62px;
+    position:fixed;
+    right: 12px;
+    bottom: calc(74px + env(safe-area-inset-bottom,0px));
     left: auto;
+    max-width:calc(100vw - 24px);
   }
 }

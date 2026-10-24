@@ -31,8 +31,8 @@ export function animateHero({ mobile }: HeroAnimationOptions) {
       "-=0.42",
     )
     .from(
-      "[data-hero-actions] > *",
-      { autoAlpha: 0, y: 18, duration: 0.5, stagger: 0.11 },
+      mobile ? "[data-hero-actions]" : "[data-hero-actions] > *",
+      { autoAlpha: 0, y: 18, duration: 0.5, stagger: mobile ? 0 : 0.11 },
       "-=0.35",
     )
     .from(

@@ -8,7 +8,7 @@ import { filterCommunity } from "./groups";
 import { createGroup as createRemoteGroup, createGroupMemory, getGroupMemories, getGroups, joinGroup as joinRemoteGroup, type CreateGroupInput, type GroupMember } from "./groupsApi";
 import type { CommunityGroup } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, ChevronDown, CircleCheck } from "lucide-react";
+import { Compass, Plus, X, Newspaper, UserRound, MessageCircle, SlidersHorizontal, CircleCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   categories,
@@ -651,6 +651,7 @@ export default function App() {
       return;
     }
     if (destination === "stories") storiesButton.current = document.activeElement as HTMLElement | null;
+    if (window.innerWidth < 900) setMusicOpen(false);
     setView("map");
     setPanelOpen(destination === "stories" && (view !== "map" || !panelOpen));
     setFactsOpen(destination === "facts" && (view !== "map" || !factsOpen));
@@ -686,7 +687,7 @@ export default function App() {
       }/>
       <div className="mobile-appbar">
         <div className="mobile-page-title"><span>Nostalgiar</span><strong>{view === 'map' ? 'Explorar' : view === 'feed' ? 'Feed' : view === 'chat' ? 'Chat' : 'Mi perfil'}</strong></div>
-        <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir opciones"><strong>Opciones</strong><ChevronDown size={15}/></button>
+        <button ref={mobileOptionsTrigger} className="mobile-era-button" onClick={() => mobileOptions.current?.showModal()} aria-label="Abrir opciones" title="Opciones"><SlidersHorizontal size={20}/></button>
         <button className="mobile-add-button" aria-label="Sumar mi recuerdo" onClick={startAdding} disabled={picking || !!draft}><Plus size={23}/></button>
       </div>
       <dialog ref={mobileOptions} className="mobile-options" onClick={e=>{if(e.target===e.currentTarget)mobileOptions.current?.close();}} onClose={()=>mobileOptionsTrigger.current?.focus()} aria-labelledby="mobile-options-title">

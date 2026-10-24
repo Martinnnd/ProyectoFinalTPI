@@ -16,8 +16,10 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
   async function load(more: boolean, controller: AbortController) {
     if (!feed) return;
     busy.current = true; setLoading(true); setError('');
+    const deadline = new AbortController();
+    const timeout = window.setTimeout(() => deadline.abort(), 20000);
     try {
-      const page = await getFeed(feed, more ? cursor ?? undefined : undefined, controller.signal);
+      const page = await getFeed(feed, more ? cursor ?? undefined : undefined, AbortSignal.any([controller.signal, deadline.signal]));
       if (controller.signal.aborted) return;
       if (more && page.hayMas && page.siguienteCursor && (page.siguienteCursor === cursor || loadedCursors.current.has(page.siguienteCursor))) {
         throw new Error('No pudimos continuar la lista de recuerdos. Volvé a intentar.');
@@ -32,16 +34,21 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
       setCursor(page.siguienteCursor); setHayMas(page.hayMas); setExpired(false);
     } catch (err) {
       if (controller.signal.aborted) return;
+      if (deadline.signal.aborted) {
+        setError('El servidor está tardando demasiado en cargar los recuerdos. Volvé a intentar.');
+        return;
+      }
       const gone = err instanceof FeedError && err.status === 410;
       setExpired(gone);
       setError(gone ? 'Esta selección de Para vos venció. Recargá para ver nuevas recomendaciones.' : (err as Error).message);
       if (gone) { setCursor(null); setHayMas(false); }
     } finally {
+      window.clearTimeout(timeout);
       if (!controller.signal.aborted) { busy.current = false; setLoading(false); }
     }
   }
   useEffect(() => {
-    if (!active || !feed) return;
+    if (!active || !feed) { setLoading(false); return; }
     const controller = new AbortController(); request.current = controller;
     loadedCursors.current.clear();
     setItems([]); setCursor(null); setHayMas(false); setExpired(false);
