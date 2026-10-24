@@ -1,10 +1,12 @@
 "use client";
+
 import dynamic from "next/dynamic";
-// Leaflet and the existing interactive experience require browser APIs.
-const App = dynamic(() => import("../App"), {
+
+const ExploreView = dynamic(() => import("./map/ExploreView"), {
   ssr: false,
-  loading: () => <p role="status">Cargando Nostalgia…</p>,
+  loading: () => <p role="status">Cargando mapa…</p>,
 });
+
 export default function NostalgiaClient() {
-  return <App />;
+  return <ExploreView />;
 }

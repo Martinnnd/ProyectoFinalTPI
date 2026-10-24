@@ -4,6 +4,31 @@ export const AUTH_STORAGE_KEY = "nostalgia_auth";
 export const AUTH_CHANGE_EVENT = "nostalgiar:auth-change";
 
 let memorySession: AuthSession | null = null;
+let authInitPromise: Promise<void> | null = null;
+let resolveAuthInit: (() => void) | null = null;
+
+export function beginAuthInit(): void {
+  if (!authInitPromise) {
+    authInitPromise = new Promise<void>((resolve) => {
+      resolveAuthInit = resolve;
+    });
+  }
+}
+
+export function completeAuthInit(): void {
+  if (resolveAuthInit) {
+    resolveAuthInit();
+    resolveAuthInit = null;
+  }
+}
+
+export function waitForAuthInit(): Promise<void> {
+  if (!authInitPromise) return Promise.resolve();
+  return Promise.race([
+    authInitPromise,
+    new Promise<void>((resolve) => setTimeout(resolve, 8000)),
+  ]);
+}
 
 export function tokenExpiresAt(token: string): number | null {
   try {
@@ -26,6 +51,7 @@ export function getStoredSession(): AuthSession | null {
 
 export function storeSession(session: AuthSession): void {
   memorySession = session;
+  completeAuthInit();
   if (typeof window !== "undefined") {
     // Limpia el formato anterior: ningún token queda persistido al recargar.
     window.localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -35,8 +61,10 @@ export function storeSession(session: AuthSession): void {
 
 export function clearStoredSession(): void {
   memorySession = null;
+  completeAuthInit();
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(AUTH_STORAGE_KEY);
     window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
   }
 }
+

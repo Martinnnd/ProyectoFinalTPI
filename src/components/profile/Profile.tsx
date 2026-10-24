@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { describeTiers, resolveAchievements, resolveUserCategory } from "../../data";
-import type { Achievement, Memory, Period, TierProgress } from "../../types";
+import type { Achievement, Memory, Period, TierProgress, UserCategory } from "../../types";
 import type { FollowedUser } from "../../seguimientosApi";
 import ProfileDialogs from "./ProfileDialogs";
 import ProfileHeader from "./ProfileHeader";
@@ -18,6 +18,7 @@ const presentations: Record<Period["decade"], ProfilePresentation> = {
 };
 
 export default function Profile({
+  userId,
   onEdit,
   onDelete,
   username,
@@ -46,6 +47,7 @@ export default function Profile({
   onFollow,
   onToggleFollow,
 }: {
+  userId?: number;
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
   username: string;
@@ -88,8 +90,31 @@ export default function Profile({
   const presentation = presentations[period.decade];
   const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
-  const userCategory = reputation ?? resolveUserCategory(tierProgress);
-  const tiers = useMemo(() => describeTiers(tierProgress), [tierProgress]);
+
+  const effectiveProgress: TierProgress = useMemo(
+    () => ({
+      memories: Math.max(tierProgress?.memories ?? 0, allMemories.length),
+      points: Math.max(
+        tierProgress?.points ?? 0,
+        allMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0),
+      ),
+      subscribed: Boolean(tierProgress?.subscribed),
+    }),
+    [tierProgress, allMemories],
+  );
+
+  const tierOrder: Record<string, number> = {
+    Errante: 0,
+    "Nostálgico": 1,
+    Aedo: 2,
+    Mnemosine: 3,
+  };
+  const calculatedCategory = resolveUserCategory(effectiveProgress);
+  const userCategory =
+    reputation && (tierOrder[reputation] ?? -1) > (tierOrder[calculatedCategory] ?? 0)
+      ? (reputation as UserCategory)
+      : calculatedCategory;
+  const tiers = useMemo(() => describeTiers(effectiveProgress), [effectiveProgress]);
 
   useEffect(() => () => clearTimeout(mapCloseTimer.current), []);
 
@@ -137,6 +162,7 @@ export default function Profile({
     <main id="explore" className="personal-profile" data-visitor={!!author} aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}>
       <div className="profile-main">
         <ProfileHeader
+          userId={userId}
           author={author}
           username={username}
           presentation={presentation}

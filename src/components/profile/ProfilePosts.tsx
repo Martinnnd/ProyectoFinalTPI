@@ -1,5 +1,5 @@
-import { Link2, MapPin, Repeat2, Send, Share2 } from "lucide-react";
-import { forwardRef, useState } from "react";
+import { MapPin, Repeat2 } from "lucide-react";
+import { forwardRef } from "react";
 import type { Memory } from "../../types";
 import MemoryOwnerActions from "../MemoryOwnerActions";
 import PostMedia, { PostMusic } from "../PostMedia";
@@ -27,8 +27,6 @@ const ProfilePosts = forwardRef<HTMLElement, {
   onSelectOnMap,
   onAdd,
 }, ref) {
-  const [shareOpen, setShareOpen] = useState<string | null>(null);
-  const [copiedShare, setCopiedShare] = useState<string | null>(null);
   const displayName = author ?? username;
 
   return (
@@ -64,37 +62,6 @@ const ProfilePosts = forwardRef<HTMLElement, {
                   </span>
                 </div>
                 <MemoryOwnerActions memory={memory} onEdit={onEdit} onDelete={onDelete} />
-                <div className="share-menu">
-                  <button
-                    className="icon-button"
-                    aria-label={`Compartir ${memory.title}`}
-                    aria-expanded={shareOpen === memory.id}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setShareOpen((open) => open === memory.id ? null : memory.id);
-                    }}
-                  >
-                    <Share2 size={18} />
-                  </button>
-                  {shareOpen === memory.id && (
-                    <div className="share-menu-panel" role="menu" onClick={(event) => event.stopPropagation()}>
-                      <span>Compartir recuerdo</span>
-                      <a><Send size={15} /> WhatsApp</a>
-                      <a target="_blank" rel="noreferrer"><Link2 size={15} /> Facebook</a>
-                      <a target="_blank" rel="noreferrer"><span aria-hidden="true">𝕏</span> X</a>
-                      <button
-                        onClick={async (event) => {
-                          event.stopPropagation();
-                          await navigator.clipboard.writeText(window.location.href);
-                          setCopiedShare(memory.id);
-                        }}
-                      >
-                        <Link2 size={15} />
-                        {copiedShare === memory.id ? "Enlace copiado" : "Copiar enlace"}
-                      </button>
-                    </div>
-                  )}
-                </div>
               </div>
               <div className="profile-post-body">
                 <h3>{memory.title}</h3>

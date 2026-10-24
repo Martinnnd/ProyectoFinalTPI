@@ -844,6 +844,7 @@ export default function App() {
       )}
       {view === "profile" && session && (
         <Profile
+          userId={profileUser?.id}
           onEdit={editMemory}
           onDelete={deleteMemory}
           onOpen={openPublication}
