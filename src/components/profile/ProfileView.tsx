@@ -78,7 +78,16 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
     );
   }
 
-  const isFollowing = followingUsers.some((u) => u.id === profileUser.id);
+  const isFollowing = profileUser
+    ? Boolean(
+        profileUser.loSigo ||
+        followingUsers.some(
+          (u) =>
+            u.id === profileUser.id ||
+            u.username.toLowerCase() === profileUser.username.toLowerCase()
+        )
+      )
+    : false;
 
   const tierProgress: TierProgress = {
     memories: profileUser.cantidadPublicaciones ?? profileMemories.length,
@@ -90,8 +99,29 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
     ...(profileMemories.length > 0 ? [achievements[0]] : []),
   ];
 
+  const handleToggleFollow = async () => {
+    if (!profileUser) return;
+    const currentlyFollowing = isFollowing;
+    const ok = await toggleFollow(profileUser.username, profileUser.id, currentlyFollowing);
+    if (ok) {
+      setProfileUser((curr) =>
+        curr
+          ? {
+              ...curr,
+              loSigo: !currentlyFollowing,
+              cantidadSeguidores: Math.max(
+                0,
+                curr.cantidadSeguidores + (currentlyFollowing ? -1 : 1)
+              ),
+            }
+          : curr
+      );
+    }
+  };
+
   return (
     <Profile
+      userId={profileUser.id}
       onEdit={() => {}}
       onDelete={() => {}}
       username={session?.username ?? profileUser.username}
@@ -113,13 +143,7 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
       onOpen={(m) => router.push(`/recuerdo/${m.id}`)}
       onAdd={() => router.push("/explorar?action=recordar")}
       onIniciarChat={(user) => router.push(`/chat?con=${user}`)}
-      onToggleFollow={
-        !isOwnProfile
-          ? async () => {
-              await toggleFollow(profileUser.username, profileUser.id);
-            }
-          : undefined
-      }
+      onToggleFollow={!isOwnProfile ? handleToggleFollow : undefined}
     />
   );
 }

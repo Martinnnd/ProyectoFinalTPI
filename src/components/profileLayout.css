@@ -60,9 +60,16 @@
 .profile-follow-dialog::backdrop { background:#0008; }
 .profile-follow-dialog > header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); }
 .profile-follow-dialog h2 { margin:0; font:700 20px var(--font-display); }
-.profile-follow-dialog ul { list-style:none; padding:0 18px; margin:0; }
-.profile-follow-dialog li { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--line); font-size:14px; }
-.profile-follow-dialog li > span { display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:var(--soft); color:var(--accent); }
+.profile-follow-dialog ul { list-style:none; padding:0 18px; margin:0; max-height:calc(70dvh - 65px); overflow-y:auto; }
+.profile-follow-dialog li { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14px; }
+.profile-follow-dialog li:last-child { border-bottom:none; }
+.profile-follow-dialog .profile-follow-loading { display:flex; align-items:center; justify-content:center; gap:10px; padding:32px; color:var(--ink-muted, inherit); font-size:14px; }
+.profile-follow-dialog li > span,
+.profile-follow-user-link > span { display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:var(--soft); color:var(--accent); font-weight:700; flex-shrink:0; }
+.profile-follow-user-link { display:flex; align-items:center; gap:12px; flex:1; min-width:0; background:none; border:none; padding:0; color:inherit; font:inherit; cursor:pointer; text-align:left; }
+.profile-follow-user-link:hover strong { color:var(--accent); text-decoration:underline; }
+.profile-follow-user-link strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.profile-follow-dialog .profile-item-follow-btn { flex-shrink:0; font-size:12px; padding:5px 12px; }
 .profile-follow-dialog > p { padding:20px; margin:0; font-size:14px; }
 .app.view-profile .profile-follow-lists { grid-column:2; justify-content:flex-start; gap:16px; margin:0; padding:0; font-size:11px; }
 .app.view-profile .profile-follow-lists details { min-width:0; }

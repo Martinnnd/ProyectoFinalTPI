@@ -1,12 +1,16 @@
-import { MessageCircle, UserMinus, UserPlus, UserRound, X } from "lucide-react";
+import { LoaderCircle, MessageCircle, UserMinus, UserPlus, UserRound, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../auth/AuthProvider";
+import { useFollow } from "../../context/FollowContext";
+import { getSeguidores, getSeguidos, type FollowedUser } from "../../seguimientosApi";
 import type { Achievement, Period } from "../../types";
-import type { FollowedUser } from "../../seguimientosApi";
 import type { ProfilePresentation } from "./profileTypes";
 
 type FollowList = "followers" | "following";
 
 export default function ProfileHeader({
+  userId,
   author,
   username,
   presentation,
@@ -28,6 +32,7 @@ export default function ProfileHeader({
   onIniciarChat,
   onToggleFollow,
 }: {
+  userId?: number;
   author?: string;
   username: string;
   presentation: ProfilePresentation;
@@ -49,20 +54,48 @@ export default function ProfileHeader({
   onIniciarChat?: (username: string) => void;
   onToggleFollow?: () => void | Promise<void>;
 }) {
+  const router = useRouter();
+  const { session } = useAuth();
+  const { isFollowing: checkIsFollowing, toggleFollow } = useFollow();
+
   const followDialog = useRef<HTMLDialogElement>(null);
   const [followList, setFollowList] = useState<FollowList>("followers");
   const [followBusy, setFollowBusy] = useState(false);
+  const [fetchedUsers, setFetchedUsers] = useState<FollowedUser[] | null>(null);
+  const [loadingList, setLoadingList] = useState(false);
+  const [pendingUserIds, setPendingUserIds] = useState<Set<number>>(new Set());
+
   const isOwnProfile = !author;
   const displayName = author ?? username;
   const totalFollowers = followerCount ?? followers.length;
   const totalFollowed = followingCount ?? followedUsers.length;
 
-  function openFollowList(list: FollowList) {
+  async function openFollowList(list: FollowList) {
     setFollowList(list);
+    setFetchedUsers(null);
     followDialog.current?.showModal();
+    const targetUserId = userId ?? (isOwnProfile ? session?.usuarioId : undefined);
+    if (targetUserId) {
+      setLoadingList(true);
+      try {
+        const users = list === "followers"
+          ? await getSeguidores(targetUserId)
+          : await getSeguidos(targetUserId);
+        setFetchedUsers(users);
+      } catch (err) {
+        console.error("Error al cargar lista de seguimiento", err);
+        setFetchedUsers([]);
+      } finally {
+        setLoadingList(false);
+      }
+    } else {
+      setFetchedUsers(list === "followers" ? followers : followedUsers);
+    }
   }
 
-  const visibleUsers = followList === "followers" ? followers : followedUsers;
+  const visibleUsers = fetchedUsers !== null
+    ? fetchedUsers
+    : (followList === "followers" ? followers : followedUsers);
 
   return (
     <>
@@ -100,21 +133,12 @@ export default function ProfileHeader({
             </div>
             <div className="personal-counts">
               <span><strong>{memoryCount}</strong> Recuerdos</span>
-              {isOwnProfile ? (
-                <>
-                  <button type="button" aria-haspopup="dialog" onClick={() => openFollowList("followers")}>
-                    <strong>{totalFollowers}</strong> Seguidores
-                  </button>
-                  <button type="button" aria-haspopup="dialog" onClick={() => openFollowList("following")}>
-                    <strong>{totalFollowed}</strong> Seguidos
-                  </button>
-                </>
-              ) : (
-                <>
-                  <span><strong>{totalFollowers}</strong> Seguidores</span>
-                  <span><strong>{totalFollowed}</strong> Seguidos</span>
-                </>
-              )}
+              <button type="button" aria-haspopup="dialog" onClick={() => openFollowList("followers")}>
+                <strong>{totalFollowers}</strong> Seguidores
+              </button>
+              <button type="button" aria-haspopup="dialog" onClick={() => openFollowList("following")}>
+                <strong>{totalFollowed}</strong> Seguidos
+              </button>
             </div>
           </div>
           {!isOwnProfile && (onIniciarChat || onToggleFollow) && (
@@ -181,17 +205,72 @@ export default function ProfileHeader({
             <X size={20} />
           </button>
         </header>
-        {visibleUsers.length ? (
+        {loadingList ? (
+          <div className="profile-follow-loading">
+            <LoaderCircle size={20} className="animate-spin" />
+            <span>Cargando lista…</span>
+          </div>
+        ) : visibleUsers.length ? (
           <ul>
-            {visibleUsers.map((user) => (
-              <li key={user.id}>
-                <span aria-hidden="true">{user.username.slice(0, 1).toUpperCase()}</span>
-                <strong>{user.username}</strong>
-              </li>
-            ))}
+            {visibleUsers.map((user) => {
+              const isMe =
+                (session?.usuarioId && user.id === session.usuarioId) ||
+                (session?.username && user.username.toLowerCase() === session.username.toLowerCase());
+              const followingUser = checkIsFollowing(user.id) || checkIsFollowing(user.username);
+              const isPending = pendingUserIds.has(user.id);
+
+              return (
+                <li key={user.id}>
+                  <button
+                    type="button"
+                    className="profile-follow-user-link"
+                    onClick={() => {
+                      followDialog.current?.close();
+                      if (isMe) {
+                        router.push("/perfil");
+                      } else {
+                        router.push(`/perfil/${encodeURIComponent(user.username)}`);
+                      }
+                    }}
+                  >
+                    <span aria-hidden="true">{user.username.slice(0, 1).toUpperCase()}</span>
+                    <strong>{user.username}</strong>
+                  </button>
+                  {!isMe && (
+                    <button
+                      type="button"
+                      className={followingUser ? "secondary-button profile-item-follow-btn" : "primary-button profile-item-follow-btn"}
+                      disabled={isPending}
+                      onClick={async () => {
+                        setPendingUserIds((prev) => new Set(prev).add(user.id));
+                        try {
+                          await toggleFollow(user.username, user.id, followingUser);
+                        } finally {
+                          setPendingUserIds((prev) => {
+                            const next = new Set(prev);
+                            next.delete(user.id);
+                            return next;
+                          });
+                        }
+                      }}
+                    >
+                      {isPending ? "…" : followingUser ? "Dejar de seguir" : "Seguir"}
+                    </button>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
-          <p>{followList === "followers" ? "Todavía no tenés seguidores." : "Todavía no seguís a nadie."}</p>
+          <p>
+            {followList === "followers"
+              ? isOwnProfile
+                ? "Todavía no tenés seguidores."
+                : "Este usuario todavía no tiene seguidores."
+              : isOwnProfile
+              ? "Todavía no seguís a nadie."
+              : "Este usuario todavía no sigue a nadie."}
+          </p>
         )}
       </dialog>
     </>

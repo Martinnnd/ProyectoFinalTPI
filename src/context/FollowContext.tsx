@@ -1,22 +1,28 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../components/auth/AuthProvider";
+import { useRatings } from "./RatingsContext";
 import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from "../seguimientosApi";
 
 interface FollowContextType {
   followingUsers: FollowedUser[];
   followers: FollowedUser[];
   followingRevision: number;
-  toggleFollow: (author: string, authorId?: number) => Promise<void>;
+  toggleFollow: (author: string, authorId?: number, currentlyFollowing?: boolean) => Promise<boolean>;
+  isFollowing: (userIdOrUsername: number | string) => boolean;
   refreshFollows: () => void;
 }
 
 const FollowContext = createContext<FollowContextType | undefined>(undefined);
 
 export function FollowProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const { session } = useAuth();
+  const { setNotice } = useRatings();
   const currentUserId = session?.usuarioId;
+
   const [followingUsers, setFollowingUsers] = useState<FollowedUser[]>([]);
   const [followers, setFollowers] = useState<FollowedUser[]>([]);
   const [followingRevision, setFollowingRevision] = useState(0);
@@ -47,27 +53,80 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
     return () => controller.abort();
   }, [currentUserId, followingRevision]);
 
-  const toggleFollow = useCallback(
-    async (author: string, authorId?: number) => {
-      if (!currentUserId || !authorId) return;
-      if (authorId === currentUserId || pendingFollows.current.has(authorId)) return;
+  const isFollowing = useCallback(
+    (target: number | string) => {
+      if (typeof target === "number") {
+        return followingUsers.some((u) => u.id === target);
+      }
+      return followingUsers.some((u) => u.username.toLowerCase() === target.toLowerCase());
+    },
+    [followingUsers]
+  );
 
-      const wasFollowing = followingUsers.some((u) => u.id === authorId);
-      pendingFollows.current.add(authorId);
+  const toggleFollow = useCallback(
+    async (author: string, authorId?: number, currentlyFollowing?: boolean): Promise<boolean> => {
+      if (!currentUserId) {
+        if (typeof window !== "undefined") {
+          router.push(`/auth/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
+        }
+        setNotice("Debés iniciar sesión para seguir a otros usuarios.");
+        return false;
+      }
+
+      let targetId = authorId ?? followingUsers.find((u) => u.username.toLowerCase() === author.toLowerCase())?.id;
+      if (!targetId) {
+        try {
+          const { obtenerUsuarioPorUsername } = await import("../chat/chatApi");
+          const u = await obtenerUsuarioPorUsername(author);
+          targetId = u.usuarioId;
+        } catch {
+          // Si no se encuentra
+        }
+      }
+
+      if (!targetId) {
+        setNotice(`No se puede seguir a ${author}: falta su identificador de usuario.`);
+        return false;
+      }
+
+      if (targetId === currentUserId) {
+        setNotice("No podés seguirte a vos mismo.");
+        return false;
+      }
+
+      if (pendingFollows.current.has(targetId)) return false;
+      pendingFollows.current.add(targetId);
+
+      const wasFollowing =
+        currentlyFollowing !== undefined
+          ? currentlyFollowing
+          : followingUsers.some((u) => u.id === targetId || u.username.toLowerCase() === author.toLowerCase());
+
       try {
         if (wasFollowing) {
-          await dejarDeSeguir(currentUserId, authorId);
-          setFollowingUsers((curr) => curr.filter((u) => u.id !== authorId));
+          await dejarDeSeguir(currentUserId, targetId);
+          setFollowingUsers((curr) =>
+            curr.filter((u) => u.id !== targetId && u.username.toLowerCase() !== author.toLowerCase())
+          );
+          setNotice(`Dejaste de seguir a ${author}.`);
         } else {
-          await seguir(currentUserId, authorId);
-          setFollowingUsers((curr) => [...curr, { id: authorId, username: author }]);
+          await seguir(currentUserId, targetId);
+          setFollowingUsers((curr) => [
+            ...curr.filter((u) => u.id !== targetId && u.username.toLowerCase() !== author.toLowerCase()),
+            { id: targetId, username: author },
+          ]);
+          setNotice(`Ahora seguís a ${author}.`);
         }
         setFollowingRevision((r) => r + 1);
+        return true;
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "No se pudo actualizar el seguimiento.");
+        return false;
       } finally {
-        pendingFollows.current.delete(authorId);
+        pendingFollows.current.delete(targetId);
       }
     },
-    [currentUserId, followingUsers]
+    [currentUserId, followingUsers, router, setNotice]
   );
 
   return (
@@ -77,6 +136,7 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
         followers,
         followingRevision,
         toggleFollow,
+        isFollowing,
         refreshFollows,
       }}
     >
@@ -92,3 +152,4 @@ export function useFollow() {
   }
   return context;
 }
+

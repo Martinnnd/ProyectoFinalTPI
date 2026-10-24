@@ -47,8 +47,8 @@ src/app/
 
 ### A. Contextos y Estado Global (Nuevos)
 * **`src/context/EraContext.tsx`**: Administra la década actual (`period.decade`), el año histórico, los tokens CSS de la época (`eraThemes`) y el estado del reproductor de música retro (`musicOpen`, `factsOpen`, `panelOpen`).
-* **`src/context/FollowContext.tsx`**: Desacopla la lógica de seguimiento de usuarios (`followingUsers`, `followers`, `toggleFollow`). Permite que tanto el buscador del navbar, el feed y los perfiles compartan el estado de seguimiento sin duplicar peticiones.
-* **`src/context/RatingsContext.tsx`**: Provee el estado de puntuación de recuerdos (`ratings`, `pointsMap`, `rateMemory`) accesible tanto en el feed como en la vista individual del recuerdo.
+* **`src/context/FollowContext.tsx`**: Desacopla la lógica de seguimiento de usuarios (`followingUsers`, `followers`, `toggleFollow`, `isFollowing`). Resuelve dinámicamente el `authorId` en caso de que un post no lo incluya en memoria, redirige al login si el usuario no está autenticado, previene el auto-seguimiento, sincroniza el estado de `loSigo` y los contadores de seguidores en los perfiles, y emite notificaciones toast en caso de éxito o error.
+* **`src/context/RatingsContext.tsx`**: Provee el estado de puntuación de recuerdos (`ratings`, `pointsMap`, `rateMemory`, `notice`, `setNotice`) accesible tanto en el feed como en la vista individual del recuerdo y el shell general.
 
 ### B. Layout Compartido y Vistas Desacopladas (Nuevos)
 * **`src/components/layout/AppShell.tsx`**: Contenedor maestro que preserva la estructura visual original:
@@ -93,9 +93,13 @@ src/app/
    * Podés copiar la URL del navegador y compartirla.
    * Cuenta con un botón *"Ver en el mapa"* que te lleva a `/explorar?recuerdo=[id]`.
    * Al hacer clic en recuerdos relacionados del carrusel, navega fluidamente a `/recuerdo/[otroId]`.
-4. **Desde un Perfil (`/perfil/[username]`):**
+4. **Desde los Perfiles (`/perfil` y `/perfil/[username]`):**
    * Botón *"Iniciar chat"* navega a `/chat?con=[username]`, abriendo la conversación directamente.
-   * Botón *"Seguir / Dejar de seguir"* sincroniza en tiempo real el contador y la lista de seguidos.
+   * Botón *"Seguir / Dejar de seguir"* en el encabezado sincroniza en tiempo real el contador y la lista de seguidos.
+   * Clic en los contadores *"Seguidores"* o *"Seguidos"* abre el diálogo modal con la lista de usuarios correspondiente (consultada a la API para el perfil activo).
+   * En el diálogo de seguidores/seguidos:
+     * Cada usuario incluye un enlace interactivo para navegar a su perfil (`/perfil/[username]` o `/perfil`).
+     * Cada usuario (excepto el propio usuario conectado) cuenta con un botón directo *"Seguir / Dejar de seguir"* al costado que actualiza el estado en tiempo real.
 
 ---
 

@@ -377,10 +377,12 @@ export default function SocialFeed({
                 active={active}
                 quotedMemory={quotedMemory}
                 selected={selected?.id === memory.id}
-                following={following.includes(
-                  memory.repost && !memory.repost.comment && memory.repost.author
+                following={following.some((name) =>
+                  name.toLowerCase() ===
+                  (memory.repost && !memory.repost.comment && memory.repost.author
                     ? memory.repost.author
                     : memory.author
+                  ).toLowerCase()
                 )}
                 liked={interactions.isLiked(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
                 commentMemoryId={publicationId(targetMemory) ? rootId : undefined}

@@ -18,6 +18,7 @@ const presentations: Record<Period["decade"], ProfilePresentation> = {
 };
 
 export default function Profile({
+  userId,
   onEdit,
   onDelete,
   username,
@@ -42,6 +43,7 @@ export default function Profile({
   onIniciarChat,
   onToggleFollow,
 }: {
+  userId?: number;
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
   username: string;
@@ -129,6 +131,7 @@ export default function Profile({
     <main id="explore" className="personal-profile" data-visitor={!!author} aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}>
       <div className="profile-main">
         <ProfileHeader
+          userId={userId}
           author={author}
           username={username}
           presentation={presentation}

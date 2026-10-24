@@ -54,7 +54,9 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
     return () => controller.abort();
   }, [id]);
 
-  const isFollowing = memory ? followingUsers.some((u) => u.username === memory.author) : false;
+  const isFollowing = memory
+    ? followingUsers.some((u) => u.username.toLowerCase() === memory.author.toLowerCase())
+    : false;
 
   return (
     <div className="social-feed" style={{ maxWidth: "780px", margin: "0 auto", padding: "16px" }}>

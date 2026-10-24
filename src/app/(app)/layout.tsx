@@ -33,11 +33,11 @@ export const metadata: Metadata = {
 export default function MainAppLayout({ children }: { children: React.ReactNode }) {
   return (
     <EraProvider>
-      <FollowProvider>
-        <RatingsProvider>
+      <RatingsProvider>
+        <FollowProvider>
           <AppShell>{children}</AppShell>
-        </RatingsProvider>
-      </FollowProvider>
+        </FollowProvider>
+      </RatingsProvider>
     </EraProvider>
   );
 }
