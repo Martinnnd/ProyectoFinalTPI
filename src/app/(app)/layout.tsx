@@ -21,12 +21,24 @@ import "../../components/profileLayout.css";
 import "../../components/chatTaskbar.css";
 import "../../eras/70s/tvViews.css";
 
+import { EraProvider } from "../../context/EraContext";
+import { FollowProvider } from "../../context/FollowContext";
+import { RatingsProvider } from "../../context/RatingsContext";
+import AppShell from "../../components/layout/AppShell";
+
 export const metadata: Metadata = {
-  title: "Explorar | Nostalgiar",
+  title: "Nostalgiar",
+  description: "Historias, lugares y música de nuestras épocas",
 };
 
-export default function ExploreLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
-  return children;
+export default function MainAppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <EraProvider>
+      <RatingsProvider>
+        <FollowProvider>
+          <AppShell>{children}</AppShell>
+        </FollowProvider>
+      </RatingsProvider>
+    </EraProvider>
+  );
 }

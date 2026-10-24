@@ -17,6 +17,7 @@ export default function FeedPost({
   selected,
   following,
   liked,
+  likeCount,
   commentMemoryId,
   rating,
   canRate,
@@ -41,6 +42,7 @@ export default function FeedPost({
   selected: boolean;
   following: boolean;
   liked: boolean;
+  likeCount?: number;
   commentMemoryId?: string;
   rating?: number;
   canRate: boolean;
@@ -255,12 +257,15 @@ export default function FeedPost({
         value={rating}
         totalPoints={memory.points ?? 0}
         canRate={canRate}
+        isOwn={isHeaderAuthorOwn}
         onRate={onRate}
       />
       <PostActions
         memoryTitle={memory.title}
+        memoryId={memory.id}
+        memoryYear={memory.year}
         liked={liked}
-        likeCount={memory.likeCount}
+        likeCount={likeCount ?? memory.likeCount}
         commentCount={commentCount}
         reposted={reposted}
         saved={saved}
