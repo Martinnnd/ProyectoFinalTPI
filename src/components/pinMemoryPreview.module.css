@@ -11,10 +11,33 @@
 .section button:focus-visible, .track:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .stack { display: flex; flex-direction: column; gap: 18px; width: 230px; max-width: 55vw; color: var(--ink); font-family: var(--font-body); }
 .card { position: relative; box-sizing: border-box; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
-:global(.app) .card button.close { position: absolute; top: 2px; right: 3px; width: 24px; height: 24px; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; font-size: 18px; cursor: pointer; }
-.section.floating { display: flex; align-items: center; gap: 5px; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+:global(.app) .stack .card button.close { position:absolute; z-index:2; top:8px; right:8px; display:grid; place-items:center; width:22px; height:22px; margin:0; padding:0; border:2px solid var(--ink); border-radius:var(--radius); background:var(--surface); color:var(--ink); box-shadow:0 2px 8px #0006; cursor:pointer; }
+:global(.app) .stack .card button.close:hover { background:var(--soft); }
+:global(.app) .stack .card button.close:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+.close svg { display:block; width:11px; height:11px; }
+.section.floating { width:390px; max-width:calc(100vw - 116px); align-self:center; display: flex; align-items: center; gap: 5px; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
 .floating .track { min-width: 0; flex: 1; padding: 3px; scrollbar-width: none; touch-action: pan-y; scroll-snap-type: none; cursor: grab; user-select: none; }
 .floating .track::-webkit-scrollbar { display: none; }
 .floating .track:active { cursor: grabbing; }
 :global(.app) .floating .track .item { cursor: inherit; box-shadow: var(--shadow); }
 :global(.app) .section.floating .arrow { flex: 0 0 24px; width: 24px; height: 30px; margin: 0; padding: 0; border-radius: var(--radius); font-size: 22px; line-height: 1; box-shadow: var(--shadow); }
+.floating .track { position:relative; display:block; height:224px; overflow:hidden; container-type:inline-size; perspective:500px; isolation:isolate; }
+:global(.app) .floating .track .item { position:absolute; box-sizing:border-box; left:50%; top:80px; width:clamp(64px, 29cqw, 100px); height:136px; overflow:hidden; transform:translateX(-50%) translateX(calc(var(--carousel-x) * 35cqw)) translateY(calc(var(--carousel-y) * 1px)) scale(var(--carousel-scale)) rotateY(calc(var(--carousel-turn) * 1deg)); border-radius:var(--carousel-curve-left) var(--carousel-curve-right) var(--carousel-curve-right) var(--carousel-curve-left) / 15%; filter:blur(var(--carousel-blur, 0px)); transition:transform 480ms ease, border-radius 480ms ease, filter 480ms ease; opacity:1; }
+:global(.app) .floating .track .item[data-active="true"] { opacity:1; }
+:global(.app) .floating .track .item[aria-hidden="true"] { opacity:0; pointer-events:none; }
+.floating .item img, .floating .placeholder { width:100%; height:68px; flex-shrink:0; }
+.floating .item span:not(.placeholder) { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.floating .item time {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 2px 7px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: .04em;
+}
+@media (prefers-reduced-motion:reduce) { :global(.app) .floating .track .item { transition:none; } }

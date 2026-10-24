@@ -1,4 +1,4 @@
-import { MessageCircle, UserRound, X } from "lucide-react";
+import { MessageCircle, UserMinus, UserPlus, UserRound, X } from "lucide-react";
 import { useRef, useState } from "react";
 import type { Achievement, Period } from "../../types";
 import type { FollowedUser } from "../../seguimientosApi";
@@ -16,6 +16,7 @@ export default function ProfileHeader({
   followedUsers,
   followerCount,
   followingCount,
+  isFollowing = false,
   userCategory,
   unlocked,
   achievementCount,
@@ -29,6 +30,7 @@ export default function ProfileHeader({
   onIniciarChat,
   onNavigateToProfile,
   onToggleFollow,
+  onToggleFollowUser,
 }: {
   author?: string;
   username: string;
@@ -39,6 +41,7 @@ export default function ProfileHeader({
   followedUsers: FollowedUser[];
   followerCount?: number;
   followingCount?: number;
+  isFollowing?: boolean;
   userCategory: string;
   unlocked: Achievement[];
   achievementCount: number;
@@ -51,10 +54,12 @@ export default function ProfileHeader({
   onOpenTiers: () => void;
   onIniciarChat?: (username: string) => void;
   onNavigateToProfile?: (username: string) => void;
-  onToggleFollow?: (author: string, authorId: number) => void;
+  onToggleFollow?: () => void | Promise<void>;
+  onToggleFollowUser?: (author: string, authorId: number) => void;
 }) {
   const followDialog = useRef<HTMLDialogElement>(null);
   const [followList, setFollowList] = useState<FollowList>("followers");
+  const [followBusy, setFollowBusy] = useState(false);
   const isOwnProfile = !author;
   const displayName = author ?? username;
   const totalFollowers = isOwnProfile ? followers.length : (followerCount ?? followers.length);
@@ -111,14 +116,23 @@ export default function ProfileHeader({
               </button>
             </div>
           </div>
-          {!isOwnProfile && onIniciarChat && (
-            <button
-              className="secondary-button"
-              onClick={() => onIniciarChat(author!)}
-              style={{ display: "flex", alignItems: "center", gap: "6px", alignSelf: "flex-start", marginTop: "8px" }}
-            >
-              <MessageCircle size={14} /> Iniciar chat
-            </button>
+          {!isOwnProfile && (onIniciarChat || onToggleFollow) && (
+            <div className="profile-visitor-actions">
+              {onIniciarChat && <button className="secondary-button" onClick={() => onIniciarChat(author!)}>
+                <MessageCircle size={14} /> Iniciar chat
+              </button>}
+              {onToggleFollow && <button
+                className={isFollowing ? "secondary-button profile-unfollow-button" : "primary-button profile-follow-button"}
+                disabled={followBusy}
+                onClick={async () => {
+                  setFollowBusy(true);
+                  try { await onToggleFollow(); } finally { setFollowBusy(false); }
+                }}
+              >
+                {isFollowing ? <UserMinus size={14} /> : <UserPlus size={14} />}
+                {followBusy ? "Actualizando…" : isFollowing ? "Dejar de seguir" : "Seguir"}
+              </button>}
+            </div>
           )}
           {isOwnProfile && (
             <div className="achievements">
@@ -189,12 +203,12 @@ export default function ProfileHeader({
                     <span aria-hidden="true">{user.username.slice(0, 1).toUpperCase()}</span>
                     <strong>{user.username}</strong>
                   </button>
-                  {!isSelf && currentUserId != null && onToggleFollow && (
+                  {!isSelf && currentUserId != null && onToggleFollowUser && (
                     <button
                       type="button"
                       className="follow-button"
                       aria-pressed={isFollowing}
-                      onClick={() => onToggleFollow(user.username, user.id)}
+                      onClick={() => onToggleFollowUser(user.username, user.id)}
                     >
                       {isFollowing ? "Siguiendo" : "Seguir"}
                     </button>

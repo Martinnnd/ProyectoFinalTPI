@@ -25,6 +25,10 @@
 }
 .app.view-profile .profile-portrait { width:76px; height:82px; align-self:start; }
 .app.view-profile .personal-identity { gap:16px; align-items:start; }
+.app.view-profile .profile-visitor-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px; }
+.app.view-profile .profile-visitor-actions button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:38px; white-space:nowrap; }
+.app.view-profile .profile-visitor-actions button:disabled { cursor:wait; opacity:.65; }
+.app.view-profile .profile-unfollow-button { color:var(--accent); border-color:var(--accent); }
 .app.view-profile .personal-identity-text { flex:1 1 180px; display:flex; flex-direction:column; min-height:82px; gap:12px; }
 .app.view-profile .profile-name-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px 12px; }
 .app.view-profile .personal-identity h2 { font-size:24px; margin:0; padding:0; background:transparent; color:var(--ink); }
@@ -84,6 +88,7 @@
   .app.view-profile .profile-portrait { width:54px; height:62px; }
   .app.view-profile .personal-identity-text { min-height:62px; }
   .app.view-profile .personal-identity h2 { font-size:21px; }
+  .app.view-profile .profile-visitor-actions { flex-basis:100%; margin-top:0; }
   .app.view-profile .personal-counts { grid-column:1 / -1; gap:8px 14px; }
   .app.view-profile .profile-follow-lists { grid-column:1 / -1; }
   .app.view-profile .profile-motto { display:none; }

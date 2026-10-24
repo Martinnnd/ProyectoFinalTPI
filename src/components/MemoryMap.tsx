@@ -45,6 +45,7 @@ function icon(memory?: Memory, selected = false) {
 }
 
 function MapActions({
+  active,
   picking,
   onPick,
   selected,
@@ -53,6 +54,7 @@ function MapActions({
   searchTarget,
   onBoundsChange,
 }: {
+  active?: boolean;
   picking: boolean;
   onPick: (p: Point) => void;
   selected: Memory | null;
@@ -82,6 +84,7 @@ function MapActions({
     return () => observer.disconnect();
   }, [map]);
   const selectedRef = useRef(selected);
+  const focusedPin = useRef<string | null>(null);
   selectedRef.current = selected;
   useEffect(() => {
     const fit = () => {
@@ -98,11 +101,16 @@ function MapActions({
     return () => observer.disconnect();
   }, [reset, map, fitPoints]);
   useEffect(() => {
+    if (active === false) return;
+    if (!selected) { focusedPin.current = null; return; }
+    const locationKey = `${selected.id}:${selected.lat}:${selected.lng}`;
+    if (focusedPin.current === locationKey) return;
+    focusedPin.current = locationKey;
     if (selected)
       map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
         animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
       });
-  }, [selected, map]);
+  }, [selected, active, map]);
   useEffect(() => {
     if (searchTarget) map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
       animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .8,
@@ -141,6 +149,7 @@ function MapActions({
   return null;
 }
 export default function MemoryMap({
+  active,
   showEmptyState = true,
   showRelations = true,
   onBoundsChange,
@@ -151,6 +160,7 @@ export default function MemoryMap({
   selected,
   onSelect,
   onSelectRelated,
+  onClosePreview,
   onMoment,
   onOpen,
   picking,
@@ -169,6 +179,7 @@ export default function MemoryMap({
   selected: Memory | null;
   onSelect: (m: Memory) => void;
   onSelectRelated?: (m: Memory) => void;
+  onClosePreview?: () => void;
   onMoment?: (id: number, memory: Memory) => void;
   onOpen?: (m: Memory) => void;
   picking: boolean;
@@ -232,6 +243,7 @@ export default function MemoryMap({
             }}
           />
           <MapActions
+            active={active}
             onBoundsChange={onBoundsChange}
             picking={picking}
             onPick={onPick}
@@ -271,6 +283,7 @@ export default function MemoryMap({
                 <PinMemoryPreview
                   memory={selected}
                   showRelations={showRelations}
+                  onClose={onClosePreview}
                   onSelect={onSelectRelated ?? onSelect}
                   onOpen={onOpen}
                   onMoment={onMoment ? id => onMoment(id, selected) : undefined}
@@ -298,7 +311,7 @@ export default function MemoryMap({
         </button>
         {picking && (
           <div className="map-notice picking" role="status">
-            <MapPin size={19} />
+            <MapPin size={22} aria-hidden="true" />
             <span>Elegí un lugar en el mapa para tu recuerdo.</span>
             <button onClick={onCancel}>Cancelar</button>
           </div>

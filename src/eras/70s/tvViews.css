@@ -23,7 +23,7 @@
   box-shadow:0 0 0 2px #a3a18f,0 0 0 5px #352e25,inset 0 0 18px #333c3025,0 7px 14px #0006;
   color:#202820;
 }
-.app.era-1970.view-feed .social-stream { --paper-turn:0; padding:16px 20px 24px; }
+.app.era-1970.view-feed .social-stream { --paper-turn:0; padding:0 20px 24px; }
 .app.era-1970.view-feed .feed-heading { padding:10px 0; border:0; border-bottom:1px solid #8b9282; }
 .app.era-1970.view-feed .feed-heading::before { content:none; }
 .app.era-1970.view-feed .feed-heading h2 { font:700 23px 'Courier New',monospace; letter-spacing:0; }
@@ -93,7 +93,7 @@
 @media(max-width:899px) {
   .app.era-1970.view-chat .chat-page { top:var(--mobile-top); }
   .app.era-1970.view-profile .profile-main { padding:8px; }
-  .app.era-1970.view-feed .social-stream { padding:12px; }
+  .app.era-1970.view-feed .social-stream { padding:0 12px 12px; }
   .app.era-1970.view-feed .social-stream,.app.era-1970.view-profile .profile-main,.app.era-1970 .chat-window { border-width:4px; border-radius:16px; }
 }
 

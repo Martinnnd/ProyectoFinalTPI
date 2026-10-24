@@ -1,5 +1,6 @@
 import PinMemoryPreview from './PinMemoryPreview';
 import { createPortal } from 'react-dom';
+import { MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -82,11 +83,15 @@ export default function MapboxMap(
   optionsRef.current = options;
   const [previewContent, setPreviewContent] = useState<HTMLElement | null>(null);
   const previewPopup = useRef<mapboxgl.Popup | null>(null);
+  const focusedPin = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
   const [controls, setControls] = useState(false);
   useEffect(() => {
     if (!container.current) return;
+    setReady(false);
+    setError(null);
     if (!mapboxgl.supported()) {
       latest.current.onFallback();
       return;
@@ -96,7 +101,7 @@ export default function MapboxMap(
       map = new mapboxgl.Map({
         container: container.current,
         accessToken: props.token,
-        style: "mapbox://styles/mapbox/standard",
+        style: `mapbox://styles/mapbox/${optionsRef.current.satellite ? "standard-satellite" : "standard"}`,
         projection: "globe",
         ...(savedCamera ?? responsiveOverview()),
         minZoom: 0.5,
@@ -119,7 +124,7 @@ export default function MapboxMap(
     map.on('moveend', reportBounds);
     let loaded = false;
     const timeout = window.setTimeout(() => {
-      if (!loaded) setError(true);
+      if (!loaded) setError("El mapa está tardando en cargar. Podés reintentar o usar el mapa 2D.");
     }, 20000);
     map.on("style.load", () => {
       styleReady.current = true;
@@ -127,7 +132,21 @@ export default function MapboxMap(
     });
     map.on("webglcontextlost", () => latest.current.onFallback());
     
-    map.on("error", () => setError(true));
+    let resourceFailed = false;
+    map.on("error", (event) => {
+      resourceFailed = true;
+      const status = (event.error as Error & { status?: number }).status;
+      setError(status === 401 || status === 403
+        ? "Mapbox rechazó el acceso al mapa. Revisá el token y sus dominios permitidos."
+        : status === 429
+          ? "Mapbox alcanzó su límite de solicitudes. Esperá un momento antes de reintentar."
+          : "No se pudieron cargar algunos recursos del mapa. Reintentá la carga; si persiste, revisá la conexión o los bloqueadores del navegador.");
+    });
+    map.on("idle", () => {
+      // An idle map may still contain failed tiles. Only clear a slow-load
+      // warning when this instance has not reported a resource failure.
+      if (!resourceFailed) setError(null);
+    });
     map.on("load", () => {
       loaded = true;
       clearTimeout(timeout);
@@ -200,7 +219,7 @@ export default function MapboxMap(
       instance.current = null;
       styleReady.current = false;
     };
-  }, [props.token]);
+  }, [props.token, reload]);
   useEffect(() => {
     if (props.active === false) instance.current?.stop();
   }, [props.active]);
@@ -219,6 +238,12 @@ export default function MapboxMap(
       !props.locationResolved ||
       initialLocationApplied.current
     ) {
+      return;
+    }
+
+    if (props.selected) {
+      introSeen = true;
+      initialLocationApplied.current = true;
       return;
     }
 
@@ -269,7 +294,7 @@ export default function MapboxMap(
         essential: true,
       });
     }
-  }, [props.locationResolved, props.userLocation, props.active, ready]);
+  }, [props.locationResolved, props.userLocation, props.active, props.selected?.id, ready]);
   useEffect(() => {
     const map = instance.current;
     if (!map) return;
@@ -322,15 +347,20 @@ export default function MapboxMap(
           .addTo(map),
       );
     return () => markers.forEach((marker) => marker.remove());
-  }, [props.memories, props.selected?.id, props.draft, ready]);
+  }, [props.memories, props.selected?.id, props.selected?.lat, props.selected?.lng, props.draft, ready]);
   useEffect(() => {
-    if (ready && props.selected)
+    if (!ready || props.active === false) return;
+    if (!props.selected) { focusedPin.current = null; return; }
+    const locationKey = `${props.selected.id}:${props.selected.lat}:${props.selected.lng}`;
+    if (focusedPin.current === locationKey) return;
+    focusedPin.current = locationKey;
+    if (props.selected)
       instance.current?.flyTo({
         center: [props.selected.lng, props.selected.lat],
         zoom: Math.max(instance.current.getZoom(), 14),
         duration: duration(),
       });
-  }, [props.selected?.id, ready]);
+  }, [props.selected?.id, props.selected?.lat, props.selected?.lng, props.active, ready]);
   useEffect(() => {
     const map=instance.current;
     const memory=props.selected;
@@ -361,7 +391,7 @@ export default function MapboxMap(
     optionsRef.current = next;
     setOptions(next);
     styleReady.current = false;
-    setError(false);
+    setError(null);
     instance.current?.setStyle(
       `mapbox://styles/mapbox/${value ? "standard-satellite" : "standard"}`,
     );
@@ -371,7 +401,7 @@ export default function MapboxMap(
       className="map-section mapbox-section"
       aria-label="Globo Mapbox de recuerdos de Argentina"
     >
-      {previewContent && props.selected && createPortal(<PinMemoryPreview key={props.selected.id} memory={props.selected} onSelect={memory => (latest.current.onSelectRelated ?? latest.current.onSelect)(memory)} onOpen={props.onOpen} onMoment={props.onMoment ? id => latest.current.onMoment?.(id, props.selected!) : undefined} onClose={() => { previewPopup.current?.remove(); setPreviewContent(null); }} />, previewContent)}
+      {previewContent && props.selected && createPortal(<PinMemoryPreview key={props.selected.id} memory={props.selected} onSelect={memory => (latest.current.onSelectRelated ?? latest.current.onSelect)(memory)} onOpen={props.onOpen} onMoment={props.onMoment ? id => latest.current.onMoment?.(id, props.selected!) : undefined} onClose={() => { if (latest.current.onClosePreview) latest.current.onClosePreview(); else { previewPopup.current?.remove(); setPreviewContent(null); } }} />, previewContent)}
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
       
       {controls && (
@@ -449,16 +479,17 @@ export default function MapboxMap(
       )}
       {props.picking && (
         <div className="map-notice picking" role="status">
+          <MapPin size={22} aria-hidden="true" />
           <span>Elegí un lugar en el mapa para tu recuerdo.</span>
           <button onClick={props.onCancel}>Cancelar</button>
         </div>
       )}
       {error && (
         <div className="mapbox-status" role="alert">
-          Mapbox no pudo cargar parte del mapa. Revisá la conexión o la
-          configuración del token.
+          {error}
+          <button onClick={() => setReload(value => value + 1)}>Reintentar mapa</button>
           <button onClick={props.onFallback}>Usar mapa 2D</button>
-          <button onClick={() => setError(false)}>Cerrar aviso</button>
+          <button onClick={() => setError(null)}>Cerrar aviso</button>
         </div>
       )}
       {props.showEmptyState !== false && !props.memories.length && !props.picking && (

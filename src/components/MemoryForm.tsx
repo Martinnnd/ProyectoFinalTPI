@@ -1,16 +1,17 @@
 import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../media";
 import { eraRegistry } from "../eras/registry";
-import { parseHashtags } from "../hashtags";
+import { extractHashtags } from "../hashtags";
 import { memoryDateIso } from "../memoryDate";
 import GooglePhotosPicker from "./GooglePhotosPicker";
+import MemoryDatePicker from "./MemoryDatePicker";
+import DiscardDraftDialog from './DiscardDraftDialog';
   import { useEffect, useRef, useState } from "react";
-  import { X, MapPin, Save, Loader2 } from "lucide-react";
+  import { X, Save, Loader2, Upload, Images, Link } from "lucide-react";
   import { categories, type Memory, type Decade } from "../types";
   import type { Point } from "./MemoryMap";
   export default function MemoryForm({
     initial,
     defaultHashtags = [],
-    groupName,
     point,
     decade,
     onCancel,
@@ -25,14 +26,30 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
     onSave: (m: Memory) => string | null | Promise<string | null | void> | void;
   }) {
     const dirty = useRef(false);
+    const [confirmDiscard, setConfirmDiscard] = useState(false);
     function requestClose() {
-      if (dirty.current && !window.confirm("¿Descartar los cambios sin guardar?")) return;
+      if (saving) return;
+      if (dirty.current) { setConfirmDiscard(true); return; }
       onCancel();
     }
     const dialog = useRef<HTMLDialogElement>(null);
-    const titleInput = useRef<HTMLInputElement>(null);
+    const stepHeading = useRef<HTMLHeadingElement>(null);
+    const [step, setStep] = useState(0);
+    const steps = ["Foto o video", "Tu historia", "Lugar y fecha", "Música"];
+    const [description, setDescription] = useState(() => {
+      const text = initial?.description ?? "";
+      const existing = extractHashtags(text).tags;
+      const missing = (initial?.hashtags ?? defaultHashtags).filter(tag => !existing.includes(tag));
+      return [text, missing.map(tag => `#${tag}`).join(" ")].filter(Boolean).join("\n\n");
+    });
+    const detectedHashtags = extractHashtags(description);
     const [mediaKind,setMediaKind]=useState<'image'|'video'|'youtube'>(initial?.media?.kind ?? (youtubeId(initial?.image ?? '') ? 'youtube' : 'image'));
     const [mediaUrl,setMediaUrl]=useState(initial?.media?.url ?? initial?.image ?? '');
+    const [mediaSelected, setMediaSelected] = useState(Boolean(initial?.media?.url ?? initial?.image));
+    const [mediaSource, setMediaSource] = useState<'file' | 'google' | 'link'>(() => {
+      const url = initial?.media?.url ?? initial?.image ?? '';
+      return url && !url.startsWith('data:') ? 'link' : 'file';
+    });
     const [loadingFile,setLoadingFile]=useState(false);
     const [googlePhotosBusy, setGooglePhotosBusy] = useState(false);
     const fileVersion=useRef(0);
@@ -41,13 +58,14 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
     async function readFile(file:File|undefined){
       const version=++fileVersion.current;
       if(!file)return;
+      setLoadingFile(false);
       if(file.size>2*1024*1024){setError('El archivo supera 2 MB. Usá un enlace para archivos más grandes.');return;}
       const kind=file.type.startsWith('image/')?'image':file.type.startsWith('video/')?'video':null;
       if(!kind){setError('Elegí una foto o video compatible.');return;}
       setLoadingFile(true);setError('');
       await new Promise<void>(resolve => {
         const reader=new FileReader();
-        reader.onload=()=>{if(version===fileVersion.current){dirty.current=true;setMediaKind(kind);setMediaUrl(String(reader.result));setLoadingFile(false);}resolve();};
+        reader.onload=()=>{if(version===fileVersion.current){dirty.current=true;setMediaKind(kind);setMediaUrl(String(reader.result));setMediaSelected(true);setLoadingFile(false);}resolve();};
         reader.onerror=()=>{if(version===fileVersion.current){setError('No se pudo leer el archivo.');setLoadingFile(false);}resolve();};
         reader.readAsDataURL(file);
       });
@@ -56,23 +74,47 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
     useEffect(() => {
       const previous = document.activeElement as HTMLElement | null;
       dialog.current?.showModal();
-      titleInput.current?.focus();
+      stepHeading.current?.focus();
       return () => {
         fileVersion.current++;
         previous?.focus();
       };
     }, []);
+    useEffect(() => {
+      stepHeading.current?.focus();
+    }, [step]);
+    function validateStep(form: HTMLFormElement, index: number): boolean {
+      if (index === 0) {
+        if (loadingFile || googlePhotosBusy) { setError("Esperá a que termine de cargar el archivo."); return false; }
+        if (!mediaUrl || (mediaKind === "youtube" ? !youtubeId(mediaUrl) : !safeMediaUrl(mediaUrl, mediaKind))) {
+          setError("Adjuntá una foto, un video o un enlace válido de YouTube para continuar."); return false;
+        }
+      }
+      const fields = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[data-form-step="${index}"] input, [data-form-step="${index}"] textarea, [data-form-step="${index}"] select`);
+      for (const field of fields) {
+        if (!field.checkValidity()) { field.reportValidity(); return false; }
+        if (field.required && !field.value.trim()) { setError("Completá los campos obligatorios."); field.focus(); return false; }
+      }
+      if (index === 1 && detectedHashtags.error) { setError(detectedHashtags.error); return false; }
+      setError("");
+      return true;
+    }
     const [saving, setSaving] = useState(false);
     async function submit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
-      if (saving || googlePhotosBusy) return;
+      if (saving || googlePhotosBusy || loadingFile) return;
+      if (!validateStep(event.currentTarget, step)) return;
+      if (step < steps.length - 1) { setStep(step + 1); return; }
+      for (let index = 0; index < steps.length; index++) {
+        if (!validateStep(event.currentTarget, index)) { setStep(index); return; }
+      }
       const data = new FormData(event.currentTarget);
       const title = String(data.get("title")).trim(),
         place = String(data.get("place")).trim(),
         description = String(data.get("description")).trim();
       const date = String(data.get("date") ?? "");
       const year = Number(date.slice(0, 4));
-      const hashtags = parseHashtags(String(data.get("hashtags") ?? ""));
+      const hashtags = extractHashtags(description);
       if (hashtags.error) { setError(hashtags.error); return; }
       if (
         !title ||
@@ -98,6 +140,7 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
       setSaving(true);
       setError("");
       
+      try {
       const result = await onSave({
         ...initial,
         image: undefined,
@@ -120,8 +163,12 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
         lng: point.lng,
       });
       
-      setSaving(false);
       if (typeof result === "string") setError(result);
+      } catch {
+        setError("No se pudo guardar el recuerdo. Tus datos siguen acá; intentá de nuevo.");
+      } finally {
+        setSaving(false);
+      }
     }
     return (
       <dialog
@@ -146,45 +193,71 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
           </button>
         </div>
         <h2 id="form-title">{initial ? "Editar mi recuerdo" : "¿Qué pasó en este lugar?"}</h2>
-        <p>Publicar en: <strong>{groupName ?? "Recuerdos generales"}</strong></p>
-        <p className="muted">Los pequeños recuerdos también merecen un pin.</p>
-        <div className="coordinate-label">
-          <MapPin size={16} /> Ubicación elegida: {point.lat.toFixed(4)},{" "}
-          {point.lng.toFixed(4)}
-        </div>
-        <form onSubmit={submit} onChange={() => {dirty.current = true;}}>
+        <ol className="memory-form-progress" aria-label="Pasos del recuerdo">
+          {steps.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined}><span aria-hidden="true">{index + 1}</span>{label}</li>)}
+        </ol>
+        <h3 ref={stepHeading} tabIndex={-1} className="memory-form-step-title">Paso {step + 1} de {steps.length}: {steps[step]}{step === 3 ? " · opcional" : ""}</h3>
+        <form noValidate onSubmit={submit} onChangeCapture={() => {dirty.current = true; setError("");}}>
+          <div data-form-step="0" hidden={step !== 0}>
+          <fieldset className="media-fields"><legend>Foto o video · obligatorio</legend>
+            <div className="media-source-selector" role="group" aria-label="Origen del adjunto">
+              <button type="button" aria-pressed={mediaSource === 'file'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('file'); setError(''); }}><Upload size={18} aria-hidden="true" />Archivo</button>
+              <button type="button" aria-pressed={mediaSource === 'google'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('google'); setError(''); }}><Images size={18} aria-hidden="true" />Google Photos</button>
+              <button type="button" aria-pressed={mediaSource === 'link'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('link'); setError(''); }}><Link size={18} aria-hidden="true" />Enlace</button>
+            </div>
+            <div id="media-source-panel" className="media-source-panel" hidden={mediaSelected}>
+              {mediaSource === 'file' && <label>Subir foto o video (hasta 2 MB)<input type="file" disabled={saving || loadingFile} accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/ogg" onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>}
+              {mediaSource === 'google' && <GooglePhotosPicker disabled={saving || loadingFile} onFile={readFile} onBusyChange={setGooglePhotosBusy} />}
+              {mediaSource === 'link' && <>
+                <label>Tipo de adjunto<select disabled={saving} value={mediaKind} onChange={e=>{fileVersion.current++;setLoadingFile(false);setMediaKind(e.target.value as typeof mediaKind);setMediaUrl('');}}><option value="image">Foto</option><option value="video">Video</option><option value="youtube">YouTube</option></select></label>
+                <label>{mediaKind==='youtube'?'Enlace de YouTube':'O pegá un enlace HTTPS al archivo'}<input type="url" disabled={saving} value={mediaUrl.startsWith('data:')?'':mediaUrl} placeholder={mediaKind==='youtube'?'https://www.youtube.com/watch?v=…':'https://…'} onChange={e=>{fileVersion.current++;setLoadingFile(false);const url=e.target.value.trim();setMediaUrl(url);if(youtubeId(url))setMediaKind('youtube');}}/></label>
+                <button type="button" className="secondary-button" onClick={() => {
+                  if (!mediaUrl || (mediaKind === 'youtube' ? !youtubeId(mediaUrl) : !safeMediaUrl(mediaUrl, mediaKind))) { setError('Pegá un enlace válido para adjuntarlo.'); return; }
+                  setError(''); setMediaSelected(true); dirty.current = true;
+                }}>Usar enlace</button>
+              </>}
+            </div>
+            {loadingFile&&<small role="status">Cargando archivo…</small>}
+            {mediaSelected && <div className="memory-attachment-preview">
+              {mediaKind === 'image' && safeMediaUrl(mediaUrl, 'image') && <img className="attachment-preview" src={mediaUrl} alt="Vista previa del adjunto" />}
+              {mediaKind === 'video' && safeMediaUrl(mediaUrl, 'video') && <video src={mediaUrl} controls preload="metadata" aria-label="Vista previa del video" />}
+              {mediaKind === 'youtube' && youtubeId(mediaUrl) && <>
+                <img className="attachment-preview youtube-attachment-thumbnail" src={`https://i.ytimg.com/vi/${youtubeId(mediaUrl)}/hqdefault.jpg`} alt="Miniatura del video de YouTube adjunto" />
+                <span className="youtube-attachment-badge">YouTube</span>
+              </>}
+              <button type="button" className="memory-attachment-remove" aria-label="Quitar adjunto" disabled={googlePhotosBusy || saving} onClick={() => { fileVersion.current++; setLoadingFile(false); setMediaUrl(''); setMediaSelected(false); setError(''); dirty.current=true; }}><X size={20} aria-hidden="true" /></button>
+            </div>}
+            {step === 0 && error && <p className="form-error" role="alert">{error}</p>}
+          </fieldset>
+          </div>
+          <div data-form-step="1" hidden={step !== 1}>
           <label>
             Título del recuerdo
             <input
-              ref={titleInput}
               name="title" defaultValue={initial?.title}
-              autoFocus
               required
               maxLength={90}
               placeholder="Ese verano que no me olvido"
             />
           </label>
-          <div className="form-row">
-            <label>
-              Fecha del recuerdo
-              <input
-                name="date"
-                type="date"
-                required
-                min="1970-01-01"
-                max="2009-12-31"
-                defaultValue={initial?.date ?? ""}
-              />
-            </label>
-            <label>
-              Categoría
-              <select name="category" defaultValue={initial?.category ?? "Personales"}>
-                {categories.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </label>
+          <label>
+            Tu historia
+            <textarea
+              name="description" value={description} onChange={e => setDescription(e.target.value)}
+              aria-describedby="hashtags-help"
+              required
+              minLength={1}
+              maxLength={1800}
+              rows={4}
+              placeholder="Contanos qué hace especial a este recuerdo."
+            />
+          </label>
+          <small id="hashtags-help">Agregá #palabras en tu historia para crear hashtags. Hasta 5, de 32 caracteres cada uno.</small>
+          <div className="memory-form-tags" aria-live="polite">
+            {detectedHashtags.error ? <small className="form-error">{detectedHashtags.error}</small> : detectedHashtags.tags.map(tag => <span key={tag}>#{tag}</span>)}
           </div>
+          </div>
+          <div data-form-step="2" hidden={step !== 2}>
           <label>
             Nombre del lugar
             <input
@@ -194,37 +267,25 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
               placeholder="Una plaza, tu barrio, aquel café…"
             />
           </label>
-          <label>
-            Tu historia
-            <textarea
-              name="description" defaultValue={initial?.description}
-              required
-              minLength={1}
-              maxLength={1800}
-              rows={4}
-              placeholder="Contanos qué hace especial a este recuerdo."
-            />
-          </label>
-          <label>
-            Hashtags · opcional
-            <input name="hashtags" defaultValue={(initial?.hashtags ?? defaultHashtags).map(tag => `#${tag}`).join(" ")}
-              maxLength={500} placeholder="#cassettes #recuerdosdelbarrio" aria-describedby="hashtags-help" />
-            <small id="hashtags-help">Hasta 5 etiquetas separadas por espacios o comas. Compartí un hashtag para sumar tu recuerdo a su hilo.</small>
-          </label>
-          <fieldset className="media-fields"><legend>Foto o video · obligatorio</legend>
-            <label>Tipo de adjunto<select disabled={googlePhotosBusy || saving} value={mediaKind} onChange={e=>{fileVersion.current++;setLoadingFile(false);setMediaKind(e.target.value as typeof mediaKind);setMediaUrl('');}}><option value="image">Foto</option><option value="video">Video</option><option value="youtube">YouTube</option></select></label>
-            {mediaKind!=='youtube'&&<label>Subir archivo (hasta 2 MB)<input type="file" disabled={googlePhotosBusy || saving} accept={mediaKind==='image'?'image/jpeg,image/png,image/webp,image/gif':'video/mp4,video/webm,video/ogg'} onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>}
-            <GooglePhotosPicker disabled={saving || loadingFile} onFile={readFile} onBusyChange={setGooglePhotosBusy} />
-            <label>{mediaKind==='youtube'?'Enlace de YouTube':'O pegá un enlace HTTPS al archivo'}<input type="url" disabled={googlePhotosBusy || saving} value={mediaUrl.startsWith('data:')?'':mediaUrl} placeholder={mediaKind==='youtube'?'https://www.youtube.com/watch?v=…':'https://…'} onChange={e=>{fileVersion.current++;setLoadingFile(false);const url=e.target.value.trim();setMediaUrl(url);if(youtubeId(url))setMediaKind('youtube');}}/></label>
-            {loadingFile&&<small role="status">Cargando archivo…</small>}
-            {mediaUrl.startsWith('data:')&&<small>Archivo adjunto listo.</small>}
-            {mediaKind==='image'&&safeMediaUrl(mediaUrl,'image')&&<img className="attachment-preview" src={mediaUrl} alt="Vista previa del adjunto"/>}
-            {mediaUrl && <button type="button" className="secondary-button" disabled={googlePhotosBusy || saving} onClick={() => { fileVersion.current++; setLoadingFile(false); setMediaUrl(''); dirty.current=true; }}>Quitar adjunto</button>}
-          </fieldset>
+          <div className="form-row">
+            <MemoryDatePicker initialDate={initial?.date} decade={decade} onChange={() => { dirty.current = true; setError(''); }} />
+            <label>
+              Categoría
+              <select name="category" defaultValue={initial?.category ?? "Personales"}>
+                {categories.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          </div>
+          <div data-form-step="3" hidden={step !== 3}>
           <fieldset className="media-fields"><legend>Música de fondo · opcional</legend><label>Elegir canción<select value={musicChoice} onChange={e=>setMusicChoice(e.target.value)}><option value="">Sin música</option>{tracks.map(track=><option key={track.spotifyId} value={track.spotifyId}>{track.title} — {track.artist}</option>)}<option value="custom">Otra canción de Spotify…</option></select></label>
           {musicChoice==='custom'&&<><label>Enlace de Spotify<input name="spotifyUrl" defaultValue={initial?.music ? `https://open.spotify.com/track/${initial.music.spotifyId}` : ""} type="url" required placeholder="https://open.spotify.com/track/…"/></label><label>Tema<input name="songTitle" defaultValue={initial?.music?.title} required maxLength={120}/></label><label>Artista<input name="songArtist" defaultValue={initial?.music?.artist} required maxLength={120}/></label></>}
-          <small>El tema y el artista aparecerán arriba del recuerdo. Tocá Escuchar para reproducir desde Spotify.</small></fieldset>
-          {error && (
+          <small>Este paso es opcional. Podés guardar tu recuerdo sin agregar música.</small></fieldset>
+          </div>
+          {step !== 0 && error && (
             <p className="form-error" role="alert">
               {error}
             </p>
@@ -233,6 +294,7 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
             Revisá tu historia y el adjunto antes de guardar el recuerdo.
           </p>
           <div className="dialog-actions">
+            {step > 0 && <button type="button" className="secondary-button" disabled={saving || loadingFile || googlePhotosBusy} onClick={() => { setError(""); setStep(step - 1); }}>Atrás</button>}
             <button type="button" className="secondary-button" onClick={requestClose} disabled={saving}>
               Cancelar
             </button>
@@ -240,11 +302,12 @@ import GooglePhotosPicker from "./GooglePhotosPicker";
               {saving ? (
                 <><Loader2 size={17} style={{ animation: "device-spin 1s linear infinite" }} /> Guardando...</>
               ) : (
-                <><Save size={17} /> {loadingFile ? "Cargando archivo…" : "Guardar recuerdo"}</>
+                <>{step === steps.length - 1 && <Save size={17} />} {loadingFile ? "Cargando archivo…" : step < steps.length - 1 ? "Continuar" : "Guardar recuerdo"}</>
               )}
             </button>
           </div>
         </form>
+        {confirmDiscard && <DiscardDraftDialog decade={decade} onContinue={() => setConfirmDiscard(false)} onDiscard={onCancel}/>}
       </dialog>
     );
   }

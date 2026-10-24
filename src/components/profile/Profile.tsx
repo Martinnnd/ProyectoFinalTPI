@@ -25,6 +25,7 @@ export default function Profile({
   reputation,
   followerCount,
   followingCount,
+  isFollowing,
   onBack,
   community,
   allMemories,
@@ -43,6 +44,7 @@ export default function Profile({
   onIniciarChat,
   onNavigateToProfile,
   onFollow,
+  onToggleFollow,
 }: {
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
@@ -51,6 +53,7 @@ export default function Profile({
   reputation?: string;
   followerCount?: number;
   followingCount?: number;
+  isFollowing?: boolean;
   onBack?: () => void;
   community?: ReactNode;
   allMemories: Memory[];
@@ -69,6 +72,7 @@ export default function Profile({
   onIniciarChat?: (username: string) => void;
   onNavigateToProfile?: (username: string) => void;
   onFollow?: (author: string, authorId: number) => void;
+  onToggleFollow?: () => void | Promise<void>;
 }) {
   const album = useRef<HTMLElement>(null);
   const mapDialog = useRef<HTMLDialogElement>(null);
@@ -142,6 +146,7 @@ export default function Profile({
           followedUsers={followedUsers}
           followerCount={followerCount}
           followingCount={followingCount}
+          isFollowing={isFollowing}
           userCategory={userCategory}
           unlocked={unlocked}
           achievementCount={catalogue.length}
@@ -154,7 +159,8 @@ export default function Profile({
           currentUserId={currentUserId}
           myFollowingUsers={myFollowingUsers}
           onNavigateToProfile={onNavigateToProfile}
-          onToggleFollow={onFollow}
+          onToggleFollow={onToggleFollow}
+          onToggleFollowUser={onFollow}
         />
         <ProfileShortcuts
           author={author}

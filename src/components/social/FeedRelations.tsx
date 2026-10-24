@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { CalendarDays, MapPin, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '../../apiConfig';
 import { safeMediaUrl } from '../../media';
-import { getMemoryRelations, getRelatedMapMemory, getRelatedMemories, type MemoryRelations, type RelatedMemory, type RelatedPage } from '../../recuerdosRelationsApi';
+import { getFeedPlacePage, getMemoryRelations, getRelatedMapMemory, getRelatedMemories, type MemoryRelations, type RelatedMemory, type RelatedPage } from '../../recuerdosRelationsApi';
 import { getMoment, getMomentPublications } from '../../momentosApi';
 import type { Publication } from '../../publicationsApi';
 import type { Memory } from '../../types';
@@ -22,7 +22,7 @@ export default function FeedRelations({ id, onOpen, active = true }: { id: strin
     const observer = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting)) { setVisible(true); observer.disconnect(); }
     }, { rootMargin: '150px' });
-    observer.observe(container.current);
+    observer.observe(container.current.closest('.feed-post') ?? container.current);
     return () => observer.disconnect();
   }, [active, visible]);
   return <div ref={container}>{active && visible && <FeedRelationsContent id={id} onOpen={onOpen} />}</div>;
@@ -39,7 +39,12 @@ function FeedRelationsContent({ id, onOpen }: { id: string; onOpen: (memory: Mem
   useEffect(() => {
     const controller = new AbortController();
     setRelations(null); setError(''); setSelection(null);
-    getMemoryRelations(id, controller.signal).then(result => { if (!controller.signal.aborted) setRelations(result); })
+    getMemoryRelations(id, controller.signal).then(async result => {
+      if (controller.signal.aborted) return;
+      setRelations({ ...result, lugar: { ...result.lugar, items: result.lugar.items.filter(item => !item.mismoDia) } });
+      const lugar = await getFeedPlacePage(String(result.publicacionId), result.lugar, controller.signal);
+      if (!controller.signal.aborted) setRelations(current => current ? { ...current, lugar } : current);
+    })
       .catch(() => { if (!controller.signal.aborted) setError('No pudimos cargar los recuerdos relacionados.'); });
     return () => controller.abort();
   }, [id, revision]);
@@ -109,7 +114,9 @@ function FeedRelationPanel({ selection, originId, initialPage, panelId, onClose,
     try {
       const result = selection.type === 'momento'
         ? await getMomentPublications(canonical!, true, cursor, controller.signal)
-        : await getRelatedMemories(String(originId), selection.type, cursor, controller.signal);
+        : selection.type === 'lugar'
+          ? await getFeedPlacePage(String(originId), await getRelatedMemories(String(originId), 'lugar', cursor, controller.signal), controller.signal)
+          : await getRelatedMemories(String(originId), 'dia', cursor, controller.signal);
       if (!controller.signal.aborted) {
         const added = selection.type === 'momento' ? (result.items as Publication[]).filter(item => item.id !== originId).map(momentCard) : (result.items as RelatedMemory[]).map(geographicCard);
         setCards(current => [...new Map([...current, ...added].map(item => [item.id, item])).values()]); setCursor(result.siguienteCursor);

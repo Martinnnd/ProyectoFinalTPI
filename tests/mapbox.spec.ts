@@ -1,4 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function openOwnProfile(page: Page) {
+  await page.getByRole("button", { name: "Abrir menú de usuario", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Perfil", exact: true }).click();
+}
 
 // These tests use the real Mapbox provider and the production build.
 // Build with a valid public token before running; no vendor responses are mocked.
@@ -87,13 +92,13 @@ test("crear con teclado en Mapbox, perfil y persistencia", async ({ page }) => {
     .getByRole("button", { name: "Guardar recuerdo", exact: true })
     .click();
   await expect(page.locator(".mapbox-memory-pin")).toHaveCount(8);
-  await page.getByRole("button", { name: "Perfil", exact: true }).click();
+  await openOwnProfile(page);
   await expect(page.locator(".personal-counts dd").first()).toHaveText("1");
   await expect(page.locator(".personal-memory")).toContainText(
     "Mi recuerdo desde Next y Mapbox",
   );
   await page.reload();
-  await page.getByRole("button", { name: "Perfil", exact: true }).click();
+  await openOwnProfile(page);
   await expect(page.locator(".personal-memory")).toContainText(
     "Mi recuerdo desde Next y Mapbox",
   );

@@ -1,4 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;500;600;700&family=VT323&display=swap");
+.era-1980 {
+  --picking-bg: #180e2c;
+  --picking-ink: #f2d9ff;
+  --picking-border: 2px solid #e739c7;
+  --picking-radius: 0px;
+  --picking-shadow: 3px 3px 0 #3af3e580, 0 8px 28px #0008;
+  --picking-highlight: #70fffb;
+  --picking-button-bg: #302044;
+  --picking-button-ink: #70fffb;
+  --picking-button-border: 1px solid #70fffb;
+  --picking-button-radius: 0px;
+  --picking-button-hover: #493354;
+}
 .era-1980 .leaflet-tile-pane {
   filter: invert(0.88) hue-rotate(170deg) saturate(0.45) brightness(0.9);
 }
@@ -390,7 +403,7 @@
   transform: scale(1.12) rotate(-8deg);
   outline-color: #ff6ada;
 }
-.era-1980 :is(input, textarea, select) {
+.era-1980 :is(input, textarea, select, .memory-select-control) {
   border-radius: 0;
   border-color: #86469c;
 }

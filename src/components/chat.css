@@ -54,7 +54,6 @@
 .chat-popup .chat-bubble { font-size:13px; }
 .chat-dock button:focus-visible,.chat-page button:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
 @media(max-width:899px) {
- .app .navigation-rail .rail-profile { margin-top:0; }
  .chat-dock { right:12px; bottom:80px; }
  .chat-launcher { padding:10px 14px; }
  .chat-faces { display:none; }

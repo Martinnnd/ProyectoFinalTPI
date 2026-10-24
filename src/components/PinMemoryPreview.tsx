@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { getMemoryAuthorDisplay } from '../api';
 import { API_BASE_URL } from '../apiConfig';
-import { safeMediaUrl } from '../media';
+import { safeMediaUrl, youtubeId } from '../media';
 import { publicationId } from '../publicationsApi';
-import { getMemoryRelations, getRelatedMapMemory, getRelatedMemories, type MemoryRelations, type RelatedPage } from '../recuerdosRelationsApi';
+import { getFeedPlacePage, getMemoryRelations, getRelatedMapMemory, getRelatedMemories, type MemoryRelations, type RelatedPage } from '../recuerdosRelationsApi';
 import type { Memory } from '../types';
 import { memoryThumbnail } from './memoryThumbnail';
 import styles from './pinMemoryPreview.module.css';
 import PublicationMoments from './PublicationMoments';
+import { X } from 'lucide-react';
 
 export default function PinMemoryPreview({ memory, showRelations = true, onSelect, onOpen, onClose, onMoment }: {
   memory: Memory;
@@ -18,6 +19,7 @@ export default function PinMemoryPreview({ memory, showRelations = true, onSelec
   onMoment?: (id: number) => void;
 }) {
   const id = publicationId(memory);
+  const thumbnail = memoryThumbnail(memory);
   const [relations, setRelations] = useState<MemoryRelations | null>(null);
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
@@ -25,8 +27,9 @@ export default function PinMemoryPreview({ memory, showRelations = true, onSelec
     setRelations(null); setError('');
     if (!id || !showRelations) return;
     const controller = new AbortController();
-    getMemoryRelations(id, controller.signal).then(result => {
-      if (!controller.signal.aborted) setRelations(result);
+    getMemoryRelations(id, controller.signal).then(async result => {
+      const lugar = await getFeedPlacePage(id, result.lugar, controller.signal);
+      if (!controller.signal.aborted) setRelations({ ...result, lugar });
     }).catch(() => {
       if (!controller.signal.aborted) setError('No pudimos cargar los recuerdos relacionados.');
     });
@@ -35,8 +38,8 @@ export default function PinMemoryPreview({ memory, showRelations = true, onSelec
   return <div className={styles.stack}>
     {showRelations && relations && <RelatedCarousel key={`${id}-lugar`} id={id!} tipo="lugar" initialPage={relations.lugar} onSelect={onSelect} />}
     <div className={styles.card}>
-    {onClose && <button className={styles.close} aria-label="Cerrar vista previa" onClick={onClose}>×</button>}
-    {memoryThumbnail(memory) && <img className="pin-preview-photo" src={memoryThumbnail(memory)} alt="" onError={event => { event.currentTarget.hidden = true; }} />}
+    {onClose && <button className={styles.close} aria-label="Cerrar vista previa" onClick={onClose}><X size={11} strokeWidth={2.5} aria-hidden="true" /></button>}
+    {thumbnail && <img key={thumbnail} className="pin-preview-photo" src={thumbnail} alt={youtubeId(memory.media?.url ?? memory.image ?? '') ? 'Miniatura del video de YouTube' : ''} onError={event => { event.currentTarget.hidden = true; }} />}
     <small>{getMemoryAuthorDisplay(memory)} · {memory.year}</small>
     <strong>{memory.title}</strong>
     <p>{memory.description.length > 140 ? `${memory.description.slice(0, 140)}…` : memory.description}</p>
@@ -58,19 +61,7 @@ function RelatedCarousel({ id, tipo, initialPage, onSelect }: { id: string; tipo
   const track = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; scroll: number; pointer: number } | null>(null);
   const dragged = useRef(false);
-  const [scrollable, setScrollable] = useState({ left: false, right: false });
-  function updateScroll() {
-    const element = track.current;
-    if (element) setScrollable({ left: element.scrollLeft > 2, right: element.scrollLeft + element.clientWidth < element.scrollWidth - 2 });
-  }
-  useEffect(() => {
-    const element = track.current;
-    if (!element) return;
-    updateScroll();
-    const observer = new ResizeObserver(updateScroll);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [page]);
+  const [active, setActive] = useState(0);
   useEffect(() => {
     const activeRequests = requests.current;
     return () => { activeRequests.forEach(request => request.abort()); activeRequests.clear(); };
@@ -81,8 +72,9 @@ function RelatedCarousel({ id, tipo, initialPage, onSelect }: { id: string; tipo
     pending.current = true; setBusy(true); setError('');
     const controller = new AbortController(); requests.current.add(controller);
     try {
-      const next = await getRelatedMemories(id, tipo, page.siguienteCursor, controller.signal);
-      if (!controller.signal.aborted) setPage(current => ({ ...next, items: [...new Map([...(current?.items ?? []), ...next.items].map(item => [item.id, item])).values()] }));
+      const response = await getRelatedMemories(id, tipo, page.siguienteCursor, controller.signal);
+      const next = tipo === 'lugar' ? await getFeedPlacePage(id, response, controller.signal) : response;
+      if (!controller.signal.aborted) { setPage(current => ({ ...next, items: [...new Map([...current.items, ...next.items].map(item => [item.id, item])).values()] })); return next; }
     } catch {
       if (!controller.signal.aborted) setError('No pudimos cargar más recuerdos. Podés volver a intentar.');
     } finally {
@@ -105,8 +97,21 @@ function RelatedCarousel({ id, tipo, initialPage, onSelect }: { id: string; tipo
     }
   }
   async function next() {
-    if (!scrollable.right && page.hayMas) await more();
-    requestAnimationFrame(() => track.current?.scrollBy({ left: 92, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
+    if (pending.current) return;
+    if (active === page.items.length - 1 && page.hayMas && page.siguienteCursor) {
+      const loaded = await more();
+      if (loaded) {
+        const combined = [...new Map([...page.items, ...loaded.items].map(item => [item.id, item])).values()].sort((a,b) => new Date(a.fecha).getTime()-new Date(b.fecha).getTime() || a.id-b.id);
+        const target = loaded.items.find(item => !page.items.some(old => old.id === item.id));
+        if (target) setActive(combined.findIndex(item => item.id === target.id));
+        else if (!loaded.hayMas) setActive(0);
+      }
+      return;
+    }
+    setActive(current => (current + 1) % page.items.length);
+  }
+  function previous() {
+    if (!pending.current) setActive(current => (current - 1 + page.items.length) % page.items.length);
   }
   if (!error && !page?.items.length) return null;
 
@@ -116,9 +121,13 @@ function RelatedCarousel({ id, tipo, initialPage, onSelect }: { id: string; tipo
     : page.items;
   return <section className={`${styles.section}${tipo === 'lugar' ? ` ${styles.floating}` : ''}`} aria-label={title}>
     {tipo === 'dia' && <><h3>{title}</h3><small>Misma fecha · a hasta 200 m</small></>}
-    {tipo === 'lugar' && scrollable.left && <button className={styles.arrow} aria-label="Recuerdos anteriores de este lugar" onClick={() => track.current?.scrollBy({ left: -92, behavior: 'smooth' })}>‹</button>}
+    {tipo === 'lugar' && page.items.length > 1 && <button className={styles.arrow} aria-label="Recuerdos anteriores de este lugar" disabled={busy || opening !== null} onClick={previous}>‹</button>}
     {!!page?.items.length && <div ref={track} className={styles.track} role="group" aria-label={tipo === 'dia' ? 'Recuerdos del mismo día' : 'Recuerdos de este lugar'} tabIndex={0}
-      onScroll={updateScroll}
+      onKeyDown={event => {
+        if (tipo !== 'lugar' || !['ArrowLeft','ArrowRight'].includes(event.key)) return;
+        event.preventDefault(); event.stopPropagation();
+        if (event.key === 'ArrowRight') void next(); else previous();
+      }}
       onMouseDown={event => event.stopPropagation()}
       onPointerDown={event => {
         event.stopPropagation();
@@ -136,24 +145,41 @@ function RelatedCarousel({ id, tipo, initialPage, onSelect }: { id: string; tipo
         }
         if (dragged.current) {
           event.preventDefault();
-          event.currentTarget.scrollLeft = drag.current.scroll - delta;
+
         }
       }}
       onPointerUp={event => {
         if (!drag.current) return;
         event.stopPropagation();
         if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+        const delta = event.clientX - drag.current.x;
         drag.current = null;
-        const element = event.currentTarget;
-        if (dragged.current && element.scrollLeft + element.clientWidth >= element.scrollWidth - 2 && page.hayMas) void more();
+        if (dragged.current && Math.abs(delta) > 25) { if (delta < 0) void next(); else previous(); }
       }}
       onPointerCancel={() => { drag.current = null; }}
       onClickCapture={event => { if (dragged.current && event.detail !== 0) { event.preventDefault(); event.stopPropagation(); } }}
       onWheel={event => event.stopPropagation()}>
-      {items.map(item => {
+      {items.map((item, index) => {
+        let offset = (index-active+items.length)%items.length;
+        if (offset > items.length/2) offset -= items.length;
+        // Keep sparse carousels at the front; five cards already fill the ring.
+        const slots = items.length >= 5 ? items.length : items.length === 4 ? 6 : 8;
+        const angle = items.length === 4 && Math.abs(offset) === 2 ? 180 : offset * (360 / slots);
+        const radians = angle * Math.PI / 180;
+        const depth = (1 - Math.cos(radians)) / 2;
+        const rotation = tipo === 'lugar' ? {
+          '--carousel-blur': Math.abs(offset) > 1 ? '2.5px' : '0px',
+          '--carousel-x': Math.sin(radians),
+          '--carousel-y': -depth * 76,
+          '--carousel-scale': 1 - depth * .3,
+          '--carousel-turn': Math.sin(radians) * 42,
+          '--carousel-curve-left': Math.sin(radians) < -.1 ? '12%' : '5%',
+          '--carousel-curve-right': Math.sin(radians) > .1 ? '12%' : '5%',
+          zIndex: Math.round((1 - depth) * 100),
+        } as CSSProperties : undefined;
         const url = item.urlMultimedia ? new URL(item.urlMultimedia, API_BASE_URL).href : '';
         const photo = item.tipoMultimedia === 0 && safeMediaUrl(url, 'image');
-        return <button className={styles.item} key={item.id} draggable={false} onDragStart={event => event.preventDefault()} onClick={() => open(item.id)} disabled={opening !== null || busy} aria-label={`Ver en el mapa: ${item.titulo}`}>
+        return <button className={styles.item} key={item.id} style={rotation} data-active={tipo === 'lugar' ? offset === 0 : undefined} draggable={false} onDragStart={event => event.preventDefault()} onClick={() => open(item.id)} disabled={opening !== null || busy} aria-label={`Ver en el mapa: ${item.titulo}`}>
           {photo ? <img src={url} alt="" draggable={false} loading="lazy" onError={event => { event.currentTarget.hidden = true; }} /> : <span className={styles.placeholder} aria-hidden="true">{item.tipoMultimedia === 1 ? '▶' : '▧'}</span>}
           <span>{item.titulo}</span>
           <time dateTime={item.fecha}>{tipo === 'lugar' ? new Date(item.fecha).getUTCFullYear() : new Date(item.fecha).toLocaleDateString('es-AR', { timeZone: 'UTC' })}</time>
@@ -161,8 +187,9 @@ function RelatedCarousel({ id, tipo, initialPage, onSelect }: { id: string; tipo
       })}
       {tipo === 'dia' && page.hayMas && page.siguienteCursor && <button className={styles.more} onClick={more} disabled={busy || opening !== null}>{busy ? 'Cargando…' : 'Ver más'}</button>}
     </div>}
-    {tipo === 'lugar' && (scrollable.right || (page.hayMas && page.siguienteCursor)) && <button className={styles.arrow} aria-label="Más recuerdos de este lugar" disabled={busy || opening !== null} onClick={next}>{busy ? '…' : '›'}</button>}
+    {tipo === 'lugar' && (items.length > 1 || (page.hayMas && page.siguienteCursor)) && <button className={styles.arrow} aria-label="Más recuerdos de este lugar" disabled={busy || opening !== null} onClick={next}>{busy ? '…' : '›'}</button>}
     {opening !== null && <p role="status">Abriendo recuerdo…</p>}
     {error && <div role="alert"><p>{error}</p></div>}
   </section>;
 }
+

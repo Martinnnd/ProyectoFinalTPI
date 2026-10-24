@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getPerfilUsuario, getPublicacionesUsuario } from './userApi';
+import { buscarUsuarios, getPerfilUsuario, getPublicacionesUsuario } from './userApi';
 import { guardarSesion, cerrarSesion } from './api';
 
 function respond(data: unknown, status = 200) {
@@ -15,6 +15,23 @@ afterEach(() => {
 });
 
 describe('userApi', () => {
+  it('busca usuarios parcialmente y codifica los parámetros', async () => {
+    const fetch = respond([{ id: 2, username: 'lucia' }]);
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(buscarUsuarios('  luci & amigos  ')).resolves.toEqual([{ id: 2, username: 'lucia' }]);
+
+    const url = new URL(fetch.mock.calls[0][0]);
+    expect(url.pathname).toBe('/api/usuario/buscar');
+    expect(Object.fromEntries(url.searchParams)).toEqual({ texto: 'luci & amigos', limite: '10' });
+  });
+
+  it('rechaza una respuesta de búsqueda inválida', async () => {
+    vi.stubGlobal('fetch', respond([{ id: 0, username: '' }]));
+
+    await expect(buscarUsuarios('usuario')).rejects.toThrow('respuesta inválida');
+  });
+
   it('obtiene el perfil del usuario autenticado o buscado', async () => {
     guardarSesion({ usuarioId: 17, token: 'token-test', username: 'nico', email: 'nico@example.com', esAdmin: false });
     const mockPerfil = {

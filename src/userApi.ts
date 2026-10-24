@@ -17,6 +17,36 @@ export interface UsuarioPerfil {
   loSigo: boolean;
 }
 
+export interface UsuarioBusqueda {
+  id: number;
+  username: string;
+}
+
+export async function buscarUsuarios(
+  texto: string,
+  signal?: AbortSignal,
+): Promise<UsuarioBusqueda[]> {
+  const query = new URLSearchParams({ texto: texto.trim(), limite: "10" });
+  const response = await apiFetch(`${API_BASE_URL}/api/usuario/buscar?${query}`, { signal });
+  if (!response.ok) {
+    const problem = await response.json().catch(() => null);
+    throw new Error(
+      problem?.detail ||
+        problem?.title ||
+        `No se pudieron buscar usuarios (${response.status}).`,
+    );
+  }
+  const users: unknown = await response.json();
+  if (!Array.isArray(users)) throw new Error("La búsqueda de usuarios devolvió una respuesta inválida.");
+  return users.map((user) => {
+    const value = user as Partial<UsuarioBusqueda>;
+    if (!Number.isSafeInteger(value.id) || !value.username) {
+      throw new Error("La búsqueda de usuarios devolvió una respuesta inválida.");
+    }
+    return { id: value.id!, username: value.username };
+  });
+}
+
 export async function getPerfilUsuario(
   username: string,
   signal?: AbortSignal,
