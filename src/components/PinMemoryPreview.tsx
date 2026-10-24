@@ -11,8 +11,9 @@ import PublicationMoments from './PublicationMoments';
 import RetroMediaPlaceholder from './RetroMediaPlaceholder';
 import { X } from 'lucide-react';
 
-export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, onMoment }: {
+export default function PinMemoryPreview({ memory, showRelations = true, onSelect, onOpen, onClose, onMoment }: {
   memory: Memory;
+  showRelations?: boolean;
   onSelect: (memory: Memory) => void;
   onOpen?: (memory: Memory) => void;
   onClose?: () => void;
@@ -31,7 +32,7 @@ export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, on
 
   useEffect(() => {
     setRelations(null); setError('');
-    if (!id) return;
+    if (!id || !showRelations) return;
     const controller = new AbortController();
     getMemoryRelations(id, controller.signal).then(async result => {
       const lugar = await getFeedPlacePage(id, result.lugar, controller.signal);
@@ -40,9 +41,9 @@ export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, on
       if (!controller.signal.aborted) setError('No pudimos cargar los recuerdos relacionados.');
     });
     return () => controller.abort();
-  }, [id, revision]);
+  }, [id, revision, showRelations]);
   return <div className={styles.stack}>
-    {relations && <RelatedCarousel key={`${id}-lugar`} id={id!} tipo="lugar" initialPage={relations.lugar} onSelect={onSelect} />}
+    {showRelations && relations && <RelatedCarousel key={`${id}-lugar`} id={id!} tipo="lugar" initialPage={relations.lugar} onSelect={onSelect} />}
     <div className={styles.card}>
     {onClose && <button className={styles.close} aria-label="Cerrar vista previa" onClick={onClose}><X size={11} strokeWidth={2.5} aria-hidden="true" /></button>}
     {thumbnail && !thumbFailed ? (
@@ -66,7 +67,7 @@ export default function PinMemoryPreview({ memory, onSelect, onOpen, onClose, on
     <p>{memory.description.length > 140 ? `${memory.description.slice(0, 140)}…` : memory.description}</p>
     {id && onMoment && <PublicationMoments key={id} id={id} onOpen={onMoment} />}
     {onOpen && <button onClick={() => onOpen(memory)}>Ver publicación →</button>}
-    {relations && <RelatedCarousel key={`${id}-dia`} id={id!} tipo="dia" initialPage={relations.dia} onSelect={onSelect} />}
+    {showRelations && relations && <RelatedCarousel key={`${id}-dia`} id={id!} tipo="dia" initialPage={relations.dia} onSelect={onSelect} />}
     {error && <div role="alert"><p>{error}</p><button onClick={() => setRevision(value => value + 1)}>Reintentar</button></div>}
     </div>
   </div>;

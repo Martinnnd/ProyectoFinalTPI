@@ -77,6 +77,7 @@ export default function ProfileMapDialog({
                   <div className="personal-map">
                     <MemoryMap
                       fitMemories
+                      showRelations={false}
                       memories={memories}
                       selected={selected}
                       onSelect={onSelect}
