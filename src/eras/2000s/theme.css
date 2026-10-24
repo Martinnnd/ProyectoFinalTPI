@@ -454,10 +454,15 @@
   color: #263b50;
   box-shadow: inset 1px 1px #cbd4df;
 }
-.era-2000 .secondary-button {
+.era-2000 :is(.secondary-button, .follow-button[aria-pressed="true"], .profile-item-follow-btn[aria-pressed="true"]) {
   border: 1px solid #7892b4;
   border-radius: 3px;
   background: linear-gradient(white, #e0e8f2);
+  color: #1d3555;
+}
+.era-2000 :is(.secondary-button, .follow-button[aria-pressed="true"], .profile-item-follow-btn[aria-pressed="true"]):hover {
+  background: linear-gradient(#f0f5fc, #d0def0);
+  color: #0f2d52;
 }
 .era-2000 .system-taskbar {
   background: linear-gradient(#428dea, #1963c7 15%, #1f69ce 85%, #1251a7);

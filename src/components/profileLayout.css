@@ -78,6 +78,19 @@
 .profile-follow-user-link strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .profile-follow-dialog .follow-button,
 .profile-follow-dialog .profile-item-follow-btn { flex-shrink:0; font-size:12px; padding:5px 12px; cursor:pointer; }
+.profile-follow-dialog .follow-button[aria-pressed="true"],
+.profile-follow-dialog .profile-item-follow-btn[aria-pressed="true"],
+.profile-follow-dialog .profile-item-follow-btn.secondary-button {
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.profile-follow-dialog .follow-button[aria-pressed="true"]:hover,
+.profile-follow-dialog .profile-item-follow-btn[aria-pressed="true"]:hover,
+.profile-follow-dialog .profile-item-follow-btn.secondary-button:hover {
+  color: var(--accent);
+  background: var(--soft);
+}
 .profile-follow-dialog > p { padding:24px 18px; margin:0; font-size:14px; color:var(--muted); text-align:center; }
 .app.view-profile .profile-follow-lists { grid-column:2; justify-content:flex-start; gap:16px; margin:0; padding:0; font-size:11px; }
 .app.view-profile .profile-follow-lists details { min-width:0; }
@@ -90,6 +103,8 @@
 .app.view-profile .profile-shortcuts button { padding:7px 10px; font-size:12px; }
 .app.view-profile .profile-posts { width:100%; max-width:none; margin:16px 0 0; }
 .app.view-profile .profile-posts > .personal-section-title { margin-bottom:12px; }
+.app.view-profile .profile-feed-posts { display:flex; flex-direction:column; width:100%; }
+.app.view-profile .profile-feed-posts .feed-post { width:100%; }
 @media(max-width:899px) {
   .app.view-profile .personal-profile { inset:var(--mobile-top) 0 var(--mobile-bottom); display:block; padding:12px 10px 70px; }
   .profile-groups { position:static; max-height:none; margin-top:20px; }

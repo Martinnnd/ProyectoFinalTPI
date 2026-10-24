@@ -6,14 +6,22 @@ import { LoaderCircle } from "lucide-react";
 import Profile from "./Profile";
 import DeleteMemoryDialog from "../DeleteMemoryDialog";
 import MemoryForm from "../MemoryForm";
+import CommunityControls from "../CommunityControls";
+import GroupInfoModal from "../GroupInfoModal";
 import { useAuth } from "../auth/AuthProvider";
 import { useEra } from "../../context/EraContext";
 import { useFollow } from "../../context/FollowContext";
 import { useRatings } from "../../context/RatingsContext";
 import { eliminarPublicacion } from "../../api";
 import { getPerfilUsuario, getPublicacionesUsuario, type UsuarioPerfil } from "../../userApi";
+import {
+  getGroups,
+  createGroup,
+  joinGroup,
+  type CreateGroupInput,
+} from "../../groupsApi";
 import { achievements } from "../../data";
-import type { Achievement, Decade, Memory, TierProgress } from "../../types";
+import type { Achievement, CommunityGroup, Decade, Memory, TierProgress } from "../../types";
 
 export default function ProfileView({ targetUsername }: { targetUsername?: string }) {
   const router = useRouter();
@@ -31,6 +39,23 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
   const [deleting, setDeleting] = useState<Memory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Grupos para la barra lateral del perfil propio
+  const [groups, setGroups] = useState<CommunityGroup[]>([]);
+  const [scope, setScope] = useState("groups");
+  const [query, setQuery] = useState("");
+  const [groupInfoId, setGroupInfoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOwnProfile || !session) return;
+    const controller = new AbortController();
+    getGroups(controller.signal)
+      .then((res) => {
+        if (!controller.signal.aborted) setGroups(res);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [isOwnProfile, session]);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -155,6 +180,68 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
     return null;
   };
 
+  const myGroups = groups.filter((g) => g.isMember);
+
+  const handleCreateGroup = async (groupInput: CreateGroupInput): Promise<string | null> => {
+    if (groups.some((g) => g.name.toLowerCase() === groupInput.name.toLowerCase())) {
+      return "Ya existe un grupo con ese nombre.";
+    }
+    try {
+      const created = await createGroup(groupInput);
+      setGroups((curr) => [...curr, created]);
+      setScope(created.id);
+      setNotice("¡Grupo creado con éxito!");
+      return null;
+    } catch (err) {
+      return err instanceof Error ? err.message : "No se pudo crear el grupo.";
+    }
+  };
+
+  const handleJoinGroup = async (groupId: string): Promise<string | null> => {
+    try {
+      await joinGroup(groupId);
+      setGroups((curr) => curr.map((g) => (g.id === groupId ? { ...g, isMember: true } : g)));
+      setNotice("Ya sos integrante del grupo.");
+      return null;
+    } catch (err) {
+      return err instanceof Error ? err.message : "No se pudo completar la unión al grupo.";
+    }
+  };
+
+  const handleGroupScope = (value: string) => {
+    if (value === "groups" || value === "all") {
+      setScope("groups");
+    } else {
+      setScope(value);
+      router.push(`/feed?tab=groups&scope=${value}`);
+    }
+  };
+
+  const communityControls = isOwnProfile ? (
+    <CommunityControls
+      groups={myGroups}
+      searchGroups={groups}
+      scope={scope}
+      query={query}
+      decade={period.decade}
+      profile={true}
+      canCreate={!!session}
+      onQuery={(val) => setQuery(val)}
+      onScope={handleGroupScope}
+      onCreate={handleCreateGroup}
+      onJoinGroup={handleJoinGroup}
+      onAddToGroup={(groupId) => {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));
+        }
+        router.push(`/explorar?action=recordar&groupId=${groupId}`);
+      }}
+      onShowInfo={(groupId) => setGroupInfoId(groupId)}
+    />
+  ) : undefined;
+
+  const activeGroupInfo = groups.find((g) => g.id === groupInfoId);
+
   return (
     <>
       <Profile
@@ -168,6 +255,7 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
         followingCount={profileUser.cantidadSeguidos}
         isFollowing={isFollowing}
         onBack={() => router.back()}
+        community={communityControls}
         allMemories={profileMemories}
         repostedPublicationIds={[]}
         tierProgress={tierProgress}
@@ -178,10 +266,37 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
         earned={earned}
         onSelect={() => {}}
         onOpen={(m) => router.push(`/recuerdo/${m.id}`)}
-        onAdd={() => router.push("/explorar?action=recordar")}
+        onAdd={() => {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));
+          }
+          router.push("/explorar?action=recordar");
+        }}
         onIniciarChat={(user) => router.push(`/chat?con=${user}`)}
         onToggleFollow={!isOwnProfile ? handleToggleFollow : undefined}
       />
+
+      {activeGroupInfo && (
+        <GroupInfoModal
+          group={activeGroupInfo}
+          memoryCount={0}
+          onClose={() => setGroupInfoId(null)}
+          onUpdated={(updatedGroup) =>
+            setGroups((curr) => curr.map((g) => (g.id === updatedGroup.id ? updatedGroup : g)))
+          }
+          onDeleted={(deletedId) => {
+            setGroups((curr) => curr.filter((g) => g.id !== deletedId));
+            setGroupInfoId(null);
+            setNotice("Grupo eliminado.");
+          }}
+          onLeft={(leftId) => {
+            setGroups((curr) => curr.map((g) => (g.id === leftId ? { ...g, isMember: false } : g)));
+            setGroupInfoId(null);
+            setNotice("Saliste del grupo.");
+          }}
+          onOpenMember={(member) => router.push(`/perfil/${member.username}`)}
+        />
+      )}
 
       {deleting && (
         <DeleteMemoryDialog

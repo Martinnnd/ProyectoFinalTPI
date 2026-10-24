@@ -25,24 +25,53 @@ interface EraContextType {
 }
 
 const DEFAULT_PERIOD: Period = { decade: 1980, year: null };
+const ERA_STORAGE_KEY = "nostalgia_era";
 
 const EraContext = createContext<EraContextType | undefined>(undefined);
 
 export function EraProvider({ children }: { children: React.ReactNode }) {
-  const [period, setPeriod] = useState<Period>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const eraParam = params.get("era");
-      if (eraParam === "1970" || eraParam === "1980" || eraParam === "1990" || eraParam === "2000") {
-        return { decade: Number(eraParam) as Decade, year: null };
-      }
-    }
-    return DEFAULT_PERIOD;
-  });
+  const [period, setPeriod] = useState<Period>(DEFAULT_PERIOD);
+  const isHydratedRef = useRef(false);
 
   const [musicOpen, setMusicOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+
+  // Sincronizar en el cliente post-hidratación para evitar hydration mismatch con SSR
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const eraParam = params.get("era");
+      let initialDecade: Decade | null = null;
+      if (eraParam === "1970" || eraParam === "1980" || eraParam === "1990" || eraParam === "2000") {
+        initialDecade = Number(eraParam) as Decade;
+      } else {
+        const savedEra = window.localStorage.getItem(ERA_STORAGE_KEY);
+        if (savedEra === "1970" || savedEra === "1980" || savedEra === "1990" || savedEra === "2000") {
+          initialDecade = Number(savedEra) as Decade;
+        }
+      }
+
+      if (initialDecade && initialDecade !== DEFAULT_PERIOD.decade) {
+        setPeriod({ decade: initialDecade, year: null });
+      }
+    } catch {
+      // Ignorar si el almacenamiento local está restringido
+    }
+  }, []);
+
+  // Persistir en localStorage cada vez que cambia la década (omitir primer ciclo para no sobreescribir)
+  useEffect(() => {
+    if (!isHydratedRef.current) {
+      isHydratedRef.current = true;
+      return;
+    }
+    try {
+      window.localStorage.setItem(ERA_STORAGE_KEY, String(period.decade));
+    } catch {
+      // Ignorar
+    }
+  }, [period.decade]);
 
   const eraTransition = useRef<{ finished: Promise<void>; skipTransition: () => void } | null>(null);
   useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);

@@ -66,6 +66,28 @@ function ExploreContent() {
   const [draft, setDraft] = useState<Point | null>(null);
   const [mapRevision, setMapRevision] = useState(0);
 
+  // Si action=recordar está en la URL o cambia, activar el modo de selección de pin
+  useEffect(() => {
+    if (actionParam === "recordar") {
+      setPicking(true);
+      setSelectedId(null);
+      setPanelOpen(false);
+      setFactsOpen(false);
+    }
+  }, [actionParam, setPanelOpen, setFactsOpen]);
+
+  // Soporte para cuando el usuario hace clic en "Recordar" estando ya en /explorar
+  useEffect(() => {
+    const handleStartRecordar = () => {
+      setPicking(true);
+      setSelectedId(null);
+      setPanelOpen(false);
+      setFactsOpen(false);
+    };
+    window.addEventListener("nostalgiar:start-recordar", handleStartRecordar);
+    return () => window.removeEventListener("nostalgiar:start-recordar", handleStartRecordar);
+  }, [setPanelOpen, setFactsOpen]);
+
   // Redirección retrocompatible si alguien accede con ?view=feed, ?view=chat o ?view=profile
   useEffect(() => {
     const viewParam = searchParams.get("view");
@@ -178,6 +200,12 @@ function ExploreContent() {
   function cancelCreation() {
     setPicking(false);
     setDraft(null);
+    if (actionParam) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("action");
+      const qs = params.toString();
+      router.replace(qs ? `/explorar?${qs}` : "/explorar", { scroll: false });
+    }
   }
 
   async function saveCreation(memory: Memory) {
@@ -197,6 +225,12 @@ function ExploreContent() {
       setMapRevision((r) => r + 1);
       setDraft(null);
       setPicking(false);
+      if (actionParam) {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("action");
+        const qs = params.toString();
+        router.replace(qs ? `/explorar?${qs}` : "/explorar", { scroll: false });
+      }
       selectMapPin(memory);
       setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
       return null;
