@@ -72,6 +72,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleRecordar = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));
+    }
+    router.push("/explorar?action=recordar");
+  };
+
   return (
     <div
       style={theme.tokens}
@@ -86,7 +93,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <button
             aria-label="Recordar"
             className="primary-button time-add-memory"
-            onClick={() => router.push("/explorar?action=recordar")}
+            onClick={handleRecordar}
           >
             <Plus size={16} />
             <span>Recordar</span>
@@ -119,7 +126,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <button
           className="mobile-add-button"
           aria-label="Sumar mi recuerdo"
-          onClick={() => router.push("/explorar?action=recordar")}
+          onClick={handleRecordar}
         >
           <Plus size={23} />
         </button>
