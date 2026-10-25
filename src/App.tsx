@@ -363,7 +363,7 @@ export default function App() {
       await reloadMemories();
     } catch (err) {
       console.warn("Backend falló al crear publicación.", err);
-      return "Falló la conexión con el servidor. No se pudo guardar el recuerdo.";
+      return err instanceof Error ? err.message : "No se pudo guardar el recuerdo. Intentá nuevamente.";
     }
 
     setMapRevision(value => value + 1);

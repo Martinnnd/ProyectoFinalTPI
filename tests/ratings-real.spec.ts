@@ -48,3 +48,37 @@ test('el formulario pide GPS con permiso explícito', async ({page, context}) =>
   await dialog.getByRole('button', {name: 'Usar mi ubicación actual para Cronista Local'}).click();
   await expect(dialog.getByRole('status')).toContainText('Ubicación actual lista');
 });
+
+test('publicar muestra el error HTTP real y conserva el formulario', async ({page}) => {
+  // Solo se simula el rechazo del POST para comprobar cómo lo presenta la interfaz.
+  let attempts = 0;
+  await page.route(`${api}/api/publicaciones`, async route => {
+    if (route.request().method() !== 'POST') return route.continue();
+    attempts++;
+    await route.fulfill({status: attempts === 1 ? 400 : 500,
+      headers: {'access-control-allow-origin': new URL(page.url()).origin},
+      json: attempts === 1 ? {errors: {Archivo: ['La imagen no es válida.']}}
+        : {detail: 'No se pudo completar la operación.', traceId: 'trace-prueba'},
+    });
+  });
+  await page.goto('/explorar?era=1990');
+  await page.getByRole('button', {name: 'Iniciar sesión', exact: true}).click();
+  await page.locator('input[type=email]').fill('miguel@example.com');
+  await page.locator('input[type=password]').fill('password123');
+  await page.getByRole('button', {name: 'Ingresar', exact: true}).click();
+  await expect(page.getByRole('button', {name: /^Cuenta:/})).toBeVisible();
+  await page.getByRole('button', {name: 'Recordar', exact: true}).click();
+  await page.locator('#explore .memory-map').click({position: {x: 350, y: 240}});
+  const dialog = page.getByRole('dialog', {name: '¿Qué pasó en este lugar?'});
+  await dialog.getByRole('textbox', {name: 'Título del recuerdo'}).fill('Recuerdo para comprobar errores');
+  await dialog.getByRole('textbox', {name: 'Nombre del lugar'}).fill('Buenos Aires');
+  await dialog.getByRole('textbox', {name: 'Tu historia'}).fill('Una historia de prueba');
+  await dialog.getByLabel('O pegá un enlace HTTPS al archivo').fill('https://example.test/foto.jpg');
+  await dialog.getByRole('button', {name: 'Guardar recuerdo', exact: true}).click();
+  await expect(dialog.getByRole('alert')).toContainText('La imagen no es válida. (HTTP 400)');
+  await expect(dialog.getByRole('textbox', {name: 'Título del recuerdo'})).toHaveValue('Recuerdo para comprobar errores');
+  await dialog.getByRole('button', {name: 'Guardar recuerdo', exact: true}).click();
+  await expect(dialog.getByRole('alert')).toContainText('HTTP 500');
+  await expect(dialog.getByRole('alert')).toContainText('trace-prueba');
+  await expect(dialog.getByRole('alert')).not.toContainText('Falló la conexión');
+});

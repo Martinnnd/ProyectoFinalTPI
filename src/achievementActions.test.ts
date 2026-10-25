@@ -5,6 +5,27 @@ import { consumeLoginAchievements } from './loginAchievements';
 
 afterEach(() => { cerrarSesion(); vi.unstubAllGlobals(); });
 const session = {usuarioId: 8, token: 'test-token', username: 'usuario', email: 'usuario@example.test', esAdmin: false};
+const publication = {title: 'Recuerdo', description: 'Texto', year: 1995, category: 'Lugares', place: 'Buenos Aires', lat: -34.6, lng: -58.4, image: 'https://example.test/foto.jpg'};
+
+it('distingue una validación rechazada de una falla de conexión al publicar', async () => {
+  guardarSesion(session);
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({errors: {Fecha: ['La fecha debe ser UTC.']}}), {status: 400})));
+  await expect(crearPublicacion(publication)).rejects.toThrow('La fecha debe ser UTC. (HTTP 400)');
+});
+
+it('conserva el estado y la referencia de un error del backend sin exponer su HTML', async () => {
+  guardarSesion(session);
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({detail: 'No se pudo completar la operación.', traceId: 'trace-prueba'}), {status: 500})));
+  await expect(crearPublicacion(publication)).rejects.toThrow('No se pudo completar la operación. (HTTP 500). Referencia: trace-prueba.');
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('<html>Detalle interno</html>', {status: 502})));
+  await expect(crearPublicacion(publication)).rejects.toThrow('El servidor rechazó la publicación. (HTTP 502)');
+});
+
+it('solo informa una falla de conexión cuando fetch no recibe respuesta', async () => {
+  guardarSesion(session);
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+  await expect(crearPublicacion(publication)).rejects.toThrow('No se pudo conectar con el servidor.');
+});
 
 it('envía la puntuación autenticada al backend y conserva su resultado', async () => {
   guardarSesion(session);

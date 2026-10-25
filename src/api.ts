@@ -277,15 +277,21 @@ export async function crearPublicacion(memory: any, autorId?: number, gpsUsuario
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/publicaciones`, {
-        method: 'POST',
-        headers,
-        body: formData
-    });
+    let response: Response;
+    try {
+        response = await fetch(`${API_BASE_URL}/api/publicaciones`, {
+            method: 'POST', headers, body: formData
+        });
+    } catch {
+        throw new Error('No se pudo conectar con el servidor. Comprobá que el backend esté encendido y volvé a intentar.');
+    }
 
     if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || `Error ${response.status}`);
+        const problem = await response.json().catch(() => null);
+        const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
+        const message = fields || problem?.detail || problem?.mensaje || problem?.title || 'El servidor rechazó la publicación.';
+        const reference = problem?.traceId ? ` Referencia: ${problem.traceId}.` : '';
+        throw new Error(`${message} (HTTP ${response.status}).${reference}`);
     }
 
     notifyAchievementsChanged();

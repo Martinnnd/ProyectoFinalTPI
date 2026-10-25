@@ -239,8 +239,8 @@ import { parseHashtags } from "../hashtags";
             </p>
           )}
           <p className="local-note">
-            Se guarda solo en este navegador. No se comparte con otros
-            dispositivos.
+            {initial ? 'Los cambios de edición se conservan solo en este navegador.'
+              : 'El recuerdo se guarda en tu cuenta cuando el servidor confirma la publicación.'}
           </p>
           <div className="dialog-actions">
             <button type="button" className="secondary-button" onClick={requestClose} disabled={saving}>

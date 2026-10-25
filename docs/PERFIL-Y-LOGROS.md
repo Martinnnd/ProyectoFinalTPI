@@ -16,6 +16,8 @@ En el formulario de recuerdos, «Usar mi ubicación actual para Cronista Local»
 
 Las rachas se actualizan en el backend al autenticar o renovar una sesión. Los logros nuevos devueltos por el login también muestran el cartel. Esa lista de avisos se consume una sola vez en memoria y no se guarda en `localStorage`, para que no se repita al recargar.
 
+Si falla una publicación, el formulario conserva los datos y muestra el mensaje público del backend, el código HTTP y la referencia de seguimiento cuando están disponibles. Una respuesta HTTP 400 o 500 no se presenta como una falla de conexión. Para un error interno, buscá esa referencia en la terminal del backend: allí se registra la excepción, por ejemplo un problema de configuración o de carga a Cloudinary. No compartas claves ni contraseñas al copiar el mensaje. El mensaje de conexión se reserva para peticiones que no recibieron respuesta.
+
 ## Ejecutar
 
 Instalá las dependencias con `npm ci`. El frontend usa `http://localhost:5199` por defecto: no requiere crear `.env.local` para conectarse al perfil HTTP del backend. `.env.example` es solo una plantilla, Next.js no lo carga automáticamente.
