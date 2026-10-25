@@ -23,10 +23,10 @@ export function getNotificationText(notification: NotificationDto): string {
       return "¡Felicidades! Subiste de categoría";
 
     case "emailMessages":
-      return "Tenés mensajes sin leer en tu correo";
+      return "Recibiste mensajes en tu correo";
 
     case "chatMessage":
-      return "Tenés mensajes sin leer en el chat";
+      return "Recibiste mensajes en el chat";
 
     default: {
       const exhaustiveCheck: never = type;
