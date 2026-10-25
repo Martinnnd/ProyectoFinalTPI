@@ -10,7 +10,7 @@ import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
 import RepostDialog from "./RepostDialog";
 import { compartirPublicacion, eliminarRepost, getSesion, isOwnMemory } from "../../api";
-import { publicationId, likePublication, unlikePublication } from '../../publicationsApi';
+import { publicationId, likePublication, unlikePublication, ratePublication, type RatingSummary } from '../../publicationsApi';
 import { memoryHashtags, weeklyTrends } from "../../hashtags";
 import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
@@ -58,9 +58,7 @@ export default function SocialFeed({
   following,
   followingRevision,
   onFollow,
-  ratings,
   canRate,
-  onRate,
   onReloadMemories,
   onRepostCreated,
   onRequireLogin,
@@ -75,9 +73,7 @@ export default function SocialFeed({
   following: string[];
   followingRevision: number;
   onFollow: (author: string, authorId?: number) => void;
-  ratings: Record<string, number>;
   canRate: boolean;
-  onRate: (postId: string, score: number) => void;
   groupIds: string[];
   suggestedAuthors: { name: string; id: number }[];
   groupOpenRequest: number;
@@ -97,6 +93,27 @@ export default function SocialFeed({
   const interactions = useMemoryInteractions();
   const pendingLikes = useRef(new Set<string>());
   const [likeError, setLikeError] = useState('');
+  const [scores, setScores] = useState<Record<string, RatingSummary>>({});
+  const pendingRatings = useRef(new Set<string>());
+  const [ratingBusy, setRatingBusy] = useState<string[]>([]);
+
+  async function handleRating(memoryId: string, memory: Memory, score: number) {
+    if (!getSesion()?.token) { onRequireLogin(); return; }
+    const id = publicationId({...memory, id: memoryId});
+    if (!id || !canRate || pendingRatings.current.has(id)) return;
+    pendingRatings.current.add(id);
+    setRatingBusy(current => [...current, id]);
+    setLikeError('');
+    try {
+      const summary = await ratePublication(id, score);
+      setScores(current => ({...current, [id]: summary}));
+    } catch (error) {
+      setLikeError(error instanceof Error ? error.message : 'No se pudo guardar la puntuación.');
+    } finally {
+      pendingRatings.current.delete(id);
+      setRatingBusy(current => current.filter(value => value !== id));
+    }
+  }
   const desktopDetail = !!selected && (decade === 1990 || decade === 2000);
   const [maximized, setMaximized] = useState(false);
   const [reposts, setReposts] = useState<string[]>([]);
@@ -325,7 +342,9 @@ export default function SocialFeed({
                 )}
                 liked={interactions.isLiked(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
                 comments={comments}
-                rating={ratings[isSimpleRepost ? rootId : memory.id]}
+                rating={(scores[isSimpleRepost ? rootId : memory.id]?.miPuntuacion === null ? undefined
+                  : scores[isSimpleRepost ? rootId : memory.id]?.miPuntuacion ?? targetMemory.viewerScore ?? undefined)}
+                ratingBusy={ratingBusy.includes(isSimpleRepost ? rootId : memory.id)}
                 canRate={canRate}
                 reposted={isReposted}
                 saved={saves.includes(memory.id)}
@@ -335,7 +354,7 @@ export default function SocialFeed({
                 onFollow={onFollow}
                 onOpen={(memToOpen) => open(memToOpen || targetMemory)}
                 onMap={onMap}
-                onRate={(value) => onRate(isSimpleRepost ? rootId : memory.id, value)}
+                onRate={(value) => { void handleRating(isSimpleRepost ? rootId : memory.id, targetMemory, value); }}
                 onLike={() => { void handleLike(isSimpleRepost ? rootId : memory.id, targetMemory); }}
                 onRepost={() => {
                   if (isReposted) {

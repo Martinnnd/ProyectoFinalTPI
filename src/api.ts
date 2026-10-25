@@ -1,4 +1,6 @@
 import { notifyAchievementsChanged } from './achievementEvents';
+import { rememberLoginAchievements, clearLoginAchievements } from './loginAchievements';
+import type { AchievementState } from './profileApi';
 
 // Coincide con el perfil HTTP del backend, sin exigir un archivo local al clonar.
 export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://localhost:5199").replace(/\/+$/, "");
@@ -34,6 +36,7 @@ export function guardarSesion(sesion: UsuarioSesion): void {
 }
 
 export function cerrarSesion(): void {
+    clearLoginAchievements();
     memorySesion = null;
     if (typeof window !== "undefined" && window.localStorage) {
         window.localStorage.removeItem("nostalgia_auth");
@@ -72,8 +75,9 @@ export async function login(email: string, contrasena: string): Promise<UsuarioS
         throw new Error(err.mensaje || `Error ${response.status}`);
     }
 
-    const data: UsuarioSesion = await response.json();
+    const {logrosNuevos, ...data}: UsuarioSesion & {logrosNuevos?: AchievementState[]} = await response.json();
     guardarSesion(data);
+    rememberLoginAchievements(data.usuarioId, logrosNuevos);
     return data;
 }
 
@@ -221,7 +225,7 @@ export async function getMemories(signal?: AbortSignal) {
     return getUserMemories(session.usuarioId, signal);
 }
 
-export async function crearPublicacion(memory: any, autorId?: number): Promise<any> {
+export async function crearPublicacion(memory: any, autorId?: number, gpsUsuario?: {lat: number; lng: number}): Promise<any> {
     const sesion = getSesion();
     const token = sesion?.token;
     const finalAutorId = sesion?.usuarioId ?? (autorId !== undefined ? await getValidAutorId(autorId) : await getValidAutorId(1));
@@ -248,6 +252,10 @@ export async function crearPublicacion(memory: any, autorId?: number): Promise<a
     formData.set('Latitud', memory.lat.toString());
     formData.set('Longitud', memory.lng.toString());
     formData.append('AutorId', finalAutorId.toString());
+    if (gpsUsuario) {
+        formData.append('GpsLatitud', String(gpsUsuario.lat));
+        formData.append('GpsLongitud', String(gpsUsuario.lng));
+    }
 
     let mediaUrl = memory.image || (memory.media ? memory.media.url : '');
     let isVideo = memory.media && memory.media.kind !== 'image';

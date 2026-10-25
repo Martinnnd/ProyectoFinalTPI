@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import { ACHIEVEMENTS_CHANGED, ACHIEVEMENTS_UPDATED } from '../achievementEvents';
 import { getUserProfile, toAchievement } from '../profileApi';
 import type { Achievement } from '../types';
+import { consumeLoginAchievements } from '../loginAchievements';
 
-export default function useAchievementNotifications(userId: number | null) {
+export default function useAchievementNotifications(userId: number | null, sessionToken?: string) {
   const [pending, setPending] = useState<{userId: number; items: Achievement[]} | null>(null);
   useEffect(() => {
     setPending(null);
     if (userId === null) return;
     const id = userId;
+    const loginAwards = consumeLoginAchievements(id).filter(logro => logro.desbloqueado).map(toAchievement);
+    if (loginAwards.length) setPending({userId: id, items: loginAwards});
     const controller = new AbortController();
     let seen: Set<number> | null = null;
     let reading = false;
@@ -52,7 +55,7 @@ export default function useAchievementNotifications(userId: number | null) {
       window.removeEventListener('focus', changed);
       document.removeEventListener('visibilitychange', visible);
     };
-  }, [userId]);
+  }, [userId, sessionToken]);
 
   return {
     achievement: pending?.userId === userId ? pending.items[0] : undefined,

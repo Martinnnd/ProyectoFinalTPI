@@ -6,9 +6,19 @@ import { notifyAchievementsChanged } from './achievementEvents';
 
 export type MapBounds = { minLatitud: number; maxLatitud: number; minLongitud: number; maxLongitud: number };
 type Pin = { id: number; latitud: number; longitud: number; categoria: number | string };
-export type Publication = { cantidadLikes?: number; cantidadComentarios?: number; dioLike?: boolean; id: number; titulo: string; descripcion?: string; descripcionBreve?: string; fecha: string; fechaCreacion?: string; categoria: number | string; urlMultimedia: string; tipoMultimedia: number | string; autor: { id: number; username: string }; lugar?: { nombre: string; latitud: number; longitud: number } };
+export type Publication = { puntosTotales?: number; miPuntuacion?: number | null; cantidadLikes?: number; cantidadComentarios?: number; dioLike?: boolean; id: number; titulo: string; descripcion?: string; descripcionBreve?: string; fecha: string; fechaCreacion?: string; categoria: number | string; urlMultimedia: string; tipoMultimedia: number | string; autor: { id: number; username: string }; lugar?: { nombre: string; latitud: number; longitud: number } };
 type Comment = { id: number; contenido: string; fechaCreacion: string; autor: { id: number; username: string } };
 export type LikeSummary = { publicacionId: number; cantidadLikes: number; dioLike: boolean };
+export type RatingSummary = { publicacionId: number; puntosTotales: number; miPuntuacion: number | null };
+
+export function ratePublication(id: string, score: number): Promise<RatingSummary> {
+  if (!/^[1-9]\d*$/.test(id) || !Number.isInteger(score) || score < 1 || score > 5)
+    throw new Error('La publicación o la puntuación no es válida.');
+  if (!getSesion()?.token) throw new Error('Iniciá sesión para puntuar.');
+  return publicationRequest<RatingSummary>(`/${id}/puntuacion`, {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({puntaje: score}),
+  });
+}
 
 export async function publicationRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
@@ -50,7 +60,7 @@ export async function getMapPublications(bounds: MapBounds, period: Period, sele
 export function toMemory(data: Publication, pin: Memory): Memory {
   const url = data.urlMultimedia ? new URL(data.urlMultimedia, API_BASE_URL).href : '';
   const video = data.tipoMultimedia === 1 || data.tipoMultimedia === 'Video';
-  return { ...pin, id: String(data.id), source: 'backend', likeCount: data.cantidadLikes, commentCount: data.cantidadComentarios, viewerLiked: data.dioLike, title: data.titulo, description: data.descripcion ?? data.descripcionBreve ?? '', year: new Date(data.fecha).getUTCFullYear(), category: category(data.categoria), author: data.autor.username, authorId: data.autor.id, createdAt: data.fechaCreacion, place: data.lugar?.nombre ?? pin.place, lat: data.lugar?.latitud ?? pin.lat, lng: data.lugar?.longitud ?? pin.lng, image: url && !video && !youtubeId(url) ? url : undefined, media: url && (video || youtubeId(url)) ? { kind: youtubeId(url) ? 'youtube' : 'video', url } : undefined };
+  return { ...pin, id: String(data.id), source: 'backend', likeCount: data.cantidadLikes, commentCount: data.cantidadComentarios, viewerLiked: data.dioLike, viewerScore: data.miPuntuacion, nostalgiaPoints: data.puntosTotales, title: data.titulo, description: data.descripcion ?? data.descripcionBreve ?? '', year: new Date(data.fecha).getUTCFullYear(), category: category(data.categoria), author: data.autor.username, authorId: data.autor.id, createdAt: data.fechaCreacion, place: data.lugar?.nombre ?? pin.place, lat: data.lugar?.latitud ?? pin.lat, lng: data.lugar?.longitud ?? pin.lng, image: url && !video && !youtubeId(url) ? url : undefined, media: url && (video || youtubeId(url)) ? { kind: youtubeId(url) ? 'youtube' : 'video', url } : undefined };
 }
 export async function getPublication(memory: Memory, summary: boolean, signal?: AbortSignal) {
   const id = publicationId(memory);

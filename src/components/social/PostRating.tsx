@@ -4,11 +4,13 @@ export default function PostRating({
   memoryTitle,
   value,
   canRate,
+  pending = false,
   onRate,
 }: {
   memoryTitle: string;
   value?: number;
   canRate: boolean;
+  pending?: boolean;
   onRate: (value: number) => void;
 }) {
   return (
@@ -24,14 +26,14 @@ export default function PostRating({
           aria-label={`${value === score ? "Quitar" : "Dar"} ${score} ${score === 1 ? "punto" : "puntos"} de nostalgia a ${memoryTitle}`}
           aria-pressed={value === score}
           data-filled={score <= (value ?? 0)}
-          disabled={!canRate}
+          disabled={!canRate || pending}
           onClick={() => onRate(score)}
         >
           <img src="/nostalgiar-rail-logo.png" alt="" width={28} height={28} />
         </button>
       ))}
       <small className="post-rating-value">
-        {!canRate ? "Disponible desde Nostálgico" : value ? `${value} de 5 puntos de nostalgia` : "Sin puntuar"}
+        {pending ? "Guardando puntuación…" : !canRate ? "Disponible desde Nostálgico" : value ? `${value} de 5 puntos de nostalgia` : "Sin puntuar"}
       </small>
     </div>
   );

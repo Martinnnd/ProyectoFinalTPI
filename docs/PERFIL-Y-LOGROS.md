@@ -10,6 +10,12 @@ El catálogo actual contiene 17 logros. «Melómano», «Turista del Pasado» y 
 
 El cartel «¡Logro completado!» usa los desbloqueos confirmados por el servidor. Se consulta después de las acciones confirmadas por la API, como crear recuerdos, comentar, dar likes o seguir usuarios. También se comprueban cambios al volver a la pestaña y cada 30 segundos mientras está visible, para detectar logros otorgados por acciones de otras personas. Si llegan varios, los avisos se muestran en orden. La primera consulta al iniciar sesión establece una referencia: no vuelve a anunciar los logros anteriores. Al cambiar de cuenta se descartan los avisos pendientes.
 
+Las puntuaciones ahora se guardan en el backend: los botones usan `PUT /api/publicaciones/{id}/puntuacion`, muestran lo que devuelve el servidor y recuperan la puntuación del DTO al volver a abrir una publicación. Mientras se guarda se bloquean los botones; una respuesta fallida no modifica la puntuación visible. Pulsar el mismo puntaje vuelve a quitarlo.
+
+En el formulario de recuerdos, «Usar mi ubicación actual para Cronista Local» solicita permiso al navegador. Es opcional: si no se obtiene la ubicación, se puede publicar igualmente. Al aceptar, se envía el GPS separado del lugar elegido en el mapa. El backend verifica la cercanía; el navegador no otorga el logro por su cuenta.
+
+Las rachas se actualizan en el backend al autenticar o renovar una sesión. Los logros nuevos devueltos por el login también muestran el cartel. Esa lista de avisos se consume una sola vez en memoria y no se guarda en `localStorage`, para que no se repita al recargar.
+
 ## Ejecutar
 
 Instalá las dependencias con `npm ci`. El frontend usa `http://localhost:5199` por defecto: no requiere crear `.env.local` para conectarse al perfil HTTP del backend. `.env.example` es solo una plantilla, Next.js no lo carga automáticamente.
@@ -43,4 +49,4 @@ Para la prueba de navegador con API real, iniciá backend y frontend, y luego ej
 npx playwright test --config playwright.profile.config.ts
 ```
 
-Este recorrido crea dos cuentas temporales en la base local, comenta una publicación del seed y comprueba catálogo, fecha, recarga y separación entre cuentas. Usalo solo contra una base de desarrollo. Requiere Chrome, como las otras pruebas del repositorio; también admite `PLAYWRIGHT_CHROMIUM_EXECUTABLE` para un Chromium instalado y `PLAYWRIGHT_BASE_URL` para otro puerto del frontend. `NEXT_PUBLIC_API_BASE_URL` define la dirección de la API de la prueba. No simula las respuestas del backend.
+Estos recorridos crean dos cuentas temporales en la base local, comentan una publicación del seed y comprueban catálogo, fecha, recarga y separación entre cuentas. También prueban puntuación y desmarcado contra la API real con `miguel@example.com` / `password123`, y el botón GPS con permiso de ubicación del navegador. Requieren que backend y frontend ya estén escuchando antes de ejecutar el comando. Usalos solo contra una base de desarrollo con el seed cargado. Requieren Chrome, como las otras pruebas del repositorio; también admiten `PLAYWRIGHT_CHROMIUM_EXECUTABLE` para un Chromium instalado y `PLAYWRIGHT_BASE_URL` para otro puerto del frontend. `NEXT_PUBLIC_API_BASE_URL` define la dirección de la API de la prueba. No simulan las respuestas del backend.

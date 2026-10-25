@@ -20,7 +20,7 @@ import { parseHashtags } from "../hashtags";
     point: Point;
     decade: Decade;
     onCancel: () => void;
-    onSave: (m: Memory) => string | null | Promise<string | null | void> | void;
+    onSave: (m: Memory, gpsUsuario?: Point) => string | null | Promise<string | null | void> | void;
   }) {
     const dirty = useRef(false);
     function requestClose() {
@@ -57,9 +57,23 @@ import { parseHashtags } from "../hashtags";
       };
     }, []);
     const [saving, setSaving] = useState(false);
+    const [gps, setGps] = useState<Point | null>(null);
+    const [gpsMessage, setGpsMessage] = useState('');
+    const [gpsLoading, setGpsLoading] = useState(false);
+    function shareLocation() {
+      if (!navigator.geolocation) { setGpsMessage('Tu navegador no permite obtener la ubicación. Podés publicar igualmente.'); return; }
+      setGpsLoading(true); setGpsMessage('Obteniendo ubicación…');
+      navigator.geolocation.getCurrentPosition(position => {
+        setGps({lat: position.coords.latitude, lng: position.coords.longitude});
+        setGpsLoading(false); setGpsMessage('Ubicación actual lista para comprobar Cronista Local.');
+      }, () => {
+        setGpsLoading(false); setGpsMessage('No se pudo obtener tu ubicación. Podés publicar igualmente sin comprobar Cronista Local.');
+      }, {enableHighAccuracy: true, maximumAge: 60000, timeout: 10000});
+    }
     async function submit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
       if (saving) return;
+      if (gpsLoading) { setError('Esperá a que termine la consulta de tu ubicación.'); return; }
       const data = new FormData(event.currentTarget);
       const title = String(data.get("title")).trim(),
         place = String(data.get("place")).trim(),
@@ -110,7 +124,7 @@ import { parseHashtags } from "../hashtags";
         source: "local",
         lat: point.lat,
         lng: point.lng,
-      });
+      }, gps ?? undefined);
       
       setSaving(false);
       if (typeof result === "string") setError(result);
@@ -145,6 +159,11 @@ import { parseHashtags } from "../hashtags";
           {point.lng.toFixed(4)}
         </div>
         <form onSubmit={submit} onChange={() => {dirty.current = true;}}>
+          {!initial && <div>
+            <button type="button" disabled={gpsLoading || saving} onClick={shareLocation}>Usar mi ubicación actual para Cronista Local</button>
+            <p>Es opcional. La ubicación elegida en el mapa sigue siendo el lugar del recuerdo.</p>
+            {gpsMessage && <p role="status">{gpsMessage}</p>}
+          </div>}
           <label>
             Título del recuerdo
             <input

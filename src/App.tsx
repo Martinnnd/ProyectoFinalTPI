@@ -19,7 +19,6 @@ import {
   type TierProgress,
 } from "./types";
 import { eraContent, resolveUserCategory } from "./data";
-import { updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
 import { getMemories, isOwnMemory, getSesion, type UsuarioSesion, eliminarPublicacion } from "./api";
 import LoginDialog from "./components/LoginDialog";
 import AchievementToast from "./components/AchievementToast";
@@ -82,7 +81,7 @@ export default function App() {
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const [loginOpen, setLoginOpen] = useState(false);
   const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
-  const achievementNotice = useAchievementNotifications(currentSesion?.usuarioId ?? null);
+  const achievementNotice = useAchievementNotifications(currentSesion?.usuarioId ?? null, currentSesion?.token);
   const currentUserId = currentSesion?.usuarioId ?? 1;
   const following = followingUsers.map(user => user.username);
 
@@ -146,18 +145,12 @@ export default function App() {
   const [draft, setDraft] = useState<Point | null>(null);
   const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
-  const [ratings, setRatings] = useState<NostalgiaRatings>({});
   const tierProgress: TierProgress = {
     memories: dbMemories.filter(m => isOwnMemory(m)).length,
     points: 0,
     subscribed: false,
   };
   const canRate = resolveUserCategory(tierProgress) !== 'Errante';
-  function rateMemory(postId: string, score: number) {
-    if (!canRate) return;
-    const next = updateNostalgiaRating(ratings, postId, score);
-    setRatings(next);
-  }
   const [panelOpen, setPanelOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
@@ -354,7 +347,7 @@ export default function App() {
     setNotice("Recuerdo actualizado.");
     return null;
   }
-  async function save(memory: Memory) {
+  async function save(memory: Memory, gpsUsuario?: Point) {
     const destinationGroup=groups.find(g=>g.id===scope);
     if(destinationGroup) {
       if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
@@ -363,7 +356,7 @@ export default function App() {
 
     try {
       const { crearPublicacion } = await import("./api");
-      const res = await crearPublicacion(memory);
+      const res = await crearPublicacion(memory, undefined, gpsUsuario);
       if (res && res.id) {
         memory = { ...memory, id: res.id.toString() };
       }
@@ -630,9 +623,7 @@ export default function App() {
           following={following}
           followingRevision={followingRevision}
           onFollow={toggleFollow}
-          ratings={ratings}
           canRate={canRate}
-          onRate={rateMemory}
           selected={selected}
           onSelect={(m) => { selectedSeed.current = m; setRemoteSelected(m); setSelectedId(m?.id ?? null); }}
           onMap={(m) => {
