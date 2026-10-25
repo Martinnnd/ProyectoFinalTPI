@@ -1,4 +1,4 @@
-import { Bookmark, Link2, MessageCircle, Repeat2, Send, Share2 } from "lucide-react";
+import { Bookmark, Link2, MessageCircle, Quote, Repeat2, Send, Share2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import LikeButton from "./LikeButton";
 
@@ -10,9 +10,13 @@ export default function PostActions({
   likeCount,
   commentCount,
   reposted,
+  repostCount,
   saved,
   onLike,
   onOpenComments,
+  onSimpleRepost,
+  onUnrepost,
+  onQuote,
   onRepost,
   onSave,
 }: {
@@ -23,15 +27,21 @@ export default function PostActions({
   likeCount?: number;
   commentCount: number;
   reposted: boolean;
+  repostCount?: number;
   saved: boolean;
   onLike: () => void;
   onOpenComments: () => void;
-  onRepost: () => void;
+  onSimpleRepost?: () => void;
+  onUnrepost?: () => void;
+  onQuote?: () => void;
+  onRepost?: () => void;
   onSave: () => void;
 }) {
   const [shareOpen, setShareOpen] = useState(false);
+  const [repostOpen, setRepostOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const shareRef = useRef<HTMLDivElement>(null);
+  const repostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!shareOpen) return;
@@ -43,6 +53,17 @@ export default function PostActions({
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, [shareOpen]);
+
+  useEffect(() => {
+    if (!repostOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (repostRef.current && !repostRef.current.contains(event.target as Node)) {
+        setRepostOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [repostOpen]);
 
   const shareUrl = typeof window !== "undefined"
     ? (memoryId ? `${window.location.origin}/recuerdo/${memoryId}` : window.location.href)
@@ -59,18 +80,61 @@ export default function PostActions({
         <MessageCircle size={17} />
         {commentCount} Comentar
       </button>
-      <button
-        type="button"
-        className={`repost-button${reposted ? " is-reposted" : ""}`}
-        aria-label={reposted ? `Deshacer repost: ${memoryTitle}` : `Repostear: ${memoryTitle}`}
-        title={reposted ? "Deshacer repost" : "Repostear"}
-        aria-pressed={reposted}
-        style={reposted ? { color: '#10b981', fontWeight: 600 } : undefined}
-        onClick={onRepost}
-      >
-        <Repeat2 size={17} style={reposted ? { stroke: '#10b981', strokeWidth: 2.5 } : undefined} />
-        {reposted ? "Reposteado" : "Repostear"}
-      </button>
+      <div className="share-menu repost-menu" ref={repostRef}>
+        <button
+          type="button"
+          className={`repost-button${reposted ? " is-reposted" : ""}`}
+          aria-label={reposted ? `Opciones de repost (reposteado): ${memoryTitle}` : `Opciones de repost: ${memoryTitle}`}
+          aria-expanded={repostOpen}
+          aria-pressed={reposted}
+          style={reposted ? { color: '#10b981', fontWeight: 600 } : undefined}
+          onClick={(event) => {
+            event.stopPropagation();
+            setShareOpen(false);
+            setRepostOpen((open) => !open);
+          }}
+        >
+          <Repeat2 size={17} style={reposted ? { stroke: '#10b981', strokeWidth: 2.5 } : undefined} />
+          {Boolean(repostCount && repostCount > 0) && <span>{repostCount} </span>}
+          {reposted ? "Reposteado" : "Repostear"}
+        </button>
+        {repostOpen && (
+          <div
+            className="share-menu-panel repost-menu-panel"
+            role="menu"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <span>{reposted ? "Opciones de repost" : "Difundir"}</span>
+            <button
+              type="button"
+              onClick={() => {
+                setRepostOpen(false);
+                if (reposted) {
+                  if (onUnrepost) onUnrepost();
+                  else onRepost?.();
+                } else {
+                  if (onSimpleRepost) onSimpleRepost();
+                  else onRepost?.();
+                }
+              }}
+            >
+              <Repeat2 size={15} style={reposted ? { stroke: '#ef4444' } : { stroke: '#10b981' }} />
+              {reposted ? "Deshacer repost" : "Repostear"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRepostOpen(false);
+                if (onQuote) onQuote();
+                else onRepost?.();
+              }}
+            >
+              <Quote size={15} />
+              Citar recuerdo
+            </button>
+          </div>
+        )}
+      </div>
       <button
         aria-label={`Guardar: ${memoryTitle}`}
         aria-pressed={saved}
@@ -86,6 +150,7 @@ export default function PostActions({
           aria-expanded={shareOpen}
           onClick={(event) => {
             event.stopPropagation();
+            setRepostOpen(false);
             setShareOpen((open) => !open);
           }}
         >

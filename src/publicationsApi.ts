@@ -5,7 +5,30 @@ import { youtubeId } from './media';
 
 export type MapBounds = { minLatitud: number; maxLatitud: number; minLongitud: number; maxLongitud: number };
 type Pin = { id: number; latitud: number; longitud: number; categoria: number | string };
-export type Publication = { cantidadLikes?: number; cantidadComentarios?: number; dioLike?: boolean; puntosTotales?: number; miPuntuacion?: number | null; id: number; titulo: string; descripcion?: string; descripcionBreve?: string; fecha: string; fechaCreacion?: string; categoria: number | string; urlMultimedia: string; tipoMultimedia: number | string; autor: { id: number; username: string }; lugar?: { nombre: string; latitud: number; longitud: number }; grupo?: { id: number } | null };
+export type Publication = {
+  cantidadLikes?: number;
+  cantidadComentarios?: number;
+  dioLike?: boolean;
+  puntosTotales?: number;
+  miPuntuacion?: number | null;
+  cantidadReposts?: number;
+  dioRepost?: boolean;
+  id: number;
+  titulo: string;
+  descripcion?: string;
+  descripcionBreve?: string;
+  fecha: string;
+  fechaCreacion?: string;
+  categoria: number | string;
+  urlMultimedia: string;
+  tipoMultimedia: number | string;
+  autor: { id: number; username: string };
+  lugar?: { nombre: string; latitud: number; longitud: number };
+  grupo?: { id: number } | null;
+  publicacionOriginalId?: number | null;
+  publicacionOriginal?: Publication;
+  reposteadoPor?: { usuarioId: number; username: string; fecha?: string };
+};
 
 export async function publicationRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
@@ -44,6 +67,39 @@ export async function getMapPublications(bounds: MapBounds, period: Period, sele
 export function toMemory(data: Publication, pin: Memory): Memory {
   const url = data.urlMultimedia ? new URL(data.urlMultimedia, API_BASE_URL).href : '';
   const video = data.tipoMultimedia === 1 || data.tipoMultimedia === 'Video';
+
+  let repost: Memory['repost'] = undefined;
+  let author = data.autor?.username ?? '';
+  let authorId = data.autor?.id;
+  let quotedMemory: Memory | undefined = undefined;
+
+  if (data.reposteadoPor) {
+    // Repost simple desde Neo4j: el author principal se asigna al reposteador para badges y el author original va en repost
+    author = data.reposteadoPor.username || pin.author || '';
+    authorId = data.reposteadoPor.usuarioId;
+    repost = {
+      originalId: String(data.id),
+      author: data.autor?.username ?? '',
+      authorId: data.autor?.id,
+    };
+  } else if (data.publicacionOriginal) {
+    // Cita con comentario desde PostgreSQL: el autor es quien cita y el comentario es la descripción
+    repost = {
+      id: String(data.id),
+      originalId: String(data.publicacionOriginal.id),
+      author: data.publicacionOriginal.autor?.username ?? '',
+      authorId: data.publicacionOriginal.autor?.id,
+      comment: data.descripcion,
+    };
+    quotedMemory = toMemory(data.publicacionOriginal, {
+      ...pin,
+      id: String(data.publicacionOriginal.id),
+      place: data.publicacionOriginal.lugar?.nombre ?? pin.place,
+      lat: data.publicacionOriginal.lugar?.latitud ?? pin.lat,
+      lng: data.publicacionOriginal.lugar?.longitud ?? pin.lng,
+    });
+  }
+
   return {
     ...pin,
     id: String(data.id),
@@ -53,13 +109,17 @@ export function toMemory(data: Publication, pin: Memory): Memory {
     viewerLiked: data.dioLike,
     points: data.puntosTotales ?? 0,
     viewerRating: data.miPuntuacion ?? undefined,
+    repostCount: data.cantidadReposts,
+    viewerReposted: data.dioRepost,
+    repost,
+    quotedMemory,
     title: data.titulo,
     description: data.descripcion ?? data.descripcionBreve ?? '',
-    year: new Date(data.fecha).getUTCFullYear(),
-    date: new Date(data.fecha).toISOString().slice(0, 10),
+    year: data.fecha ? new Date(data.fecha).getUTCFullYear() : pin.year,
+    date: data.fecha ? new Date(data.fecha).toISOString().slice(0, 10) : pin.date,
     category: category(data.categoria),
-    author: data.autor.username,
-    authorId: data.autor.id,
+    author,
+    authorId,
     createdAt: data.fechaCreacion,
     place: data.lugar?.nombre ?? pin.place,
     lat: data.lugar?.latitud ?? pin.lat,

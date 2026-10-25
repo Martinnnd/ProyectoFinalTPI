@@ -91,16 +91,18 @@ export default function Profile({
   const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
 
+  const ownMemories = useMemo(() => allMemories.filter((m) => !m.repost), [allMemories]);
+
   const effectiveProgress: TierProgress = useMemo(
     () => ({
-      memories: Math.max(tierProgress?.memories ?? 0, allMemories.length),
+      memories: Math.max(tierProgress?.memories ?? 0, ownMemories.length),
       points: Math.max(
         tierProgress?.points ?? 0,
-        allMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0),
+        ownMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0),
       ),
       subscribed: Boolean(tierProgress?.subscribed),
     }),
-    [tierProgress, allMemories],
+    [tierProgress, ownMemories],
   );
 
   const tierOrder: Record<string, number> = {
@@ -200,7 +202,7 @@ export default function Profile({
           dialogRef={mapDialog}
           author={author}
           period={period}
-          memories={allMemories}
+          memories={ownMemories}
           selected={selected}
           opened={mapOpened}
           closing={mapClosing}

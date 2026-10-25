@@ -4,6 +4,7 @@ import { likePublication, unlikePublication } from "../publicationsApi";
 export default function useMemoryInteractions() {
   const [likes, setLikes] = useState<Record<string, boolean>>({});
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [repostCounts, setRepostCounts] = useState<Record<string, number>>({});
 
   const isLiked = useCallback(
     (memoryId: string, initial = false) => {
@@ -17,6 +18,30 @@ export default function useMemoryInteractions() {
       return likeCounts[memoryId] ?? initialCount;
     },
     [likeCounts],
+  );
+
+  const getRepostCount = useCallback(
+    (memoryId: string, initialCount = 0) => {
+      return repostCounts[memoryId] ?? initialCount;
+    },
+    [repostCounts],
+  );
+
+  const updateRepostCount = useCallback(
+    (memoryId: string, count: number) => {
+      setRepostCounts((prev) => ({ ...prev, [memoryId]: count }));
+    },
+    [],
+  );
+
+  const incrementRepostCount = useCallback(
+    (memoryId: string, delta: number, initialCount = 0) => {
+      setRepostCounts((prev) => {
+        const current = prev[memoryId] ?? initialCount;
+        return { ...prev, [memoryId]: Math.max(0, current + delta) };
+      });
+    },
+    [],
   );
 
   const toggleLike = useCallback(
@@ -47,5 +72,5 @@ export default function useMemoryInteractions() {
     [likes, likeCounts],
   );
 
-  return { isLiked, getLikeCount, toggleLike };
+  return { isLiked, getLikeCount, toggleLike, getRepostCount, updateRepostCount, incrementRepostCount };
 }

@@ -10,7 +10,7 @@ import FeedPost from "./FeedPost";
 import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
 import RepostDialog from "./RepostDialog";
-import { compartirPublicacion, eliminarRepost, isOwnMemory } from "../../api";
+import { repostearPublicacion, quitarRepost, citarPublicacion, isOwnMemory } from "../../api";
 import { memoryHashtags, weeklyTrends } from "../../hashtags";
 import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
@@ -255,7 +255,10 @@ export default function SocialFeed({
   }
 
   function isMemoryRepostedByMe(mem: Memory): boolean {
-    const isQuote = Boolean(mem.repost?.comment);
+    const isQuote = Boolean(
+      mem.quotedMemory ||
+      (mem.repost && (mem.repost.comment !== undefined || (mem.repost.id && mem.repost.id !== mem.repost.originalId)))
+    );
 
     // En los reposts con cita (tipo quote tweet):
     // NO debe aparecer pintado por defecto ni porque sea propio ni porque se haya reposteado el post citado.
@@ -266,13 +269,20 @@ export default function SocialFeed({
           isOwnMemory(m) &&
           m.repost &&
           !m.repost.comment &&
+          !m.quotedMemory &&
           m.repost.originalId === mem.id,
       );
-      return hasRetweetedThisQuote || reposts.includes(mem.id);
+      return hasRetweetedThisQuote || reposts.includes(mem.id) || mem.viewerReposted === true;
+    }
+
+    if (typeof mem.viewerReposted === 'boolean') {
+      const rootId = mem.repost?.originalId || mem.id;
+      const existsLocally = reposts.includes(rootId) || reposts.includes(mem.id);
+      return mem.viewerReposted || existsLocally;
     }
 
     // Para reposts simples propios:
-    if (mem.repost && !mem.repost.comment && isOwnMemory(mem)) {
+    if (mem.repost && !mem.repost.comment && !mem.quotedMemory && isOwnMemory(mem)) {
       return true;
     }
 
@@ -283,17 +293,45 @@ export default function SocialFeed({
         isOwnMemory(m) &&
         m.repost &&
         !m.repost.comment &&
+        !m.quotedMemory &&
         (m.repost.originalId === rootId || m.repost.originalId === mem.id),
     );
     const existsLocally = reposts.includes(rootId) || reposts.includes(mem.id);
     return existsInFeed || existsLocally;
   }
 
-  async function handleUnrepost(mem: Memory) {
+  async function handleSimpleRepost(mem: Memory) {
+    if (!requireAuthentication()) return;
     const { targetId } = getTargetToRepost(mem, allMemories);
     try {
-      await eliminarRepost(targetId);
+      const res = await repostearPublicacion(targetId);
+      setReposts((current) => [...new Set([...current, targetId, mem.id])]);
+      onRepostCreated(targetId);
+      if (res?.cantidadReposts !== undefined) {
+        interactions.updateRepostCount(targetId, res.cantidadReposts);
+      } else {
+        interactions.incrementRepostCount(targetId, 1, mem.repostCount ?? 0);
+      }
+      remote.reload();
+      if (onReloadMemories) {
+        await onReloadMemories();
+      }
+    } catch (err) {
+      console.error("Error al repostear:", err);
+    }
+  }
+
+  async function handleUnrepost(mem: Memory) {
+    if (!requireAuthentication()) return;
+    const { targetId } = getTargetToRepost(mem, allMemories);
+    try {
+      const res = await quitarRepost(targetId);
       setReposts((current) => current.filter((id) => id !== targetId && id !== mem.id));
+      if (res?.cantidadReposts !== undefined) {
+        interactions.updateRepostCount(targetId, res.cantidadReposts);
+      } else {
+        interactions.incrementRepostCount(targetId, -1, mem.repostCount ?? 0);
+      }
       remote.reload();
       if (onReloadMemories) {
         await onReloadMemories();
@@ -301,6 +339,12 @@ export default function SocialFeed({
     } catch (err) {
       console.error("Error al deshacer repost:", err);
     }
+  }
+
+  function handleQuote(mem: Memory) {
+    if (!requireAuthentication()) return;
+    const { targetMemory: toRepost } = getTargetToRepost(mem, allMemories);
+    setRepostMemory(toRepost);
   }
 
   return (
@@ -342,15 +386,18 @@ export default function SocialFeed({
         )}
         <div className="feed-posts">
           {(selected ? [selected] : posts).map((memory) => {
-            const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
-            const isQuote = Boolean(memory.repost?.comment);
+            const isQuote = Boolean(
+              memory.quotedMemory ||
+              (memory.repost && (memory.repost.comment !== undefined || (memory.repost.id && memory.repost.id !== memory.repost.originalId)))
+            );
+            const isSimpleRepost = Boolean(memory.repost && !isQuote);
             const rootId = isSimpleRepost && memory.repost?.originalId ? memory.repost.originalId : memory.id;
             const targetMemory = isSimpleRepost
               ? (allMemories.find((m) => m.id === rootId) || memory)
               : memory;
             const quotedId = isQuote && memory.repost?.originalId ? memory.repost.originalId : undefined;
             const quotedMemory = quotedId
-              ? (allMemories.find((m) => m.id === quotedId) || {
+              ? (memory.quotedMemory || allMemories.find((m) => m.id === quotedId) || {
                   ...memory,
                   id: quotedId,
                   title: memory.title,
@@ -390,6 +437,7 @@ export default function SocialFeed({
                 rating={effectiveRating}
                 canRate={canRate}
                 reposted={isReposted}
+                repostCount={interactions.getRepostCount(targetKey, targetMemory.repostCount ?? 0)}
                 saved={saves.includes(memory.id)}
                 onDelete={onDelete}
                 onEdit={onEdit}
@@ -406,13 +454,14 @@ export default function SocialFeed({
                   if (!requireAuthentication()) return;
                   interactions.toggleLike(targetKey, targetMemory.viewerLiked, targetMemory.likeCount ?? 0);
                 }}
+                onSimpleRepost={() => handleSimpleRepost(memory)}
+                onUnrepost={() => handleUnrepost(memory)}
+                onQuote={() => handleQuote(memory)}
                 onRepost={() => {
-                  if (!requireAuthentication()) return;
                   if (isReposted) {
                     handleUnrepost(memory);
                   } else {
-                    const { targetMemory: toRepost } = getTargetToRepost(memory, allMemories);
-                    setRepostMemory(toRepost);
+                    handleSimpleRepost(memory);
                   }
                 }}
                 onSave={() => {
@@ -464,17 +513,13 @@ export default function SocialFeed({
             }
             const { targetId } = getTargetToRepost(repostMemory, allMemories);
             try {
-              const created = await compartirPublicacion(targetId, descripcion);
-              if (created && typeof created.id !== 'undefined') onRepostCreated(String(created.id));
-              if (!descripcion.trim()) {
-                setReposts((current) => [...new Set([...current, targetId])]);
-              }
+              await citarPublicacion(targetId, descripcion);
               remote.reload();
               if (onReloadMemories) {
                 await onReloadMemories();
               }
             } catch (err) {
-              console.error("Error al compartir en el servidor:", err);
+              console.error("Error al citar en el servidor:", err);
             } finally {
               setRepostMemory(null);
             }
