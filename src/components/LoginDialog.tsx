@@ -12,8 +12,8 @@ export default function LoginDialog({
   onSesionChange: () => void;
 }) {
   const [sesion, setSesion] = useState<UsuarioSesion | null>(null);
-  const [email, setEmail] = useState("nico@example.com");
-  const [contrasena, setContrasena] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [contrasena, setContrasena] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -178,7 +178,7 @@ export default function LoginDialog({
             </div>
 
             <div style={{ fontSize: "0.8rem", color: "var(--muted, #aaa)" }}>
-              Tip: Podés probar con <strong>nico@example.com</strong> y <strong>password123</strong>.
+              Usá el email y la contraseña de tu cuenta.
             </div>
 
             <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>

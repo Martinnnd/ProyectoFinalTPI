@@ -4,9 +4,10 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Grid3x3, Link2, Lock, MapPin, Plus, Repeat2, Send, Share2, UserRound, X } from "lucide-react";
 import MemoryMap from "./MemoryMap";
-import { describeTiers, resolveAchievements, resolveUserCategory } from "../data";
-import type { Achievement, Memory, Period, TierProgress } from "../types";
-import type { FollowedUser } from "../seguimientosApi";
+import { userTiers } from "../data";
+import type { Memory, Period } from "../types";
+import useUserProfile from "../hooks/useUserProfile";
+import { toAchievement } from "../profileApi";
 
 export default function Profile({
   onEdit,
@@ -14,15 +15,11 @@ export default function Profile({
   author,
   onBack,
   community,
-  memories,
-  allMemories,
+  userId,
+  onRequireLogin,
   repostedPublicationIds,
-  tierProgress,
-  followers,
-  followedUsers,
   period,
   selected,
-  earned,
   onSelect,
   onOpen,
   onAdd,
@@ -32,19 +29,21 @@ export default function Profile({
   author?: string;
   onBack?: () => void;
   community?: ReactNode;
-  memories: Memory[];
-  allMemories: Memory[];
+  userId: number | null;
+  onRequireLogin: () => void;
   repostedPublicationIds: string[];
-  tierProgress: TierProgress;
-  followers: FollowedUser[];
-  followedUsers: FollowedUser[];
   period: Period;
   selected: Memory | null;
-  earned: Achievement[];
   onOpen?: (memory: Memory) => void;
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
 }) {
+  const remote = useUserProfile(userId === null ? null : author ?? userId);
+  const profile = remote.data?.profile;
+  const allMemories = remote.data?.memories ?? [];
+  const followers = remote.data?.followers ?? [];
+  const followedUsers = remote.data?.following ?? [];
+  const displayName = [profile?.nombre, profile?.apellido].filter(Boolean).join(' ') || profile?.username || '';
   const followDialog = useRef<HTMLDialogElement>(null);
   const [followList, setFollowList] = useState<"followers" | "following">("followers");
   const mapDialog = useRef<HTMLDialogElement>(null);
@@ -87,10 +86,11 @@ export default function Profile({
   const [tiersOpen, setTiersOpen] = useState(false);
   const catalogueDialog = useRef<HTMLDialogElement>(null);
   const tiersDialog = useRef<HTMLDialogElement>(null);
-  const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
+  const catalogue = useMemo(() => profile?.logros.map(toAchievement) ?? [], [profile]);
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
-  const userCategory = resolveUserCategory(tierProgress);
-  const tiers = useMemo(() => describeTiers(tierProgress), [tierProgress]);
+  const userCategory = profile?.reputacion;
+  const currentTier = userTiers.findIndex(tier => tier.name === userCategory);
+  const tiers = userTiers.map((tier, index) => ({...tier, state: index === currentTier ? 'current' : index < currentTier ? 'reached' : 'locked'}));
   function openCatalogue() {
     setAchievementsOpen(true);
     catalogueDialog.current?.showModal();
@@ -107,6 +107,16 @@ export default function Profile({
     setTiersOpen(false);
     tiersDialog.current?.close();
   }
+  if (userId === null) return <main id="explore" className="personal-profile" aria-label="Mi perfil">
+    <p>Iniciá sesión para ver tu perfil y tus logros.</p>
+    <button className="primary-button" onClick={onRequireLogin}>Iniciar sesión</button>
+  </main>;
+  if (remote.error) return <main id="explore" className="personal-profile" aria-label="Perfil">
+    <p role="alert">{remote.error}</p><button onClick={remote.reload}>Reintentar</button>
+    <button onClick={onRequireLogin}>Iniciar sesión</button>
+    {author && <button onClick={onBack}>Volver al feed</button>}
+  </main>;
+  if (!profile) return <main id="explore" className="personal-profile"><p role="status">Cargando perfil y logros…</p></main>;
   return (
     <main id="explore" className="personal-profile" data-visitor={!!author} aria-label={author ? `Perfil de ${author}` : "Mi perfil"}>
       
@@ -115,18 +125,14 @@ export default function Profile({
       <div className="profile-era-bar"><span className="profile-era-mark" aria-hidden="true"><UserRound size={18}/></span><strong>{presentation.title}</strong><span className="profile-edition">{period.decade}—{period.decade + 9}</span></div>
       <header className="personal-header">
         <div className="profile-portrait" aria-hidden="true">
-          <span className="visitor-initial">{(author ?? "Nico").slice(0,1)}</span>
-          {!author && <img
-            src="/foto-perfil.jpg"
-            alt="Nico Gutierrez"
-            onError={event => {event.currentTarget.hidden = true;}}
-          />}
+          <span className="visitor-initial">{displayName.slice(0,1)}</span>
         </div>
         <div className="personal-identity">
           <div className="personal-identity-text">
             <span className="eyebrow">{presentation.label}</span>
             <div className="profile-name-row">
-            <h2>{author ?? "Nico Gutierrez"}</h2>
+            <h2>{displayName}</h2>
+            <span>@{profile.username}</span>
             {!author && <button
               className="profile-note"
               onClick={openTiers}
@@ -137,10 +143,10 @@ export default function Profile({
             </button>}
             </div>
         <div className="personal-counts">
-          <span><strong>{allMemories.length}</strong> Recuerdos</span>
+          <span><strong>{profile.cantidadPublicaciones}</strong> Recuerdos</span>
           {!author && <>
-            <button type="button" aria-haspopup="dialog" onClick={() => { setFollowList("followers"); followDialog.current?.showModal(); }}><strong>{followers.length}</strong> Seguidores</button>
-            <button type="button" aria-haspopup="dialog" onClick={() => { setFollowList("following"); followDialog.current?.showModal(); }}><strong>{followedUsers.length}</strong> Seguidos</button>
+            <button type="button" aria-haspopup="dialog" onClick={() => { setFollowList("followers"); followDialog.current?.showModal(); }}><strong>{profile.cantidadSeguidores}</strong> Seguidores</button>
+            <button type="button" aria-haspopup="dialog" onClick={() => { setFollowList("following"); followDialog.current?.showModal(); }}><strong>{profile.cantidadSeguidos}</strong> Seguidos</button>
           </>}
         </div>
           </div>
@@ -329,7 +335,7 @@ export default function Profile({
                   <div className="profile-repost-badge"><Repeat2 size={15} aria-hidden="true" /> Reposteado</div>
                 )}
                 <div className="memory-card-top">
-                  <div className="profile-post-author"><span className="profile-post-avatar" aria-hidden="true">{author ? author.slice(0,1) : <img src="/foto-perfil.jpg" alt="" />}</span><span><strong>{author ?? "Vos"}</strong><small>{memory.year} · {memory.category}</small></span></div>
+                  <div className="profile-post-author"><span className="profile-post-avatar" aria-hidden="true">{displayName.slice(0,1)}</span><span><strong>{displayName}</strong><small>{memory.year} · {memory.category}</small></span></div>
                   <MemoryOwnerActions memory={memory} onEdit={onEdit} onDelete={onDelete}/>
 
                   <div className="share-menu">
@@ -470,6 +476,9 @@ export default function Profile({
                   <span className="achievement-state">
                     {achievement.unlocked ? "Conseguida" : "Bloqueada"}
                   </span>
+                  {achievement.unlocked && achievement.unlockedAt && <time dateTime={achievement.unlockedAt}>
+                    {new Date(achievement.unlockedAt).toLocaleDateString('es-AR')}
+                  </time>}
                 </span>
               </li>
             ))}

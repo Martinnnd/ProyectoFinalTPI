@@ -12,18 +12,16 @@ import {
   categories,
   filterMemories,
   symbols,
-  type Achievement,
   type Category,
   type Decade,
   type Memory,
   type Period,
   type TierProgress,
 } from "./types";
-import { achievements, eraContent, resolveUserCategory } from "./data";
-import { totalGivenNostalgia, updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
+import { eraContent, resolveUserCategory } from "./data";
+import { updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
 import { getMemories, isOwnMemory, getSesion, type UsuarioSesion, eliminarPublicacion } from "./api";
 import LoginDialog from "./components/LoginDialog";
-import AchievementToast from "./components/AchievementToast";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
 import Profile from "./components/Profile";
@@ -129,8 +127,15 @@ export default function App() {
 
   useEffect(() => {
     setCurrentSesion(getSesion());
-    reloadMemories();
   }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    setDbMemories([]);
+    if (currentSesion) getMemories(controller.signal).then(data => {
+      if (!controller.signal.aborted) setDbMemories(data);
+    }).catch(error => { if (!controller.signal.aborted) setNotice(`No se pudieron cargar tus recuerdos: ${error.message}`); });
+    return () => controller.abort();
+  }, [currentSesion]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [deleting, setDeleting] = useState<Memory | null>(null);
@@ -138,13 +143,7 @@ export default function App() {
   const [draft, setDraft] = useState<Point | null>(null);
   const [draftHashtags, setDraftHashtags] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
-  const [celebrating, setCelebrating] = useState<Achievement | null>(null);
   const [ratings, setRatings] = useState<NostalgiaRatings>({});
-  const [firstFiveEarned, setFirstFiveEarned] = useState(false);
-  const earned: Achievement[] = [
-    ...(dbMemories.some(m => isOwnMemory(m)) ? [achievements[0]] : []),
-    ...(firstFiveEarned ? [achievements.find(achievement => achievement.id === '21')!] : []),
-  ];
   const tierProgress: TierProgress = {
     memories: dbMemories.filter(m => isOwnMemory(m)).length,
     points: 0,
@@ -155,10 +154,6 @@ export default function App() {
     if (!canRate) return;
     const next = updateNostalgiaRating(ratings, postId, score);
     setRatings(next);
-    if (!firstFiveEarned && totalGivenNostalgia(next) >= 5) {
-      setFirstFiveEarned(true);
-      setCelebrating(achievements.find(achievement => achievement.id === '21')!);
-    }
   }
   const [panelOpen, setPanelOpen] = useState(false);
   const [factsOpen, setFactsOpen] = useState(false);
@@ -222,7 +217,6 @@ export default function App() {
   const profileMemories = profileAuthor === null
     ? dbMemories.filter(m => isOwnMemory(m))
     : dbMemories.filter(m => m.author === profileAuthor);
-  const ownMemories = filterMemories(profileMemories, period, category);
   const visibleMemories = view === "profile" ? profileMemories : memories;
   const selected = remoteSelected?.id === selectedId ? remoteSelected : visibleMemories.find((m) => m.id === selectedId) ?? remotePins.find(m => m.id === selectedId) ?? null;
   function chooseScope(value:string) {
@@ -363,7 +357,6 @@ export default function App() {
       if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
       memory={...memory,groupId:scope};
     }
-    const isFirstMemory = dbMemories.filter(m => isOwnMemory(m)).length === 0;
 
     try {
       const { crearPublicacion } = await import("./api");
@@ -395,9 +388,6 @@ export default function App() {
       setDraftHashtags([]);
     }
     setNotice("¡Recuerdo guardado! Ya tiene su lugar en el mapa.");
-    // Hardcoded unlock: the very first memory the visitor creates earns badge 01.
-    // It only sets this state, so the popup never moves them off the current view.
-    if (isFirstMemory) setCelebrating(achievements[0]);
     window.setTimeout(() => addButton.current?.focus(), 0);
     return null;
   }
@@ -596,20 +586,15 @@ export default function App() {
           onEdit={editMemory}
           onDelete={deleteMemory}
           onOpen={openPublication}
-          key={profileAuthor ?? "own"}
+          key={`${currentSesion?.usuarioId ?? 'guest'}:${profileAuthor ?? 'own'}`}
           author={profileAuthor ?? undefined}
           onBack={() => {setSelectedId(null);setView("feed");}}
-          community={profileAuthor === null ? communityControls(true) : undefined}
-          memories={ownMemories}
-          allMemories={profileMemories}
+          userId={currentSesion?.usuarioId ?? null}
+          onRequireLogin={() => setLoginOpen(true)}
           repostedPublicationIds={repostedPublicationIds}
-          tierProgress={tierProgress}
-          followers={followers}
-          followedUsers={followingUsers}
           period={period}
           selected={selected}
-          earned={earned}
-          onSelect={(m) => setSelectedId(m?.id ?? null)}
+          onSelect={(m) => { selectedSeed.current = m; setRemoteSelected(m); setSelectedId(m?.id ?? null); }}
           onAdd={startAdding}
         />
       )}
@@ -687,13 +672,6 @@ export default function App() {
           </button>
         </div>
       )}
-      {celebrating && (
-        <AchievementToast
-          key={celebrating.id}
-          achievement={celebrating}
-          onDismiss={() => setCelebrating(null)}
-        />
-      )}
       {mapExpanded && view === "feed" && (
         <MapModal
           onOpen={openPublication}
@@ -723,7 +701,6 @@ export default function App() {
         onClose={() => setLoginOpen(false)}
         onSesionChange={() => {
           setCurrentSesion(getSesion());
-          getMemories().then(data => setDbMemories(data)).catch(console.error);
         }}
       />
     </div>

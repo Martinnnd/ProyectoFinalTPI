@@ -210,12 +210,11 @@ function dataURItoBlob(dataURI: string) {
     return new Blob([ab], { type: mimeString });
 }
 
-export async function getMemories() {
-    const response = await fetch(`${API_BASE_URL}/api/publicaciones`);
-    if (!response.ok) {
-        throw new Error(`Error fetching memories: ${response.statusText}`);
-    }
-    return await response.json();
+export async function getMemories(signal?: AbortSignal) {
+    const session = getSesion();
+    if (!session) return [];
+    const { getUserMemories } = await import('./profileApi');
+    return getUserMemories(session.usuarioId, signal);
 }
 
 export async function crearPublicacion(memory: any, autorId?: number): Promise<any> {
