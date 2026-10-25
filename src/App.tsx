@@ -2,6 +2,7 @@
 import DeleteMemoryDialog from "./components/DeleteMemoryDialog";
 
 import Chat from "./components/Chat";
+import Notification from "./components/Notification";
 import CommunityControls from "./components/CommunityControls";
 import GroupInfoModal from "./components/GroupInfoModal";
 import { filterCommunity } from "./groups";
@@ -764,6 +765,12 @@ export default function App() {
         {session && <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {
           setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);
         }}><MessageCircle/><span>Chat</span></button>}
+        {session && (
+          <Notification
+            hidden={picking || !!draft}
+            onOpenChat={() => { setView("chat"); setPicking(false); setPanelOpen(false); setFactsOpen(false); }}
+          />
+        )}
         {session ? <div className="account-navigation">
           <UserSearch
             currentUserId={session.usuarioId}
