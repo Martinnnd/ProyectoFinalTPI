@@ -8,14 +8,16 @@ Los logros solo se muestran desbloqueados cuando el backend ya los otorgó. No s
 
 ## Ejecutar
 
-Instalá las dependencias con `npm ci`. Creá `.env.local` (está ignorado por Git):
+Instalá las dependencias con `npm ci`. El frontend usa `http://localhost:5199` por defecto: no requiere crear `.env.local` para conectarse al perfil HTTP del backend. `.env.example` es solo una plantilla, Next.js no lo carga automáticamente.
+
+Si necesitás otra configuración, creá `.env.local` junto a `package.json` (está ignorado por Git), por ejemplo:
 
 ```dotenv
 NEXT_PUBLIC_API_BASE_URL=http://localhost:5199
 NEXT_PUBLIC_MAP_MODE=2d
 ```
 
-Adaptá la URL al backend local y reiniciá el frontend si cambia. El modo 2D permite probar sin un token Mapbox. No coloques credenciales de Cloudinary en este archivo.
+Adaptá la URL al backend local y reiniciá el frontend si cambia. Una variable existente en `.env`, `.env.local` o el proceso tiene prioridad sobre el valor predeterminado del código; si todavía apunta a `https://localhost:7014`, actualizala al puerto donde está escuchando tu backend. Las variables `NEXT_PUBLIC_` quedan incorporadas al compilar: si usás `npm run start`, volvé a ejecutar `npm run build` después de cambiarlas. El modo 2D permite probar sin un token Mapbox. No coloques credenciales de Cloudinary en este archivo.
 
 ```sh
 npm run dev

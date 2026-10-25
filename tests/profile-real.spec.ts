@@ -6,7 +6,9 @@ async function login(page: Page, email: string) {
   await page.getByRole('button', {name: 'Iniciar sesión', exact: true}).first().click();
   await page.locator('input[type=email]').fill(email);
   await page.locator('input[type=password]').fill('PruebaLogros123!');
+  const loginRequest = page.waitForRequest(request => request.url().endsWith('/api/auth/login') && request.method() === 'POST');
   await page.getByRole('button', {name: 'Ingresar', exact: true}).click();
+  expect((await loginRequest).url()).toBe(`${api}/api/auth/login`);
   await expect(page.getByRole('button', {name: /^Cuenta:/})).toBeVisible();
 }
 
@@ -25,7 +27,9 @@ test('logro real persiste al recargar y no se comparte entre cuentas', async ({p
   page.on('response', response => {
     if (response.url().startsWith(api) && response.status() >= 400) errors.push(`${response.status()} ${new URL(response.url()).pathname}`);
   });
+  const mapResponse = page.waitForResponse(response => response.url().includes('/api/publicaciones/mapa') && response.request().method() === 'GET');
   await page.goto('/explorar?era=1990');
+  expect((await mapResponse).status()).toBe(200);
   await login(page, users[0].email);
   await page.getByRole('button', {name: 'Perfil', exact: true}).click();
   const profile = page.getByRole('main', {name: 'Mi perfil', exact: true});

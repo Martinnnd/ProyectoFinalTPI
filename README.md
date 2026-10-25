@@ -32,12 +32,12 @@ Es un frontend completo de demostración, no una red social con backend. No hay 
 Crear .env.local en la raíz, tomando .env.example como plantilla:
 
 ```dotenv
-NEXT_PUBLIC_API_BASE_URL=https://localhost:7014
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5199
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=TU_TOKEN_PUBLICO
 NEXT_PUBLIC_MAP_MODE=auto
 ```
 
-Reemplazar TU_TOKEN_PUBLICO por el token propio que empieza con pk. La copia local preparada ya tiene el token; no se incluye en los archivos compartidos. .env.example permanece sin credenciales. No usar tokens sk. ni publicar .env.local.
+Reemplazar TU_TOKEN_PUBLICO por el token propio que empieza con pk. El repositorio no incluye un token Mapbox. .env.example permanece sin credenciales. No usar tokens sk. ni publicar .env.local. Para probar sin Mapbox, usar NEXT_PUBLIC_MAP_MODE=2d.
 
 En Vercel usar preset **Next.js**, comando npm run build y directorio de salida automático. Configurar NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN para Production y, si corresponde, Preview; redeploy después de cambiarla. No usar el nombre VITE_MAPBOX_ACCESS_TOKEN ni el directorio dist del prototipo. El token público es visible en el bundle por diseño; configurar los dominios permitidos en Mapbox, incluyendo localhost:3001 para pruebas.
 
@@ -101,7 +101,7 @@ Validación: `npm run check`, `npm test`, `npm run build` y `npx playwright test
 
 ## Conexión con el Backend y Usuarios de Prueba (Data Seeder)
 
-El frontend obtiene las publicaciones, el mapa y los feeds desde la API; no se conecta directamente a PostgreSQL ni a Neo4j. La URL se configura con `NEXT_PUBLIC_API_BASE_URL` en `.env.local`. El valor predeterminado es `https://localhost:7014`, correspondiente al perfil HTTPS del backend. Si se inicia solo el perfil HTTP, usar `http://localhost:5199`. Reiniciar `npm run dev` después de cambiar esta variable.
+El frontend obtiene las publicaciones, el mapa y los feeds desde la API; no se conecta directamente a PostgreSQL ni a Neo4j. Sin configuración adicional usa `http://localhost:5199`, correspondiente al perfil HTTP del backend. `.env.local` es opcional: permite configurar otra URL con `NEXT_PUBLIC_API_BASE_URL`. `.env.example` es una plantilla y no se carga automáticamente. Reiniciar `npm run dev` después de cambiar una variable. Si se usa `npm run start`, recompilar primero con `npm run build`.
 
 Cuando el backend se inicia por primera vez en desarrollo, su **Data Seeder** puebla automáticamente la base de datos con los usuarios y publicaciones históricas desde `seed.json`.
 

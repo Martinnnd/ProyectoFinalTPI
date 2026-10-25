@@ -1,4 +1,5 @@
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://localhost:7014").replace(/\/+$/, "");
+// Coincide con el perfil HTTP del backend, sin exigir un archivo local al clonar.
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://localhost:5199").replace(/\/+$/, "");
 
 export interface UsuarioSesion {
     token: string;
