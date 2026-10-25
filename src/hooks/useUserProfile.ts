@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getUserMemories, getUserProfile, type UserProfile } from '../profileApi';
 import { getSeguidores, getSeguidos, type FollowedUser } from '../seguimientosApi';
 import type { Memory } from '../types';
+import { ACHIEVEMENTS_UPDATED } from '../achievementEvents';
 
 type ProfileData = { profile: UserProfile; memories: Memory[]; followers: FollowedUser[]; following: FollowedUser[] };
 
@@ -10,6 +11,11 @@ export default function useUserProfile(user: number | string | null) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const refresh = () => setRevision(value => value + 1);
+    window.addEventListener(ACHIEVEMENTS_UPDATED, refresh);
+    return () => window.removeEventListener(ACHIEVEMENTS_UPDATED, refresh);
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     setResult(null); setError('');

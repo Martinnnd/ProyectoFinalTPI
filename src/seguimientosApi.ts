@@ -1,4 +1,5 @@
 import { API_BASE_URL, getSesion } from './api';
+import { notifyAchievementsChanged } from './achievementEvents';
 
 export type FollowedUser = { id: number; username: string };
 
@@ -12,6 +13,7 @@ async function request(path: string, options?: RequestInit): Promise<unknown> {
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
     throw new Error(fields || problem?.detail || problem?.mensaje || problem?.title || `No se pudo completar el seguimiento (${response.status}).`);
   }
+  if (options?.method && !['GET', 'HEAD'].includes(options.method.toUpperCase())) notifyAchievementsChanged();
   if (response.status === 204) return null;
   return response.json().catch(() => null);
 }

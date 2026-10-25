@@ -2,6 +2,7 @@ import { API_BASE_URL, getSesion } from './api';
 import { categories, type Category, type Memory, type Period } from './types';
 import { youtubeId } from './media';
 import type { MemoryComment } from './socialTypes';
+import { notifyAchievementsChanged } from './achievementEvents';
 
 export type MapBounds = { minLatitud: number; maxLatitud: number; minLongitud: number; maxLongitud: number };
 type Pin = { id: number; latitud: number; longitud: number; categoria: number | string };
@@ -19,7 +20,9 @@ export async function publicationRequest<T>(path: string, options?: RequestInit)
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
     throw new Error(fields || problem?.detail || problem?.title || `Error del servidor (${response.status}).`);
   }
-  return response.json();
+  const data = await response.json();
+  if (options?.method && !['GET', 'HEAD'].includes(options.method.toUpperCase())) notifyAchievementsChanged();
+  return data;
 }
 function category(value: number | string): Category {
   if (typeof value === 'number') return categories[value] ?? 'Personales';

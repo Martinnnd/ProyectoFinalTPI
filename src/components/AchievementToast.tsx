@@ -56,7 +56,7 @@ export default function AchievementToast({
         height={52}
       />
       <div className="achievement-toast-body">
-        <span className="achievement-toast-kicker">Insignia conseguida</span>
+        <span className="achievement-toast-kicker">¡Logro completado!</span>
         <strong>{achievement.name}</strong>
         <small>{achievement.description}</small>
       </div>

@@ -87,13 +87,6 @@ export const achievements: Achievement[] = [
     unlocked: false,
   },
   {
-    id: "09",
-    name: "Mecenas",
-    description: "Completaste 10 historias incompletas de tu barrio.",
-    image: "/logros/09_mecenas.png",
-    unlocked: false,
-  },
-  {
     id: "10",
     name: "Primera palabra",
     description: "Escribiste tu primera historia completa.",

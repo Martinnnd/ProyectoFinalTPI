@@ -1,3 +1,5 @@
+import { notifyAchievementsChanged } from './achievementEvents';
+
 // Coincide con el perfil HTTP del backend, sin exigir un archivo local al clonar.
 export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://localhost:5199").replace(/\/+$/, "");
 
@@ -143,6 +145,7 @@ export async function compartirPublicacion(originalId: string, descripcion: stri
         throw new Error(`Error en el backend: ${response.statusText}`);
     }
 
+    notifyAchievementsChanged();
     return await response.json();
 }
 
@@ -277,6 +280,7 @@ export async function crearPublicacion(memory: any, autorId?: number): Promise<a
         throw new Error(error || `Error ${response.status}`);
     }
 
+    notifyAchievementsChanged();
     return await response.json();
 }
 

@@ -44,7 +44,7 @@ const icons: Record<number, string> = {
   7: '02_cronista_local.png', 8: '04_voz_de_una_epoca.png', 9: '17_fotografoDelRecuerdo.png',
   10: '06_popular.png', 11: '08_generoso.png', 12: '11_conversador.png',
   14: '18_rachaDeHierro.png', 15: '05_decada_completa.png', 16: '07_leyenda.png',
-  17: '09_mecenas.png', 18: '14_influencer.png', 19: '19_rachaDeOro.png',
+  18: '14_influencer.png', 19: '19_rachaDeOro.png',
 };
 
 export function toAchievement(logro: AchievementState): Achievement {

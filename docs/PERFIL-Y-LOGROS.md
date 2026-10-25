@@ -6,6 +6,10 @@ El perfil carga nombre, username, reputación, contadores, publicaciones, seguid
 
 Los logros solo se muestran desbloqueados cuando el backend ya los otorgó. No se deducen de contadores del navegador. Los logros que no tengan todavía una acción implementada en el backend permanecerán bloqueados.
 
+El catálogo actual contiene 17 logros. «Melómano», «Turista del Pasado» y «Mecenas» se retiraron mediante una migración del backend, sin cambiar los IDs de los demás.
+
+El cartel «¡Logro completado!» usa los desbloqueos confirmados por el servidor. Se consulta después de las acciones confirmadas por la API, como crear recuerdos, comentar, dar likes o seguir usuarios. También se comprueban cambios al volver a la pestaña y cada 30 segundos mientras está visible, para detectar logros otorgados por acciones de otras personas. Si llegan varios, los avisos se muestran en orden. La primera consulta al iniciar sesión establece una referencia: no vuelve a anunciar los logros anteriores. Al cambiar de cuenta se descartan los avisos pendientes.
+
 ## Ejecutar
 
 Instalá las dependencias con `npm ci`. El frontend usa `http://localhost:5199` por defecto: no requiere crear `.env.local` para conectarse al perfil HTTP del backend. `.env.example` es solo una plantilla, Next.js no lo carga automáticamente.

@@ -22,6 +22,8 @@ import { eraContent, resolveUserCategory } from "./data";
 import { updateNostalgiaRating, type NostalgiaRatings } from "./nostalgiaRatings";
 import { getMemories, isOwnMemory, getSesion, type UsuarioSesion, eliminarPublicacion } from "./api";
 import LoginDialog from "./components/LoginDialog";
+import AchievementToast from "./components/AchievementToast";
+import useAchievementNotifications from "./hooks/useAchievementNotifications";
 import MapModal from "./components/MapModal";
 import MainMap from "./components/MainMap";
 import Profile from "./components/Profile";
@@ -80,6 +82,7 @@ export default function App() {
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const [loginOpen, setLoginOpen] = useState(false);
   const [currentSesion, setCurrentSesion] = useState<UsuarioSesion | null>(null);
+  const achievementNotice = useAchievementNotifications(currentSesion?.usuarioId ?? null);
   const currentUserId = currentSesion?.usuarioId ?? 1;
   const following = followingUsers.map(user => user.username);
 
@@ -696,6 +699,11 @@ export default function App() {
           onSave={save}
         />
       )}
+      {achievementNotice.achievement && <AchievementToast
+        key={`${currentSesion?.usuarioId}:${achievementNotice.achievement.id}`}
+        achievement={achievementNotice.achievement}
+        onDismiss={achievementNotice.dismiss}
+      />}
       <LoginDialog
         isOpen={loginOpen}
         onClose={() => setLoginOpen(false)}
