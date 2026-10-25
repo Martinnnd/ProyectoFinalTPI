@@ -4,7 +4,7 @@ import MemoryMap, { type Point } from "./MemoryMap";
 import PlaceSearch from "./PlaceSearch";
 const MapboxMap = lazy(() => import("./MapboxMap"));
 export type MapProps = ComponentProps<typeof MemoryMap>;
-export default function MainMap(props: MapProps) {
+export default function MainMap({onUserLocation, ...props}: MapProps & {onUserLocation?: (point: Point | null) => void}) {
   const token =
     process.env.NEXT_PUBLIC_MAP_MODE === "2d"
       ? undefined
@@ -23,21 +23,28 @@ export default function MainMap(props: MapProps) {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     if (!("geolocation" in navigator)) {
+      onUserLocation?.(null);
       setLocationResolved(true);
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setUserLocation({
+        if (cancelled) return;
+        const point = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-        });
+        };
+        setUserLocation(point);
+        onUserLocation?.(point);
         setLocationResolved(true);
       },
       () => {
+        if (cancelled) return;
         setUserLocation(null);
+        onUserLocation?.(null);
         setLocationResolved(true);
       },
       {
@@ -46,7 +53,8 @@ export default function MainMap(props: MapProps) {
         maximumAge: 300000,
       },
     );
-  }, []);
+    return () => { cancelled = true; };
+  }, [onUserLocation]);
 
   const mapProps = {
     ...props,

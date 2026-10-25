@@ -43,6 +43,7 @@ import { getMapPublications, getPublication, publicationId, type MapBounds } fro
 import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from './seguimientosApi';
 
 export default function App() {
+  const [userLocation, setUserLocation] = useState<Point | null>(null);
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const reportBounds = useCallback((next: MapBounds) => setBounds(current => JSON.stringify(current) === JSON.stringify(next) ? current : next), []);
   const [remotePins, setRemotePins] = useState<Memory[]>([]);
@@ -347,7 +348,7 @@ export default function App() {
     setNotice("Recuerdo actualizado.");
     return null;
   }
-  async function save(memory: Memory, gpsUsuario?: Point) {
+  async function save(memory: Memory) {
     const destinationGroup=groups.find(g=>g.id===scope);
     if(destinationGroup) {
       if(memory.year < destinationGroup.decade || memory.year > destinationGroup.decade+9) return `Elegí un año entre ${destinationGroup.decade} y ${destinationGroup.decade+9} para este grupo.`;
@@ -356,7 +357,7 @@ export default function App() {
 
     try {
       const { crearPublicacion } = await import("./api");
-      const res = await crearPublicacion(memory, undefined, gpsUsuario);
+      const res = await crearPublicacion(memory, undefined, userLocation ?? undefined);
       if (res && res.id) {
         memory = { ...memory, id: res.id.toString() };
       }
@@ -434,6 +435,7 @@ export default function App() {
       </a>
         <main id="explore" className="map-canvas" style={view === 'map' ? undefined : { display: 'none' }}>
           <MainMap
+            onUserLocation={setUserLocation}
             active={view === 'map'}
             showEmptyState={false}
             onBoundsChange={reportBounds}

@@ -37,16 +37,56 @@ test('los botones guardan, recuperan y quitan una puntuación real', async ({pag
   expect(removed.miPuntuacion).toBeNull();
 });
 
-test('el formulario pide GPS con permiso explícito', async ({page, context}) => {
-  await context.grantPermissions(['geolocation']);
-  await context.setGeolocation({latitude: -34.6, longitude: -58.4});
+for (const allowed of [true, false]) test(`publicar reutiliza el permiso inicial del mapa: ${allowed ? 'aceptado' : 'rechazado'}`, async ({page, context}) => {
+  if (allowed) {
+    await context.grantPermissions(['geolocation']);
+    await context.setGeolocation({latitude: -34.6, longitude: -58.4});
+  }
+  await page.addInitScript(allow => {
+    const state = window as Window & {geoRequests?: number; initialLocationReady?: boolean};
+    state.geoRequests = 0;
+    const original = navigator.geolocation.getCurrentPosition.bind(navigator.geolocation);
+    navigator.geolocation.getCurrentPosition = (success, error, options) => {
+      state.geoRequests!++;
+      if (!allow) {
+        state.initialLocationReady = true;
+        error?.({code: 1, message: 'Permiso denegado'} as GeolocationPositionError);
+        return;
+      }
+      original(position => { state.initialLocationReady = true; success(position); }, error, options);
+    };
+  }, allowed);
+  let body = '';
+  await page.route(`${api}/api/publicaciones`, async route => {
+    if (route.request().method() !== 'POST') return route.continue();
+    body = route.request().postData() || '';
+    await route.fulfill({status: 400, headers: {'access-control-allow-origin': new URL(page.url()).origin}, json: {detail: 'Prueba de envío GPS'}});
+  });
   await page.goto('/explorar?era=1990');
+  await page.waitForFunction(() => (window as Window & {initialLocationReady?: boolean}).initialLocationReady);
+  await page.getByRole('button', {name: 'Iniciar sesión', exact: true}).click();
+  await page.locator('input[type=email]').fill('miguel@example.com');
+  await page.locator('input[type=password]').fill('password123');
+  await page.getByRole('button', {name: 'Ingresar', exact: true}).click();
+  await expect(page.getByRole('button', {name: /^Cuenta:/})).toBeVisible();
   await page.getByRole('button', {name: 'Recordar', exact: true}).click();
   await page.locator('#explore .memory-map').click({position: {x: 350, y: 240}});
   const dialog = page.getByRole('dialog', {name: '¿Qué pasó en este lugar?'});
-  await expect(dialog).toBeVisible();
-  await dialog.getByRole('button', {name: 'Usar mi ubicación actual para Cronista Local'}).click();
-  await expect(dialog.getByRole('status')).toContainText('Ubicación actual lista');
+  await expect(dialog.getByRole('button', {name: /Usar mi ubicación/})).toHaveCount(0);
+  await dialog.getByRole('textbox', {name: 'Título del recuerdo'}).fill('Recuerdo con ubicación inicial');
+  await dialog.getByRole('textbox', {name: 'Nombre del lugar'}).fill('Buenos Aires');
+  await dialog.getByRole('textbox', {name: 'Tu historia'}).fill('Una historia de prueba');
+  await dialog.getByLabel('O pegá un enlace HTTPS al archivo').fill('https://example.test/foto.jpg');
+  await dialog.getByRole('button', {name: 'Guardar recuerdo', exact: true}).click();
+  await expect(dialog.getByRole('alert')).toContainText('Prueba de envío GPS');
+  if (allowed) {
+    expect(body).toContain('name="GpsLatitud"\r\n\r\n-34.6');
+    expect(body).toContain('name="GpsLongitud"\r\n\r\n-58.4');
+  } else {
+    expect(body).not.toContain('name="GpsLatitud"');
+    expect(body).not.toContain('name="GpsLongitud"');
+  }
+  expect(await page.evaluate(() => (window as Window & {geoRequests?: number}).geoRequests)).toBe(1);
 });
 
 test('publicar muestra el error HTTP real y conserva el formulario', async ({page}) => {
