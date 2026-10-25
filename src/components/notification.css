@@ -1,0 +1,179 @@
+/* ─── Navigation rail ────────────────────────────────────────────────────── */
+.notif-dock {
+  position: static;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.notif-launcher {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 18px;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  color: var(--ink);
+  margin-left: auto;
+  font: 13px var(--font-body);
+}
+
+.navigation-rail .notif-launcher {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+  color: inherit;
+  margin: 0;
+  font: inherit;
+}
+
+.navigation-rail .notif-launcher strong {
+  font: inherit;
+}
+
+.notif-badge {
+  background: var(--accent);
+  color: var(--surface);
+  font: bold 10px Arial;
+  border-radius: 50%;
+  padding: 4px 6px;
+}
+
+/* ─── Popup ──────────────────────────────────────────────────────────────── */
+.notif-popup {
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  color: var(--ink);
+}
+
+/* Popup en modo flotante (sin taskbar slot): posicionado fijo en pantalla */
+.app > .notif-popup {
+  position: fixed;
+  right: 24px;
+  bottom: 148px;
+  z-index: 700;
+  margin: 0;
+  max-height: calc(100dvh - 180px);
+  overflow: auto;
+}
+
+/* Cabecera */
+.notif-titlebar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--soft);
+  border-bottom: 1px solid var(--line);
+  color: var(--accent);
+}
+.notif-titlebar strong { flex: 1; font-size: 14px; }
+.notif-titlebar .icon-button { color: inherit; width: 30px; height: 30px; }
+
+/* Acción marcar todas como leídas */
+.notif-actions {
+  display: flex; justify-content: flex-end;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.notif-mark-all {
+  background: none; border: none; cursor: pointer;
+  font: 11px var(--font-body);
+  color: var(--accent);
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+.notif-mark-all:hover { background: var(--soft); }
+.notif-mark-all:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Lista */
+.notif-list { max-height: 370px; overflow-y: auto; }
+.notif-empty {
+  padding: 24px 16px; font-size: 13px;
+  color: var(--muted); text-align: center; margin: 0;
+}
+.notif-loading { padding: 16px; font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Ítem */
+.notif-item {
+  display: flex; width: 100%; text-align: left;
+  gap: 10px; align-items: flex-start;
+  padding: 14px 16px;
+  border: 0; border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink); font: inherit;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.notif-item:last-child { border-bottom: 0; }
+.notif-item:hover { background: var(--soft); }
+.notif-item.unread { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.notif-item.unread:hover { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
+
+.notif-item-icon {
+  flex-shrink: 0; display: grid; place-items: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--soft); border: 1px solid var(--line); color: var(--accent);
+}
+.notif-unread-dot {
+  flex-shrink: 0; align-self: center;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.notif-item-body { flex: 1; min-width: 0; }
+.notif-item-body p {
+  margin: 0 0 4px; font-size: 13px; line-height: 1.4;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.notif-item-body time { font-size: 11px; color: var(--muted); }
+
+.notif-error {
+  padding: 9px 14px; font-size: 11px;
+  color: var(--error, #c0392b); border-top: 1px solid var(--line);
+}
+
+/* ─── Popup in the app layer ────────────────────────────────────────────── */
+@media (min-width: 900px) {
+  /* The popup is portaled to .app to avoid clipping inside the navigation rail. */
+  .app > #notif-popup {
+    position: fixed;
+    right: 24px;
+    bottom: 148px;
+    z-index: 700;
+    margin: 0;
+    max-height: calc(100dvh - 180px);
+    overflow: auto;
+    text-align: left; letter-spacing: normal;
+  }
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 899px) {
+  .notif-dock {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+  .navigation-rail .notif-dock .notif-launcher {
+    width: 100%;
+    min-width: 0;
+  }
+  .navigation-rail .notif-launcher { padding: 0; }
+  .app > #notif-popup {
+    position: fixed;
+    right: 12px;
+    bottom: 200px;
+    z-index: 700;
+    max-height: calc(100dvh - 220px);
+    overflow: auto;
+  }
+}
+
+/* ─── Focus visible ──────────────────────────────────────────────────────── */
+.notif-dock button:focus-visible,
+.notif-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }

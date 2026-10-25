@@ -13,6 +13,7 @@ import UserSearch from "../UserSearch";
 import AuthMenu from "../auth/AuthMenu";
 import { useRatings } from "../../context/RatingsContext";
 import AchievementToast from "../AchievementToast";
+import Notification from "../Notification";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -226,6 +227,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <MessageCircle />
             <span>Chat</span>
           </button>
+        )}
+        {session && (
+          <Notification
+            hidden={false}
+            onOpenChat={() => {
+              setPanelOpen(false);
+              setFactsOpen(false);
+              router.push("/chat");
+            }}
+          />
         )}
         {session ? (
           <div className="account-navigation">
