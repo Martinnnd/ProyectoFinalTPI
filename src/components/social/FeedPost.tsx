@@ -22,6 +22,7 @@ export default function FeedPost({
   rating,
   canRate,
   reposted,
+  repostCount,
   saved,
   quotedMemory,
   onDelete,
@@ -34,6 +35,9 @@ export default function FeedPost({
   onRate,
   onLike,
   onRepost,
+  onSimpleRepost,
+  onUnrepost,
+  onQuote,
   onSave,
   onHashtag,
 }: {
@@ -47,6 +51,7 @@ export default function FeedPost({
   rating?: number;
   canRate: boolean;
   reposted: boolean;
+  repostCount?: number;
   saved: boolean;
   quotedMemory?: Memory;
   onDelete: (memory: Memory) => void;
@@ -58,7 +63,10 @@ export default function FeedPost({
   onMap: (memory: Memory) => void;
   onRate: (value: number) => void;
   onLike: () => void;
-  onRepost: () => void;
+  onRepost?: () => void;
+  onSimpleRepost?: (memory: Memory) => void;
+  onUnrepost?: (memory: Memory) => void;
+  onQuote?: (memory: Memory) => void;
   onSave: () => void;
   onHashtag: (tag: string) => void;
 }) {
@@ -89,7 +97,23 @@ export default function FeedPost({
       {isSimpleRepost && (
         <div className="repost-header-badge" style={{ padding: '0.5rem 1rem 0', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
           <Repeat2 size={14} />
-          <span>{isReposterOwn ? "Has reposteado" : `${reposterDisplay} ha reposteado`}</span>
+          {isReposterOwn ? (
+            <span>Has reposteado</span>
+          ) : (
+            <span>
+              <button
+                type="button"
+                style={{ background: 'none', border: 'none', padding: 0, color: 'inherit', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onProfile({ ...memory, author: memory.author });
+                }}
+              >
+                {reposterDisplay}
+              </button>{" "}
+              ha reposteado
+            </span>
+          )}
         </div>
       )}
       <div className={`post-composition${splitPhoto ? ' has-split-photo' : ''}`}>
@@ -268,9 +292,22 @@ export default function FeedPost({
         likeCount={likeCount ?? memory.likeCount}
         commentCount={commentCount}
         reposted={reposted}
+        repostCount={repostCount ?? memory.repostCount}
         saved={saved}
         onLike={onLike}
         onOpenComments={() => onOpen(memory)}
+        onSimpleRepost={() => {
+          if (onSimpleRepost) onSimpleRepost(memory);
+          else onRepost?.();
+        }}
+        onUnrepost={() => {
+          if (onUnrepost) onUnrepost(memory);
+          else onRepost?.();
+        }}
+        onQuote={() => {
+          if (onQuote) onQuote(memory);
+          else onRepost?.();
+        }}
         onRepost={onRepost}
         onSave={onSave}
       />

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Repeat2 } from "lucide-react";
+import { X, Quote } from "lucide-react";
 
 export default function RepostDialog({
   memoryTitle,
@@ -20,8 +20,9 @@ export default function RepostDialog({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!descripcion.trim()) return;
     setSubmitting(true);
-    onConfirm(descripcion);
+    onConfirm(descripcion.trim());
   }
 
   return (
@@ -36,7 +37,7 @@ export default function RepostDialog({
       onKeyDown={(e) => e.stopPropagation()}
     >
       <header className="dialog-heading">
-        <span><Repeat2 size={16} style={{ display: 'inline', verticalAlign: 'middle' }}/> Repostear</span>
+        <span><Quote size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}/> Citar recuerdo</span>
         <button
           type="button"
           className="icon-button"
@@ -51,15 +52,16 @@ export default function RepostDialog({
       <form onSubmit={handleSubmit}>
         <div style={{ padding: '0 1rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label htmlFor="repost-desc">¿Quieres agregar un comentario a "{memoryTitle}"?</label>
+            <label htmlFor="repost-desc">¿Qué querés agregar sobre <strong>"{memoryTitle}"</strong>?</label>
             <textarea
               id="repost-desc"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               disabled={submitting}
-              placeholder="Escribe algo de forma opcional..."
+              placeholder="Escribe tu reflexión, contexto o anécdota..."
               rows={3}
               autoFocus
+              required
             />
           </div>
         </div>
@@ -73,12 +75,18 @@ export default function RepostDialog({
           >
             Cancelar
           </button>
-          <button type="submit" className="primary-button" disabled={submitting}>
-            {submitting ? "Compartiendo..." : "Repostear"}
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={submitting || !descripcion.trim()}
+          >
+            {submitting ? "Publicando..." : "Publicar cita"}
           </button>
         </footer>
       </form>
     </dialog>
   );
 }
+
+export { RepostDialog as CitarDialog };
 

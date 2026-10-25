@@ -37,49 +37,68 @@ function requireSession(): AuthSession {
     return session;
 }
 
-export async function compartirPublicacion(originalId: string, descripcion: string, autorId?: number) {
+export async function repostearPublicacion(id: string, autorId?: number) {
     const sesion = requireSession();
-    const finalAutorId = sesion.usuarioId;
-    const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1; 
+    const finalAutorId = autorId ?? sesion.usuarioId;
+    const numericId = parseInt(id.replace(/\D/g, ''), 10) || 1;
 
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-    };
-    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/compartir`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-            publicacionOriginalId: numericId,
-            descripcion: descripcion,
-            autorId: finalAutorId
-        })
+    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/${numericId}/repost?usuarioId=${finalAutorId}`, {
+        method: 'POST'
     });
 
     if (!response.ok) {
-        throw new Error(`Error en el backend: ${response.statusText}`);
+        throw new Error(`Error en el backend al repostear: ${response.statusText}`);
     }
 
     return await response.json();
 }
 
-export async function eliminarRepost(originalId: string, autorId?: number) {
+export async function quitarRepost(id: string, autorId?: number) {
     const sesion = requireSession();
-    const finalAutorId = sesion.usuarioId;
-    const numericId = parseInt(originalId.replace(/\D/g, ''), 10) || 1;
+    const finalAutorId = autorId ?? sesion.usuarioId;
+    const numericId = parseInt(id.replace(/\D/g, ''), 10) || 1;
 
-    const url = finalAutorId !== undefined
-        ? `${API_BASE_URL}/api/publicaciones/compartir/${numericId}?autorId=${finalAutorId}`
-        : `${API_BASE_URL}/api/publicaciones/compartir/${numericId}`;
-
-    const response = await apiFetch(url, {
+    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/${numericId}/repost?usuarioId=${finalAutorId}`, {
         method: 'DELETE'
     });
 
     if (!response.ok) {
-        throw new Error(`Error en el backend al eliminar repost: ${response.statusText}`);
+        throw new Error(`Error en el backend al quitar repost: ${response.statusText}`);
     }
 
-    return await response.json().catch(() => ({}));
+    return await response.json();
+}
+
+export async function citarPublicacion(id: string, descripcion: string, autorId?: number) {
+    const sesion = requireSession();
+    const finalAutorId = autorId ?? sesion.usuarioId;
+    const numericId = parseInt(id.replace(/\D/g, ''), 10) || 1;
+
+    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/${numericId}/citar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            autorId: finalAutorId,
+            descripcion: descripcion.trim()
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error en el backend al citar: ${response.statusText}`);
+    }
+
+    return await response.json();
+}
+
+export async function compartirPublicacion(originalId: string, descripcion: string, autorId?: number) {
+    if (!descripcion || !descripcion.trim()) {
+        return await repostearPublicacion(originalId, autorId);
+    }
+    return await citarPublicacion(originalId, descripcion, autorId);
+}
+
+export async function eliminarRepost(originalId: string, autorId?: number) {
+    return await quitarRepost(originalId, autorId);
 }
 
 export async function eliminarPublicacion(id: string, autorId?: number) {

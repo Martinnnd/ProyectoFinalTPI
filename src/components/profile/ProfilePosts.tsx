@@ -7,7 +7,7 @@ import useMemoryInteractions from "../../hooks/useMemoryInteractions";
 import { useRatings } from "../../context/RatingsContext";
 import { useFollow } from "../../context/FollowContext";
 import { useAuth } from "../auth/AuthProvider";
-import { compartirPublicacion, isOwnMemory } from "../../api";
+import { repostearPublicacion, quitarRepost, citarPublicacion, isOwnMemory } from "../../api";
 
 const ProfilePosts = forwardRef<HTMLElement, {
   author?: string;
@@ -58,12 +58,15 @@ const ProfilePosts = forwardRef<HTMLElement, {
       {sortedMemories.length ? (
         <div className="feed-posts profile-feed-posts">
           {sortedMemories.map((memory) => {
-            const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
-            const isQuote = Boolean(memory.repost?.comment);
+            const isQuote = Boolean(
+              memory.quotedMemory ||
+              (memory.repost && (memory.repost.comment !== undefined || (memory.repost.id && memory.repost.id !== memory.repost.originalId)))
+            );
+            const isSimpleRepost = Boolean(memory.repost && !isQuote);
             const rootId = isSimpleRepost && memory.repost?.originalId ? memory.repost.originalId : memory.id;
             const quotedId = isQuote && memory.repost?.originalId ? memory.repost.originalId : undefined;
             const quotedMemory = quotedId
-              ? memories.find((m) => m.id === quotedId) || {
+              ? memory.quotedMemory || memories.find((m) => m.id === quotedId) || {
                   ...memory,
                   id: quotedId,
                   title: memory.title,
@@ -74,11 +77,21 @@ const ProfilePosts = forwardRef<HTMLElement, {
               : undefined;
 
             const targetKey = isSimpleRepost ? rootId : memory.id;
-            const isReposted =
-              reposts.includes(memory.id) ||
-              reposts.includes(rootId) ||
-              repostedPublicationIds.includes(memory.id) ||
-              Boolean(memory.repost && isOwnMemory(memory));
+            let isReposted = false;
+            if (isQuote) {
+              isReposted = reposts.includes(memory.id) || memory.viewerReposted === true;
+            } else if (isSimpleRepost) {
+              isReposted =
+                Boolean(isOwnMemory(memory)) ||
+                reposts.includes(rootId) ||
+                reposts.includes(memory.id) ||
+                memory.viewerReposted === true;
+            } else {
+              isReposted =
+                reposts.includes(memory.id) ||
+                repostedPublicationIds.includes(memory.id) ||
+                memory.viewerReposted === true;
+            }
 
             const effectivePoints = pointsMap?.[targetKey] ?? memory.points ?? 0;
             const effectiveRating = ratings[targetKey] ?? memory.viewerRating;
@@ -95,7 +108,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
 
             return (
               <FeedPost
-                key={memory.id}
+                key={memory.repost ? `${memory.id}-repost-${memory.author}-${memory.createdAt ?? ""}` : memory.id}
                 memory={effectiveMemory}
                 active={true}
                 selected={selected?.id === memory.id}
@@ -106,6 +119,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                 rating={effectiveRating}
                 canRate={Boolean(session)}
                 reposted={isReposted}
+                repostCount={interactions.getRepostCount(targetKey, memory.repostCount ?? 0)}
                 saved={saves.includes(memory.id)}
                 quotedMemory={quotedMemory}
                 onDelete={onDelete}
@@ -131,12 +145,72 @@ const ProfilePosts = forwardRef<HTMLElement, {
                   }
                   interactions.toggleLike(targetKey, memory.viewerLiked, memory.likeCount ?? 0);
                 }}
-                onRepost={() => {
+                onSimpleRepost={async () => {
+                  if (!session) {
+                    router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
+                    return;
+                  }
+                  try {
+                    const res = await repostearPublicacion(targetKey);
+                    setReposts((curr) => [...new Set([...curr, memory.id, rootId])]);
+                    if (res?.cantidadReposts !== undefined) {
+                      interactions.updateRepostCount(targetKey, res.cantidadReposts);
+                    } else {
+                      interactions.incrementRepostCount(targetKey, 1, memory.repostCount ?? 0);
+                    }
+                    setNotice("Recuerdo reposteado.");
+                  } catch (err) {
+                    console.error("Error al repostear:", err);
+                  }
+                }}
+                onUnrepost={async () => {
+                  if (!session) return;
+                  try {
+                    const res = await quitarRepost(targetKey);
+                    setReposts((curr) => curr.filter((id) => id !== memory.id && id !== rootId));
+                    if (res?.cantidadReposts !== undefined) {
+                      interactions.updateRepostCount(targetKey, res.cantidadReposts);
+                    } else {
+                      interactions.incrementRepostCount(targetKey, -1, memory.repostCount ?? 0);
+                    }
+                    setNotice("Repost eliminado.");
+                  } catch (err) {
+                    console.error("Error al quitar repost:", err);
+                  }
+                }}
+                onQuote={() => {
                   if (!session) {
                     router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
                     return;
                   }
                   setRepostMemory(memory);
+                }}
+                onRepost={() => {
+                  if (!session) {
+                    router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
+                    return;
+                  }
+                  if (isReposted) {
+                    quitarRepost(targetKey).then((res) => {
+                      setReposts((curr) => curr.filter((id) => id !== memory.id && id !== rootId));
+                      if (res?.cantidadReposts !== undefined) {
+                        interactions.updateRepostCount(targetKey, res.cantidadReposts);
+                      } else {
+                        interactions.incrementRepostCount(targetKey, -1, memory.repostCount ?? 0);
+                      }
+                      setNotice("Repost eliminado.");
+                    });
+                  } else {
+                    repostearPublicacion(targetKey).then((res) => {
+                      setReposts((curr) => [...new Set([...curr, memory.id, rootId])]);
+                      if (res?.cantidadReposts !== undefined) {
+                        interactions.updateRepostCount(targetKey, res.cantidadReposts);
+                      } else {
+                        interactions.incrementRepostCount(targetKey, 1, memory.repostCount ?? 0);
+                      }
+                      setNotice("Recuerdo reposteado.");
+                    });
+                  }
                 }}
                 onSave={() => {
                   setSaves((curr) =>
@@ -161,13 +235,10 @@ const ProfilePosts = forwardRef<HTMLElement, {
           onCancel={() => setRepostMemory(null)}
           onConfirm={async (descripcion) => {
             try {
-              const res = await compartirPublicacion(repostMemory.id, descripcion);
-              if (res && res.id) {
-                setReposts((curr) => [...new Set([...curr, repostMemory.id, String(res.id)])]);
-              }
-              setNotice("Publicación compartida.");
+              await citarPublicacion(repostMemory.id, descripcion);
+              setNotice("Cita publicada.");
             } catch (err) {
-              console.error("Error al compartir:", err);
+              console.error("Error al citar:", err);
             } finally {
               setRepostMemory(null);
             }

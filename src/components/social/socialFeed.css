@@ -414,6 +414,30 @@
   filter: drop-shadow(0 0 1px rgba(16, 185, 129, 0.5));
 }
 
+.repost-menu-panel {
+  min-width: 170px;
+}
+
+.repost-menu-panel button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: left;
+  transition: background 120ms ease;
+}
+
+.repost-menu-panel button:hover {
+  background: var(--soft, rgba(0, 0, 0, 0.05));
+}
+
 .quoted-post-box {
   transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
 }
