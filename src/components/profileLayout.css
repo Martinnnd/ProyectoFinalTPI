@@ -99,10 +99,9 @@
 .app.view-profile .achievement-rail { margin:4px 0; max-width:140px; }
 .app.view-profile .achievement-rail img { width:28px; height:28px; }
 .app.view-profile .achievements-browse { padding:4px 7px; font-size:10px; }
-.app.view-profile .profile-shortcuts { padding:10px 14px; gap:8px; }
+.app.view-profile .profile-shortcuts { padding:10px 14px; gap:8px; margin-bottom:0; }
 .app.view-profile .profile-shortcuts button { padding:7px 10px; font-size:12px; }
-.app.view-profile .profile-posts { width:100%; max-width:none; margin:16px 0 0; }
-.app.view-profile .profile-posts > .personal-section-title { margin-bottom:12px; }
+.app.view-profile .profile-posts { width:100%; max-width:none; margin:8px 0 0; }
 .app.view-profile .profile-feed-posts { display:flex; flex-direction:column; width:100%; }
 .app.view-profile .profile-feed-posts .feed-post { width:100%; }
 @media(max-width:899px) {

@@ -8,7 +8,6 @@ import {
   TileLayer,
   Tooltip,
   useMapEvents,
-  ZoomControl,
 } from "react-leaflet";
 import L from "leaflet";
 import { LocateFixed, MapPin, RotateCcw } from "lucide-react";
@@ -232,7 +231,6 @@ export default function MemoryMap({
           attributionControl
           zoomControl={false}
         >
-          <ZoomControl position="bottomright" />
           <TileLayer
             key={retry}
             url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"

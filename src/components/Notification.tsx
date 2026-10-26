@@ -4,15 +4,12 @@ import { createPortal } from "react-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Bell,
-  ChevronUp,
   MessageCircle,
   Minus,
   User,
-  BookOpen,
   Star,
   Trophy,
   Mail,
-  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./auth/AuthProvider";
@@ -234,24 +231,22 @@ export default function Notification({
   );
 
   const dock = (
-    <div className="notif-dock">
       <button
         ref={trigger}
         className="notif-launcher"
+        title="Notificaciones"
         aria-expanded={open}
         aria-controls="notif-popup"
         onClick={() => setOpen((isOpen) => !isOpen)}
       >
-        <Bell size={21} />
-        <strong>Notificaciones</strong>
+        <Bell aria-hidden="true" />
+        <span className="notif-label">Notifi&shy;caciones</span>
         {hasUnread && (
-          <span className="notif-badge" aria-label={`${unreadCount} notificaciones sin leer`}>
-            {unreadCount}
-          </span>
+          <small className="notif-badge" aria-label={`${unreadCount} notificaciones sin leer`}>
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </small>
         )}
-        {open ? <X size={14} /> : <ChevronUp size={14} />}
       </button>
-    </div>
   );
 
   const appRoot = typeof document !== "undefined"

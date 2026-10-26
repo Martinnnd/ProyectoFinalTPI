@@ -187,7 +187,6 @@ export default function MapboxMap(
         });
       }
     });
-    map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
     const canvas = map.getCanvas();
     canvas.setAttribute(
       "aria-label",

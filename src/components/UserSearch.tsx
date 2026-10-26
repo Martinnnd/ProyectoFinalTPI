@@ -98,6 +98,7 @@ export default function UserSearch({ currentUserId, followedUsers, onFollow, onO
       ref={trigger}
       type="button"
       aria-label="Buscar usuarios"
+      title="Buscar usuarios"
       aria-haspopup="dialog"
       aria-expanded={open}
       onClick={show}

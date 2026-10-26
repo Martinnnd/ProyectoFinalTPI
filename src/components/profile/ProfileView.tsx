@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import Profile from "./Profile";
 import DeleteMemoryDialog from "../DeleteMemoryDialog";
@@ -25,6 +25,7 @@ import type { Achievement, CommunityGroup, Decade, Memory, TierProgress } from "
 
 export default function ProfileView({ targetUsername }: { targetUsername?: string }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { session, status } = useAuth();
   const { period } = useEra();
   const { followingUsers, followers, toggleFollow } = useFollow();
@@ -265,7 +266,7 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
         selected={null}
         earned={earned}
         onSelect={() => {}}
-        onOpen={(m) => router.push(`/recuerdo/${m.id}`)}
+        onOpen={(m) => router.push(`/recuerdo/${m.id}?returnTo=${encodeURIComponent(pathname)}`)}
         onAdd={() => {
           if (typeof window !== "undefined") {
             window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));

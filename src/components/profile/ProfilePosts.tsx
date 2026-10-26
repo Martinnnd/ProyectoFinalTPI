@@ -41,8 +41,12 @@ const ProfilePosts = forwardRef<HTMLElement, {
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [reposts, setReposts] = useState<string[]>(repostedPublicationIds);
   const [saves, setSaves] = useState<string[]>([]);
+  const [removedReposts, setRemovedReposts] = useState<string[]>([]);
 
-  const sortedMemories = [...memories].sort((a, b) => {
+  const sortedMemories = memories.filter((memory) => !(
+    memory.repost && !memory.repost.comment && !memory.quotedMemory &&
+    isOwnMemory(memory) && removedReposts.includes(memory.repost.originalId ?? memory.id)
+  )).sort((a, b) => {
     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     if (timeA !== timeB) return timeB - timeA;
@@ -50,17 +54,17 @@ const ProfilePosts = forwardRef<HTMLElement, {
   });
 
   return (
-    <section ref={ref} className="personal-album profile-posts">
-      <div className="personal-section-title">
-        <h3>{author ? `Recuerdos de ${author}` : "Mis recuerdos"}</h3>
-        <span>Todas las épocas · Últimas publicaciones primero</span>
-      </div>
+    <section
+      ref={ref}
+      className="personal-album profile-posts"
+      aria-label={author ? `Recuerdos de ${author}` : "Mis recuerdos"}
+    >
       {sortedMemories.length ? (
         <div className="feed-posts profile-feed-posts">
           {sortedMemories.map((memory) => {
             const isQuote = Boolean(
               memory.quotedMemory ||
-              (memory.repost && (memory.repost.comment !== undefined || (memory.repost.id && memory.repost.id !== memory.repost.originalId)))
+              memory.repost?.comment
             );
             const isSimpleRepost = Boolean(memory.repost && !isQuote);
             const rootId = isSimpleRepost && memory.repost?.originalId ? memory.repost.originalId : memory.id;
@@ -92,6 +96,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                 repostedPublicationIds.includes(memory.id) ||
                 memory.viewerReposted === true;
             }
+            if (removedReposts.includes(targetKey)) isReposted = false;
 
             const effectivePoints = pointsMap?.[targetKey] ?? memory.points ?? 0;
             const effectiveRating = ratings[targetKey] ?? memory.viewerRating;
@@ -119,6 +124,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                 rating={effectiveRating}
                 canRate={Boolean(session)}
                 reposted={isReposted}
+                directUnrepost={true}
                 repostCount={interactions.getRepostCount(targetKey, memory.repostCount ?? 0)}
                 saved={saves.includes(memory.id)}
                 quotedMemory={quotedMemory}
@@ -152,6 +158,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                   }
                   try {
                     const res = await repostearPublicacion(targetKey);
+                    setRemovedReposts((current) => current.filter((id) => id !== targetKey));
                     setReposts((curr) => [...new Set([...curr, memory.id, rootId])]);
                     if (res?.cantidadReposts !== undefined) {
                       interactions.updateRepostCount(targetKey, res.cantidadReposts);
@@ -167,6 +174,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                   if (!session) return;
                   try {
                     const res = await quitarRepost(targetKey);
+                    setRemovedReposts((current) => [...new Set([...current, targetKey])]);
                     setReposts((curr) => curr.filter((id) => id !== memory.id && id !== rootId));
                     if (res?.cantidadReposts !== undefined) {
                       interactions.updateRepostCount(targetKey, res.cantidadReposts);
@@ -176,6 +184,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                     setNotice("Repost eliminado.");
                   } catch (err) {
                     console.error("Error al quitar repost:", err);
+                    setNotice("No se pudo quitar el repost. Intentá de nuevo.");
                   }
                 }}
                 onQuote={() => {

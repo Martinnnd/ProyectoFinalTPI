@@ -22,6 +22,7 @@ export default function FeedPost({
   rating,
   canRate,
   reposted,
+  directUnrepost = false,
   repostCount,
   saved,
   quotedMemory,
@@ -51,6 +52,7 @@ export default function FeedPost({
   rating?: number;
   canRate: boolean;
   reposted: boolean;
+  directUnrepost?: boolean;
   repostCount?: number;
   saved: boolean;
   quotedMemory?: Memory;
@@ -65,7 +67,7 @@ export default function FeedPost({
   onLike: () => void;
   onRepost?: () => void;
   onSimpleRepost?: (memory: Memory) => void;
-  onUnrepost?: (memory: Memory) => void;
+  onUnrepost?: (memory: Memory) => void | Promise<void>;
   onQuote?: (memory: Memory) => void;
   onSave: () => void;
   onHashtag: (tag: string) => void;
@@ -95,15 +97,15 @@ export default function FeedPost({
   return (
     <article className="feed-post">
       {isSimpleRepost && (
-        <div className="repost-header-badge" style={{ padding: '0.5rem 1rem 0', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          <Repeat2 size={14} />
+        <div className="repost-header-badge">
+          <Repeat2 size={14} aria-hidden="true" />
           {isReposterOwn ? (
             <span>Has reposteado</span>
           ) : (
             <span>
               <button
                 type="button"
-                style={{ background: 'none', border: 'none', padding: 0, color: 'inherit', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}
+                className="repost-author"
                 onClick={(e) => {
                   e.stopPropagation();
                   onProfile({ ...memory, author: memory.author });
@@ -143,9 +145,9 @@ export default function FeedPost({
             {following ? "Siguiendo" : "Seguir"}
           </button>
         )}
-        {isOwnMemory(memory) && (
-          <details className="compact-menu feed-owner-menu">
-            <summary aria-label="Opciones de publicación" title="Opciones de publicación"><Ellipsis size={20} aria-hidden="true" /></summary>
+        {isReposterOwn && !memory.repost && (
+          <details className="feed-owner-menu">
+            <summary className="secondary-button" aria-label="Opciones de publicación" title="Opciones de publicación"><Ellipsis size={20} aria-hidden="true" /></summary>
             <div className="feed-owner-menu-options">
               <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onEdit(memory); }}><Pencil size={15} /> Editar</button>
               <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onDelete(memory); }}><Trash2 size={15} /> Eliminar</button>
@@ -285,6 +287,7 @@ export default function FeedPost({
         onRate={onRate}
       />
       <PostActions
+        directUnrepost={directUnrepost}
         memoryTitle={memory.title}
         memoryId={memory.id}
         memoryYear={memory.year}
@@ -301,7 +304,7 @@ export default function FeedPost({
           else onRepost?.();
         }}
         onUnrepost={() => {
-          if (onUnrepost) onUnrepost(memory);
+          if (onUnrepost) return onUnrepost(memory);
           else onRepost?.();
         }}
         onQuote={() => {

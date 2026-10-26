@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, use, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import SocialFeed from "../../../../components/social/SocialFeed";
 import DeleteMemoryDialog from "../../../../components/DeleteMemoryDialog";
@@ -18,11 +18,17 @@ import type { FeedTab } from "../../../../socialTypes";
 export default function RecuerdoPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedReturn = searchParams.get("returnTo");
+  const returnTo = requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
+    ? requestedReturn
+    : "/feed";
+  const backLabel = returnTo === "/feed" ? "Volver al feed" : "Volver al perfil";
   const { id } = resolvedParams;
 
   const { period, changePeriod } = useEra();
   const { session, status } = useAuth();
-  const { followingUsers, toggleFollow, followingRevision } = useFollow();
+  const { followingUsers, followers, toggleFollow, followingRevision } = useFollow();
   const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
 
   const [memory, setMemory] = useState<Memory | null>(null);
@@ -80,22 +86,22 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   const handleSelect = useCallback(
     (selectedMemory: Memory | null) => {
       if (!selectedMemory) {
-        router.push("/feed");
+        router.push(returnTo);
       } else if (selectedMemory.id !== id) {
-        router.push(`/recuerdo/${selectedMemory.id}`);
+        router.push(`/recuerdo/${selectedMemory.id}?returnTo=${encodeURIComponent(returnTo)}`);
       }
     },
-    [id, router]
+    [id, router, returnTo]
   );
 
   const confirmDelete = useCallback(
     (targetMemory: Memory): string | null => {
       eliminarPublicacion(targetMemory.id).catch(console.error);
       setNotice("Recuerdo eliminado.");
-      router.push("/feed");
+      router.push(returnTo);
       return null;
     },
-    [router, setNotice]
+    [router, setNotice, returnTo]
   );
 
   const saveEdit = useCallback(
@@ -121,8 +127,8 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="feed-load-error" role="alert" style={{ padding: "60px 0", textAlign: "center" }}>
         <p>{error ?? "No se encontró el recuerdo solicitado."}</p>
-        <button type="button" className="secondary-button" onClick={() => router.push("/feed")}>
-          Volver al feed
+        <button type="button" className="secondary-button" onClick={() => router.push(returnTo)}>
+          {backLabel}
         </button>
       </div>
     );
@@ -137,6 +143,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   return (
     <>
       <SocialFeed
+        backLabel={backLabel}
         key={memory.id}
         active={true}
         onItems={() => {}}
@@ -149,7 +156,12 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         onDelete={(m) => setDeleting(m)}
         onProfile={handleProfile}
         groupIds={[]}
-        suggestedAuthors={[]}
+        suggestedAuthors={[
+          ...(effectiveMemory.authorId
+            ? [{ name: effectiveMemory.author, id: effectiveMemory.authorId }]
+            : []),
+          ...followers.map((user) => ({ name: user.username, id: user.id })),
+        ]}
         groupOpenRequest={0}
         onRepostCreated={(_repostId) => {}}
         decade={period.decade}
