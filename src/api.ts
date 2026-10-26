@@ -90,16 +90,6 @@ export async function citarPublicacion(id: string, descripcion: string, autorId?
     return await response.json();
 }
 
-export async function compartirPublicacion(originalId: string, descripcion: string, autorId?: number) {
-    if (!descripcion || !descripcion.trim()) {
-        return await repostearPublicacion(originalId, autorId);
-    }
-    return await citarPublicacion(originalId, descripcion, autorId);
-}
-
-export async function eliminarRepost(originalId: string, autorId?: number) {
-    return await quitarRepost(originalId, autorId);
-}
 
 export async function eliminarPublicacion(id: string, autorId?: number) {
     const sesion = requireSession();
