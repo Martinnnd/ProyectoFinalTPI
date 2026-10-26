@@ -1,5 +1,5 @@
 import { Ellipsis, MapPin, Pencil, Repeat2, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
 import type { Memory } from "../../types";
@@ -12,6 +12,7 @@ import { publicationId } from '../../publicationsApi';
 import FeedRelations from './FeedRelations';
 
 export default function FeedPost({
+  topOverlay,
   memory,
   active = true,
   selected,
@@ -42,6 +43,7 @@ export default function FeedPost({
   onSave,
   onHashtag,
 }: {
+  topOverlay?: ReactNode;
   memory: Memory;
   active?: boolean;
   selected: boolean;
@@ -95,7 +97,8 @@ export default function FeedPost({
     : memory;
 
   return (
-    <article className="feed-post">
+    <article className={`feed-post${topOverlay ? ' has-top-overlay' : ''}`}>
+      {topOverlay}
       {isSimpleRepost && (
         <div className="repost-header-badge">
           <Repeat2 size={14} aria-hidden="true" />

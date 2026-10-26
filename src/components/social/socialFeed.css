@@ -31,6 +31,28 @@
 }
 .feed-heading.is-scroll-hidden { transform:translateY(calc(-100% - 2px)); opacity:0; pointer-events:none; }
 .feed-heading.is-scroll-hidden:has(:focus-visible) { transform:none; opacity:1; pointer-events:auto; }
+.feed-post.has-top-overlay { position:relative; }
+.app .feed-post > .feed-refresh-button {
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translate(-50%, -50%);
+  z-index:25;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:7px 14px;
+  border:1px solid #779ab9;
+  border-radius:999px;
+  background:#BFDCF7;
+  color:#173952;
+  font:600 12px/1.3 var(--font-body);
+  text-transform:none;
+  white-space:nowrap;
+  box-shadow:0 2px 5px #17395226;
+}
+.app .feed-post > .feed-refresh-button:active { transform:translate(-50%, -50%); }
 @media(prefers-reduced-motion:reduce) { .feed-heading { transition:none; } }
 
 .feed-heading h2 {
