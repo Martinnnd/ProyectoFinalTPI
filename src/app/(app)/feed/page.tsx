@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import SocialFeed from "../../../components/social/SocialFeed";
 import DeleteMemoryDialog from "../../../components/DeleteMemoryDialog";
 import MemoryForm from "../../../components/MemoryForm";
@@ -27,6 +27,7 @@ import type { FeedTab } from "../../../socialTypes";
 
 export default function FeedPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { period, changePeriod } = useEra();
   const { session } = useAuth();
   const { followingUsers, followers, followingRevision, toggleFollow } = useFollow();
@@ -34,6 +35,9 @@ export default function FeedPage() {
 
   const [feedItems, setFeedItems] = useState<Memory[]>([]);
   const [selected, setSelected] = useState<Memory | null>(null);
+  useEffect(() => {
+    if (pathname === '/feed') setSelected(null);
+  }, [pathname]);
   const [editing, setEditing] = useState<Memory | null>(null);
   const [deleting, setDeleting] = useState<Memory | null>(null);
 
