@@ -138,6 +138,8 @@
  .mobile-decades button[aria-pressed='true'] { background:var(--accent); color:var(--surface); border-color:var(--accent); }
  .app.map-app .map-canvas { inset:var(--mobile-top) 0 var(--mobile-bottom); margin:0; padding:0; border:0; border-radius:0; box-shadow:none; }
  .app.map-app .map-canvas::before,.app.map-app .map-canvas::after { display:none; }
+ .app.era-1970.view-map .era-atmosphere { inset:var(--mobile-top) 0 var(--mobile-bottom); border:0; border-radius:0; box-shadow:none; }
+ .app.era-1970.view-map .era-atmosphere::after { border-radius:0; box-shadow:none; }
  .app .place-search { top:12px; left:12px; right:12px; width:auto; max-width:calc(100% - 24px); }
  .app .place-search-trigger { min-height:44px; }
  .app .place-search-panel { width:min(100%,420px); max-height:calc(100dvh - var(--mobile-top) - var(--mobile-bottom) - 80px); overflow:auto; }

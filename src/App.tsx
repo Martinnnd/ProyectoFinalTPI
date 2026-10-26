@@ -286,7 +286,9 @@ export default function App() {
   const [factsOpen, setFactsOpen] = useState(initialNavigation.factsOpen);
   useEffect(() => {
     const url = navigationUrl(window.location.href, { period, view, selectedId, profileAuthor, category, panelOpen, factsOpen });
-    window.history.replaceState(window.history.state, '', url);
+    // Let Next.js synchronize its router state with the visible URL.
+    // Passing its internal history state bypasses that synchronization.
+    window.history.replaceState(null, '', url);
   }, [period, view, selectedId, profileAuthor, category, panelOpen, factsOpen]);
   useEffect(() => {
     const restore = () => {
@@ -459,7 +461,7 @@ export default function App() {
   function openPublication(memory: Memory) {
     if (view === 'map') {
       const origin = { period, view, selectedId, profileAuthor, category, panelOpen, factsOpen };
-      window.history.replaceState(window.history.state, '', navigationUrl(window.location.href, origin));
+      window.history.replaceState(null, '', navigationUrl(window.location.href, origin));
       const publication = { ...origin, period: { decade: Math.floor(memory.year / 10) * 10 as Decade, year: null }, view: 'feed' as const, selectedId: memory.id, category: 'Todas' as const, panelOpen: false };
       window.history.pushState(null, '', navigationUrl(window.location.href, publication));
     }
