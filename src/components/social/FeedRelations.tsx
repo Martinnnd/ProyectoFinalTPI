@@ -53,8 +53,9 @@ function FeedRelationsContent({ id, onOpen }: { id: string; onOpen: (memory: Mem
     setSelection(current => current?.type === next.type && (current.type !== 'momento' || (next.type === 'momento' && current.momentId === next.momentId)) ? null : next);
   }
   function close() { setSelection(null); trigger.current?.focus({ preventScroll: true }); }
-  const hasLinks = !!relations?.dia.items.length || !!relations?.lugar.items.length || !!associations?.momentos.length;
-  if (!hasLinks && !error && !momentError && !pending && !unavailable) return null;
+  const hasMoments = !!associations?.momentos.length;
+  const hasLinks = !!relations?.dia.items.length || !!relations?.lugar.items.length || hasMoments;
+  if (!hasLinks && !error) return null;
   return <section className={styles.section} aria-label="Explorar recuerdos relacionados">
     {hasLinks && <div className={styles.links} aria-label="Relaciones del recuerdo">
       {!!relations?.dia.items.length && <button aria-expanded={selection?.type === 'dia'} aria-controls={panelId} onClick={event => choose({ type: 'dia', title: 'También ese día' }, event.currentTarget)}><CalendarDays size={16} aria-hidden="true" />También ese día</button>}
@@ -62,8 +63,8 @@ function FeedRelationsContent({ id, onOpen }: { id: string; onOpen: (memory: Mem
       {associations?.momentos.map(({ momento }) => <button key={momento.id} aria-expanded={selection?.type === 'momento' && selection.momentId === momento.id} aria-controls={panelId} onClick={event => choose({ type: 'momento', momentId: momento.id, title: momento.nombre }, event.currentTarget)}><Sparkles size={16} aria-hidden="true" />Parte de {momento.nombre}</button>)}
     </div>}
     {error && <div role="status">{error} <button onClick={() => setRevision(value => value + 1)}>Reintentar</button></div>}
-    {pending && <small role="status">Buscando momentos relacionados…</small>}
-    {(momentError || unavailable) && <div role="status">{momentError || 'La detección de momentos no estuvo disponible.'} <button onClick={retry}>Consultar de nuevo</button></div>}
+    {hasMoments && pending && <small role="status">Buscando momentos relacionados…</small>}
+    {hasMoments && (momentError || unavailable) && <div role="status">{momentError || 'La detección de momentos no estuvo disponible.'} <button onClick={retry}>Consultar de nuevo</button></div>}
     {selection && <FeedRelationPanel key={selection.type === 'momento' ? `momento-${selection.momentId}` : selection.type} selection={selection}
       originId={relations?.publicacionId ?? associations?.publicacionId ?? Number(id)}
       initialPage={selection.type === 'momento' ? undefined : relations?.[selection.type]}
