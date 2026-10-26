@@ -573,10 +573,18 @@
 @keyframes suggested-person-leave { to { opacity:0; transform:translateX(12px); } }
 @media (prefers-reduced-motion: reduce) { .suggested-person, .suggested-person.is-leaving { animation:none; } }
 
-.suggested-person strong {
+.suggested-person-name {
   flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.suggested-person strong {
   font-size: 12px;
 }
+.suggested-person .social-avatar { text-decoration: none; }
+.suggested-person-name:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .suggested-person .social-avatar {
   position: relative;
