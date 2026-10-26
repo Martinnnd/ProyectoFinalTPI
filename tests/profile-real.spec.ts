@@ -35,6 +35,14 @@ test('logro real persiste al recargar y no se comparte entre cuentas', async ({p
   const profile = page.getByRole('main', {name: 'Mi perfil', exact: true});
   await expect(profile.getByRole('heading', {name: users[0].username, exact: true})).toBeVisible();
   await expect(profile.locator('.achievements-count')).toHaveText('0/17');
+  await expect(profile.locator('.achievement-rail img')).toHaveCount(0);
+  await expect(profile.getByText('Todavía no conseguiste ninguna insignia.')).toBeVisible();
+  await profile.getByRole('button', {name: 'Logros', exact: true}).click();
+  const initialCatalogue = page.getByRole('dialog', {name: 'Todas las insignias', exact: true});
+  await expect(initialCatalogue.locator('.achievement-card.is-locked')).toHaveCount(17);
+  await expect(initialCatalogue.locator('.achievement-card.is-unlocked')).toHaveCount(0);
+  await expect(initialCatalogue).not.toContainText('Corazón abierto');
+  await initialCatalogue.getByRole('button', {name: 'Cerrar catálogo de logros'}).click();
   await expect(profile.getByText('Nico Gutierrez')).toHaveCount(0);
   await expect(page.locator('.achievement-toast')).toHaveCount(0);
   await page.getByRole('button', {name: 'Feed', exact: true}).click();
