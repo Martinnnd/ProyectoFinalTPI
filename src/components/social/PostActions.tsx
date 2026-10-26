@@ -10,6 +10,7 @@ export default function PostActions({
   likeCount,
   commentCount,
   reposted,
+  directUnrepost = false,
   repostCount,
   saved,
   onLike,
@@ -27,18 +28,20 @@ export default function PostActions({
   likeCount?: number;
   commentCount: number;
   reposted: boolean;
+  directUnrepost?: boolean;
   repostCount?: number;
   saved: boolean;
   onLike: () => void;
   onOpenComments: () => void;
   onSimpleRepost?: () => void;
-  onUnrepost?: () => void;
+  onUnrepost?: () => void | Promise<void>;
   onQuote?: () => void;
   onRepost?: () => void;
   onSave: () => void;
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [repostOpen, setRepostOpen] = useState(false);
+  const [removingRepost, setRemovingRepost] = useState(false);
   const [copied, setCopied] = useState(false);
   const shareRef = useRef<HTMLDivElement>(null);
   const repostRef = useRef<HTMLDivElement>(null);
@@ -84,13 +87,26 @@ export default function PostActions({
         <button
           type="button"
           className={`repost-button${reposted ? " is-reposted" : ""}`}
-          aria-label={reposted ? `Opciones de repost (reposteado): ${memoryTitle}` : `Opciones de repost: ${memoryTitle}`}
-          aria-expanded={repostOpen}
+          aria-label={reposted && directUnrepost ? `Deshacer repost: ${memoryTitle}` : reposted ? `Opciones de repost (reposteado): ${memoryTitle}` : `Opciones de repost: ${memoryTitle}`}
+          aria-expanded={reposted && directUnrepost ? undefined : repostOpen}
           aria-pressed={reposted}
+          disabled={removingRepost}
           style={reposted ? { color: '#10b981', fontWeight: 600 } : undefined}
-          onClick={(event) => {
+          onClick={async (event) => {
             event.stopPropagation();
             setShareOpen(false);
+            if (reposted && directUnrepost) {
+              if (removingRepost) return;
+              setRepostOpen(false);
+              setRemovingRepost(true);
+              try {
+                if (onUnrepost) await onUnrepost();
+                else onRepost?.();
+              } finally {
+                setRemovingRepost(false);
+              }
+              return;
+            }
             setRepostOpen((open) => !open);
           }}
         >

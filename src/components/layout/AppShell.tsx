@@ -192,6 +192,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <nav className="navigation-rail" aria-label="Navegación principal">
         <button
           aria-label="Explorar mapa"
+          title="Explorar mapa"
           className={currentView === "map" && !panelOpen ? "rail-active" : ""}
           onClick={() => {
             setPanelOpen(false);
@@ -204,6 +205,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </button>
         <button
           aria-current={currentView === "feed" ? "page" : undefined}
+          title="Feed"
           className={currentView === "feed" ? "rail-active" : ""}
           onClick={() => {
             setPanelOpen(false);
@@ -217,6 +219,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {session && (
           <button
             aria-current={currentView === "chat" ? "page" : undefined}
+            title="Chat"
             className={currentView === "chat" ? "rail-active" : ""}
             onClick={() => {
               setPanelOpen(false);

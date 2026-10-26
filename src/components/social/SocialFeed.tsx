@@ -48,6 +48,7 @@ function getTargetToRepost(mem: Memory, allMemories: Memory[]): { targetId: stri
 }
 
 export default function SocialFeed({
+  backLabel = "Volver al feed",
   active,
   onItems,
   filterFeed,
@@ -77,6 +78,7 @@ export default function SocialFeed({
   onReloadMemories,
   onRepostCreated,
 }: {
+  backLabel?: string;
   active: boolean;
   onItems: (items: Memory[]) => void;
   filterFeed: (items: Memory[]) => Memory[];
@@ -353,6 +355,7 @@ export default function SocialFeed({
       aria-label="Feed de recuerdos"
     >
       <PostDetailFrame
+        backLabel={backLabel}
         ref={stream}
         decade={decade}
         memory={selected}
@@ -361,9 +364,10 @@ export default function SocialFeed({
         onToggleMaximize={() => setMaximized((current) => !current)}
       >
         <FeedHeader
+          backLabel={backLabel}
           title={groupName ?? (tab === "groups" ? "Mis grupos" : "Feed")}
           tab={tab}
-          selected={!!selected}
+          selected={!!selected && !desktopDetail}
           scrollHidden={headerHidden}
           onBack={() => open(null)}
           onTabChange={changeTab}

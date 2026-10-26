@@ -1054,7 +1054,7 @@
 .era-2000 .social-stream.detail-mode { min-height:0; padding:0; border:0; background:transparent; overflow:visible; box-shadow:none; border-radius:0; }
 .era-2000 .social-stream .detail-window { position:relative; inset:auto; height:100%; width:100%; transform-origin:top left; box-sizing:border-box; }
 .era-2000 .detail-mode .feed-heading { display:none; }
-.era-2000 .detail-mode .transition-content { overflow-y:auto; overscroll-behavior:contain; }
+.era-2000 .detail-mode .transition-content { margin:0; padding:0; border:0; border-radius:0; overflow-y:auto; overscroll-behavior:contain; }
 .era-2000 .detail-mode .feed-back { margin:0 0 12px; }
 .era-2000 .detail-mode .feed-post { margin:0; }
 .era-2000 .transition-window-controls button { display:grid; place-items:center; width:23px; height:22px; padding:0; font:12px Arial,sans-serif; cursor:pointer; }
