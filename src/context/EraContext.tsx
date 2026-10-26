@@ -79,6 +79,7 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
   }, [hydrated, period.decade, period.year]);
 
   const eraTransition = useRef<{ finished: Promise<void>; skipTransition: () => void } | null>(null);
+  const periodChangeRevision = useRef(0);
   useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
 
   const changePeriod: ChangePeriodFn = useCallback(
@@ -87,6 +88,8 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       yearOrAfterChange?: number | null | (() => void),
       afterChange?: () => void
     ) => {
+      const revision = ++periodChangeRevision.current;
+      eraTransition.current?.skipTransition();
       let next: Period;
       let callback: (() => void) | undefined;
 
@@ -107,6 +110,7 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       }
 
       const update = () => {
+        if (revision !== periodChangeRevision.current) return;
         setPeriod(next);
         callback?.();
       };

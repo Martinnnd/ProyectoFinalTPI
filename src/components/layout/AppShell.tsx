@@ -14,6 +14,7 @@ import AuthMenu from "../auth/AuthMenu";
 import { useRatings } from "../../context/RatingsContext";
 import AchievementToast from "../AchievementToast";
 import Notification from "../Notification";
+import type { Period } from '../../types';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -36,6 +37,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
+
+  function handlePeriodChange(next: Period) {
+    if (pathname.startsWith('/recuerdo/')) {
+      const requestedReturn = new URLSearchParams(window.location.search).get('returnTo');
+      const destination = requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
+        ? requestedReturn : '/feed';
+      changePeriod(next, () => router.push(destination));
+      return;
+    }
+    changePeriod(next);
+  }
 
   let currentView: "map" | "feed" | "profile" | "chat" = "map";
   if (pathname.startsWith("/feed") || pathname.startsWith("/recuerdo")) {
@@ -92,7 +104,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     >
       <EraTimeline
         period={period}
-        onChange={changePeriod}
+        onChange={handlePeriodChange}
         action={
           <button
             aria-label="Recordar"

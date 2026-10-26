@@ -103,7 +103,7 @@
 .app.view-profile .profile-shortcuts button { padding:7px 10px; font-size:12px; }
 .app.view-profile .profile-posts { width:100%; max-width:none; margin:8px 0 0; }
 .app.view-profile .profile-feed-posts { display:flex; flex-direction:column; width:100%; }
-.app.view-profile .profile-feed-posts .feed-post { width:100%; }
+.app.view-profile .profile-feed-posts .feed-post { width:100%; min-width:0; margin-inline:0; }
 @media(max-width:899px) {
   .app.view-profile .personal-profile { inset:var(--mobile-top) 0 var(--mobile-bottom); display:block; padding:12px 10px 70px; }
   .profile-groups { position:static; max-height:none; margin-top:20px; }

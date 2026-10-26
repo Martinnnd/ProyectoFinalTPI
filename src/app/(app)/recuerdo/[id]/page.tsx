@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, use, useCallback } from "react";
+import React, { useEffect, useState, use, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import SocialFeed from "../../../../components/social/SocialFeed";
@@ -27,6 +27,8 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   const { id } = resolvedParams;
 
   const { period, changePeriod } = useEra();
+  const currentEra = useRef({ period, changePeriod });
+  currentEra.current = { period, changePeriod };
   const { session, status } = useAuth();
   const { followingUsers, followers, toggleFollow, followingRevision } = useFollow();
   const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
@@ -51,8 +53,8 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         setMemory(data);
         setLoading(false);
         const memoryDecade = (Math.floor(data.year / 10) * 10) as Decade;
-        if (memoryDecade !== period.decade) {
-          changePeriod({ decade: memoryDecade, year: null });
+        if (memoryDecade !== currentEra.current.period.decade) {
+          currentEra.current.changePeriod({ decade: memoryDecade, year: null });
         }
       })
       .catch((err) => {
@@ -63,7 +65,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
       });
 
     return () => controller.abort();
-  }, [id, status, changePeriod, period.decade]);
+  }, [id, status]);
 
   const handleProfile = useCallback(
     (targetMemory: Memory) => {
