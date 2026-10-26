@@ -26,7 +26,6 @@ export default function DecadeAtmosphere() {
           {(era.id === "1990" || era.id === "2000") && <span className={styles.monitorCabinet}>
             <span className={styles.screenGlass} />
             <span className={styles.monitorChin}><b>NOSTALGIAR</b><span className={styles.monitorVents} /><span className={styles.monitorControls}><i /><i /><i /><em /></span></span>
-            <span className={styles.monitorStand} />
           </span>}
         </span>
       ))}
