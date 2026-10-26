@@ -1,24 +1,20 @@
-import styles from "./landing.module.css";
+import HeroExperience from "../components/landing/HeroExperience";
 import DecadesSection from "../components/landing/DecadesSection";
 import FinalCall from "../components/landing/FinalCall";
-import Hero from "../components/landing/Hero";
 import LandingFooter from "../components/landing/LandingFooter";
-import LandingHeader from "../components/landing/LandingHeader";
 import MemoryMapSection from "../components/landing/MemoryMapSection";
 import StorySection from "../components/landing/StorySection";
+import LandingAnimations from "../components/landing/animations/LandingAnimations";
 
 export default function LandingPage() {
   return (
-    <main className={styles.landing}>
-      <div className={styles.heroShell}>
-        <LandingHeader />
-        <Hero />
-      </div>
-      <MemoryMapSection />
+    <LandingAnimations>
+      <HeroExperience />
       <DecadesSection />
+      <MemoryMapSection />
       <StorySection />
       <FinalCall />
       <LandingFooter />
-    </main>
+    </LandingAnimations>
   );
 }

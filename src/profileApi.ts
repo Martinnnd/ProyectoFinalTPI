@@ -1,4 +1,5 @@
 import { API_BASE_URL, getSesion } from './api';
+import { apiFetch } from './components/auth/apiClient';
 import { publicationRequest, toMemory, type Publication } from './publicationsApi';
 import type { Achievement, Memory } from './types';
 
@@ -13,12 +14,12 @@ export type UserProfile = {
   logros: AchievementState[];
 };
 
-export async function getUserProfile(user: number | string, signal?: AbortSignal): Promise<UserProfile> {
+export async function getUserProfile(user: number | string, signal?: AbortSignal, cache: RequestCache = 'no-store'): Promise<UserProfile> {
   const token = getSesion()?.token;
   if (!token) throw new Error('Iniciá sesión para ver el perfil.');
   const path = typeof user === 'number' ? `${user}/perfil` : `perfil/${encodeURIComponent(user)}`;
-  const response = await fetch(`${API_BASE_URL}/api/usuario/${path}`, {
-    headers: { Authorization: `Bearer ${token}` }, cache: 'no-store', signal,
+  const response = await apiFetch(`${API_BASE_URL}/api/usuario/${path}`, {
+    cache, signal,
   });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);

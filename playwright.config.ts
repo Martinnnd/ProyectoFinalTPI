@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
 export default defineConfig({
   testDir: "./tests",
   testMatch: "demo.spec.ts",
@@ -6,7 +7,8 @@ export default defineConfig({
   timeout: 60000,
   use: {
     baseURL: "http://localhost:3101",
-    channel: "chrome",
+    channel: executablePath ? undefined : "chrome",
+    launchOptions: executablePath ? { executablePath } : undefined,
     headless: true,
     screenshot: "only-on-failure",
   },

@@ -1,25 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getSesion } from './api';
+import { guardarSesion, cerrarSesion } from './api';
 import { getUserMemories, getUserProfile, toAchievement, type AchievementState } from './profileApi';
 
-vi.mock('./api', () => ({API_BASE_URL: 'http://backend.test', getSesion: vi.fn()}));
+vi.mock('./apiConfig', () => ({API_BASE_URL: 'http://backend.test'}));
 const fetchMock = vi.fn();
 const logro: AchievementState = {id: 2, titulo: 'Primera Palabra', descripcion: 'Comentario en un recuerdo ajeno',
   urlIcono: '.', puntosRecompensa: 0, desbloqueado: true, fechaDesbloqueo: '2026-10-25T12:00:00Z'};
 
 beforeEach(() => {
   vi.stubGlobal('fetch', fetchMock);
-  vi.mocked(getSesion).mockReturnValue({token: 'test-token', usuarioId: 2, username: 'susana', email: 'susana@example.test', esAdmin: false});
+  guardarSesion({token: 'test-token', usuarioId: 2, username: 'susana', email: 'susana@example.test', esAdmin: false});
 });
-afterEach(() => { vi.unstubAllGlobals(); vi.resetAllMocks(); });
+afterEach(() => { cerrarSesion(); vi.unstubAllGlobals(); vi.resetAllMocks(); });
 
 describe('perfil conectado', () => {
   it('pide el perfil autenticado y conserva el catálogo del servidor', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({id: 2, username: 'susana', logros: [logro]})));
     const profile = await getUserProfile(2);
     expect(fetchMock).toHaveBeenCalledWith('http://backend.test/api/usuario/2/perfil', expect.objectContaining({
-      headers: {Authorization: 'Bearer test-token'}, cache: 'no-store',
+      cache: 'no-store',
     }));
+    expect(new Headers(fetchMock.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer test-token');
     expect(profile.logros).toEqual([logro]);
   });
   it('no sustituye un catálogo ausente por los antiguos logros de ejemplo', async () => {
@@ -27,7 +28,7 @@ describe('perfil conectado', () => {
     await expect(getUserProfile(2)).rejects.toThrow('catálogo de logros');
   });
   it('exige sesión y no hace requests anónimos del perfil', async () => {
-    vi.mocked(getSesion).mockReturnValue(null);
+    cerrarSesion();
     await expect(getUserProfile(2)).rejects.toThrow('Iniciá sesión');
     expect(fetchMock).not.toHaveBeenCalled();
   });

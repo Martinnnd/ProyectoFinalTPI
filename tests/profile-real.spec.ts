@@ -1,16 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const api = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5199';
+// Las fuentes externas no forman parte de estas pruebas funcionales.
+test.beforeEach(async ({page}) => {
+  await page.route('https://fonts.googleapis.com/**', route => route.fulfill({contentType: 'text/css', body: ''}));
+});
 
-async function login(page: Page, email: string) {
-  await page.getByRole('button', {name: 'Iniciar sesión', exact: true}).first().click();
-  await page.locator('input[type=email]').fill(email);
-  await page.locator('input[type=password]').fill('PruebaLogros123!');
-  const loginRequest = page.waitForRequest(request => request.url().endsWith('/api/auth/login') && request.method() === 'POST');
-  await page.getByRole('button', {name: 'Ingresar', exact: true}).click();
-  expect((await loginRequest).url()).toBe(`${api}/api/auth/login`);
-  await expect(page.getByRole('button', {name: /^Cuenta:/})).toBeVisible();
-}
+import { api, loginReal as login, openOwnProfile } from './real-api-helpers';
 
 test('logro real persiste al recargar y no se comparte entre cuentas', async ({page, request}) => {
   const suffix = Date.now();
@@ -25,14 +20,14 @@ test('logro real persiste al recargar y no se comparte entre cuentas', async ({p
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('response', response => {
-    if (response.url().startsWith(api) && response.status() >= 400) errors.push(`${response.status()} ${new URL(response.url()).pathname}`);
+    if (response.url().startsWith(api) && response.status() >= 400 && !(response.url().endsWith('/api/auth/refresh') && response.status() === 401)) errors.push(`${response.status()} ${new URL(response.url()).pathname}`);
   });
   const mapResponse = page.waitForResponse(response => response.url().includes('/api/publicaciones/mapa') && response.request().method() === 'GET');
   await page.goto('/explorar?era=1990');
   expect((await mapResponse).status()).toBe(200);
   await login(page, users[0].email);
-  await page.getByRole('button', {name: 'Perfil', exact: true}).click();
-  const profile = page.getByRole('main', {name: 'Mi perfil', exact: true});
+  await openOwnProfile(page);
+  const profile = page.locator('.personal-profile');
   await expect(profile.getByRole('heading', {name: users[0].username, exact: true})).toBeVisible();
   await expect(profile.locator('.achievements-count')).toHaveText('0/17');
   await expect(profile.locator('.achievement-rail img')).toHaveCount(0);
@@ -68,7 +63,7 @@ test('logro real persiste al recargar y no se comparte entre cuentas', async ({p
   await (await refreshed).finished();
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await expect(toast).toHaveCount(0);
-  await page.getByRole('button', {name: 'Perfil', exact: true}).click();
+  await openOwnProfile(page);
   await expect(profile.locator('.achievements-count')).toHaveText('1/17');
   await expect(profile.getByRole('img', {name: 'Primera Palabra', exact: true})).toBeVisible();
   await profile.getByRole('button', {name: 'Logros', exact: true}).click();
@@ -83,14 +78,15 @@ test('logro real persiste al recargar y no se comparte entre cuentas', async ({p
   await expect(earned.locator('time')).toBeVisible();
   await catalogue.getByRole('button', {name: 'Cerrar catálogo de logros'}).click();
   await page.reload();
-  await page.getByRole('button', {name: 'Perfil', exact: true}).click();
+  await openOwnProfile(page);
   await expect(profile.locator('.achievements-count')).toHaveText('1/17');
   await expect(page.locator('.achievement-toast')).toHaveCount(0);
-  await page.getByRole('button', {name: /^Cuenta:/}).click();
-  await page.getByRole('button', {name: 'Cerrar sesión', exact: true}).click();
-  await expect(profile).toContainText('Iniciá sesión');
-  await expect(profile.locator('.achievements-count')).toHaveCount(0);
+  await page.getByRole('button', {name: 'Abrir menú de usuario', exact: true}).first().click();
+  await page.getByRole('menuitem', {name: 'Cerrar sesión', exact: true}).click();
+  await expect(page).toHaveURL(/\/auth\/login/);
+  await expect(page.locator('.achievement-rail')).toHaveCount(0);
   await login(page, users[1].email);
+  await openOwnProfile(page);
   await expect(profile.getByRole('heading', {name: users[1].username, exact: true})).toBeVisible();
   await expect(profile.locator('.achievements-count')).toHaveText('0/17');
   await expect(page.locator('.achievement-toast')).toHaveCount(0);

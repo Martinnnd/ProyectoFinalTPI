@@ -1,7 +1,6 @@
-import { memoryThumbnail } from "./memoryThumbnail";
+import PinMemoryPreview from "./PinMemoryPreview";
 import type { MapBounds } from '../publicationsApi';
-import { getMemoryAuthorDisplay } from "../api";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   CircleMarker,
@@ -9,14 +8,43 @@ import {
   TileLayer,
   Tooltip,
   useMapEvents,
-  ZoomControl,
 } from "react-leaflet";
 import L from "leaflet";
 import { LocateFixed, MapPin, RotateCcw } from "lucide-react";
 import { symbols, type Memory } from "../types";
 export type Point = { lat: number; lng: number; label?: string };
 const center: [number, number] = [-38.4, -64.4];
+
+const markerIconCache = new Map<string, L.DivIcon>();
+
+function icon(memory?: Memory, selected = false) {
+  const isGroup = Boolean(memory?.groupId);
+  const category = memory
+    ? memory.category
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+    : "provisional";
+  const cacheKey = `${category}-${isGroup ? "grp" : "std"}-${selected ? "sel" : "def"}`;
+  let cached = markerIconCache.get(cacheKey);
+  if (!cached) {
+    const symbol = isGroup
+      ? '<img src="/groups/community-pin.svg" width="36" height="44" alt="" />'
+      : memory ? symbols[memory.category] : "+";
+    cached = L.divIcon({
+      className: "memory-marker-wrapper",
+      html: `<span class="memory-marker marker-${category} ${isGroup ? "community-marker" : ""} ${selected ? "selected" : ""}">${symbol}</span>`,
+      iconSize: [36, 42],
+      iconAnchor: [18, 40],
+      tooltipAnchor: [0, -38],
+    });
+    markerIconCache.set(cacheKey, cached);
+  }
+  return cached;
+}
+
 function MapActions({
+  active,
   picking,
   onPick,
   selected,
@@ -25,6 +53,7 @@ function MapActions({
   searchTarget,
   onBoundsChange,
 }: {
+  active?: boolean;
   picking: boolean;
   onPick: (p: Point) => void;
   selected: Memory | null;
@@ -54,6 +83,7 @@ function MapActions({
     return () => observer.disconnect();
   }, [map]);
   const selectedRef = useRef(selected);
+  const focusedPin = useRef<string | null>(null);
   selectedRef.current = selected;
   useEffect(() => {
     const fit = () => {
@@ -70,11 +100,16 @@ function MapActions({
     return () => observer.disconnect();
   }, [reset, map, fitPoints]);
   useEffect(() => {
+    if (active === false) return;
+    if (!selected) { focusedPin.current = null; return; }
+    const locationKey = `${selected.id}:${selected.lat}:${selected.lng}`;
+    if (focusedPin.current === locationKey) return;
+    focusedPin.current = locationKey;
     if (selected)
       map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
         animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
       });
-  }, [selected, map]);
+  }, [selected, active, map]);
   useEffect(() => {
     if (searchTarget) map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
       animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .8,
@@ -112,26 +147,10 @@ function MapActions({
 
   return null;
 }
-function icon(memory?: Memory, selected = false) {
-  const symbol = memory?.groupId
-    ? '<img src="/groups/community-pin.svg" width="36" height="44" alt="" />'
-    : memory ? symbols[memory.category] : "+";
-  const category = memory
-    ? memory.category
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-    : "provisional";
-  return L.divIcon({
-    className: "memory-marker-wrapper",
-    html: `<span class="memory-marker marker-${category} ${memory?.groupId ? "community-marker" : ""} ${selected ? "selected" : ""}">${symbol}</span>`,
-    iconSize: [36, 42],
-    iconAnchor: [18, 40],
-    tooltipAnchor: [0, -38],
-  });
-}
 export default function MemoryMap({
+  active,
   showEmptyState = true,
+  showRelations = true,
   onBoundsChange,
   searchTarget,
   onSearchMove,
@@ -139,6 +158,9 @@ export default function MemoryMap({
   memories,
   selected,
   onSelect,
+  onSelectRelated,
+  onClosePreview,
+  onMoment,
   onOpen,
   picking,
   onPick,
@@ -147,6 +169,7 @@ export default function MemoryMap({
 }: {
   active?: boolean;
   showEmptyState?: boolean;
+  showRelations?: boolean;
   onBoundsChange?: (bounds: MapBounds) => void;
   searchTarget?: Point | null;
   onSearchMove?: (point: Point) => void;
@@ -154,6 +177,9 @@ export default function MemoryMap({
   memories: Memory[];
   selected: Memory | null;
   onSelect: (m: Memory) => void;
+  onSelectRelated?: (m: Memory) => void;
+  onClosePreview?: () => void;
+  onMoment?: (id: number, memory: Memory) => void;
   onOpen?: (m: Memory) => void;
   picking: boolean;
   onPick: (p: Point) => void;
@@ -170,6 +196,25 @@ export default function MemoryMap({
     }, 12000);
     return () => clearTimeout(timeout);
   }, [loaded, retry]);
+
+  const fitPointsStr = useMemo(() => {
+    if (!fitMemories || !memories.length) return undefined;
+    return JSON.stringify(memories.map((m) => [m.lat, m.lng]));
+  }, [fitMemories, memories]);
+
+  const markersToRender = useMemo(() => {
+    if (!showRelations) return memories;
+    return selected && !memories.some((memory) => memory.id === selected.id)
+      ? [...memories, selected]
+      : memories;
+  }, [showRelations, memories, selected]);
+
+  const canShowPreview =
+    selected &&
+    !picking &&
+    !searchTarget &&
+    (showRelations || memories.some((m) => m.id === selected.id));
+
   return (
     <section
       className="map-section"
@@ -186,7 +231,6 @@ export default function MemoryMap({
           attributionControl
           zoomControl={false}
         >
-          <ZoomControl position="bottomright" />
           <TileLayer
             key={retry}
             url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -197,15 +241,16 @@ export default function MemoryMap({
             }}
           />
           <MapActions
+            active={active}
             onBoundsChange={onBoundsChange}
             picking={picking}
             onPick={onPick}
             selected={selected}
             reset={reset}
             searchTarget={searchTarget}
-            fitPoints={fitMemories ? JSON.stringify(memories.map(m => [m.lat,m.lng])) : undefined}
+            fitPoints={fitPointsStr}
           />
-          {memories.map((m) => (
+          {markersToRender.map((m) => (
             <Marker
               key={m.id}
               position={[m.lat, m.lng]}
@@ -230,7 +275,20 @@ export default function MemoryMap({
               <Tooltip direction="top">{m.title} · {m.year}</Tooltip>
             </Marker>
           ))}
-          {selected && !picking && !searchTarget && <CircleMarker key={selected.id} center={[selected.lat,selected.lng]} radius={0} opacity={0} fillOpacity={0} interactive={false}><Tooltip position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview"><div>{memoryThumbnail(selected) && <img className="pin-preview-photo" src={memoryThumbnail(selected)} alt="" onError={e => {e.currentTarget.hidden=true;}}/>}<small>{getMemoryAuthorDisplay(selected)} · {selected.year}</small><strong>{selected.title}</strong><p>{selected.description.length>140?selected.description.slice(0,140)+'…':selected.description}</p>{onOpen && <button onClick={()=>onOpen(selected)}>Ver publicación →</button>}</div></Tooltip></CircleMarker>}
+          {canShowPreview && (
+            <CircleMarker key={selected.id} center={[selected.lat,selected.lng]} radius={0} opacity={0} fillOpacity={0} interactive={false}>
+              <Tooltip position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview">
+                <PinMemoryPreview
+                  memory={selected}
+                  showRelations={showRelations}
+                  onClose={onClosePreview}
+                  onSelect={onSelectRelated ?? onSelect}
+                  onOpen={onOpen}
+                  onMoment={onMoment ? id => onMoment(id, selected) : undefined}
+                />
+              </Tooltip>
+            </CircleMarker>
+          )}
           {searchTarget && <Marker position={[searchTarget.lat, searchTarget.lng]} icon={icon()} draggable title="Arrastrá para ajustar la ubicación" eventHandlers={{ dragend: event => {
             const point = event.target.getLatLng(); onSearchMove?.({ ...searchTarget, lat: point.lat, lng: point.lng });
           }}}><Tooltip>Ubicación encontrada · Arrastrá para ajustar</Tooltip></Marker>}
@@ -251,7 +309,7 @@ export default function MemoryMap({
         </button>
         {picking && (
           <div className="map-notice picking" role="status">
-            <MapPin size={19} />
+            <MapPin size={22} aria-hidden="true" />
             <span>Elegí un lugar en el mapa para tu recuerdo.</span>
             <button onClick={onCancel}>Cancelar</button>
           </div>

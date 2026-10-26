@@ -2,8 +2,11 @@
 .feed-community>summary,.globe-tools>summary { display:none; }
 .globe-tool-buttons { display:flex; gap:6px; }
 .mobile-appbar { display:none; }
+.mobile-player-heading { display:none; }
 .mobile-options { color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); }
 .mobile-options::backdrop { background:#0009; backdrop-filter:blur(3px); }
+.profile-groups-disclosure>summary { display:none; }
+@media(min-width:900px) { .profile-groups-disclosure::details-content { content-visibility:visible; } }
 @media(max-width:899px) {
  .app { --mobile-top:calc(60px + env(safe-area-inset-top,0px)); --mobile-bottom:calc(66px + env(safe-area-inset-bottom,0px)); height:100dvh; min-height:0; overflow:hidden; }
  .app .mobile-appbar { position:absolute; inset:0 0 auto; height:var(--mobile-top); padding:env(safe-area-inset-top,0px) 12px 0; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(180deg,var(--surface),var(--soft)); border-bottom:1px solid var(--line); box-shadow:0 2px 10px #00000010; z-index:620; gap:10px; }
@@ -82,6 +85,7 @@
  .mobile-options-done { width:100%; min-height:48px; justify-content:center; }
  .app .memory-dialog { width:calc(100% - 16px); max-width:none; max-height:calc(100dvh - 24px); padding:18px 14px; overflow:auto; }
  .app .memory-dialog .form-row { display:flex; flex-direction:column; gap:14px; }
+ .app.era-2000 .memory-dialog .dialog-heading { margin-inline:-14px; }
  .app input,.app textarea { font-size:16px; min-width:0; max-width:100%; }
  .app .dialog-actions { display:flex; gap:8px; flex-wrap:wrap; }
  .app .dialog-actions button { min-height:44px; flex:1; }
@@ -102,4 +106,95 @@
  .app .transition-menu,.app .transition-chat-tools { display:none; }
  .app .transition-caption { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
  .app .transition-window-controls button { min-height:36px; min-width:32px; }
+}
+
+/* Compact mobile workspace. These rules follow the device chrome styles. */
+@media(max-width:899px) {
+ .app.map-app { --time-height:0px; --mobile-top:calc(134px + env(safe-area-inset-top,0px)); --mobile-bottom:calc(56px + env(safe-area-inset-bottom,0px)); position:relative; width:100%; height:100dvh; margin-top:0; }
+ .app.map-app .mobile-appbar { height:calc(56px + env(safe-area-inset-top,0px)); }
+ .app.map-app .time-navigation { display:block; position:absolute; inset:calc(56px + env(safe-area-inset-top,0px)) 0 auto; height:78px; padding:4px 16px 10px; border-bottom-width:1px; box-shadow:none; }
+ .app .time-navigation .time-brand,.app .time-navigation .time-add-memory { display:none; }
+ .app .time-navigation .time-scale { max-width:none; }
+ .app .time-navigation .time-decades button { min-height:36px; font-size:12px; padding:6px; }
+ .app .time-navigation .time-track { margin:0 8px; height:26px; }
+ .app .time-navigation .time-track input { height:28px; }
+ .app.map-app .mobile-appbar { display:flex; }
+ .app.map-app .mobile-era-button { display:flex; }
+ .app.map-app .mobile-add-button { display:grid; }
+ .app .account-navigation { display:contents; }
+ .app.map-app .navigation-rail { inset:auto 0 0; width:100%; height:var(--mobile-bottom); border:0; border-top:1px solid var(--line); gap:3px; overflow:visible; background:var(--surface); }
+ .app.map-app .navigation-rail>button,.app.map-app .navigation-rail>div { flex:1; min-width:0; margin:0; }
+ .app.map-app .navigation-rail button { position:relative; display:flex; align-items:center; justify-content:center; min-width:0; width:100%; height:48px; min-height:44px; padding:10px; border:0; background:transparent; box-shadow:none; border-radius:10px; }
+ .app.map-app .navigation-rail button::before,.app.map-app .navigation-rail button::after { display:none; }
+ .app .navigation-rail button:not(dialog button):not([role='menuitem']) span { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+ .app .navigation-rail dialog button { height:auto; width:auto; justify-content:flex-start; }
+ .app .navigation-rail [role='menuitem'] { justify-content:flex-start; gap:10px; }
+ .app.map-app .navigation-rail button svg { width:23px; height:23px; stroke-width:1.8; }
+ .app.map-app .navigation-rail button.rail-active { color:var(--accent); background:color-mix(in srgb,var(--accent) 10%,transparent); }
+ .app.map-app .navigation-rail button.rail-active svg { stroke-width:2.5; }
+ .app.map-app .navigation-rail button:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
+ .app > #notif-popup { top:var(--mobile-top); bottom:var(--mobile-bottom); }
+ .mobile-decades { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+ .mobile-decades button { min-height:46px; font:700 14px var(--font-body); color:var(--ink); background:var(--soft); border:1px solid var(--line); border-radius:var(--radius); }
+ .mobile-decades button[aria-pressed='true'] { background:var(--accent); color:var(--surface); border-color:var(--accent); }
+ .app.map-app .map-canvas { inset:var(--mobile-top) 0 var(--mobile-bottom); margin:0; padding:0; border:0; border-radius:0; box-shadow:none; }
+ .app.map-app .map-canvas::before,.app.map-app .map-canvas::after { display:none; }
+ .app.era-1970.view-map .era-atmosphere { inset:var(--mobile-top) 0 var(--mobile-bottom); border:0; border-radius:0; box-shadow:none; }
+ .app.era-1970.view-map .era-atmosphere::after { border-radius:0; box-shadow:none; }
+ .app .place-search { top:12px; left:12px; right:12px; width:auto; max-width:calc(100% - 24px); }
+ .app .place-search-trigger { min-height:44px; }
+ .app .place-search-panel { width:min(100%,420px); max-height:calc(100dvh - var(--mobile-top) - var(--mobile-bottom) - 80px); overflow:auto; }
+ .app.map-app .music-card.player-visible,.app.map-app .era-fact-popup.fact-reader,.app.map-app .stories-drawer { inset:auto 8px calc(var(--mobile-bottom) + 8px); width:auto; max-width:none; max-height:calc(100dvh - var(--mobile-top) - var(--mobile-bottom) - 20px); border-radius:var(--radius); box-shadow:0 -8px 32px #0004; }
+ .app.map-app .music-card.player-hidden { display:none; }
+ .app.map-app .social-layout { inset:var(--mobile-top) 0 var(--mobile-bottom); margin:0; padding:0; border:0; border-radius:0; display:flex; flex-direction:column; overflow:auto; }
+ .app.map-app .social-stream { width:100%; height:auto; min-height:0; flex:1 0 auto; overflow:visible; padding:0 0 20px; }
+ .app.map-app .feed-sidebar { order:-1; padding:8px; width:100%; overflow:visible; }
+ .app .feed-sidebar-content>summary { min-height:44px; font-size:12px; border-radius:var(--radius); }
+ .app .feed-sidebar-content>section { padding:14px; margin-bottom:10px; }
+ .app .feed-heading { padding:10px 12px; gap:8px; }
+ .app .feed-heading h1 { font-size:20px; }
+ .app .feed-post { margin:0 0 12px; padding:14px 12px; min-width:0; border-inline:0; border-radius:0; }
+ .app .post-content,.app .post-content>* { min-width:0; overflow-wrap:anywhere; }
+ .app .post-image { height:auto; max-height:60dvh; object-fit:contain; }
+ .app .post-attachment :is(img,video,iframe) { max-width:100%; }
+ .app .feed-tabs button { white-space:normal; }
+ .app.map-app .personal-profile { inset:var(--mobile-top) 0 var(--mobile-bottom); display:block; padding:12px 10px 24px; margin:0; border:0; border-radius:0; }
+ .app.view-profile .personal-header { grid-template-columns:58px minmax(0,1fr); padding:14px 10px; gap:10px; }
+ .app.view-profile .profile-portrait { width:56px; height:64px; }
+ .app.view-profile .personal-identity { min-width:0; display:block; }
+ .app.view-profile .personal-identity-text { min-height:0; min-width:0; }
+ .app.view-profile .personal-identity h2 { font-size:21px; overflow-wrap:anywhere; }
+ .app.view-profile .personal-counts { grid-column:1 / -1; justify-content:space-around; gap:10px; padding-top:12px; }
+ .app .profile-post-list { display:grid; grid-template-columns:minmax(0,1fr); }
+ .app .profile-post { min-width:0; }
+ .app .profile-post-story { overflow-wrap:anywhere; }
+ .app .profile-groups { position:static; max-height:none; margin-top:16px; }
+ .profile-groups-disclosure>summary { display:list-item; padding:16px; background:var(--surface); border:1px solid var(--line); cursor:pointer; }
+ .app.map-app .chat-page { inset:var(--mobile-top) 0 var(--mobile-bottom); margin:0; padding:0; }
+ .app .chat-content,.app .chat-conversation { min-width:0; }
+ .app .chat-page .chat-list { width:100%; }
+ .app .chat-page .chat-content:not(.has-conversation) .chat-conversation { display:none; }
+ .app .chat-contact { min-height:72px; }
+ .app .chat-conversation>header { padding:10px; gap:8px; }
+ .app .chat-composer { padding:10px; gap:8px; }
+ .app .chat-composer input { width:100%; min-width:0; min-height:44px; }
+ .app .chat-page button { min-height:44px; min-width:44px; }
+ .app .chat-bubble { overflow-wrap:anywhere; max-width:86%; }
+ .app .mobile-player-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; background:var(--surface); color:var(--ink); font-size:12px; }
+ .app .mobile-player-heading button { min-height:44px; padding:8px; color:inherit; border:1px solid var(--line); background:var(--soft); }
+ .app .music-card .player-actions button { min-width:40px; min-height:44px; }
+ .app select { font-size:16px; max-width:100%; }
+ .app dialog { max-width:calc(100vw - 20px); max-height:calc(100dvh - 24px); overscroll-behavior:contain; }
+ .app .memory-dialog { margin:auto; width:calc(100vw - 20px); }
+ .app .memory-dialog :is(input,select,textarea) { font-size:16px; }
+ .app .memory-dialog [data-form-step] { min-width:0; }
+ .app .memory-form-progress { padding:0; gap:5px; }
+ .app .memory-form-progress li { min-width:0; font-size:10px; overflow-wrap:anywhere; }
+ .app .personal-header { min-height:0; }
+ .app .moment-explorer { inset:var(--mobile-top) 8px var(--mobile-bottom); width:auto; max-width:none; }
+ .app.era-1970 .mobile-appbar { background:linear-gradient(100deg,#5e4129,#886444,#543b28); color:#f4e8ce; }
+ .app.era-1970 .mobile-page-title :is(span,strong) { color:#f4e8ce; }
+ .app.era-1980 .mobile-appbar { border-bottom-color:#bd65c9; }
+ .app.era-1990 .mobile-era-button,.app.era-1990 .mobile-add-button { border-radius:0; border:2px outset #fff; }
+ .app.era-2000 .mobile-appbar { background:linear-gradient(#f8fcff,#d4e6f8); }
 }

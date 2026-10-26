@@ -1,26 +1,30 @@
 import { Ellipsis, MapPin, Pencil, Repeat2, Trash2 } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
-import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import type { Memory } from "../../types";
 import { isOwnMemory, getMemoryAuthorDisplay } from "../../api";
-import CommentsSection from "./CommentsSection";
 import RemoteComments from './RemoteComments';
-import { publicationId } from '../../publicationsApi';
 import PostActions from "./PostActions";
 import PostRating from "./PostRating";
 import { memoryHashtags } from "../../hashtags";
+import { publicationId } from '../../publicationsApi';
+import FeedRelations from './FeedRelations';
 
 export default function FeedPost({
+  topOverlay,
   memory,
+  active = true,
   selected,
   following,
   liked,
-  comments,
+  likeCount,
+  commentMemoryId,
   rating,
-  ratingBusy,
   canRate,
   reposted,
+  directUnrepost = false,
+  repostCount,
   saved,
   quotedMemory,
   onDelete,
@@ -28,24 +32,30 @@ export default function FeedPost({
   onProfile,
   onFollow,
   onOpen,
+  onOpenRelated,
   onMap,
   onRate,
   onLike,
   onRepost,
+  onSimpleRepost,
+  onUnrepost,
+  onQuote,
   onSave,
-  onAddComment,
-  onReaction,
   onHashtag,
 }: {
+  topOverlay?: ReactNode;
   memory: Memory;
+  active?: boolean;
   selected: boolean;
   following: boolean;
   liked: boolean;
-  comments: MemoryComment[];
+  likeCount?: number;
+  commentMemoryId?: string;
   rating?: number;
-  ratingBusy: boolean;
   canRate: boolean;
   reposted: boolean;
+  directUnrepost?: boolean;
+  repostCount?: number;
   saved: boolean;
   quotedMemory?: Memory;
   onDelete: (memory: Memory) => void;
@@ -53,21 +63,22 @@ export default function FeedPost({
   onProfile: (memory: Memory) => void;
   onFollow: (author: string, authorId?: number) => void;
   onOpen: (memory: Memory) => void;
+  onOpenRelated?: (memory: Memory) => void;
   onMap: (memory: Memory) => void;
   onRate: (value: number) => void;
   onLike: () => void;
-  onRepost: () => void;
+  onRepost?: () => void;
+  onSimpleRepost?: (memory: Memory) => void;
+  onUnrepost?: (memory: Memory) => void | Promise<void>;
+  onQuote?: (memory: Memory) => void;
   onSave: () => void;
   onHashtag: (tag: string) => void;
-  onAddComment: (memoryId: string, text: string, parentId?: string) => void;
-  onReaction: (
-    memoryId: string,
-    commentId: string,
-    reaction: CommentReaction,
-  ) => void;
 }) {
+  const [commentCount, setCommentCount] = useState(memory.commentCount ?? 0);
+  useEffect(() => setCommentCount(memory.commentCount ?? 0), [memory.id, memory.commentCount]);
   const hasInlineImage =
     memory.image && !memory.media && !youtubeId(memory.image);
+  const splitPhoto = Boolean(hasInlineImage && !selected && !memory.repost?.comment);
 
   const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
 
@@ -86,13 +97,32 @@ export default function FeedPost({
     : memory;
 
   return (
-    <article className="feed-post">
+    <article className={`feed-post${topOverlay ? ' has-top-overlay' : ''}`}>
+      {topOverlay}
       {isSimpleRepost && (
-        <div className="repost-header-badge" style={{ padding: '0.5rem 1rem 0', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          <Repeat2 size={14} />
-          <span>{isReposterOwn ? "Has reposteado" : `${reposterDisplay} ha reposteado`}</span>
+        <div className="repost-header-badge">
+          <Repeat2 size={14} aria-hidden="true" />
+          {isReposterOwn ? (
+            <span>Has reposteado</span>
+          ) : (
+            <span>
+              <button
+                type="button"
+                className="repost-author"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onProfile({ ...memory, author: memory.author });
+                }}
+              >
+                {reposterDisplay}
+              </button>{" "}
+              ha reposteado
+            </span>
+          )}
         </div>
       )}
+      <div className={`post-composition${splitPhoto ? ' has-split-photo' : ''}`}>
+      <div className="post-details">
       <header>
         <button
           className="social-avatar author-avatar"
@@ -118,9 +148,9 @@ export default function FeedPost({
             {following ? "Siguiendo" : "Seguir"}
           </button>
         )}
-        {isOwnMemory(memory) && (
-          <details className="compact-menu feed-owner-menu">
-            <summary aria-label="Opciones de publicación" title="Opciones de publicación"><Ellipsis size={20} aria-hidden="true" /></summary>
+        {isReposterOwn && !memory.repost && (
+          <details className="feed-owner-menu">
+            <summary className="secondary-button" aria-label="Opciones de publicación" title="Opciones de publicación"><Ellipsis size={20} aria-hidden="true" /></summary>
             <div className="feed-owner-menu-options">
               <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onEdit(memory); }}><Pencil size={15} /> Editar</button>
               <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onDelete(memory); }}><Trash2 size={15} /> Eliminar</button>
@@ -161,7 +191,7 @@ export default function FeedPost({
 
         return (
           <div
-            className={isQuote ? "quoted-post-box" : undefined}
+            className={isQuote ? "quoted-post-box" : "post-body"}
             onClick={isQuote ? (e) => {
               e.stopPropagation();
               onOpen(targetQuoted);
@@ -254,30 +284,53 @@ export default function FeedPost({
       <PostRating
         memoryTitle={memory.title}
         value={rating}
-        pending={ratingBusy}
+        totalPoints={memory.points ?? 0}
         canRate={canRate}
+        isOwn={isHeaderAuthorOwn}
         onRate={onRate}
       />
       <PostActions
+        directUnrepost={directUnrepost}
         memoryTitle={memory.title}
+        memoryId={memory.id}
+        memoryYear={memory.year}
         liked={liked}
-        likeCount={memory.likeCount}
-        commentCount={memory.commentCount ?? comments.length}
+        likeCount={likeCount ?? memory.likeCount}
+        commentCount={commentCount}
         reposted={reposted}
+        repostCount={repostCount ?? memory.repostCount}
         saved={saved}
         onLike={onLike}
         onOpenComments={() => onOpen(memory)}
+        onSimpleRepost={() => {
+          if (onSimpleRepost) onSimpleRepost(memory);
+          else onRepost?.();
+        }}
+        onUnrepost={() => {
+          if (onUnrepost) return onUnrepost(memory);
+          else onRepost?.();
+        }}
+        onQuote={() => {
+          if (onQuote) onQuote(memory);
+          else onRepost?.();
+        }}
         onRepost={onRepost}
         onSave={onSave}
       />
-      {selected && (publicationId(memory) ? <RemoteComments key={memory.id} memoryId={memory.id}/> : (
-        <CommentsSection
-          memoryId={memory.id}
-          comments={comments}
-          onAddComment={onAddComment}
-          onReaction={onReaction}
+      </div>
+      {splitPhoto && <button className="post-photo-open" onClick={() => onOpen(memory)} aria-label={`Abrir recuerdo: ${memory.title}`}>
+        <img src={memory.image} alt={`Fotografía de ${memory.title} en ${memory.place}, ${memory.year}`} loading="lazy" decoding="async" onError={event => { event.currentTarget.hidden = true; }} />
+      </button>}
+      </div>
+      {publicationId(memory) && <FeedRelations key={`relations-${memory.id}`} id={memory.id} active={active} onOpen={onOpenRelated ?? onOpen} />}
+      {selected && commentMemoryId && (
+        <RemoteComments
+          key={`comments-${commentMemoryId}`}
+          memoryId={commentMemoryId}
+          onCommentCreated={() => setCommentCount((count) => count + 1)}
+          onCommentDeleted={() => setCommentCount((count) => Math.max(0, count - 1))}
         />
-      ))}
+      )}
     </article>
   );
 }

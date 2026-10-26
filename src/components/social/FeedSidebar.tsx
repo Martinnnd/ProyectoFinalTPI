@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
+import Link from "next/link";
 
 function avatarFor(name: string, id?: number) {
   const seed = id ?? [...name].reduce((sum, letter) => sum + letter.codePointAt(0)!, 0);
@@ -38,18 +39,18 @@ export default function FeedSidebar({
 
   return (
     <aside className="feed-sidebar">
-      <details className="feed-sidebar-content" open={window.innerWidth >= 900}>
+      <details className="feed-sidebar-content" open={typeof window !== "undefined" ? window.innerWidth >= 900 : true}>
         <summary>Tendencias, búsqueda y comunidad</summary>
         
         <section>
           <h3>A quién seguir</h3>
           {suggestions.map((author) => (
             <div className={`suggested-person${leaving === author.name ? " is-leaving" : ""}`} key={author.name}>
-              <span className="social-avatar" aria-hidden="true">
-                {author.name[0]}
+              <Link className="social-avatar" href={`/perfil/${encodeURIComponent(author.name)}`} aria-label={`Ver perfil de ${author.name}`}>
+                <span aria-hidden="true">{author.name[0]}</span>
                 <img src={avatarFor(author.name, author.id)} alt="" onError={event => { event.currentTarget.hidden = true; }} />
-              </span>
-              <strong>{author.name}</strong>
+              </Link>
+              <Link className="suggested-person-name" href={`/perfil/${encodeURIComponent(author.name)}`}><strong>{author.name}</strong></Link>
               <button
                 className="follow-button"
                 disabled={leaving === author.name}

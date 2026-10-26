@@ -1,11 +1,13 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { API_BASE_URL, cerrarSesion, crearPublicacion, guardarSesion, login } from './api';
+import { API_BASE_URL, cerrarSesion, crearPublicacion, guardarSesion } from './api';
 import { ratePublication, toMemory } from './publicationsApi';
+import type { Memory } from './types';
 import { consumeLoginAchievements } from './loginAchievements';
+import { loginRequest } from './components/auth/authApi';
 
 afterEach(() => { cerrarSesion(); vi.unstubAllGlobals(); });
 const session = {usuarioId: 8, token: 'test-token', username: 'usuario', email: 'usuario@example.test', esAdmin: false};
-const publication = {title: 'Recuerdo', description: 'Texto', year: 1995, category: 'Lugares', place: 'Buenos Aires', lat: -34.6, lng: -58.4, image: 'https://example.test/foto.jpg'};
+const publication: Memory = {id: 'draft', author: 'usuario', source: 'backend', title: 'Recuerdo', description: 'Texto', year: 1995, category: 'Lugares', place: 'Buenos Aires', lat: -34.6, lng: -58.4, image: 'https://example.test/foto.jpg'};
 
 it('distingue una validación rechazada de una falla de conexión al publicar', async () => {
   guardarSesion(session);
@@ -50,14 +52,14 @@ it('usa la puntuación persistida del DTO al reconstruir una publicación', () =
   const memory = toMemory({id: 20, titulo: 'Recuerdo', fecha: '1995-01-01', categoria: 0, tipoMultimedia: 0,
     urlMultimedia: '', autor: {id: 2, username: 'autor'}, puntosTotales: 19, miPuntuacion: 4},
   {id: '20', title: '', description: '', author: '', year: 1995, category: 'Lugares', place: '', lat: 0, lng: 0, source: 'backend'});
-  expect(memory).toMatchObject({viewerScore: 4, nostalgiaPoints: 19});
+  expect(memory).toMatchObject({viewerRating: 4, points: 19});
 });
 
 it('distingue la ubicación GPS del usuario del lugar histórico elegido', async () => {
   guardarSesion(session);
   const fetch = vi.fn().mockImplementation(() => Promise.resolve(new Response('{"id": 20}')));
   vi.stubGlobal('fetch', fetch);
-  const memory = {title: 'Recuerdo', description: 'Texto', year: 1995, category: 'Lugares', place: 'Buenos Aires', lat: -35.6, lng: -59.4, image: 'https://example.test/foto.jpg'};
+  const memory: Memory = {...publication, lat: -35.6, lng: -59.4};
   await crearPublicacion(memory, undefined, {lat: -34.6, lng: -58.4});
   const form = fetch.mock.calls[0][1].body as FormData;
   expect(form.get('Latitud')).toBe('-35.6');
@@ -70,7 +72,7 @@ it('distingue la ubicación GPS del usuario del lugar histórico elegido', async
 it('anuncia logros nuevos del login una sola vez y no los guarda en la sesión', async () => {
   const earned = {id: 14, titulo: 'Racha de Hierro', descripcion: 'Tres días', urlIcono: '.', puntosRecompensa: 0, desbloqueado: true, fechaDesbloqueo: '2026-10-03T12:00:00Z'};
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({...session, logrosNuevos: [earned]}))));
-  expect(await login(session.email, 'clave-de-prueba')).not.toHaveProperty('logrosNuevos');
+  expect(await loginRequest({email: session.email, contrasena: 'clave-de-prueba'})).not.toHaveProperty('logrosNuevos');
   expect(consumeLoginAchievements(session.usuarioId)).toEqual([earned]);
   expect(consumeLoginAchievements(session.usuarioId)).toEqual([]);
 });

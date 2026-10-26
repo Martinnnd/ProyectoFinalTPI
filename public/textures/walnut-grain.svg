@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="360" viewBox="0 0 720 360">
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".006 .12" numOctaves="3" seed="17" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues=".12 .57"/>
+        <feFuncG type="table" tableValues=".07 .38"/>
+        <feFuncB type="table" tableValues=".04 .23"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <path fill="#533724" d="M0 0h720v360H0z"/>
+  <path filter="url(#grain)" opacity=".8" d="M0 0h720v360H0z"/>
+</svg>

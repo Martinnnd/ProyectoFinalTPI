@@ -13,6 +13,8 @@ export interface Memory {
   id: string;
   title: string;
   year: number;
+  /** Historical calendar date (YYYY-MM-DD), independent of publication time. */
+  date?: string;
   category: Category;
   description: string;
   place: string;
@@ -21,8 +23,10 @@ export interface Memory {
   likeCount?: number;
   commentCount?: number;
   viewerLiked?: boolean;
-  viewerScore?: number | null;
-  nostalgiaPoints?: number;
+  points?: number;
+  viewerRating?: number;
+  repostCount?: number;
+  viewerReposted?: boolean;
   lat: number;
   lng: number;
   source: "demo" | "local" | "backend" | "community" | "db";
@@ -42,6 +46,7 @@ export interface Memory {
     authorId?: number;
     comment?: string;
   };
+  quotedMemory?: Memory;
 }
 export interface Period {
   decade: Decade;
@@ -100,4 +105,14 @@ export function filterMemories(
   );
 }
 
-export interface CommunityGroup { id: string; name: string; decade: Decade; description: string; }
+export interface CommunityGroup {
+  id: string;
+  name: string;
+  decade: Decade;
+  description: string;
+  isMember: boolean;
+  isCreator: boolean;
+  createdAt?: string;
+  memberCount?: number;
+  creator?: { id: number; username: string };
+}

@@ -1,4 +1,17 @@
 /* Canal 70: CRT glass inside a wood and brushed-metal television. */
+.era-1970 {
+  --picking-bg: linear-gradient(120deg, #454b44, #202721);
+  --picking-ink: #f0f3e8;
+  --picking-border: 3px ridge #aaa99c;
+  --picking-radius: 12px;
+  --picking-shadow: inset 0 0 15px #0008, 0 8px 28px #0007;
+  --picking-highlight: #e1dfb5;
+  --picking-button-bg: linear-gradient(#e1e2d9, #999e91);
+  --picking-button-ink: #20271e;
+  --picking-button-border: 2px outset #b4b8aa;
+  --picking-button-radius: 5px;
+  --picking-button-hover: #e1e2d9;
+}
 .era-1970 .leaflet-tile-pane,.era-1970 .mapboxgl-canvas { filter:grayscale(1) contrast(.9) brightness(.83); }
 .era-1970 .memory-map { background:#313533; }
 .era-1970 .era-atmosphere { display:block; position:absolute; inset:30px 122px 34px 78px; z-index:350; pointer-events:none; border:14px solid #393a35; border-radius:55px / 42px; box-shadow:0 0 0 5px #a49a85,0 0 0 11px #302c27,inset 0 0 50px 12px #0009,inset 0 0 3px 3px #d1d7c5; background:radial-gradient(ellipse at 45% 25%,#ffffff0a 0,transparent 60%,#0005 100%); }

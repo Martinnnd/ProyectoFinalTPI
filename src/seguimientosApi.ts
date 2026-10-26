@@ -1,19 +1,16 @@
-import { API_BASE_URL, getSesion } from './api';
-import { notifyAchievementsChanged } from './achievementEvents';
+import { API_BASE_URL } from './api';
+import { apiFetch } from './components/auth/apiClient';
 
 export type FollowedUser = { id: number; username: string };
 
 async function request(path: string, options?: RequestInit): Promise<unknown> {
   const headers = new Headers(options?.headers);
-  const token = getSesion()?.token;
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-  const response = await fetch(`${API_BASE_URL}/api/seguimientos${path}`, { ...options, headers, cache: 'no-store' });
+  const response = await apiFetch(`${API_BASE_URL}/api/seguimientos${path}`, { ...options, headers, cache: 'no-store' });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
     throw new Error(fields || problem?.detail || problem?.mensaje || problem?.title || `No se pudo completar el seguimiento (${response.status}).`);
   }
-  if (options?.method && !['GET', 'HEAD'].includes(options.method.toUpperCase())) notifyAchievementsChanged();
   if (response.status === 204) return null;
   return response.json().catch(() => null);
 }

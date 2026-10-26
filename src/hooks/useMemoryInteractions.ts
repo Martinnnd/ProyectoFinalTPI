@@ -1,92 +1,76 @@
-import { useState } from "react";
-import type {
-  CommentReaction,
-  CommentsByMemory,
-  MemoryComment,
-} from "../socialTypes";
-import { demoComments } from "@/components/social/demoComments";
-
-function updateReaction(
-  comment: MemoryComment,
-  reaction: CommentReaction,
-): MemoryComment {
-  const reactions = { ...comment.reactions };
-  const previous = comment.viewerReaction;
-
-  if (previous) {
-    const previousCount = reactions[previous] ?? 0;
-    if (previousCount <= 1) delete reactions[previous];
-    else reactions[previous] = previousCount - 1;
-  }
-
-  if (previous === reaction) {
-    return { ...comment, reactions, viewerReaction: undefined };
-  }
-
-  reactions[reaction] = (reactions[reaction] ?? 0) + 1;
-  return { ...comment, reactions, viewerReaction: reaction };
-}
+import { useState, useCallback } from "react";
+import { likePublication, unlikePublication } from "../publicationsApi";
 
 export default function useMemoryInteractions() {
   const [likes, setLikes] = useState<Record<string, boolean>>({});
-  const [commentsByMemory, setCommentsByMemory] = useState<CommentsByMemory>(demoComments);
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [repostCounts, setRepostCounts] = useState<Record<string, number>>({});
 
+  const isLiked = useCallback(
+    (memoryId: string, initial = false) => {
+      return likes[memoryId] ?? initial;
+    },
+    [likes],
+  );
 
-  function isLiked(memoryId: string, initial = false) {
-    return likes[memoryId] ?? initial;
-  }
+  const getLikeCount = useCallback(
+    (memoryId: string, initialCount = 0) => {
+      return likeCounts[memoryId] ?? initialCount;
+    },
+    [likeCounts],
+  );
 
-  function toggleLike(memoryId: string, initial = false) {
-    setLikes(current => ({ ...current, [memoryId]: !(current[memoryId] ?? initial) }));
-  }
+  const getRepostCount = useCallback(
+    (memoryId: string, initialCount = 0) => {
+      return repostCounts[memoryId] ?? initialCount;
+    },
+    [repostCounts],
+  );
 
-  function setLiked(memoryId: string, liked: boolean) {
-    setLikes(current => ({ ...current, [memoryId]: liked }));
-  }
+  const updateRepostCount = useCallback(
+    (memoryId: string, count: number) => {
+      setRepostCounts((prev) => ({ ...prev, [memoryId]: count }));
+    },
+    [],
+  );
 
-  function getComments(memoryId: string) {
-    return commentsByMemory[memoryId] ?? [];
-  }
+  const incrementRepostCount = useCallback(
+    (memoryId: string, delta: number, initialCount = 0) => {
+      setRepostCounts((prev) => {
+        const current = prev[memoryId] ?? initialCount;
+        return { ...prev, [memoryId]: Math.max(0, current + delta) };
+      });
+    },
+    [],
+  );
 
-  function addComment(memoryId: string, text: string, parentId?: string) {
-    const cleanText = text.trim();
-    if (!cleanText) return;
+  const toggleLike = useCallback(
+    async (memoryId: string, initialLiked = false, initialCount = 0) => {
+      const currentlyLiked = likes[memoryId] ?? initialLiked;
+      const currentCount = likeCounts[memoryId] ?? initialCount;
+      const nextLiked = !currentlyLiked;
+      const nextCount = Math.max(0, currentCount + (nextLiked ? 1 : -1));
 
-    const comment: MemoryComment = {
-      id: crypto.randomUUID(),
-      memoryId,
-      parentId,
-      author: "Vos",
-      text: cleanText,
-      createdAt: new Date().toISOString(),
-      reactions: {},
-    };
+      // Actualización optimista inmediata en la interfaz
+      setLikes((prev) => ({ ...prev, [memoryId]: nextLiked }));
+      setLikeCounts((prev) => ({ ...prev, [memoryId]: nextCount }));
 
-    setCommentsByMemory((current) => ({
-      ...current,
-      [memoryId]: [...(current[memoryId] ?? []), comment],
-    }));
-  }
+      try {
+        const res = nextLiked
+          ? await likePublication(memoryId)
+          : await unlikePublication(memoryId);
 
-  function reactToComment(
-    memoryId: string,
-    commentId: string,
-    reaction: CommentReaction,
-  ) {
-    setCommentsByMemory((current) => ({
-      ...current,
-      [memoryId]: (current[memoryId] ?? []).map((comment) =>
-        comment.id === commentId ? updateReaction(comment, reaction) : comment,
-      ),
-    }));
-  }
+        setLikes((prev) => ({ ...prev, [memoryId]: res.dioLike }));
+        setLikeCounts((prev) => ({ ...prev, [memoryId]: res.cantidadLikes }));
+      } catch (err) {
+        console.error("Error al actualizar me gusta:", err);
+        // Revertir estado si el backend rechaza la petición
+        setLikes((prev) => ({ ...prev, [memoryId]: currentlyLiked }));
+        setLikeCounts((prev) => ({ ...prev, [memoryId]: currentCount }));
+      }
+    },
+    [likes, likeCounts],
+  );
 
-  return {
-    addComment,
-    getComments,
-    isLiked,
-    setLiked,
-    reactToComment,
-    toggleLike,
-  };
+  return { isLiked, getLikeCount, toggleLike, getRepostCount, updateRepostCount, incrementRepostCount };
 }

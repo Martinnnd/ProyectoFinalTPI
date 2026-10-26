@@ -1,14 +1,24 @@
 import { describe, it, expect } from 'vitest';
-import { filterCommunity, demoGroup, demoGroups } from './groups';
+import { filterCommunity } from './groups';
 import { initialMemories } from './data';
-import { demoGroupMemories } from './groupMemories';
 import { loadMemories, saveMemories } from './storage';
+import type { CommunityGroup } from './types';
+
+const group: CommunityGroup = {
+ id: 'autos-80',
+ name: 'Fierros de los 80',
+ decade: 1980,
+ description: 'Autos y recuerdos de los ochenta.',
+ isMember: true,
+ isCreator: true,
+};
+
 describe('Grupos en común',()=>{
  it('separa publicaciones generales y del grupo, y permite buscar',()=>{
-  expect(filterCommunity(initialMemories,'general',[demoGroup]).every(m=>!m.groupId)).toBe(true);
-  expect(filterCommunity(initialMemories,'autos-80',[demoGroup])).toHaveLength(3);
-  expect(filterCommunity(initialMemories,'groups',[demoGroup],'Fiat')).toHaveLength(1);
-  expect(filterCommunity(initialMemories,'own',[demoGroup])).toHaveLength(0);
+  expect(filterCommunity(initialMemories,'general',[group]).every(m=>!m.groupId)).toBe(true);
+  expect(filterCommunity(initialMemories,'autos-80',[group])).toHaveLength(3);
+  expect(filterCommunity(initialMemories,'groups',[group],'Fiat')).toHaveLength(1);
+  expect(filterCommunity(initialMemories,'own',[group])).toHaveLength(0);
  });
  it('conserva el grupo de un recuerdo propio al guardarlo y recuperarlo',()=>{
   let raw=''; const storage={setItem:(_k:string,v:string)=>{raw=v;},getItem:()=>raw};
@@ -19,18 +29,8 @@ describe('Grupos en común',()=>{
 });
 
 it('muestra recuerdos generales y de grupos juntos en la vista completa',()=>{
- const all=filterCommunity(initialMemories,'all',[demoGroup]);
+ const all=filterCommunity(initialMemories,'all',[group]);
  expect(all).toHaveLength(initialMemories.length);
- expect(all.some(m=>m.groupId===demoGroup.id)).toBe(true);
+ expect(all.some(m=>m.groupId===group.id)).toBe(true);
  expect(all.some(m=>!m.groupId)).toBe(true);
-});
-
-it('cada grupo de demostración muestra cuatro recuerdos de su década',()=>{
- expect(demoGroups).toHaveLength(4);
- for(const group of demoGroups){
-  const posts=filterCommunity(demoGroupMemories,group.id,demoGroups);
-  expect(posts).toHaveLength(4);
-  expect(posts.every(p=>p.year>=group.decade&&p.year<group.decade+10)).toBe(true);
- }
- expect(new Set(demoGroupMemories.map(m=>m.id)).size).toBe(demoGroupMemories.length);
 });

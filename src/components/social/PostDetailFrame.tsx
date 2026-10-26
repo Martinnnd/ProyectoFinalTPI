@@ -1,11 +1,12 @@
 import { forwardRef, type ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
 import type { Memory } from "../../types";
-import { getMemoryAuthorDisplay } from "../../api";
 
 const PostDetailFrame = forwardRef<
   HTMLDivElement,
   {
     decade: number;
+    backLabel?: string;
     memory: Memory | null;
     maximized: boolean;
     onClose: () => void;
@@ -15,6 +16,7 @@ const PostDetailFrame = forwardRef<
 >(function PostDetailFrame(
   {
     decade,
+    backLabel = "Volver al feed",
     memory,
     maximized,
     onClose,
@@ -38,14 +40,14 @@ const PostDetailFrame = forwardRef<
         {detail && memory && (
           <>
             <div className="transition-title">
-              <span className="transition-app-icon">
-                {decade === 1990 ? "▣" : "♟"}
-              </span>
-              <strong className="transition-caption">
-                {decade === 1990
-                  ? "Recuerdo — Nostalgiar 95"
-                  : "Nostalgiar Messenger"}
-              </strong>
+              <button
+                type="button"
+                className="transition-caption detail-back"
+                onClick={onClose}
+              >
+                <ArrowLeft size={17} aria-hidden="true" />
+                {backLabel}
+              </button>
               <div className="transition-window-controls">
                 <button aria-label="Minimizar publicación" onClick={onClose}>
                   _
@@ -61,35 +63,6 @@ const PostDetailFrame = forwardRef<
                 </button>
               </div>
             </div>
-            <div className="transition-menu">
-              Archivo · Recuerdos · Conversación
-            </div>
-            {decade === 2000 && (() => {
-              const displayContact = getMemoryAuthorDisplay({
-                author:
-                  memory.repost && !memory.repost.comment && memory.repost.author
-                    ? memory.repost.author
-                    : memory.author,
-              });
-              return (
-                <>
-                  <div className="transition-contact">
-                    <span className="transition-contact-avatar">
-                      {displayContact.slice(0, 1)}
-                    </span>
-                    <div className="transition-contact-name">
-                      {displayContact} — Conversación
-                    </div>
-                    <small className="transition-contact-status">
-                      Recuerdo de {memory.year}
-                    </small>
-                  </div>
-                  <div className="transition-chat-tools">
-                    ☺ Recuerdos compartidos · ♫ Nostalgiar
-                  </div>
-                </>
-              );
-            })()}
           </>
         )}
         <div className={detail ? "transition-content" : undefined}>

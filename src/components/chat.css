@@ -18,6 +18,7 @@
 .chat-titlebar strong { flex:1; font-size:14px; }
 .chat-titlebar .icon-button { color:inherit; width:30px; height:30px; }
 .chat-content { display:flex; min-height:0; }
+.chat-conversation-empty { display:flex; align-items:center; justify-content:center; }
 .chat-page .chat-window { width:100%; max-width:none; flex:1; min-height:0; display:flex; flex-direction:column; }
 .chat-page .chat-titlebar,.chat-page .chat-demo-note,.chat-page .chat-conversation>header,.chat-page .chat-composer { flex-shrink:0; }
 .chat-page .chat-content { flex:1; min-height:0; }
@@ -54,7 +55,6 @@
 .chat-popup .chat-bubble { font-size:13px; }
 .chat-dock button:focus-visible,.chat-page button:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
 @media(max-width:899px) {
- .app .navigation-rail .rail-profile { margin-top:0; }
  .chat-dock { right:12px; bottom:80px; }
  .chat-launcher { padding:10px 14px; }
  .chat-faces { display:none; }

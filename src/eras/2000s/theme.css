@@ -1,3 +1,17 @@
+.era-2000 {
+  --picking-bg: linear-gradient(#267ae5, #004bbb);
+  --picking-ink: #ffffff;
+  --picking-border: 2px solid #123c9b;
+  --picking-radius: 9px;
+  --picking-shadow: inset 0 1px 0 #85b5fc, 0 8px 28px #0006;
+  --picking-highlight: #fff0ad;
+  --picking-button-bg: linear-gradient(#ffffff, #dceaff);
+  --picking-button-ink: #174083;
+  --picking-button-border: 1px solid #83a9d3;
+  --picking-button-radius: 5px;
+  --picking-button-shadow: inset 0 1px 0 #ffffff;
+  --picking-button-hover: #ffffff;
+}
 .era-2000 .primary-button {
   color: white;
   background: linear-gradient(#4794cc, #266da6);
@@ -433,17 +447,22 @@
   margin: 0 -26px 20px;
   border-radius: 7px 7px 0 0;
 }
-.era-2000 :is(input, textarea, select) {
+.era-2000 :is(input, textarea, select, .memory-select-control) {
   border-radius: 0;
   border: 1px solid #7f9db9;
   background: #fff;
   color: #263b50;
   box-shadow: inset 1px 1px #cbd4df;
 }
-.era-2000 .secondary-button {
+.era-2000 :is(.secondary-button, .follow-button[aria-pressed="true"], .profile-item-follow-btn[aria-pressed="true"]) {
   border: 1px solid #7892b4;
   border-radius: 3px;
   background: linear-gradient(white, #e0e8f2);
+  color: #1d3555;
+}
+.era-2000 :is(.secondary-button, .follow-button[aria-pressed="true"], .profile-item-follow-btn[aria-pressed="true"]):hover {
+  background: linear-gradient(#f0f5fc, #d0def0);
+  color: #0f2d52;
 }
 .era-2000 .system-taskbar {
   background: linear-gradient(#428dea, #1963c7 15%, #1f69ce 85%, #1251a7);
@@ -1035,7 +1054,7 @@
 .era-2000 .social-stream.detail-mode { min-height:0; padding:0; border:0; background:transparent; overflow:visible; box-shadow:none; border-radius:0; }
 .era-2000 .social-stream .detail-window { position:relative; inset:auto; height:100%; width:100%; transform-origin:top left; box-sizing:border-box; }
 .era-2000 .detail-mode .feed-heading { display:none; }
-.era-2000 .detail-mode .transition-content { overflow-y:auto; overscroll-behavior:contain; }
+.era-2000 .detail-mode .transition-content { margin:0; padding:0; border:0; border-radius:0; overflow-y:auto; overscroll-behavior:contain; }
 .era-2000 .detail-mode .feed-back { margin:0 0 12px; }
 .era-2000 .detail-mode .feed-post { margin:0; }
 .era-2000 .transition-window-controls button { display:grid; place-items:center; width:23px; height:22px; padding:0; font:12px Arial,sans-serif; cursor:pointer; }

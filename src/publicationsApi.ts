@@ -1,38 +1,45 @@
-import { API_BASE_URL, getSesion } from './api';
+import { API_BASE_URL } from './apiConfig';
+import { apiFetch } from './components/auth/apiClient';
 import { categories, type Category, type Memory, type Period } from './types';
 import { youtubeId } from './media';
-import type { MemoryComment } from './socialTypes';
-import { notifyAchievementsChanged } from './achievementEvents';
 
 export type MapBounds = { minLatitud: number; maxLatitud: number; minLongitud: number; maxLongitud: number };
 type Pin = { id: number; latitud: number; longitud: number; categoria: number | string };
-export type Publication = { puntosTotales?: number; miPuntuacion?: number | null; cantidadLikes?: number; cantidadComentarios?: number; dioLike?: boolean; id: number; titulo: string; descripcion?: string; descripcionBreve?: string; fecha: string; fechaCreacion?: string; categoria: number | string; urlMultimedia: string; tipoMultimedia: number | string; autor: { id: number; username: string }; lugar?: { nombre: string; latitud: number; longitud: number } };
-type Comment = { id: number; contenido: string; fechaCreacion: string; autor: { id: number; username: string } };
-export type LikeSummary = { publicacionId: number; cantidadLikes: number; dioLike: boolean };
-export type RatingSummary = { publicacionId: number; puntosTotales: number; miPuntuacion: number | null };
-
-export function ratePublication(id: string, score: number): Promise<RatingSummary> {
-  if (!/^[1-9]\d*$/.test(id) || !Number.isInteger(score) || score < 1 || score > 5)
-    throw new Error('La publicación o la puntuación no es válida.');
-  if (!getSesion()?.token) throw new Error('Iniciá sesión para puntuar.');
-  return publicationRequest<RatingSummary>(`/${id}/puntuacion`, {
-    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({puntaje: score}),
-  });
-}
+export type Publication = {
+  cantidadLikes?: number;
+  cantidadComentarios?: number;
+  dioLike?: boolean;
+  puntosTotales?: number;
+  miPuntuacion?: number | null;
+  cantidadReposts?: number;
+  dioRepost?: boolean;
+  id: number;
+  titulo: string;
+  descripcion?: string;
+  descripcionBreve?: string;
+  fecha: string;
+  fechaCreacion?: string;
+  categoria: number | string;
+  urlMultimedia: string;
+  tipoMultimedia: number | string;
+  autor: { id: number; username: string };
+  lugar?: { nombre: string; latitud: number; longitud: number };
+  grupo?: { id: number } | null;
+  publicacionOriginalId?: number | null;
+  publicacionOriginal?: Publication;
+  reposteadoPor?: { usuarioId: number; username: string; fecha?: string };
+};
 
 export async function publicationRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
-  const session = getSesion();
-  if (session?.token) headers.set('Authorization', `Bearer ${session.token}`);
-  const response = await fetch(`${API_BASE_URL}/api/publicaciones${path}`, { ...options, headers });
+  const response = await apiFetch(`${API_BASE_URL}/api/publicaciones${path}`, { ...options, headers });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
     throw new Error(fields || problem?.detail || problem?.title || `Error del servidor (${response.status}).`);
   }
-  const data = await response.json();
-  if (options?.method && !['GET', 'HEAD'].includes(options.method.toUpperCase())) notifyAchievementsChanged();
-  return data;
+  if (response.status === 204) return undefined as T;
+  return response.json();
 }
 function category(value: number | string): Category {
   if (typeof value === 'number') return categories[value] ?? 'Personales';
@@ -60,34 +67,121 @@ export async function getMapPublications(bounds: MapBounds, period: Period, sele
 export function toMemory(data: Publication, pin: Memory): Memory {
   const url = data.urlMultimedia ? new URL(data.urlMultimedia, API_BASE_URL).href : '';
   const video = data.tipoMultimedia === 1 || data.tipoMultimedia === 'Video';
-  return { ...pin, id: String(data.id), source: 'backend', likeCount: data.cantidadLikes, commentCount: data.cantidadComentarios, viewerLiked: data.dioLike, viewerScore: data.miPuntuacion, nostalgiaPoints: data.puntosTotales, title: data.titulo, description: data.descripcion ?? data.descripcionBreve ?? '', year: new Date(data.fecha).getUTCFullYear(), category: category(data.categoria), author: data.autor.username, authorId: data.autor.id, createdAt: data.fechaCreacion, place: data.lugar?.nombre ?? pin.place, lat: data.lugar?.latitud ?? pin.lat, lng: data.lugar?.longitud ?? pin.lng, image: url && !video && !youtubeId(url) ? url : undefined, media: url && (video || youtubeId(url)) ? { kind: youtubeId(url) ? 'youtube' : 'video', url } : undefined };
+
+  let repost: Memory['repost'] = undefined;
+  let author = data.autor?.username ?? '';
+  let authorId = data.autor?.id;
+  let quotedMemory: Memory | undefined = undefined;
+
+  if (data.reposteadoPor) {
+    // Repost simple desde Neo4j: el author principal se asigna al reposteador para badges y el author original va en repost
+    author = data.reposteadoPor.username || pin.author || '';
+    authorId = data.reposteadoPor.usuarioId;
+    repost = {
+      originalId: String(data.id),
+      author: data.autor?.username ?? '',
+      authorId: data.autor?.id,
+    };
+  } else if (data.publicacionOriginal) {
+    // Cita con comentario desde PostgreSQL: el autor es quien cita y el comentario es la descripción
+    repost = {
+      id: String(data.id),
+      originalId: String(data.publicacionOriginal.id),
+      author: data.publicacionOriginal.autor?.username ?? '',
+      authorId: data.publicacionOriginal.autor?.id,
+      comment: data.descripcion,
+    };
+    quotedMemory = toMemory(data.publicacionOriginal, {
+      ...pin,
+      id: String(data.publicacionOriginal.id),
+      place: data.publicacionOriginal.lugar?.nombre ?? pin.place,
+      lat: data.publicacionOriginal.lugar?.latitud ?? pin.lat,
+      lng: data.publicacionOriginal.lugar?.longitud ?? pin.lng,
+    });
+  }
+
+  return {
+    ...pin,
+    id: String(data.id),
+    source: 'backend',
+    likeCount: data.cantidadLikes,
+    commentCount: data.cantidadComentarios,
+    viewerLiked: data.dioLike,
+    points: data.puntosTotales ?? 0,
+    viewerRating: data.miPuntuacion ?? undefined,
+    repostCount: data.cantidadReposts,
+    viewerReposted: data.dioRepost,
+    repost,
+    quotedMemory,
+    title: data.titulo,
+    description: data.descripcion ?? data.descripcionBreve ?? '',
+    year: data.fecha ? new Date(data.fecha).getUTCFullYear() : pin.year,
+    date: data.fecha ? new Date(data.fecha).toISOString().slice(0, 10) : pin.date,
+    category: category(data.categoria),
+    author,
+    authorId,
+    createdAt: data.fechaCreacion,
+    place: data.lugar?.nombre ?? pin.place,
+    lat: data.lugar?.latitud ?? pin.lat,
+    lng: data.lugar?.longitud ?? pin.lng,
+    groupId: data.grupo ? String(data.grupo.id) : pin.groupId,
+    image: url && !video && !youtubeId(url) ? url : undefined,
+    media: url && (video || youtubeId(url)) ? { kind: youtubeId(url) ? 'youtube' : 'video', url } : undefined
+  };
 }
-export async function getPublication(memory: Memory, summary: boolean, signal?: AbortSignal) {
+export async function getPublication(input: Memory | string, summary: boolean, signal?: AbortSignal) {
+  const memory: Memory = typeof input === 'string'
+    ? { id: input, title: '', description: '', author: '', place: '', year: 0, lat: NaN, lng: NaN, category: 'Personales', source: 'backend' }
+    : input;
   const id = publicationId(memory);
   if (!id) throw new Error('Esta publicación no tiene un identificador del servidor.');
-  return toMemory(await publicationRequest<Publication>(`/${id}${summary ? '/resumen' : ''}`, { signal }), memory);
+  // The summary omits location. A direct URL has no map pin to supply it.
+  const useSummary = summary && typeof input !== 'string';
+  const result = toMemory(await publicationRequest<Publication>(`/${id}${useSummary ? '/resumen' : ''}`, { signal }), memory);
+  if (!Number.isFinite(result.lat) || !Number.isFinite(result.lng) || Math.abs(result.lat) > 90 || Math.abs(result.lng) > 180) {
+    throw new Error('Este recuerdo no tiene una ubicación válida para mostrar en el mapa.');
+  }
+  return result;
 }
-function validateLikePublicationId(id: string): string {
-  if (!/^[1-9]\d*$/.test(id)) throw new Error('Esta publicación no tiene un identificador válido del servidor.');
-  if (!getSesion()?.token) throw new Error('Iniciá sesión para dar o quitar un Me gusta.');
-  return id;
+
+export type RatingState = {
+  publicacionId: number;
+  puntosTotales: number;
+  miPuntuacion?: number | null;
+};
+
+export function ratePublication(id: number | string, puntaje: number): Promise<RatingState> {
+  if (!Number.isSafeInteger(Number(id)) || Number(id) <= 0)
+    throw new Error('La publicación no es válida.');
+  if (!Number.isInteger(puntaje) || puntaje < 1 || puntaje > 5)
+    throw new Error('La puntuación no es válida.');
+  return publicationRequest<RatingState>(`/${id}/puntuacion`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ puntaje }),
+  });
 }
-export function likePublication(id: string): Promise<LikeSummary> {
-  return publicationRequest<LikeSummary>(`/${validateLikePublicationId(id)}/like`, { method: 'POST' });
+
+export async function removePublicationRating(id: number | string): Promise<RatingState> {
+  return publicationRequest<RatingState>(`/${id}/puntuacion`, {
+    method: 'DELETE',
+  });
 }
-export function unlikePublication(id: string): Promise<LikeSummary> {
-  return publicationRequest<LikeSummary>(`/${validateLikePublicationId(id)}/like`, { method: 'DELETE' });
+
+export type LikeState = {
+  publicacionId: number;
+  cantidadLikes: number;
+  dioLike: boolean;
+};
+
+export async function likePublication(id: number | string): Promise<LikeState> {
+  return publicationRequest<LikeState>(`/${id}/like`, {
+    method: 'POST',
+  });
 }
-function toComment(data: Comment, memoryId: string): MemoryComment {
-  return { id: String(data.id), memoryId, text: data.contenido, author: data.autor.username, createdAt: data.fechaCreacion, reactions: {} };
-}
-export async function getComments(memoryId: string, cursor?: string, signal?: AbortSignal) {
-  const query = new URLSearchParams({ limite: '20' });
-  if (cursor) query.set('cursor', cursor);
-  const data = await publicationRequest<{ items: Comment[]; siguienteCursor: string | null }>(`/${memoryId}/comentarios?${query}`, { signal });
-  return { items: data.items.map(item => toComment(item, memoryId)), cursor: data.siguienteCursor };
-}
-export async function createComment(memoryId: string, contenido: string) {
-  const data = await publicationRequest<Comment>(`/${memoryId}/comentarios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contenido: contenido.trim(), usuarioId: getSesion()?.usuarioId ?? 1 }) });
-  return toComment(data, memoryId);
+
+export async function unlikePublication(id: number | string): Promise<LikeState> {
+  return publicationRequest<LikeState>(`/${id}/like`, {
+    method: 'DELETE',
+  });
 }

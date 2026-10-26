@@ -3,6 +3,7 @@ import { ACHIEVEMENTS_CHANGED, ACHIEVEMENTS_UPDATED } from '../achievementEvents
 import { getUserProfile, toAchievement } from '../profileApi';
 import type { Achievement } from '../types';
 import { consumeLoginAchievements } from '../loginAchievements';
+import { queryCache } from '../sessionQueryCache';
 
 export default function useAchievementNotifications(userId: number | null, sessionToken?: string) {
   const [pending, setPending] = useState<{userId: number; items: Achievement[]} | null>(null);
@@ -11,7 +12,11 @@ export default function useAchievementNotifications(userId: number | null, sessi
     if (userId === null) return;
     const id = userId;
     const loginAwards = consumeLoginAchievements(id).filter(logro => logro.desbloqueado).map(toAchievement);
-    if (loginAwards.length) setPending({userId: id, items: loginAwards});
+    if (loginAwards.length) {
+      queryCache.clear();
+      setPending({userId: id, items: loginAwards});
+      window.dispatchEvent(new Event(ACHIEVEMENTS_UPDATED));
+    }
     const controller = new AbortController();
     let seen: Set<number> | null = null;
     let reading = false;
@@ -30,6 +35,7 @@ export default function useAchievementNotifications(userId: number | null, sessi
           if (previous !== null) {
             const earned = unlocked.filter(logro => !previous.has(logro.id)).map(toAchievement);
             if (earned.length) {
+              queryCache.clear();
               setPending(current => ({userId: id, items: [...(current?.userId === id ? current.items : []), ...earned]}));
               window.dispatchEvent(new Event(ACHIEVEMENTS_UPDATED));
             }

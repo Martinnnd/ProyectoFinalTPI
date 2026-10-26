@@ -3,20 +3,24 @@ import type { FeedTab } from "../../socialTypes";
 
 export default function FeedHeader({
   title,
+  backLabel = "Volver al feed",
   tab,
   selected,
+  scrollHidden = false,
   onBack,
   onTabChange,
 }: {
   title: string;
+  backLabel?: string;
   tab: FeedTab;
   selected: boolean;
+  scrollHidden?: boolean;
   onBack: () => void;
   onTabChange: (tab: FeedTab) => void;
 }) {
   return (
     <>
-      <header className="feed-heading">
+      <header className={`feed-heading${scrollHidden ? ' is-scroll-hidden' : ''}`}>
         <h2>{title}</h2>
         <div className="feed-tabs" role="group" aria-label="Publicaciones">
           <button
@@ -42,7 +46,7 @@ export default function FeedHeader({
       {selected && (
         <button className="feed-back" onClick={onBack}>
           <ArrowLeft size={17} />
-          Volver a feed
+          {backLabel}
         </button>
       )}
     </>

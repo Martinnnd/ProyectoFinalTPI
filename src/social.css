@@ -1786,7 +1786,7 @@
 .profile-device-led { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
 @media(max-width:700px) { .profile-device-top small { display:none; } }
 
-.pin-message-preview img.pin-preview-photo { display:block; width:76px; height:58px; object-fit:cover; border-radius:4px; margin:0 0 8px; border:1px solid #8886; }
+.pin-message-preview img.pin-preview-photo { display:block; width:100%; height:auto; max-height:220px; box-sizing:border-box; object-fit:contain; border-radius:4px; margin:0 0 8px; border:1px solid #8886; }
 .pin-message-preview img.pin-preview-photo[hidden] { display:none; }
 
 /* Address search is shared by both main map renderers. */
@@ -1887,7 +1887,6 @@
  .personal-profile .profile-post-body h3 { font-size:21px; }
 }
 
-.app .navigation-rail .rail-profile { margin-top:auto; }
 .era-activity-dock { position:fixed; z-index:520; bottom:40px; left:calc(50% + 36px); transform:translateX(-50%); width:510px; max-width:calc(100vw - 150px); padding:10px; color:var(--ink); background:var(--surface); border:1px solid var(--line); box-shadow:0 5px 18px #0005; }
 .activity-dock-heading { display:flex; align-items:center; gap:7px; font:700 11px var(--font-display); letter-spacing:1px; padding:0 4px 8px; }
 .activity-dock-heading small { margin-left:auto; font:11px var(--font-body); letter-spacing:0; }
@@ -1899,4 +1898,4 @@
 .activity-dock-options small { font-size:10px; line-height:1.25; }
 .activity-dock-options button[aria-expanded="true"] { outline:2px solid var(--accent); outline-offset:-3px; }
 .activity-dock-options button:active { transform:translateY(1px); }
-@media(max-width:899px) { .era-activity-dock { display:none; } .app .navigation-rail .rail-profile { margin-top:0; } }
+@media(max-width:899px) { .era-activity-dock { display:none; } }

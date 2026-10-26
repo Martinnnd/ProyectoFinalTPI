@@ -28,12 +28,15 @@ export interface MemoryComment {
   id: string;
   memoryId: string;
   parentId?: string;
-  author: string;
-  text: string;
+  author?: string;
+  text?: string;
   createdAt: string;
+  deleted: boolean;
+  canDelete: boolean;
+  replyCount: number;
+  repliesCursor?: string | null;
   reactions: Partial<Record<CommentReaction, number>>;
   viewerReaction?: CommentReaction;
 }
 
-export type CommentsByMemory = Record<string, MemoryComment[]>;
 export type FeedTab = "all" | "following" | "groups";

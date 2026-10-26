@@ -32,7 +32,7 @@ Es un frontend completo de demostración, no una red social con backend. No hay 
 Crear .env.local en la raíz, tomando .env.example como plantilla:
 
 ```dotenv
-NEXT_PUBLIC_API_BASE_URL=http://localhost:5199
+NEXT_PUBLIC_API_URL=http://localhost:5199
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=TU_TOKEN_PUBLICO
 NEXT_PUBLIC_MAP_MODE=auto
 ```
@@ -101,7 +101,7 @@ Validación: `npm run check`, `npm test`, `npm run build` y `npx playwright test
 
 ## Conexión con el Backend y Usuarios de Prueba (Data Seeder)
 
-El frontend obtiene las publicaciones, el mapa y los feeds desde la API; no se conecta directamente a PostgreSQL ni a Neo4j. Sin configuración adicional usa `http://localhost:5199`, correspondiente al perfil HTTP del backend. `.env.local` es opcional: permite configurar otra URL con `NEXT_PUBLIC_API_BASE_URL`. `.env.example` es una plantilla y no se carga automáticamente. Reiniciar `npm run dev` después de cambiar una variable. Si se usa `npm run start`, recompilar primero con `npm run build`.
+El frontend obtiene las publicaciones, el mapa y los feeds desde la API; no se conecta directamente a PostgreSQL ni a Neo4j. Sin configuración adicional usa `http://localhost:5199`, correspondiente al perfil HTTP del backend. `.env.local` es opcional: permite configurar otra URL con `NEXT_PUBLIC_API_URL`. También se admite `NEXT_PUBLIC_API_BASE_URL` para configuraciones anteriores; si existen ambas, se utiliza `NEXT_PUBLIC_API_URL`. `.env.example` es una plantilla y no se carga automáticamente. Reiniciar `npm run dev` después de cambiar una variable. Si se usa `npm run start`, recompilar primero con `npm run build`.
 
 Cuando el backend se inicia por primera vez en desarrollo, su **Data Seeder** puebla automáticamente la base de datos con los usuarios y publicaciones históricas desde `seed.json`.
 

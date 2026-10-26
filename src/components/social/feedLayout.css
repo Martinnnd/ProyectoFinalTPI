@@ -1,4 +1,8 @@
 /* Feed uses the whole workspace; Explore keeps its map and era controls. */
+.app.view-feed .social-stream {
+  padding-top: 0;
+}
+
 .app.view-feed > .map-toolbar,
 .app.view-feed > .map-period,
 .app.view-feed .era-shell-top,
@@ -30,6 +34,14 @@
   color: var(--ink);
   background: var(--surface);
   border: 1px solid var(--line);
+}
+
+.feed-group-directory {
+  margin-bottom: 18px;
+}
+
+.feed-group-directory .community-controls {
+  margin: 0;
 }
 
 .app.view-feed .feed-sidebar .community-heading,

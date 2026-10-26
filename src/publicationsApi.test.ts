@@ -1,6 +1,7 @@
 import { API_BASE_URL, guardarSesion, cerrarSesion } from './api';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createComment, getComments, getMapPublications, getPublication, publicationId, toMemory } from './publicationsApi';
+import { getMapPublications, getPublication, publicationId, toMemory, ratePublication } from './publicationsApi';
+import { createComment, getComments } from './commentsApi';
 import type { Memory } from './types';
 
 const pin: Memory = { id: '25', title: 'Recuerdo', year: 1990, category: 'Personales', description: '', author: '', place: '', lat: -34, lng: -58, source: 'backend' };
@@ -15,14 +16,41 @@ it('crea comentarios con la identidad de la sesión', async () => {
   const fetch = respond(comment);
   vi.stubGlobal('fetch', fetch);
   await createComment('25', ' Hola ');
-  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Hola', usuarioId: 42 });
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Hola', comentarioPadreId: null });
   expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
 });
 describe('Publicaciones del backend', () => {
-  it('conserva los contadores y el estado de like, incluyendo ceros', () => {
-    const data = { id: 25, titulo: 'Recuerdo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, cantidadLikes: 12, cantidadComentarios: 47, dioLike: true };
-    expect(toMemory(data, pin)).toMatchObject({ likeCount: 12, commentCount: 47, viewerLiked: true });
-    expect(toMemory({ ...data, cantidadLikes: 0, cantidadComentarios: 0, dioLike: false }, pin)).toMatchObject({ likeCount: 0, commentCount: 0, viewerLiked: false });
+  it('recupera la ubicación real al abrir un pin desde la URL, sin usar el resumen sin coordenadas', async () => {
+    const fetch = respond({ id: 25, titulo: 'Ramos Mejía', fecha: '1990-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, lugar: { nombre: 'Ramos Mejía', latitud: -34.64, longitud: -58.56 } });
+    vi.stubGlobal('fetch', fetch);
+    expect(await getPublication('25', true)).toMatchObject({ lat: -34.64, lng: -58.56, place: 'Ramos Mejía' });
+    expect(fetch.mock.calls[0][0]).toBe(`${API_BASE_URL}/api/publicaciones/25`);
+  });
+  it('no inventa una ubicación en 0,0 si el detalle no informa coordenadas', async () => {
+    vi.stubGlobal('fetch', respond({ id: 25, titulo: 'Recuerdo', fecha: '1990-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' } }));
+    await expect(getPublication('25', true)).rejects.toThrow('ubicación válida');
+  });
+  it('conserva la fecha histórica completa en UTC al cargar una publicación', () => {
+    const data = { id: 25, titulo: 'Recuerdo', fecha: '1991-04-15T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' } };
+    expect(toMemory(data, pin)).toMatchObject({ year: 1991, date: '1991-04-15' });
+  });
+  it('conserva los contadores, el estado de like y la puntuación, incluyendo ceros', () => {
+    const data = { id: 25, titulo: 'Recuerdo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, cantidadLikes: 12, cantidadComentarios: 47, dioLike: true, puntosTotales: 15, miPuntuacion: 5 };
+    expect(toMemory(data, pin)).toMatchObject({ likeCount: 12, commentCount: 47, viewerLiked: true, points: 15, viewerRating: 5 });
+    expect(toMemory({ ...data, cantidadLikes: 0, cantidadComentarios: 0, dioLike: false, puntosTotales: 0, miPuntuacion: null }, pin)).toMatchObject({ likeCount: 0, commentCount: 0, viewerLiked: false, points: 0, viewerRating: undefined });
+  });
+  it('envía PUT para puntuar publicación con JWT y parsea respuesta', async () => {
+    guardarSesion({ usuarioId: 42, token: 'token-test', username: 'Ana', email: 'ana@example.com', esAdmin: false });
+    const fetch = respond({ publicacionId: 25, puntosTotales: 20, miPuntuacion: 5 });
+    vi.stubGlobal('fetch', fetch);
+    const res = await ratePublication('25', 5);
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ puntaje: 5 });
+    expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe('Bearer token-test');
+    expect(res).toEqual({ publicacionId: 25, puntosTotales: 20, miPuntuacion: 5 });
+  });
+  it('conserva el grupo informado por el backend', () => {
+    const data = { id: 25, titulo: 'Recuerdo del grupo', fecha: '1992-01-01T00:00:00Z', categoria: 0, urlMultimedia: '', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, grupo: { id: 12 } };
+    expect(toMemory(data, pin)).toMatchObject({ groupId: '12' });
   });
   it('envía el área visible y el rango exclusivo de fecha, y adapta los pines', async () => {
     const fetch = respond({ pines: [{ id: 25, latitud: -34, longitud: -58, categoria: 6 }], hayMas: true });
@@ -59,12 +87,9 @@ describe('Publicaciones del backend', () => {
     expect(page.cursor).toBe('next+/=');
     expect(page.items[0]).toMatchObject({ id: '8', text: comment.contenido, author: 'usuarioTest', createdAt: comment.fechaCreacion });
   });
-  it('crea comentarios con usuario temporal y muestra validaciones ProblemDetails', async () => {
-    const fetch = respond(comment, 201);
-    vi.stubGlobal('fetch', fetch);
-    await createComment('25', '  Qué lindo recuerdo  ');
-    expect(fetch.mock.calls[0][0]).toBe(`${API_BASE_URL}/api/publicaciones/25/comentarios`);
-    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ contenido: 'Qué lindo recuerdo', usuarioId: 1 });
+  it('rechaza comentarios anónimos y muestra validaciones ProblemDetails', async () => {
+    await expect(createComment('25', 'Qué lindo recuerdo')).rejects.toThrow('iniciar sesión');
+    guardarSesion({ usuarioId: 42, token: 'token-test', username: 'Ana', email: 'ana@example.com', esAdmin: false });
     vi.stubGlobal('fetch', respond({ title: 'Validación', errors: { Contenido: ['Contenido obligatorio.'] } }, 400));
     await expect(createComment('25', '')).rejects.toThrow('Contenido obligatorio.');
   });

@@ -27,7 +27,7 @@ Instalá las dependencias con `npm ci`. El frontend usa `http://localhost:5199` 
 Si necesitás otra configuración, creá `.env.local` junto a `package.json` (está ignorado por Git), por ejemplo:
 
 ```dotenv
-NEXT_PUBLIC_API_BASE_URL=http://localhost:5199
+NEXT_PUBLIC_API_URL=http://localhost:5199
 NEXT_PUBLIC_MAP_MODE=2d
 ```
 
@@ -54,3 +54,12 @@ npx playwright test --config playwright.profile.config.ts
 ```
 
 Estos recorridos crean dos cuentas temporales en la base local, comentan una publicación del seed y comprueban catálogo, fecha, recarga y separación entre cuentas. También prueban puntuación y desmarcado contra la API real con `miguel@example.com` / `password123`, y la reutilización del permiso GPS inicial, tanto aceptado como rechazado, sin una segunda consulta de ubicación. Requieren que backend y frontend ya estén escuchando antes de ejecutar el comando. Usalos solo contra una base de desarrollo con el seed cargado. Requieren Chrome, como las otras pruebas del repositorio; también admiten `PLAYWRIGHT_CHROMIUM_EXECUTABLE` para un Chromium instalado y `PLAYWRIGHT_BASE_URL` para otro puerto del frontend. `NEXT_PUBLIC_API_BASE_URL` define la dirección de la API de la prueba. No simulan las respuestas del backend.
+
+
+## Integración con las rutas de develop
+
+El perfil está en `/perfil` y `/perfil/[username]`; el login y el registro están en `/auth/login` y `/auth/registro`. Se conservan los componentes separados de `develop` y se retiran `App.tsx`, `components/Profile.tsx` y `LoginDialog.tsx`, reemplazados por las rutas nuevas. El catálogo y sus fechas vienen del backend de `logros`; no se vuelven a calcular insignias a partir de recuerdos ni puntuaciones del navegador.
+
+`AuthProvider` administra la sesión en memoria y la renovación mediante cookie. Los logros nuevos de login/renovación se consumen una sola vez y no se guardan con la sesión. `AppShell` presenta los avisos reales. Las mutaciones confirmadas invalidan las consultas; el sondeo de logros usa `no-store` y una nueva insignia actualiza el perfil aunque se hubiera consultado antes. La navegación conserva las otras consultas de `develop`.
+
+`NEXT_PUBLIC_API_URL` tiene prioridad y se sigue admitiendo `NEXT_PUBLIC_API_BASE_URL`. El valor por defecto es `http://localhost:5199`. La ubicación inicial del mapa se transmite desde `MainMap` a la creación de recuerdos, sin un botón adicional ni una segunda consulta desde el formulario. El formulario conserva la fecha completa y la integración con Google Photos de `develop`.

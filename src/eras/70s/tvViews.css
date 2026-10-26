@@ -23,7 +23,7 @@
   box-shadow:0 0 0 2px #a3a18f,0 0 0 5px #352e25,inset 0 0 18px #333c3025,0 7px 14px #0006;
   color:#202820;
 }
-.app.era-1970.view-feed .social-stream { --paper-turn:0; padding:16px 20px 24px; }
+.app.era-1970.view-feed .social-stream { --paper-turn:0; padding:0 20px 24px; }
 .app.era-1970.view-feed .feed-heading { padding:10px 0; border:0; border-bottom:1px solid #8b9282; }
 .app.era-1970.view-feed .feed-heading::before { content:none; }
 .app.era-1970.view-feed .feed-heading h2 { font:700 23px 'Courier New',monospace; letter-spacing:0; }
@@ -93,22 +93,14 @@
 @media(max-width:899px) {
   .app.era-1970.view-chat .chat-page { top:var(--mobile-top); }
   .app.era-1970.view-profile .profile-main { padding:8px; }
-  .app.era-1970.view-feed .social-stream { padding:12px; }
+  .app.era-1970.view-feed .social-stream { padding:0 12px 12px; }
   .app.era-1970.view-feed .social-stream,.app.era-1970.view-profile .profile-main,.app.era-1970 .chat-window { border-width:4px; border-radius:16px; }
 }
 
-/* Cabinet finishes: quiet walnut grain, satin trim and moulded CRT bezels.
-   Material-only overrides keep each destination's existing geometry intact. */
+/* Walnut veneer: organic grain under a restrained satin finish. */
 .app.era-1970 {
-  --tv-walnut: #493124;
-  --tv-trim: #998974;
-  --tv-wood-grain:
-    repeating-linear-gradient(2deg, transparent 0 3px, #170d0714 4px, transparent 6px 13px),
-    repeating-linear-gradient(178deg, transparent 0 17px, #d4a16a0b 19px, #160d0812 21px, transparent 24px 41px),
-    linear-gradient(94deg, #271b1645, transparent 24%, #c3905c12 48%, transparent 72%, #1a100b40),
-    linear-gradient(0deg, #36251c, #513729 48%, #624432);
+  --cabinet-wood: linear-gradient(105deg,#10090624,transparent 24%,#e3b37c12 48%,transparent 72%,#10090638),url('/textures/walnut-grain.svg');
 }
-
 .app.era-1970.map-app,
 .app.era-1970 .time-navigation,
 .app.era-1970 .navigation-rail,
@@ -116,87 +108,94 @@
 .app.era-1970 .device-1970,
 .app.era-1970 .profile-era-device,
 .app.era-1970 .song-picker {
-  background-color: var(--tv-walnut);
-  background-image: var(--tv-wood-grain);
+  background-color:#4b3222;
+  background-image:var(--cabinet-wood);
+  background-size:auto,720px 360px;
 }
-
 .app.era-1970 .time-navigation {
-  border-bottom-color: var(--tv-trim);
-  border-bottom-style: solid;
-  box-shadow: inset 0 1px #d6b28b42, inset 0 -1px #20150ed9, 0 2px 5px #100b0980;
+  border-bottom-color:#998368;
+  border-bottom-style:solid;
+  box-shadow:inset 0 1px #e5ba8138,inset 0 -2px #1e130c66,0 2px 5px #0005;
 }
-
 .app.era-1970 .navigation-rail,
 .app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail {
-  border-right-color: #8b7963;
-  border-right-style: solid;
-  box-shadow: inset -1px 0 #21150ed9, inset 1px 0 #cca67d30;
+  background-position:center,135px 45px;
+  border-right-color:#8e795e;
+  border-right-style:solid;
+  box-shadow:inset -1px 0 #1c110b99,inset 1px 0 #deb7892e;
 }
-
-.app.era-1970 .era-atmosphere {
-  border-color: #292825;
-  background: radial-gradient(ellipse at 40% 12%, #fffaf00b, transparent 54%, #100f0d24);
-  box-shadow: 0 0 0 1px #151411, 0 0 0 3px #b2a38c,
-    0 0 0 5px #706251, 0 0 0 10px #2b2019,
-    0 5px 12px 9px #150e0966,
-    inset 0 2px 3px #e5dfcb52, inset 0 -3px 5px #0009,
-    inset 0 0 36px #14171266;
-}
-
-.app.era-1970 .era-atmosphere::after {
-  background: repeating-linear-gradient(0deg, #00000009 0 1px, transparent 1px 4px);
-  box-shadow: inset 0 12px 20px #fff9e80a;
-}
-
 .app.era-1970 .device-1970,
 .app.era-1970 .profile-era-device,
 .app.era-1970 .song-picker {
-  border-color: #75573e;
-  border-style: solid;
-  box-shadow: inset 0 1px #e5ba8659, inset 1px 0 #c89e7130,
-    inset 0 -2px #21160fc2, 0 5px 12px #130d094d;
+  border-color:#795c3f;
+  box-shadow:inset 0 1px #e5bb8355,inset 0 -2px #1a100b88,0 6px 14px #160e0959;
 }
-
-.app.era-1970 .device-1970 .device-illustration {
-  border-color: #302a22;
-  background: linear-gradient(115deg, #ffffff26, transparent 42%, #28262014),
-    repeating-linear-gradient(0deg, #ffffff0a 0 1px, #24221c06 1px 3px),
-    linear-gradient(#c3bdad, #a9a493);
-  box-shadow: inset 0 2px 4px #17150f80, 0 1px #d4b38b70;
-}
-
 .app.era-1970 .era-activity-dock,
 .app.era-1970 #chat-taskbar-slot {
-  background: linear-gradient(#ffffff08, #00000024), var(--tv-wood-grain);
-  border-color: #8e7759;
-  border-style: solid;
-  box-shadow: inset 0 1px #e0bf8d38, inset 0 -1px #1a130ddb, 0 2px 5px #120d0966;
+  background-image:var(--cabinet-wood);
+  background-size:auto,720px 360px;
+  background-color:#4b3222;
+  border-color:#927a57;
+  box-shadow:inset 0 1px #edc58b33,inset 0 -1px #1a100b99,0 2px 4px #0004;
 }
 
-.app.era-1970 .activity-dock-options button {
-  color: #f0e7d5;
-  background: linear-gradient(#575046, #38342e);
-  border-color: #8c8170;
-  border-bottom-color: #211e19;
-  box-shadow: inset 0 1px #e2d5bc30, 0 1px 2px #0006;
+/* Small moulded television keys, inset into the walnut side panel. */
+.app.era-1970 .navigation-rail button,
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail button {
+  position:relative;
+  isolation:isolate;
+  border:1px solid #96856c;
+  border-bottom-color:#342b21;
+  border-radius:5px;
+  background:linear-gradient(115deg,#ffffff09,transparent 55%),linear-gradient(#49463e,#302f29);
+  color:#eee5d2;
+  box-shadow:inset 0 1px #e0d0ad40,inset 0 -3px #18191280,0 1px 0 1px #23180e,0 3px 5px #180f0966;
+  text-shadow:0 1px #151711;
+  transition:background-color 160ms,box-shadow 160ms,color 160ms;
 }
-
-.app.era-1970 .activity-dock-options button:hover {
-  background: linear-gradient(#655c4e, #443c32);
+.app.era-1970 .navigation-rail button::before {
+  content:'';
+  position:absolute;
+  top:5px;
+  right:6px;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#191c14;
+  box-shadow:inset 0 1px 2px #0009,0 1px #c8b88930;
+  pointer-events:none;
 }
-
-.app.era-1970 .activity-dock-options button[aria-expanded="true"] {
-  color: #e2edb8;
-  background: linear-gradient(#34382d, #414537);
-  border-color: #929b77;
-  box-shadow: inset 0 2px 4px #0008;
+.app.era-1970 .navigation-rail button svg {
+  stroke-width:1.6;
+  filter:drop-shadow(0 1px 1px #0008);
 }
-
-.app.era-1970.view-feed .social-stream,
-.app.era-1970.view-profile .profile-main,
-.app.era-1970 .chat-window {
-  border-color: #2d2c28;
-  box-shadow: 0 0 0 1px #141411, 0 0 0 2px #b2a38c,
-    0 0 0 5px #3a2c21, inset 0 1px 3px #fff9e861,
-    inset 0 0 18px #333c3025, 0 7px 14px #140d0959;
+.app.era-1970 .navigation-rail button span {
+  max-width:100%;
+  font:700 8px/1.25 Arial,sans-serif;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+}
+.app.era-1970 .navigation-rail button:hover {
+  background:linear-gradient(#5b574b,#3c3b32);
+  color:#fff3db;
+  box-shadow:inset 0 1px #ead6ae55,inset 0 -3px #18191280,0 1px 0 1px #23180e,0 3px 5px #180f0966;
+}
+.app.era-1970 .navigation-rail button:is(.rail-active,[aria-expanded="true"],:active),
+.app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail button:is(.rail-active,[aria-expanded="true"],:active) {
+  background:linear-gradient(#242821,#34392e);
+  border-color:#8f886e;
+  border-top-color:#454635;
+  color:#f5d79f;
+  box-shadow:inset 0 2px 5px #0009,inset 0 -1px #c0b58e22,0 1px #d7b78644,0 0 0 1px #271d13;
+}
+.app.era-1970 .navigation-rail button:is(.rail-active,[aria-expanded="true"])::before {
+  background:#f3c36c;
+  box-shadow:0 0 3px #ffd891,0 0 8px #e8a23c99,inset 0 1px #fff2c4;
+}
+.app.era-1970 .navigation-rail button:focus-visible { outline:2px solid #efc680; outline-offset:3px; }
+@media(max-width:899px) {
+  .app.era-1970 .navigation-rail button span { font-size:9px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .app.era-1970 .navigation-rail button { transition:none; }
 }
