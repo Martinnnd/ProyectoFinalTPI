@@ -26,6 +26,7 @@ import {
 import type { Point } from "../MemoryMap";
 import { availableDecades } from "../../eras/registry";
 import { useRatings } from "../../context/RatingsContext";
+import useFeedPrefetch from '../../hooks/useFeedPrefetch';
 
 function ExploreContent() {
   const router = useRouter();
@@ -58,6 +59,8 @@ function ExploreContent() {
   );
 
   const [remotePins, setRemotePins] = useState<Memory[]>([]);
+  const [mapDataReady, setMapDataReady] = useState(false);
+  useFeedPrefetch(mapDataReady);
   const [selectedId, setSelectedId] = useState<string | null>(recuerdoParam);
   const [remoteSelected, setRemoteSelected] = useState<Memory | null>(null);
   const selectedSeed = useRef<Memory | null>(null);
@@ -105,9 +108,10 @@ function ExploreContent() {
         .then((result) => {
           if (!controller.signal.aborted) {
             setRemotePins(result.memories);
+            setMapDataReady(true);
           }
         })
-        .catch(() => {});
+        .catch(() => { if (!controller.signal.aborted) setMapDataReady(true); });
     }, 300);
     return () => {
       clearTimeout(timer);

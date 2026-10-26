@@ -17,7 +17,8 @@ import HashtagThread from "./HashtagThread";
 import useRemoteFeed from '../../hooks/useRemoteFeed';
 import { useAuth } from '../auth/AuthProvider';
 import { publicationId } from '../../publicationsApi';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, RefreshCw } from 'lucide-react';
+import { feedCache } from '../../sessionQueryCache';
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -118,7 +119,11 @@ export default function SocialFeed({
   const [reposts, setReposts] = useState<string[]>([]);
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
-  const [tab, setTab] = useState<FeedTab>("all");
+  const viewKey = `${session?.usuarioId ?? 'guest'}:feed-view`;
+  const [tab, setTab] = useState<FeedTab>(() => feedCache.get<FeedTab>(viewKey) ?? 'all');
+  useEffect(() => {
+    if (active && !selected && tab !== 'groups') feedCache.set(viewKey, tab, Infinity);
+  }, [active, selected?.id, tab, viewKey]);
   const [knownAuthors, setKnownAuthors] = useState<{ name: string; id: number }[]>([]);
 
   function requireAuthentication(): boolean {
@@ -143,7 +148,11 @@ export default function SocialFeed({
       return next.length === previous.length && next.every((author, index) => author.id === previous[index].id && author.name === previous[index].name) ? previous : next;
     });
   }, [remote.items, session?.usuarioId]);
-  useEffect(() => { if (followingRevision && tab === 'following') remote.reload(); }, [followingRevision]);
+  const lastFollowingRevision = useRef(followingRevision);
+  useEffect(() => {
+    if (lastFollowingRevision.current !== followingRevision && tab === 'following') remote.reload();
+    lastFollowingRevision.current = followingRevision;
+  }, [followingRevision, tab]);
   useEffect(() => {
     if (isAuthenticated && tab !== 'groups') onItems(remote.items);
   }, [isAuthenticated, remote.items, tab, onItems]);
@@ -158,8 +167,12 @@ export default function SocialFeed({
   const stream = useRef<HTMLDivElement>(null);
   const loadTarget = useRef<HTMLDivElement>(null);
   const [headerHidden, setHeaderHidden] = useState(false);
+  const [suggestRefresh, setSuggestRefresh] = useState(false);
+  const scrolledDown = useRef(false);
   useEffect(() => {
     setHeaderHidden(false);
+    setSuggestRefresh(false);
+    scrolledDown.current = false;
     if (!active || selected || !stream.current) return;
     let detach = () => {};
     const attach = () => {
@@ -172,6 +185,8 @@ export default function SocialFeed({
       const onScroll = () => {
         const next = Math.max(0, scrollRoot.scrollTop);
         const delta = next - previous;
+        if (next >= 120) scrolledDown.current = true;
+        setSuggestRefresh(next <= 8 && scrolledDown.current);
         if (next > 8 && Math.abs(delta) < 3) return;
         previous = next;
         setHeaderHidden(next > 8 && delta > 0);
@@ -191,8 +206,18 @@ export default function SocialFeed({
 
   useEffect(() => () => cancelTurn.current(), []);
   useEffect(() => {
-    if (stream.current) stream.current.scrollTop = 0;
-  }, [selected?.id, tab, hashtag]);
+    let root: HTMLElement | null = stream.current;
+    while (root && !/(auto|scroll)/.test(getComputedStyle(root).overflowY)) root = root.parentElement;
+    if (!root || !active) return;
+    if (selected || hashtag) { root.scrollTop = 0; return; }
+    const scrollRoot = root;
+    const key = `${viewKey}:${tab}:scroll`;
+    const saved = feedCache.get<number>(key) ?? 0;
+    const frame = requestAnimationFrame(() => { scrollRoot.scrollTop = saved; });
+    const remember = () => feedCache.set(key, scrollRoot.scrollTop, Infinity);
+    scrollRoot.addEventListener('scroll', remember, { passive: true });
+    return () => { cancelAnimationFrame(frame); remember(); scrollRoot.removeEventListener('scroll', remember); };
+  }, [active, selected?.id, tab, hashtag, viewKey]);
 
   const feedAuthors = authorsFromMemories(allMemories);
   const authors = [...new Map([...feedAuthors, ...knownAuthors.map(author => [author.name, author] as const), ...suggestedAuthors.map(author => [author.name, author] as const)]
@@ -389,7 +414,7 @@ export default function SocialFeed({
           </div>
         )}
         <div className="feed-posts">
-          {(selected ? [selected] : posts).map((memory) => {
+          {(selected ? [selected] : posts).map((memory, index) => {
             const isQuote = Boolean(
               memory.quotedMemory ||
               (memory.repost && (memory.repost.comment !== undefined || (memory.repost.id && memory.repost.id !== memory.repost.originalId)))
@@ -423,6 +448,13 @@ export default function SocialFeed({
 
             return (
               <FeedPost
+                topOverlay={index === 0 && isAuthenticated && tab !== 'groups' && !selected && suggestRefresh ? (
+                  <button type="button" className="feed-refresh-button" disabled={remote.loading} onClick={() => {
+                    setSuggestRefresh(false);
+                    scrolledDown.current = false;
+                    remote.reload();
+                  }}><RefreshCw size={15} aria-hidden="true" />nuevas publicaciones</button>
+                ) : undefined}
                 key={memory.id}
                 memory={effectiveMemory}
                 active={active}
