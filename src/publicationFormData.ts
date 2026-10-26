@@ -15,7 +15,7 @@ function backendCategory(category: Memory['category']): string {
   return category === 'Personales' ? 'Recuerdos_Personales' : category;
 }
 
-export function buildPublicationFormData(memory: Memory, authorId?: number): FormData {
+export function buildPublicationFormData(memory: Memory, authorId?: number, gpsUsuario?: {lat: number; lng: number} | null): FormData {
   const formData = new FormData();
   formData.append('Titulo', memory.title);
   formData.append('Descripcion', memory.description);
@@ -29,6 +29,10 @@ export function buildPublicationFormData(memory: Memory, authorId?: number): For
   formData.append('Latitud', String(memory.lat));
   formData.append('Longitud', String(memory.lng));
   if (authorId !== undefined) formData.append('AutorId', String(authorId));
+  if (gpsUsuario) {
+    formData.append('GpsLatitud', String(gpsUsuario.lat));
+    formData.append('GpsLongitud', String(gpsUsuario.lng));
+  }
 
   const mediaUrl = memory.image || memory.media?.url || '';
   const isVideo = memory.media && memory.media.kind !== 'image';

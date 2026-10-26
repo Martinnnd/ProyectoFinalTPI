@@ -1,4 +1,6 @@
 import { API_BASE_URL } from "../../apiConfig";
+import { rememberLoginAchievements } from "../../loginAchievements";
+import type { AchievementState } from "../../profileApi";
 import { toAuthError } from "./authErrors";
 import type {
   AuthSession,
@@ -28,7 +30,9 @@ async function authRequest(path: string, body?: object): Promise<AuthSession> {
   }
 
   if (!response.ok) throw await toAuthError(response);
-  return response.json() as Promise<AuthSession>;
+  const { logrosNuevos, ...session }: AuthSession & { logrosNuevos?: AchievementState[] } = await response.json();
+  rememberLoginAchievements(session.usuarioId, logrosNuevos);
+  return session;
 }
 
 export function loginRequest(credentials: LoginCredentials): Promise<AuthSession> {

@@ -259,4 +259,3 @@ const ProfilePosts = forwardRef<HTMLElement, {
 });
 
 export default ProfilePosts;
-

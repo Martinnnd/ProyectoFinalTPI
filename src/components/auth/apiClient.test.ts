@@ -87,3 +87,26 @@ it('conserva el feed al registrar impresiones y lo invalida al modificar una pub
   await apiFetch('https://localhost/api/publicaciones/12/like', { method: 'POST' });
   expect(feedCache.get('1:para-vos')).toBeUndefined();
 });
+
+it('consulta el servidor en cada lectura de logros con no-store', async () => {
+  browserSession();
+  const fetch = vi.fn().mockImplementation(async () => new Response('{"logros":[]}'));
+  vi.stubGlobal('fetch', fetch);
+  await apiFetch('https://localhost/api/usuario/1/perfil', {cache: 'no-store'});
+  await apiFetch('https://localhost/api/usuario/1/perfil', {cache: 'no-store'});
+  expect(fetch).toHaveBeenCalledTimes(2);
+});
+
+it('comprueba logros después de una acción confirmada, sin anunciar rechazos ni impresiones', async () => {
+  browserSession();
+  const dispatched = vi.mocked(window.dispatchEvent);
+  dispatched.mockClear();
+  vi.stubGlobal('fetch', vi.fn()
+    .mockResolvedValueOnce(new Response('{}', {status: 400}))
+    .mockResolvedValueOnce(new Response('{}', {status: 200}))
+    .mockResolvedValueOnce(new Response('{}', {status: 200})));
+  await apiFetch('https://localhost/api/publicaciones/12/like', {method: 'POST'});
+  await apiFetch('https://localhost/api/publicaciones/12/like', {method: 'POST'});
+  await apiFetch('https://localhost/api/feed/impresiones', {method: 'POST'});
+  expect(dispatched.mock.calls.map(([event]) => event.type)).toEqual(['nostalgiar:achievements-changed']);
+});

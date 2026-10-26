@@ -10,7 +10,7 @@ for (const width of [1280, 390]) {
       if (request.method() === 'OPTIONS') return route.fulfill({ headers, status: 204 });
       let json: unknown = [];
       if (path === '/api/auth/refresh') json = { token: 'test', usuarioId: 1, username: 'ana', email: 'ana@test.com', esAdmin: false };
-      if (path === '/api/usuario/perfil/ana') json = { id: 1, username: 'ana', tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 1, cantidadSeguidores: 0, cantidadSeguidos: 0 };
+      if (path === '/api/usuario/perfil/ana') json = { id: 1, username: 'ana', logros: [], tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 1, cantidadSeguidores: 0, cantidadSeguidos: 0 };
       if (path === '/api/publicaciones/usuario/1') json = [{ id: 12, titulo: 'Un recuerdo de los noventa', descripcion: 'Una historia del barrio.', fecha: '1995-01-01', categoria: 0, tipoMultimedia: 0, urlMultimedia: '', autor: { id: 1, username: 'ana' } }];
       if (path.endsWith('/analisis')) json = { estado: 'sinMomento' };
       if (path.endsWith('/momentos')) json = { publicacionId: 12, momentos: [] };

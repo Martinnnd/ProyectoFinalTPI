@@ -1,5 +1,6 @@
 import type { AuthSession } from "./authTypes";
 import { clearSessionQueries } from '../../sessionQueryCache';
+import { clearLoginAchievements } from '../../loginAchievements';
 
 export const AUTH_STORAGE_KEY = "nostalgia_auth";
 export const AUTH_CHANGE_EVENT = "nostalgiar:auth-change";
@@ -62,6 +63,7 @@ export function storeSession(session: AuthSession): void {
 }
 
 export function clearStoredSession(): void {
+  clearLoginAchievements();
   clearSessionQueries();
   memorySession = null;
   completeAuthInit();
@@ -70,4 +72,3 @@ export function clearStoredSession(): void {
     window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
   }
 }
-

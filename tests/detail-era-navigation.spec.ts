@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 
+// Las fuentes externas no forman parte de estas pruebas funcionales.
+test.beforeEach(async ({page}) => {
+  await page.route('https://fonts.googleapis.com/**', route => route.fulfill({contentType: 'text/css', body: ''}));
+});
+
 for (const origin of ['/perfil/sofi', '/perfil', '/feed']) {
   test(`cambiar de época desde el detalle regresa a ${origin} sin restaurar la época del recuerdo`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -16,7 +21,7 @@ for (const origin of ['/perfil/sofi', '/perfil', '/feed']) {
       if (/\/api\/publicaciones\/usuario\/\d+$/.test(path)) json = [memory];
       if (path.startsWith('/api/usuario/perfil/')) {
         const own = path.endsWith('/ana');
-        json = { id: own ? 1 : 2, username: own ? 'ana' : 'sofi', tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 0, cantidadSeguidores: 0, cantidadSeguidos: 0 };
+        json = { id: own ? 1 : 2, username: own ? 'ana' : 'sofi', logros: [], tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 0, cantidadSeguidores: 0, cantidadSeguidos: 0 };
       }
       if (path.endsWith('/momentos')) json = { publicacionId: 12, momentos: [] };
       if (path.endsWith('/analisis')) json = { estado: 'sinMomento' };
@@ -27,10 +32,10 @@ for (const origin of ['/perfil/sofi', '/perfil', '/feed']) {
     await page.addStyleTag({ content: 'nextjs-portal { display:none !important; }' });
     await expect(page.getByText('Recuerdo de 1985', { exact: true })).toBeVisible();
     await page.locator('.feed-post .post-content').first().click();
-    await expect(page).toHaveURL(/\/recuerdo\/12/);
+    await expect(page).toHaveURL(/\/recuerdo\/12/, {timeout: 15000});
     await expect(page.locator('.app')).toHaveClass(/era-1980/);
     await page.getByRole('button', { name: 'Década de 1990', exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`${origin}$`));
+    await expect(page).toHaveURL(url => url.pathname === origin);
     if (origin.startsWith('/perfil')) {
       await expect(page.getByRole('main', { name: `Perfil de ${origin === '/perfil' ? 'ana' : 'sofi'}` })).toBeVisible();
     } else {

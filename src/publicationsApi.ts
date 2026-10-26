@@ -150,7 +150,11 @@ export type RatingState = {
   miPuntuacion?: number | null;
 };
 
-export async function ratePublication(id: number | string, puntaje: number): Promise<RatingState> {
+export function ratePublication(id: number | string, puntaje: number): Promise<RatingState> {
+  if (!Number.isSafeInteger(Number(id)) || Number(id) <= 0)
+    throw new Error('La publicación no es válida.');
+  if (!Number.isInteger(puntaje) || puntaje < 1 || puntaje > 5)
+    throw new Error('La puntuación no es válida.');
   return publicationRequest<RatingState>(`/${id}/puntuacion`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

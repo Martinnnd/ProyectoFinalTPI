@@ -46,7 +46,7 @@ async function mockApi(page: Page) {
       return route.fulfill({ headers, status: 204 });
     }
     if (url.pathname === '/api/usuario/perfil/lucia') {
-      return route.fulfill({ headers, json: { id: 2, username: 'lucia', tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 0, cantidadSeguidores: 4, cantidadSeguidos: 0, loSigo: true } });
+      return route.fulfill({ headers, json: { id: 2, username: 'lucia', logros: [], tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 0, cantidadSeguidores: 4, cantidadSeguidos: 0, loSigo: true } });
     }
     if (url.pathname === '/api/publicaciones/usuario/2') return route.fulfill({ headers, json: [] });
     if (url.pathname === '/api/grupos') return route.fulfill({ headers, json: [] });

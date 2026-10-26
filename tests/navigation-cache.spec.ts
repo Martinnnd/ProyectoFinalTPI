@@ -32,7 +32,7 @@ test('conserva páginas del feed al volver del mapa y actualiza solo a pedido; r
     }
     if (url.pathname === '/api/usuario/perfil/ana') {
       profileReads++;
-      return respond({ id: 1, username: 'ana', tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 0, cantidadSeguidores: 0, cantidadSeguidos: 0 });
+      return respond({ id: 1, username: 'ana', logros: [], tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 0, cantidadSeguidores: 0, cantidadSeguidos: 0 });
     }
     if (url.pathname === '/api/publicaciones/usuario/1') { publicationReads++; return respond([]); }
     if (url.pathname.endsWith('/mapa')) return respond({ pines: [], hayMas: false });
@@ -99,4 +99,3 @@ test('conserva páginas del feed al volver del mapa y actualiza solo a pedido; r
   expect(publicationReads).toBe(1);
   expect(firstPages).toBe(2);
 });
-

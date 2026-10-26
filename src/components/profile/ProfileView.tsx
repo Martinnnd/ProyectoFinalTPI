@@ -13,17 +13,23 @@ import { useEra } from "../../context/EraContext";
 import { useFollow } from "../../context/FollowContext";
 import { useRatings } from "../../context/RatingsContext";
 import { eliminarPublicacion } from "../../api";
-import { getPerfilUsuario, getPublicacionesUsuario, type UsuarioPerfil } from "../../userApi";
+import { getPublicacionesUsuario } from "../../userApi";
+import { getUserProfile, toAchievement, type UserProfile } from "../../profileApi";
+import { ACHIEVEMENTS_UPDATED } from "../../achievementEvents";
 import {
   getGroups,
   createGroup,
   joinGroup,
   type CreateGroupInput,
 } from "../../groupsApi";
-import { achievements } from "../../data";
-import type { Achievement, CommunityGroup, Decade, Memory, TierProgress } from "../../types";
+import type { CommunityGroup, Decade, Memory, TierProgress } from "../../types";
 
-export default function ProfileView({ targetUsername }: { targetUsername?: string }) {
+export default function ProfileView(props: { targetUsername?: string }) {
+  const { session } = useAuth();
+  return <ProfileContent key={`${session?.usuarioId ?? 'guest'}:${props.targetUsername ?? 'own'}`} {...props} />;
+}
+
+function ProfileContent({ targetUsername }: { targetUsername?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const { session, status } = useAuth();
@@ -34,7 +40,14 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
   const isOwnProfile = !targetUsername || targetUsername === session?.username;
   const usernameToFetch = targetUsername ?? session?.username;
 
-  const [profileUser, setProfileUser] = useState<UsuarioPerfil | null>(null);
+  const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const refresh = () => setRevision(value => value + 1);
+    window.addEventListener(ACHIEVEMENTS_UPDATED, refresh);
+    return () => window.removeEventListener(ACHIEVEMENTS_UPDATED, refresh);
+  }, []);
+
   const [profileMemories, setProfileMemories] = useState<Memory[]>([]);
   const [editing, setEditing] = useState<Memory | null>(null);
   const [deleting, setDeleting] = useState<Memory | null>(null);
@@ -72,7 +85,7 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
     setLoading(true);
     setError(null);
 
-    getPerfilUsuario(usernameToFetch, controller.signal)
+    getUserProfile(usernameToFetch, controller.signal, revision ? 'no-store' : 'default')
       .then(async (perfil) => {
         if (controller.signal.aborted) return;
         setProfileUser(perfil);
@@ -89,7 +102,7 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
       });
 
     return () => controller.abort();
-  }, [usernameToFetch, isOwnProfile, session, status, router]);
+  }, [usernameToFetch, isOwnProfile, session, status, router, revision]);
 
   if (loading) {
     return (
@@ -130,10 +143,6 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
     ),
     subscribed: false,
   };
-
-  const earned: Achievement[] = [
-    ...(profileMemories.length > 0 ? [achievements[0]] : []),
-  ];
 
   const handleToggleFollow = async () => {
     if (!profileUser) return;
@@ -264,7 +273,7 @@ export default function ProfileView({ targetUsername }: { targetUsername?: strin
         followedUsers={followingUsers}
         period={period}
         selected={null}
-        earned={earned}
+        catalogue={profileUser.logros.map(toAchievement)}
         onSelect={() => {}}
         onOpen={(m) => router.push(`/recuerdo/${m.id}?returnTo=${encodeURIComponent(pathname)}`)}
         onAdd={() => {

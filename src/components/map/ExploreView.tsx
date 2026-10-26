@@ -70,6 +70,7 @@ function ExploreContent() {
 
   const [picking, setPicking] = useState(actionParam === "recordar");
   const [draft, setDraft] = useState<Point | null>(null);
+  const [userLocation, setUserLocation] = useState<Point | null>(null);
   const [mapRevision, setMapRevision] = useState(0);
 
   // Si action=recordar está en la URL o cambia, activar el modo de selección de pin
@@ -223,7 +224,7 @@ function ExploreContent() {
         res = await createGroupMemory(groupIdParam, memory);
       } else {
         const { crearPublicacion } = await import("../../api");
-        res = await crearPublicacion(memory);
+        res = await crearPublicacion(memory, undefined, userLocation);
       }
       if (res && res.id) {
         memory = { ...memory, id: res.id.toString(), source: "backend", groupId: groupIdParam ?? undefined };
@@ -290,6 +291,7 @@ function ExploreContent() {
 
       <main id="explore" className="map-canvas">
         <MainMap
+          onUserLocation={setUserLocation}
           active={true}
           showEmptyState={false}
           onBoundsChange={reportBounds}

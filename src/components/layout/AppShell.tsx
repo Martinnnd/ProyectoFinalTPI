@@ -13,6 +13,7 @@ import UserSearch from "../UserSearch";
 import AuthMenu from "../auth/AuthMenu";
 import { useRatings } from "../../context/RatingsContext";
 import AchievementToast from "../AchievementToast";
+import useAchievementNotifications from "../../hooks/useAchievementNotifications";
 import Notification from "../Notification";
 import type { Period } from '../../types';
 
@@ -33,7 +34,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   } = useEra();
 
   const { followingUsers, toggleFollow } = useFollow();
-  const { notice, setNotice, celebrating, setCelebrating } = useRatings();
+  const { notice, setNotice } = useRatings();
+  const achievementNotice = useAchievementNotifications(session?.usuarioId ?? null, session?.token);
 
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
@@ -43,7 +45,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       const requestedReturn = new URLSearchParams(window.location.search).get('returnTo');
       const destination = requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
         ? requestedReturn : '/feed';
-      changePeriod(next, () => router.push(destination));
+      // La sincronización de la época escribe la URL; navegar después evita que
+      // history.replaceState restaure la ruta de detalle sobre el router.push.
+      changePeriod(next, () => queueMicrotask(() => router.push(destination)));
       return;
     }
     changePeriod(next);
@@ -308,11 +312,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      {celebrating && (
+      {achievementNotice.achievement && (
         <AchievementToast
-          key={celebrating.id}
-          achievement={celebrating}
-          onDismiss={() => setCelebrating(null)}
+          key={`${session?.usuarioId}:${achievementNotice.achievement.id}`}
+          achievement={achievementNotice.achievement}
+          onDismiss={achievementNotice.dismiss}
         />
       )}
     </div>

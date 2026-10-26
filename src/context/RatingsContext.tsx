@@ -1,12 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { useAuth } from "../components/auth/AuthProvider";
 import { useRouter } from "next/navigation";
 import { ratePublication } from "../publicationsApi";
-import { updateNostalgiaRating, totalGivenNostalgia, type NostalgiaRatings } from "../nostalgiaRatings";
-import { achievements } from "../data";
-import type { Achievement } from "../types";
+import { type NostalgiaRatings } from "../nostalgiaRatings";
 
 interface RatingsContextType {
   ratings: NostalgiaRatings;
@@ -14,8 +12,6 @@ interface RatingsContextType {
   rateMemory: (postId: string, score: number, canRate?: boolean) => Promise<void>;
   notice: string | null;
   setNotice: (msg: string | null) => void;
-  celebrating: Achievement | null;
-  setCelebrating: (achievement: Achievement | null) => void;
 }
 
 const RatingsContext = createContext<RatingsContextType | undefined>(undefined);
@@ -24,12 +20,19 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
   const { session } = useAuth();
   const currentUserId = session?.usuarioId;
   const router = useRouter();
+  const currentAccount = useRef(currentUserId);
+  currentAccount.current = currentUserId;
+  const pending = useRef(new Set<string>());
 
   const [ratings, setRatings] = useState<NostalgiaRatings>({});
   const [pointsMap, setPointsMap] = useState<Record<string, number>>({});
   const [notice, setNotice] = useState<string | null>(null);
-  const [firstFiveEarned, setFirstFiveEarned] = useState(false);
-  const [celebrating, setCelebrating] = useState<Achievement | null>(null);
+
+  useEffect(() => {
+    setRatings({});
+    setPointsMap({});
+    setNotice(null);
+  }, [currentUserId]);
 
   useEffect(() => {
     if (!notice) return;
@@ -47,28 +50,19 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
         setNotice("Disponible desde la categoría Nostálgico.");
         return;
       }
-      const previousRating = ratings[postId];
-      const next = updateNostalgiaRating(ratings, postId, score);
-      setRatings(next);
-
-      if (!firstFiveEarned && totalGivenNostalgia(next) >= 5) {
-        setFirstFiveEarned(true);
-        const achievement21 = achievements.find((a) => a.id === "21");
-        if (achievement21) setCelebrating(achievement21);
-      }
-
+      const requestKey = `${currentUserId}:${postId}`;
+      if (pending.current.has(requestKey)) return;
+      pending.current.add(requestKey);
       try {
         const res = await ratePublication(postId, score);
+        if (currentAccount.current !== currentUserId) return;
         setPointsMap((current) => ({
           ...current,
           [postId]: res.puntosTotales,
         }));
         if (res.miPuntuacion === null || res.miPuntuacion === undefined) {
-          setRatings((current) => {
-            const updated = { ...current };
-            delete updated[postId];
-            return updated;
-          });
+          // 0 confirma que se quitó: no vuelve a mostrar el puntaje anterior del DTO.
+          setRatings((current) => ({ ...current, [postId]: 0 }));
         } else {
           setRatings((current) => ({
             ...current,
@@ -76,20 +70,17 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
           }));
         }
       } catch (error) {
-        setRatings((current) => {
-          const reverted = { ...current };
-          if (previousRating !== undefined) reverted[postId] = previousRating;
-          else delete reverted[postId];
-          return reverted;
-        });
-        setNotice(error instanceof Error ? error.message : "No se pudo registrar la puntuación.");
+        if (currentAccount.current === currentUserId)
+          setNotice(error instanceof Error ? error.message : "No se pudo registrar la puntuación.");
+      } finally {
+        pending.current.delete(requestKey);
       }
     },
-    [currentUserId, ratings, router]
+    [currentUserId, router]
   );
 
   return (
-    <RatingsContext.Provider value={{ ratings, pointsMap, rateMemory, notice, setNotice, celebrating, setCelebrating }}>
+    <RatingsContext.Provider value={{ ratings, pointsMap, rateMemory, notice, setNotice }}>
       {children}
     </RatingsContext.Provider>
   );

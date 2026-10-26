@@ -214,4 +214,3 @@ function RelatedCarousel({ id, tipo, initialPage, onSelect }: { id: string; tipo
     {error && <div role="alert"><p>{error}</p></div>}
   </section>;
 }
-

@@ -39,6 +39,62 @@
 .time-track input::-webkit-slider-thumb { appearance:none; margin-top:-6px; width:16px; height:16px; border:2px solid var(--surface); border-radius:50%; background:var(--accent); box-shadow:0 0 0 2px var(--accent),0 2px 5px #0005; }
 .time-track input::-moz-range-thumb { width:12px; height:12px; border:2px solid var(--surface); border-radius:50%; background:var(--accent); box-shadow:0 0 0 2px var(--accent); }
 .time-navigation :is(button,input):focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+.time-navigation { --memory-light:#246bac; }
+.era-1970 .time-navigation { --memory-light:#f2bd67; }
+.era-1980 .time-navigation { --memory-light:#4ef0e5; }
+.era-1990 .time-navigation { --memory-light:#126333; }
+.era-2000 .time-navigation { --memory-light:#247bb5; }
+.time-decades button { position:relative; }
+.time-track { position:relative; }
+/* Match the range thumb's travel, including its eight-pixel end insets.
+   Marks sit above the track and never intercept dragging or touch input. */
+.time-memory-marks { position:absolute; inset:0 8px; pointer-events:none; }
+.time-memory-marks i {
+  position:absolute;
+  top:-3px;
+  width:5px;
+  height:8px;
+  transform:translateX(-50%);
+  border-radius:2px;
+  background:var(--memory-light);
+  box-shadow:0 0 4px color-mix(in srgb,var(--memory-light) 55%,transparent);
+}
+.app .time-track input { position:relative; }
+.app.era-1970 .time-track {
+  border-radius:3px;
+  background:repeating-linear-gradient(90deg,transparent 0 calc(100% / 39 - 1px),#d0b88d66 calc(100% / 39 - 1px) calc(100% / 39));
+  box-shadow:0 1px #d9b98920,inset 0 1px 3px #100c0959;
+}
+.app.era-1970 .time-decades button {
+  color:#e1d3bc;
+  text-shadow:0 1px 1px #160e09;
+}
+.app.era-1970 .time-decades button[aria-pressed="true"] {
+  background:linear-gradient(#363630,#242722);
+  border-color:#a7987e;
+  color:#ffe2a3;
+  text-shadow:0 0 6px #f2bd6759;
+  box-shadow:inset 0 1px 3px #0009,0 1px #e2c99c30;
+}
+.app.era-1970 .time-track input::-webkit-slider-runnable-track {
+  background:linear-gradient(#242622,#4c4c40);
+  box-shadow:inset 0 1px 2px #0009,0 1px #bcaa8666;
+}
+.app.era-1970 .time-track input::-moz-range-track {
+  background:linear-gradient(#242622,#4c4c40);
+  box-shadow:inset 0 1px 2px #0009,0 1px #bcaa8666;
+}
+.app.era-1970 .time-track input::-webkit-slider-thumb {
+  background:radial-gradient(circle at 36% 28%,#e2dac6,#9a927f 45%,#57574d 75%);
+  border-color:#d0c2a5;
+  box-shadow:0 0 0 2px #262720,0 2px 4px #0009;
+}
+.app.era-1970 .time-track input::-moz-range-thumb {
+  background:radial-gradient(circle at 36% 28%,#e2dac6,#9a927f 45%,#57574d 75%);
+  border-color:#d0c2a5;
+  box-shadow:0 0 0 2px #262720,0 2px 4px #0009;
+}
+.app.era-1970 .time-navigation :is(button,input):focus-visible { outline-color:#f2bd67; }
 .app .era-shell-top, .app .newspaper-edition { display:none; }
 
 /* A quieter instrument scale. Geometry and era-change animations stay shared. */

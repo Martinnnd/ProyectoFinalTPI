@@ -121,19 +121,26 @@ export async function eliminarPublicacion(id: string, autorId?: number) {
     return await response.json().catch(() => ({}));
 }
 
-export async function crearPublicacion(memory: Memory, autorId?: number): Promise<any> {
+export async function crearPublicacion(memory: Memory, autorId?: number, gpsUsuario?: {lat: number; lng: number} | null): Promise<any> {
     const sesion = requireSession();
     const finalAutorId = sesion.usuarioId;
-    const formData = buildPublicationFormData(memory, finalAutorId);
+    const formData = buildPublicationFormData(memory, finalAutorId, gpsUsuario);
 
-    const response = await apiFetch(`${API_BASE_URL}/api/publicaciones`, {
-        method: 'POST',
-        body: formData
-    });
+    let response: Response;
+    try {
+        response = await apiFetch(`${API_BASE_URL}/api/publicaciones`, {
+            method: 'POST', body: formData
+        });
+    } catch {
+        throw new Error('No se pudo conectar con el servidor. Comprobá que el backend esté encendido y volvé a intentar.');
+    }
 
     if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || `Error ${response.status}`);
+        const problem = await response.json().catch(() => null);
+        const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
+        const message = fields || problem?.detail || problem?.mensaje || problem?.title || 'El servidor rechazó la publicación.';
+        const reference = problem?.traceId ? ` Referencia: ${problem.traceId}.` : '';
+        throw new Error(`${message} (HTTP ${response.status}).${reference}`);
     }
 
     return await response.json();

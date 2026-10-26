@@ -52,6 +52,9 @@ export default function ProfileDialogs({
                   <strong>{achievement.name}</strong>
                   <p>{achievement.description}</p>
                   <span className="achievement-state">{achievement.unlocked ? "Conseguida" : "Bloqueada"}</span>
+                  {achievement.unlocked && achievement.unlockedAt && <time dateTime={achievement.unlockedAt}>
+                    {new Date(achievement.unlockedAt).toLocaleDateString('es-AR')}
+                  </time>}
                 </span>
               </li>
             ))}

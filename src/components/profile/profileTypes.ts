@@ -5,4 +5,3 @@ export type ProfilePresentation = {
   map: string;
   footer: string;
 };
-

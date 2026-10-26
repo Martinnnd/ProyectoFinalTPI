@@ -492,4 +492,3 @@ for (const count of [4, 5, 6]) {
     await carousel.screenshot({ path: testInfo.outputPath('anillo.png') });
   });
 }
-

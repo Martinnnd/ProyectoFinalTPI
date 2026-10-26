@@ -1,4 +1,5 @@
 import { refreshSessionRequest } from "./authApi";
+import { notifyAchievementsChanged } from "../../achievementEvents";
 import { feedCache, queryCache } from '../../sessionQueryCache';
 import {
   clearStoredSession,
@@ -22,7 +23,7 @@ export async function apiFetch(
   const path = new URL(String(input), 'http://localhost').pathname;
   const cacheable = typeof window !== 'undefined' && method === 'GET' &&
     /^\/api\/(publicaciones|usuario|grupos|momentos)(\/|$)/.test(path) &&
-    !/\/publicaciones\/\d+\/(analisis|momentos)$/.test(path) && init.cache !== 'reload';
+    !/\/publicaciones\/\d+\/(analisis|momentos)$/.test(path) && init.cache !== 'reload' && init.cache !== 'no-store';
   const perform = () => fetch(input, {
     ...init,
     // One shared request can finish even when a route's consumer unmounts.
@@ -40,7 +41,12 @@ export async function apiFetch(
     if (/^\/api\/publicaciones(?:\/|$)/.test(path) || path.startsWith('/api/seguimientos')) feedCache.clear();
   }
 
-  if (response.status !== 401 || !allowRefresh) return response;
+  if (response.status !== 401 || !allowRefresh) {
+    if (response.ok && /^(POST|PUT|PATCH|DELETE)$/i.test(init.method ?? "GET") && !path.endsWith('/impresiones')) {
+      notifyAchievementsChanged();
+    }
+    return response;
+  }
 
   try {
     const renewed = await refreshSessionRequest();

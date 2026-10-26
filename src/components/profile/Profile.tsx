@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { describeTiers, resolveAchievements, resolveUserCategory } from "../../data";
-import type { Achievement, Memory, Period, TierProgress, UserCategory } from "../../types";
+import { userTiers } from "../../data";
+import type { Achievement, DescribedTier, Memory, Period, TierProgress, UserCategory } from "../../types";
 import type { FollowedUser } from "../../seguimientosApi";
 import ProfileDialogs from "./ProfileDialogs";
 import ProfileHeader from "./ProfileHeader";
@@ -36,7 +36,7 @@ export default function Profile({
   followedUsers,
   period,
   selected,
-  earned,
+  catalogue,
   currentUserId,
   myFollowingUsers,
   onSelect,
@@ -65,7 +65,7 @@ export default function Profile({
   followedUsers: FollowedUser[];
   period: Period;
   selected: Memory | null;
-  earned: Achievement[];
+  catalogue: Achievement[];
   currentUserId?: number;
   myFollowingUsers?: FollowedUser[];
   onOpen?: (memory: Memory) => void;
@@ -88,35 +88,17 @@ export default function Profile({
   const [tiersOpen, setTiersOpen] = useState(false);
 
   const presentation = presentations[period.decade];
-  const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
 
   const ownMemories = useMemo(() => allMemories.filter((m) => !m.repost), [allMemories]);
 
-  const effectiveProgress: TierProgress = useMemo(
-    () => ({
-      memories: Math.max(tierProgress?.memories ?? 0, ownMemories.length),
-      points: Math.max(
-        tierProgress?.points ?? 0,
-        ownMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0),
-      ),
-      subscribed: Boolean(tierProgress?.subscribed),
-    }),
-    [tierProgress, ownMemories],
-  );
-
-  const tierOrder: Record<string, number> = {
-    Errante: 0,
-    "Nostálgico": 1,
-    Aedo: 2,
-    Mnemosine: 3,
-  };
-  const calculatedCategory = resolveUserCategory(effectiveProgress);
-  const userCategory =
-    reputation && (tierOrder[reputation] ?? -1) > (tierOrder[calculatedCategory] ?? 0)
-      ? (reputation as UserCategory)
-      : calculatedCategory;
-  const tiers = useMemo(() => describeTiers(effectiveProgress), [effectiveProgress]);
+  const userCategory = (reputation ?? "Errante") as UserCategory;
+  const tiers = useMemo<DescribedTier[]>(() => {
+    const current = userTiers.findIndex(tier => tier.name === userCategory);
+    return userTiers.map((tier, index) => ({
+      ...tier, state: index === current ? 'current' : index < current ? 'reached' : 'locked',
+    }));
+  }, [userCategory]);
 
   useEffect(() => () => clearTimeout(mapCloseTimer.current), []);
 

@@ -80,6 +80,7 @@ export interface Achievement {
   description: string;
   image: string;
   unlocked: boolean;
+  unlockedAt?: string | null;
 }
 export const symbols: Record<Category, string> = {
   Lugares: "⌂",
