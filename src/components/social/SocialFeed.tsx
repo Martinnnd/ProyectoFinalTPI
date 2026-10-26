@@ -10,14 +10,15 @@ import FeedPost from "./FeedPost";
 import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
 import RepostDialog from "./RepostDialog";
-import { compartirPublicacion, eliminarRepost, isOwnMemory } from "../../api";
+import { repostearPublicacion, quitarRepost, citarPublicacion, isOwnMemory } from "../../api";
 import { memoryHashtags, weeklyTrends } from "../../hashtags";
 import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
 import useRemoteFeed from '../../hooks/useRemoteFeed';
 import { useAuth } from '../auth/AuthProvider';
 import { publicationId } from '../../publicationsApi';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, RefreshCw } from 'lucide-react';
+import { feedCache } from '../../sessionQueryCache';
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -48,6 +49,7 @@ function getTargetToRepost(mem: Memory, allMemories: Memory[]): { targetId: stri
 }
 
 export default function SocialFeed({
+  backLabel = "Volver al feed",
   active,
   onItems,
   filterFeed,
@@ -77,6 +79,7 @@ export default function SocialFeed({
   onReloadMemories,
   onRepostCreated,
 }: {
+  backLabel?: string;
   active: boolean;
   onItems: (items: Memory[]) => void;
   filterFeed: (items: Memory[]) => Memory[];
@@ -116,7 +119,11 @@ export default function SocialFeed({
   const [reposts, setReposts] = useState<string[]>([]);
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
-  const [tab, setTab] = useState<FeedTab>("all");
+  const viewKey = `${session?.usuarioId ?? 'guest'}:feed-view`;
+  const [tab, setTab] = useState<FeedTab>(() => feedCache.get<FeedTab>(viewKey) ?? 'all');
+  useEffect(() => {
+    if (active && !selected && tab !== 'groups') feedCache.set(viewKey, tab, Infinity);
+  }, [active, selected?.id, tab, viewKey]);
   const [knownAuthors, setKnownAuthors] = useState<{ name: string; id: number }[]>([]);
 
   function requireAuthentication(): boolean {
@@ -141,7 +148,11 @@ export default function SocialFeed({
       return next.length === previous.length && next.every((author, index) => author.id === previous[index].id && author.name === previous[index].name) ? previous : next;
     });
   }, [remote.items, session?.usuarioId]);
-  useEffect(() => { if (followingRevision && tab === 'following') remote.reload(); }, [followingRevision]);
+  const lastFollowingRevision = useRef(followingRevision);
+  useEffect(() => {
+    if (lastFollowingRevision.current !== followingRevision && tab === 'following') remote.reload();
+    lastFollowingRevision.current = followingRevision;
+  }, [followingRevision, tab]);
   useEffect(() => {
     if (isAuthenticated && tab !== 'groups') onItems(remote.items);
   }, [isAuthenticated, remote.items, tab, onItems]);
@@ -156,8 +167,12 @@ export default function SocialFeed({
   const stream = useRef<HTMLDivElement>(null);
   const loadTarget = useRef<HTMLDivElement>(null);
   const [headerHidden, setHeaderHidden] = useState(false);
+  const [suggestRefresh, setSuggestRefresh] = useState(false);
+  const scrolledDown = useRef(false);
   useEffect(() => {
     setHeaderHidden(false);
+    setSuggestRefresh(false);
+    scrolledDown.current = false;
     if (!active || selected || !stream.current) return;
     let detach = () => {};
     const attach = () => {
@@ -170,6 +185,8 @@ export default function SocialFeed({
       const onScroll = () => {
         const next = Math.max(0, scrollRoot.scrollTop);
         const delta = next - previous;
+        if (next >= 120) scrolledDown.current = true;
+        setSuggestRefresh(next <= 8 && scrolledDown.current);
         if (next > 8 && Math.abs(delta) < 3) return;
         previous = next;
         setHeaderHidden(next > 8 && delta > 0);
@@ -189,8 +206,18 @@ export default function SocialFeed({
 
   useEffect(() => () => cancelTurn.current(), []);
   useEffect(() => {
-    if (stream.current) stream.current.scrollTop = 0;
-  }, [selected?.id, tab, hashtag]);
+    let root: HTMLElement | null = stream.current;
+    while (root && !/(auto|scroll)/.test(getComputedStyle(root).overflowY)) root = root.parentElement;
+    if (!root || !active) return;
+    if (selected || hashtag) { root.scrollTop = 0; return; }
+    const scrollRoot = root;
+    const key = `${viewKey}:${tab}:scroll`;
+    const saved = feedCache.get<number>(key) ?? 0;
+    const frame = requestAnimationFrame(() => { scrollRoot.scrollTop = saved; });
+    const remember = () => feedCache.set(key, scrollRoot.scrollTop, Infinity);
+    scrollRoot.addEventListener('scroll', remember, { passive: true });
+    return () => { cancelAnimationFrame(frame); remember(); scrollRoot.removeEventListener('scroll', remember); };
+  }, [active, selected?.id, tab, hashtag, viewKey]);
 
   const feedAuthors = authorsFromMemories(allMemories);
   const authors = [...new Map([...feedAuthors, ...knownAuthors.map(author => [author.name, author] as const), ...suggestedAuthors.map(author => [author.name, author] as const)]
@@ -255,7 +282,10 @@ export default function SocialFeed({
   }
 
   function isMemoryRepostedByMe(mem: Memory): boolean {
-    const isQuote = Boolean(mem.repost?.comment);
+    const isQuote = Boolean(
+      mem.quotedMemory ||
+      (mem.repost && (mem.repost.comment !== undefined || (mem.repost.id && mem.repost.id !== mem.repost.originalId)))
+    );
 
     // En los reposts con cita (tipo quote tweet):
     // NO debe aparecer pintado por defecto ni porque sea propio ni porque se haya reposteado el post citado.
@@ -266,13 +296,20 @@ export default function SocialFeed({
           isOwnMemory(m) &&
           m.repost &&
           !m.repost.comment &&
+          !m.quotedMemory &&
           m.repost.originalId === mem.id,
       );
-      return hasRetweetedThisQuote || reposts.includes(mem.id);
+      return hasRetweetedThisQuote || reposts.includes(mem.id) || mem.viewerReposted === true;
+    }
+
+    if (typeof mem.viewerReposted === 'boolean') {
+      const rootId = mem.repost?.originalId || mem.id;
+      const existsLocally = reposts.includes(rootId) || reposts.includes(mem.id);
+      return mem.viewerReposted || existsLocally;
     }
 
     // Para reposts simples propios:
-    if (mem.repost && !mem.repost.comment && isOwnMemory(mem)) {
+    if (mem.repost && !mem.repost.comment && !mem.quotedMemory && isOwnMemory(mem)) {
       return true;
     }
 
@@ -283,17 +320,45 @@ export default function SocialFeed({
         isOwnMemory(m) &&
         m.repost &&
         !m.repost.comment &&
+        !m.quotedMemory &&
         (m.repost.originalId === rootId || m.repost.originalId === mem.id),
     );
     const existsLocally = reposts.includes(rootId) || reposts.includes(mem.id);
     return existsInFeed || existsLocally;
   }
 
-  async function handleUnrepost(mem: Memory) {
+  async function handleSimpleRepost(mem: Memory) {
+    if (!requireAuthentication()) return;
     const { targetId } = getTargetToRepost(mem, allMemories);
     try {
-      await eliminarRepost(targetId);
+      const res = await repostearPublicacion(targetId);
+      setReposts((current) => [...new Set([...current, targetId, mem.id])]);
+      onRepostCreated(targetId);
+      if (res?.cantidadReposts !== undefined) {
+        interactions.updateRepostCount(targetId, res.cantidadReposts);
+      } else {
+        interactions.incrementRepostCount(targetId, 1, mem.repostCount ?? 0);
+      }
+      remote.reload();
+      if (onReloadMemories) {
+        await onReloadMemories();
+      }
+    } catch (err) {
+      console.error("Error al repostear:", err);
+    }
+  }
+
+  async function handleUnrepost(mem: Memory) {
+    if (!requireAuthentication()) return;
+    const { targetId } = getTargetToRepost(mem, allMemories);
+    try {
+      const res = await quitarRepost(targetId);
       setReposts((current) => current.filter((id) => id !== targetId && id !== mem.id));
+      if (res?.cantidadReposts !== undefined) {
+        interactions.updateRepostCount(targetId, res.cantidadReposts);
+      } else {
+        interactions.incrementRepostCount(targetId, -1, mem.repostCount ?? 0);
+      }
       remote.reload();
       if (onReloadMemories) {
         await onReloadMemories();
@@ -303,12 +368,19 @@ export default function SocialFeed({
     }
   }
 
+  function handleQuote(mem: Memory) {
+    if (!requireAuthentication()) return;
+    const { targetMemory: toRepost } = getTargetToRepost(mem, allMemories);
+    setRepostMemory(toRepost);
+  }
+
   return (
     <section
       className={`social-layout${desktopDetail && maximized ? " detail-maximized" : ""}`}
       aria-label="Feed de recuerdos"
     >
       <PostDetailFrame
+        backLabel={backLabel}
         ref={stream}
         decade={decade}
         memory={selected}
@@ -317,9 +389,10 @@ export default function SocialFeed({
         onToggleMaximize={() => setMaximized((current) => !current)}
       >
         <FeedHeader
+          backLabel={backLabel}
           title={groupName ?? (tab === "groups" ? "Mis grupos" : "Feed")}
           tab={tab}
-          selected={!!selected}
+          selected={!!selected && !desktopDetail}
           scrollHidden={headerHidden}
           onBack={() => open(null)}
           onTabChange={changeTab}
@@ -341,16 +414,19 @@ export default function SocialFeed({
           </div>
         )}
         <div className="feed-posts">
-          {(selected ? [selected] : posts).map((memory) => {
-            const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
-            const isQuote = Boolean(memory.repost?.comment);
+          {(selected ? [selected] : posts).map((memory, index) => {
+            const isQuote = Boolean(
+              memory.quotedMemory ||
+              (memory.repost && (memory.repost.comment !== undefined || (memory.repost.id && memory.repost.id !== memory.repost.originalId)))
+            );
+            const isSimpleRepost = Boolean(memory.repost && !isQuote);
             const rootId = isSimpleRepost && memory.repost?.originalId ? memory.repost.originalId : memory.id;
             const targetMemory = isSimpleRepost
               ? (allMemories.find((m) => m.id === rootId) || memory)
               : memory;
             const quotedId = isQuote && memory.repost?.originalId ? memory.repost.originalId : undefined;
             const quotedMemory = quotedId
-              ? (allMemories.find((m) => m.id === quotedId) || {
+              ? (memory.quotedMemory || allMemories.find((m) => m.id === quotedId) || {
                   ...memory,
                   id: quotedId,
                   title: memory.title,
@@ -372,21 +448,32 @@ export default function SocialFeed({
 
             return (
               <FeedPost
+                topOverlay={index === 0 && isAuthenticated && tab !== 'groups' && !selected && suggestRefresh ? (
+                  <button type="button" className="feed-refresh-button" disabled={remote.loading} onClick={() => {
+                    setSuggestRefresh(false);
+                    scrolledDown.current = false;
+                    remote.reload();
+                  }}><RefreshCw size={15} aria-hidden="true" />nuevas publicaciones</button>
+                ) : undefined}
                 key={memory.id}
                 memory={effectiveMemory}
                 active={active}
                 quotedMemory={quotedMemory}
                 selected={selected?.id === memory.id}
-                following={following.includes(
-                  memory.repost && !memory.repost.comment && memory.repost.author
+                following={following.some((name) =>
+                  name.toLowerCase() ===
+                  (memory.repost && !memory.repost.comment && memory.repost.author
                     ? memory.repost.author
                     : memory.author
+                  ).toLowerCase()
                 )}
-                liked={interactions.isLiked(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked)}
+                liked={interactions.isLiked(targetKey, targetMemory.viewerLiked)}
+                likeCount={interactions.getLikeCount(targetKey, targetMemory.likeCount ?? 0)}
                 commentMemoryId={publicationId(targetMemory) ? rootId : undefined}
                 rating={effectiveRating}
                 canRate={canRate}
                 reposted={isReposted}
+                repostCount={interactions.getRepostCount(targetKey, targetMemory.repostCount ?? 0)}
                 saved={saves.includes(memory.id)}
                 onDelete={onDelete}
                 onEdit={onEdit}
@@ -401,15 +488,16 @@ export default function SocialFeed({
                 onRate={(value) => onRate(isSimpleRepost ? rootId : memory.id, value)}
                 onLike={() => {
                   if (!requireAuthentication()) return;
-                  interactions.toggleLike(isSimpleRepost ? rootId : memory.id, targetMemory.viewerLiked);
+                  interactions.toggleLike(targetKey, targetMemory.viewerLiked, targetMemory.likeCount ?? 0);
                 }}
+                onSimpleRepost={() => handleSimpleRepost(memory)}
+                onUnrepost={() => handleUnrepost(memory)}
+                onQuote={() => handleQuote(memory)}
                 onRepost={() => {
-                  if (!requireAuthentication()) return;
                   if (isReposted) {
                     handleUnrepost(memory);
                   } else {
-                    const { targetMemory: toRepost } = getTargetToRepost(memory, allMemories);
-                    setRepostMemory(toRepost);
+                    handleSimpleRepost(memory);
                   }
                 }}
                 onSave={() => {
@@ -461,17 +549,13 @@ export default function SocialFeed({
             }
             const { targetId } = getTargetToRepost(repostMemory, allMemories);
             try {
-              const created = await compartirPublicacion(targetId, descripcion);
-              if (created && typeof created.id !== 'undefined') onRepostCreated(String(created.id));
-              if (!descripcion.trim()) {
-                setReposts((current) => [...new Set([...current, targetId])]);
-              }
+              await citarPublicacion(targetId, descripcion);
               remote.reload();
               if (onReloadMemories) {
                 await onReloadMemories();
               }
             } catch (err) {
-              console.error("Error al compartir en el servidor:", err);
+              console.error("Error al citar en el servidor:", err);
             } finally {
               setRepostMemory(null);
             }

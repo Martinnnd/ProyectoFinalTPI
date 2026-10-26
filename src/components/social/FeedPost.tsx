@@ -1,5 +1,5 @@
 import { Ellipsis, MapPin, Pencil, Repeat2, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
 import type { Memory } from "../../types";
@@ -12,15 +12,19 @@ import { publicationId } from '../../publicationsApi';
 import FeedRelations from './FeedRelations';
 
 export default function FeedPost({
+  topOverlay,
   memory,
   active = true,
   selected,
   following,
   liked,
+  likeCount,
   commentMemoryId,
   rating,
   canRate,
   reposted,
+  directUnrepost = false,
+  repostCount,
   saved,
   quotedMemory,
   onDelete,
@@ -33,18 +37,25 @@ export default function FeedPost({
   onRate,
   onLike,
   onRepost,
+  onSimpleRepost,
+  onUnrepost,
+  onQuote,
   onSave,
   onHashtag,
 }: {
+  topOverlay?: ReactNode;
   memory: Memory;
   active?: boolean;
   selected: boolean;
   following: boolean;
   liked: boolean;
+  likeCount?: number;
   commentMemoryId?: string;
   rating?: number;
   canRate: boolean;
   reposted: boolean;
+  directUnrepost?: boolean;
+  repostCount?: number;
   saved: boolean;
   quotedMemory?: Memory;
   onDelete: (memory: Memory) => void;
@@ -56,7 +67,10 @@ export default function FeedPost({
   onMap: (memory: Memory) => void;
   onRate: (value: number) => void;
   onLike: () => void;
-  onRepost: () => void;
+  onRepost?: () => void;
+  onSimpleRepost?: (memory: Memory) => void;
+  onUnrepost?: (memory: Memory) => void | Promise<void>;
+  onQuote?: (memory: Memory) => void;
   onSave: () => void;
   onHashtag: (tag: string) => void;
 }) {
@@ -83,11 +97,28 @@ export default function FeedPost({
     : memory;
 
   return (
-    <article className="feed-post">
+    <article className={`feed-post${topOverlay ? ' has-top-overlay' : ''}`}>
+      {topOverlay}
       {isSimpleRepost && (
-        <div className="repost-header-badge" style={{ padding: '0.5rem 1rem 0', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-          <Repeat2 size={14} />
-          <span>{isReposterOwn ? "Has reposteado" : `${reposterDisplay} ha reposteado`}</span>
+        <div className="repost-header-badge">
+          <Repeat2 size={14} aria-hidden="true" />
+          {isReposterOwn ? (
+            <span>Has reposteado</span>
+          ) : (
+            <span>
+              <button
+                type="button"
+                className="repost-author"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onProfile({ ...memory, author: memory.author });
+                }}
+              >
+                {reposterDisplay}
+              </button>{" "}
+              ha reposteado
+            </span>
+          )}
         </div>
       )}
       <div className={`post-composition${splitPhoto ? ' has-split-photo' : ''}`}>
@@ -117,9 +148,9 @@ export default function FeedPost({
             {following ? "Siguiendo" : "Seguir"}
           </button>
         )}
-        {isOwnMemory(memory) && (
-          <details className="compact-menu feed-owner-menu">
-            <summary aria-label="Opciones de publicación" title="Opciones de publicación"><Ellipsis size={20} aria-hidden="true" /></summary>
+        {isReposterOwn && !memory.repost && (
+          <details className="feed-owner-menu">
+            <summary className="secondary-button" aria-label="Opciones de publicación" title="Opciones de publicación"><Ellipsis size={20} aria-hidden="true" /></summary>
             <div className="feed-owner-menu-options">
               <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onEdit(memory); }}><Pencil size={15} /> Editar</button>
               <button type="button" onClick={event => { event.currentTarget.closest("details")?.removeAttribute("open"); onDelete(memory); }}><Trash2 size={15} /> Eliminar</button>
@@ -255,17 +286,34 @@ export default function FeedPost({
         value={rating}
         totalPoints={memory.points ?? 0}
         canRate={canRate}
+        isOwn={isHeaderAuthorOwn}
         onRate={onRate}
       />
       <PostActions
+        directUnrepost={directUnrepost}
         memoryTitle={memory.title}
+        memoryId={memory.id}
+        memoryYear={memory.year}
         liked={liked}
-        likeCount={memory.likeCount}
+        likeCount={likeCount ?? memory.likeCount}
         commentCount={commentCount}
         reposted={reposted}
+        repostCount={repostCount ?? memory.repostCount}
         saved={saved}
         onLike={onLike}
         onOpenComments={() => onOpen(memory)}
+        onSimpleRepost={() => {
+          if (onSimpleRepost) onSimpleRepost(memory);
+          else onRepost?.();
+        }}
+        onUnrepost={() => {
+          if (onUnrepost) return onUnrepost(memory);
+          else onRepost?.();
+        }}
+        onQuote={() => {
+          if (onQuote) onQuote(memory);
+          else onRepost?.();
+        }}
         onRepost={onRepost}
         onSave={onSave}
       />

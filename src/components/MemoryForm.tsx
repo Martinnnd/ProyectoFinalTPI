@@ -5,11 +5,13 @@ import { memoryDateIso } from "../memoryDate";
 import GooglePhotosPicker from "./GooglePhotosPicker";
 import MemoryDatePicker from "./MemoryDatePicker";
 import DiscardDraftDialog from './DiscardDraftDialog';
+import MemoryEditForm from './MemoryEditForm';
+import type { ComponentProps } from 'react';
   import { useEffect, useRef, useState } from "react";
   import { X, Save, Loader2, Upload, Images, Link } from "lucide-react";
   import { categories, type Memory, type Decade } from "../types";
   import type { Point } from "./MemoryMap";
-  export default function MemoryForm({
+  function MemoryCreationForm({
     initial,
     defaultHashtags = [],
     point,
@@ -311,3 +313,9 @@ import DiscardDraftDialog from './DiscardDraftDialog';
       </dialog>
     );
   }
+
+export default function MemoryForm(props: ComponentProps<typeof MemoryCreationForm>) {
+  return props.initial
+    ? <MemoryEditForm initial={props.initial} onCancel={props.onCancel} onSave={props.onSave} />
+    : <MemoryCreationForm {...props} />;
+}

@@ -3,6 +3,7 @@ import type { FeedTab } from "../../socialTypes";
 
 export default function FeedHeader({
   title,
+  backLabel = "Volver al feed",
   tab,
   selected,
   scrollHidden = false,
@@ -10,6 +11,7 @@ export default function FeedHeader({
   onTabChange,
 }: {
   title: string;
+  backLabel?: string;
   tab: FeedTab;
   selected: boolean;
   scrollHidden?: boolean;
@@ -44,7 +46,7 @@ export default function FeedHeader({
       {selected && (
         <button className="feed-back" onClick={onBack}>
           <ArrowLeft size={17} />
-          Volver a feed
+          {backLabel}
         </button>
       )}
     </>

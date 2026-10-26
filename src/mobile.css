@@ -133,6 +133,7 @@
  .app.map-app .navigation-rail button.rail-active { color:var(--accent); background:color-mix(in srgb,var(--accent) 10%,transparent); }
  .app.map-app .navigation-rail button.rail-active svg { stroke-width:2.5; }
  .app.map-app .navigation-rail button:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
+ .app > #notif-popup { top:var(--mobile-top); bottom:var(--mobile-bottom); }
  .mobile-decades { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
  .mobile-decades button { min-height:46px; font:700 14px var(--font-body); color:var(--ink); background:var(--soft); border:1px solid var(--line); border-radius:var(--radius); }
  .mobile-decades button[aria-pressed='true'] { background:var(--accent); color:var(--surface); border-color:var(--accent); }

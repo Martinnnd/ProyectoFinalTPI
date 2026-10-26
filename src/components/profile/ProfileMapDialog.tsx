@@ -77,6 +77,7 @@ export default function ProfileMapDialog({
                   <div className="personal-map">
                     <MemoryMap
                       fitMemories
+                      showRelations={false}
                       memories={memories}
                       selected={selected}
                       onSelect={onSelect}
@@ -130,17 +131,39 @@ export default function ProfileMapDialog({
                     <button className="icon-button" aria-label="Compartir recuerdo" aria-expanded={shareOpen} onClick={() => setShareOpen((open) => !open)}>
                       <Share2 size={18} />
                     </button>
-                    {shareOpen && (
-                      <div className="share-menu-panel" role="menu">
-                        <span>Compartir recuerdo</span>
-                        <a target="_blank" rel="noreferrer"><Send size={15} /> WhatsApp</a>
-                        <a target="_blank" rel="noreferrer"><Link2 size={15} /> Facebook</a>
-                        <a target="_blank" rel="noreferrer"><span aria-hidden="true">𝕏</span> X</a>
-                        <button onClick={async () => { await navigator.clipboard.writeText(window.location.href); setCopied(true); }}>
-                          <Link2 size={15} />{copied ? "Enlace copiado" : "Copiar enlace"}
-                        </button>
-                      </div>
-                    )}
+                    {shareOpen && (() => {
+                      const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/recuerdo/${selected.id}` : `/recuerdo/${selected.id}`;
+                      const shareText = `Mirá este recuerdo de ${selected.year} en Nostalgiar: "${selected.title}"`;
+                      const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+                      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+                      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+
+                      return (
+                        <div className="share-menu-panel" role="menu">
+                          <span>Compartir recuerdo</span>
+                          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                            <Send size={15} /> WhatsApp
+                          </a>
+                          <a href={facebookUrl} target="_blank" rel="noopener noreferrer">
+                            <Link2 size={15} /> Facebook
+                          </a>
+                          <a href={twitterUrl} target="_blank" rel="noopener noreferrer">
+                            <span aria-hidden="true">𝕏</span> X
+                          </a>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              await navigator.clipboard.writeText(shareUrl);
+                              setCopied(true);
+                              setTimeout(() => setCopied(false), 2500);
+                            }}
+                          >
+                            <Link2 size={15} />
+                            {copied ? "¡Enlace copiado!" : "Copiar enlace"}
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <button className="icon-button" aria-label="Cerrar mi recuerdo" onClick={() => onSelect(null)}><X size={18} /></button>
                 </div>

@@ -25,6 +25,8 @@ export interface Memory {
   viewerLiked?: boolean;
   points?: number;
   viewerRating?: number;
+  repostCount?: number;
+  viewerReposted?: boolean;
   lat: number;
   lng: number;
   source: "demo" | "local" | "backend" | "community" | "db";
@@ -44,6 +46,7 @@ export interface Memory {
     authorId?: number;
     comment?: string;
   };
+  quotedMemory?: Memory;
 }
 export interface Period {
   decade: Decade;

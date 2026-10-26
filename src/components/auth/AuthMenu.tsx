@@ -28,6 +28,7 @@ export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthM
           type="button"
           onClick={() => router.push("/auth/login?returnTo=/explorar")}
           aria-label="Iniciar sesión"
+          title="Iniciar sesión"
         >
           <LogIn />
           <span>Ingresar</span>

@@ -70,10 +70,9 @@ export function usePublicationMoments(id: string) {
 }
 
 export default function PublicationMoments({ id, onOpen }: { id: string; onOpen: (id: number) => void }) {
-  const { associations, analysis, error, pending, unavailable, retry } = usePublicationMoments(id);
+  const { associations } = usePublicationMoments(id);
+  if (!associations?.momentos.length) return null;
   return <div className={styles.associations}>
     {associations?.momentos.map(({ momento }) => <button className={styles.link} key={momento.id} onClick={() => onOpen(momento.id)}>Parte de {momento.nombre} <span aria-hidden="true">→</span></button>)}
-    {pending && <small role="status">{analysis?.estado === 'pendiente' ? 'Buscando momentos relacionados…' : 'Analizando este recuerdo…'}</small>}
-    {(error || unavailable) && <div role="status"><small>{error || 'La detección de momentos no estuvo disponible.'}</small><button onClick={retry}>Consultar de nuevo</button></div>}
   </div>;
 }

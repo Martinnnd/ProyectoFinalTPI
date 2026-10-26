@@ -9,7 +9,7 @@ import styles from "./UserSearch.module.css";
 type UserSearchProps = {
   currentUserId: number;
   followedUsers: FollowedUser[];
-  onFollow: (username: string, userId: number) => void | Promise<void>;
+  onFollow: (username: string, userId: number) => unknown;
   onOpenProfile: (user: UsuarioBusqueda) => void;
 };
 
@@ -98,6 +98,7 @@ export default function UserSearch({ currentUserId, followedUsers, onFollow, onO
       ref={trigger}
       type="button"
       aria-label="Buscar usuarios"
+      title="Buscar usuarios"
       aria-haspopup="dialog"
       aria-expanded={open}
       onClick={show}

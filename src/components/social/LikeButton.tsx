@@ -20,7 +20,7 @@ export default function LikeButton({
       onClick={onToggle}
     >
       <Heart size={17} fill={liked ? "currentColor" : "none"} />
-      {count !== undefined && <span>{count} </span>}
+      {Boolean(count && count > 0) && <span>{count} </span>}
       {liked ? "Te gusta" : "Me gusta"}
     </button>
   );

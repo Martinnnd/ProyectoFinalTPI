@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { describeTiers, resolveAchievements, resolveUserCategory } from "../../data";
-import type { Achievement, Memory, Period, TierProgress } from "../../types";
+import type { Achievement, Memory, Period, TierProgress, UserCategory } from "../../types";
 import type { FollowedUser } from "../../seguimientosApi";
 import ProfileDialogs from "./ProfileDialogs";
 import ProfileHeader from "./ProfileHeader";
@@ -18,6 +18,7 @@ const presentations: Record<Period["decade"], ProfilePresentation> = {
 };
 
 export default function Profile({
+  userId,
   onEdit,
   onDelete,
   username,
@@ -36,12 +37,17 @@ export default function Profile({
   period,
   selected,
   earned,
+  currentUserId,
+  myFollowingUsers,
   onSelect,
   onOpen,
   onAdd,
   onIniciarChat,
+  onNavigateToProfile,
+  onFollow,
   onToggleFollow,
 }: {
+  userId?: number;
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
   username: string;
@@ -60,10 +66,14 @@ export default function Profile({
   period: Period;
   selected: Memory | null;
   earned: Achievement[];
+  currentUserId?: number;
+  myFollowingUsers?: FollowedUser[];
   onOpen?: (memory: Memory) => void;
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
   onIniciarChat?: (username: string) => void;
+  onNavigateToProfile?: (username: string) => void;
+  onFollow?: (author: string, authorId: number) => void;
   onToggleFollow?: () => void | Promise<void>;
 }) {
   const album = useRef<HTMLElement>(null);
@@ -80,8 +90,33 @@ export default function Profile({
   const presentation = presentations[period.decade];
   const catalogue = useMemo(() => resolveAchievements(earned), [earned]);
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
-  const userCategory = reputation ?? resolveUserCategory(tierProgress);
-  const tiers = useMemo(() => describeTiers(tierProgress), [tierProgress]);
+
+  const ownMemories = useMemo(() => allMemories.filter((m) => !m.repost), [allMemories]);
+
+  const effectiveProgress: TierProgress = useMemo(
+    () => ({
+      memories: Math.max(tierProgress?.memories ?? 0, ownMemories.length),
+      points: Math.max(
+        tierProgress?.points ?? 0,
+        ownMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0),
+      ),
+      subscribed: Boolean(tierProgress?.subscribed),
+    }),
+    [tierProgress, ownMemories],
+  );
+
+  const tierOrder: Record<string, number> = {
+    Errante: 0,
+    "Nostálgico": 1,
+    Aedo: 2,
+    Mnemosine: 3,
+  };
+  const calculatedCategory = resolveUserCategory(effectiveProgress);
+  const userCategory =
+    reputation && (tierOrder[reputation] ?? -1) > (tierOrder[calculatedCategory] ?? 0)
+      ? (reputation as UserCategory)
+      : calculatedCategory;
+  const tiers = useMemo(() => describeTiers(effectiveProgress), [effectiveProgress]);
 
   useEffect(() => () => clearTimeout(mapCloseTimer.current), []);
 
@@ -129,6 +164,7 @@ export default function Profile({
     <main id="explore" className="personal-profile" data-visitor={!!author} aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}>
       <div className="profile-main">
         <ProfileHeader
+          userId={userId}
           author={author}
           username={username}
           presentation={presentation}
@@ -148,7 +184,11 @@ export default function Profile({
           onOpenAchievements={openCatalogue}
           onOpenTiers={openTiers}
           onIniciarChat={onIniciarChat}
+          currentUserId={currentUserId}
+          myFollowingUsers={myFollowingUsers}
+          onNavigateToProfile={onNavigateToProfile}
           onToggleFollow={onToggleFollow}
+          onToggleFollowUser={onFollow}
         />
         <ProfileShortcuts
           author={author}
@@ -162,7 +202,7 @@ export default function Profile({
           dialogRef={mapDialog}
           author={author}
           period={period}
-          memories={allMemories}
+          memories={ownMemories}
           selected={selected}
           opened={mapOpened}
           closing={mapClosing}

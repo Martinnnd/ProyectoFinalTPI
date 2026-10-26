@@ -2,6 +2,7 @@
 import DeleteMemoryDialog from "./components/DeleteMemoryDialog";
 
 import Chat from "./components/Chat";
+import Notification from "./components/Notification";
 import CommunityControls from "./components/CommunityControls";
 import GroupInfoModal from "./components/GroupInfoModal";
 import { filterCommunity } from "./groups";
@@ -91,6 +92,8 @@ export default function App() {
   const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const [profileMemories, setProfileMemories] = useState<Memory[]>([]);
+  const [profileFollowers, setProfileFollowers] = useState<FollowedUser[]>([]);
+  const [profileFollowed, setProfileFollowed] = useState<FollowedUser[]>([]);
   const [profileUser, setProfileUser] = useState<UsuarioPerfil | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const currentUserId = session?.usuarioId;
@@ -109,9 +112,15 @@ export default function App() {
       .then(async (perfil) => {
         if (controller.signal.aborted) return;
         setProfileUser(perfil);
-        const userMems = await getPublicacionesUsuario(perfil.id, controller.signal);
+        const [userMems, targetFollowers, targetFollowed] = await Promise.all([
+          getPublicacionesUsuario(perfil.id, controller.signal),
+          getSeguidores(perfil.id, controller.signal).catch(() => []),
+          getSeguidos(perfil.id, controller.signal).catch(() => []),
+        ]);
         if (controller.signal.aborted) return;
         setProfileMemories(userMems);
+        setProfileFollowers(targetFollowers);
+        setProfileFollowed(targetFollowed);
         setProfileLoading(false);
       })
       .catch((error) => {
@@ -453,10 +462,14 @@ export default function App() {
     setSelectedId(null);setPanelOpen(false);setFactsOpen(false);setPicking(false);
     setCategory("Todas");setPeriod(current=>({...current,year:null}));setView("profile");
   }
+  function openUserProfile(username: string) {
+    setProfileAuthor(username === session?.username ? null : username);
+    setSelectedId(null); setPanelOpen(false); setFactsOpen(false); setPicking(false);
+    setCategory("Todas"); setPeriod(p => ({...p, year: null}));
+    setView("profile");
+  }
   function openSearchedUserProfile(user: UsuarioBusqueda) {
-    setProfileAuthor(user.id === currentUserId ? null : user.username);
-    setSelectedId(null);setPanelOpen(false);setFactsOpen(false);setPicking(false);
-    setCategory("Todas");setPeriod(current => ({...current, year: null}));setView("profile");
+    openUserProfile(user.username);
   }
   function openPublication(memory: Memory) {
     if (view === 'map') {
@@ -755,6 +768,12 @@ export default function App() {
         {session && <button aria-current={view === "chat" ? "page" : undefined} className={view === "chat" ? "rail-active" : ""} onClick={() => {
           setView("chat");setPicking(false);setPanelOpen(false);setFactsOpen(false);
         }}><MessageCircle/><span>Chat</span></button>}
+        {session && (
+          <Notification
+            hidden={picking || !!draft}
+            onOpenChat={() => { setView("chat"); setPicking(false); setPanelOpen(false); setFactsOpen(false); }}
+          />
+        )}
         {session ? <div className="account-navigation">
           <UserSearch
             currentUserId={session.usuarioId}
@@ -835,6 +854,7 @@ export default function App() {
       )}
       {view === "profile" && session && (
         <Profile
+          userId={profileUser?.id}
           onEdit={editMemory}
           onDelete={deleteMemory}
           onOpen={openPublication}
@@ -850,14 +870,18 @@ export default function App() {
           allMemories={profileMemories}
           repostedPublicationIds={repostedPublicationIds}
           tierProgress={tierProgress}
-          followers={followers}
-          followedUsers={followingUsers}
+          followers={profileAuthor ? profileFollowers : followers}
+          followedUsers={profileAuthor ? profileFollowed : followingUsers}
+          currentUserId={currentUserId}
+          myFollowingUsers={followingUsers}
           period={period}
           selected={selected}
           earned={earned}
           onSelect={(m) => setSelectedId(m?.id ?? null)}
           onAdd={startAdding}
           onIniciarChat={profileAuthor ? iniciarChatConUsuario : undefined}
+          onNavigateToProfile={openUserProfile}
+          onFollow={toggleFollow}
           onToggleFollow={profileAuthor && profileUser ? () => toggleFollow(profileUser.username, profileUser.id) : undefined}
         />
       )}
