@@ -3,6 +3,7 @@
 import { use } from "react";
 import dynamic from "next/dynamic";
 import { LoaderCircle } from "lucide-react";
+import { decodeProfileUsername } from '../../../../profileRoute';
 
 const ProfileView = dynamic(() => import("../../../../components/profile/ProfileView"), {
   ssr: false,
@@ -16,5 +17,5 @@ const ProfileView = dynamic(() => import("../../../../components/profile/Profile
 
 export default function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const resolved = use(params);
-  return <ProfileView targetUsername={resolved.username} />;
+  return <ProfileView targetUsername={decodeProfileUsername(resolved.username)} />;
 }
