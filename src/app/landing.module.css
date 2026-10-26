@@ -1374,3 +1374,55 @@
  .finalCall { padding:64px 24px; }
  .footer { padding-bottom:env(safe-area-inset-bottom,0px); }
 }
+
+/* Two distinct invitations: a map pin to enter, a small dial to discover. */
+.eraHero .actions .exploreAction {
+  display:inline-flex; align-items:center; justify-content:center; gap:12px;
+  min-height:48px; padding:8px 16px 8px 9px; width:auto;
+  border:1px solid color-mix(in srgb,var(--green) 70%,var(--paper));
+  border-radius:12px; background:var(--green); color:var(--paper);
+  font-size:14px; font-weight:800; letter-spacing:0; text-transform:none;
+  box-shadow:inset 0 1px #ffffff55,0 4px 0 color-mix(in srgb,var(--green) 60%,#000),0 8px 22px #0003;
+  transition:box-shadow 180ms,background-color 300ms;
+}
+.exploreActionPin { display:grid; place-items:center; width:32px; height:32px; flex-shrink:0; border-radius:8px; background:color-mix(in srgb,var(--paper) 14%,transparent); border:1px solid color-mix(in srgb,var(--paper) 25%,transparent); }
+.eraHero .actions .exploreAction>svg { transition:translate 180ms; }
+.eraHero .actions .exploreAction:hover>svg { translate:2px -2px; }
+.eraHero .actions .epochsAction { display:inline-flex; align-items:center; justify-content:center; gap:10px; width:auto; min-height:44px; padding:5px 8px; border:0; border-radius:0; background:transparent; color:var(--green); box-shadow:none; font-size:13px; font-weight:600; text-decoration:none; }
+.epochsActionDial { display:grid; place-items:center; width:34px; height:34px; flex-shrink:0; border:1px dashed color-mix(in srgb,var(--green) 65%,transparent); border-radius:50%; transition:rotate 400ms; }
+.epochsAction>span:last-child { padding-block:5px; border-bottom:1px solid color-mix(in srgb,var(--green) 35%,transparent); }
+.epochsAction:hover .epochsActionDial { rotate:35deg; }
+.epochsAction:hover>span:last-child { border-bottom-color:currentColor; }
+.epochsActionDial>svg { animation:epochsCompassTurn 9s ease-in-out infinite; transform-origin:center; }
+.epochsAction>span:last-child {
+  background-image:linear-gradient(110deg,currentColor 0%,currentColor 33%,#fff 46%,#fff 54%,currentColor 67%,currentColor 100%);
+  background-size:300% 100%;
+  background-position:100% 0;
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:epochsTextShine 4.5s ease-in-out infinite;
+}
+@keyframes epochsCompassTurn {
+  0%,15% { transform:rotate(0deg); }
+  55%,100% { transform:rotate(360deg); }
+}
+@keyframes epochsTextShine {
+  0%,20% { background-position:100% 0; filter:drop-shadow(0 0 0 transparent); }
+  42% { filter:drop-shadow(0 0 5px color-mix(in srgb,var(--green) 55%,#fff)) drop-shadow(0 0 10px color-mix(in srgb,var(--green) 40%,transparent)); }
+  65%,100% { background-position:0% 0; filter:drop-shadow(0 0 0 transparent); }
+}
+.eraHero .actions a:focus-visible { outline:2px solid var(--green); outline-offset:5px; }
+.eraHero[data-era="1980"] .actions .exploreAction { border-radius:5px; box-shadow:3px 3px 0 #df65ba,0 0 20px #62f0df22; }
+.eraHero[data-era="1990"] .actions .exploreAction { border-radius:2px; border:2px outset #d8e5d7; box-shadow:3px 3px 0 #002e2e66; }
+.eraHero[data-era="2000"] .actions .exploreAction { background:linear-gradient(#347cbd,#195a99); color:white; box-shadow:inset 0 1px #ffffff88,0 4px 0 #164774,0 8px 20px #195a9926; }
+@media(max-width:560px) {
+ .eraHero .actions { gap:18px; width:min(90%,300px); align-items:center; }
+ .eraHero .actions .exploreAction { font-size:13px; gap:9px; }
+ .eraHero .actions .epochsAction { font-size:12px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .exploreActionPin,.eraHero .actions .exploreAction>svg,.epochsActionDial { transition:none; }
+ .epochsActionDial>svg,.epochsAction>span:last-child { animation:none; }
+ .epochsAction>span:last-child { background:none; -webkit-text-fill-color:currentColor; }
+}

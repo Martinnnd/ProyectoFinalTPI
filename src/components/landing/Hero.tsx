@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, ArrowUpRight, Compass } from "lucide-react";
 import styles from "../../app/landing.module.css";
 
 export default function Hero({ dial }: { dial?: ReactNode }) {
@@ -27,11 +27,13 @@ export default function Hero({ dial }: { dial?: ReactNode }) {
         </h1>
         <p className={styles.heroTagline} data-hero-tagline data-landing-animate>Un día. Un momento. Un lugar.</p>
         <div className={styles.actions} data-hero-actions>
-          <Link className={styles.primaryAction} href="/explorar">
-            Explorar recuerdos <span aria-hidden="true">→</span>
+          <Link className={`${styles.primaryAction} ${styles.exploreAction}`} href="/explorar">
+            <span className={styles.exploreActionPin} aria-hidden="true"><MapPin size={18}/></span>
+            Explorar recuerdos <ArrowUpRight size={18} aria-hidden="true"/>
           </Link>
-          <a className={styles.secondaryAction} href="#epocas">
-            Conocer las épocas
+          <a className={`${styles.secondaryAction} ${styles.epochsAction}`} href="#epocas">
+            <span className={styles.epochsActionDial} aria-hidden="true"><Compass size={19}/></span>
+            <span>Conocer las épocas</span>
           </a>
         </div>
       </div>
