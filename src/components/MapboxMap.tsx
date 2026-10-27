@@ -353,10 +353,13 @@ export default function MapboxMap(
     const locationKey = `${props.selected.id}:${props.selected.lat}:${props.selected.lng}`;
     if (focusedPin.current === locationKey) return;
     focusedPin.current = locationKey;
+    const mobile = matchMedia('(max-width: 899px)').matches;
+    const mapSize = instance.current?.getContainer();
     if (props.selected)
       instance.current?.flyTo({
         center: [props.selected.lng, props.selected.lat],
-        zoom: Math.max(instance.current.getZoom(), 14),
+        zoom: mobile ? 12 : Math.max(instance.current.getZoom(), 14),
+        offset: mobile && mapSize ? [-mapSize.clientWidth * .24, -mapSize.clientHeight * .07] : [0, 0],
         duration: duration(),
       });
   }, [props.selected?.id, props.selected?.lat, props.selected?.lng, props.active, ready]);

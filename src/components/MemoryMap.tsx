@@ -105,10 +105,17 @@ function MapActions({
     const locationKey = `${selected.id}:${selected.lat}:${selected.lng}`;
     if (focusedPin.current === locationKey) return;
     focusedPin.current = locationKey;
-    if (selected)
-      map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
+    if (selected) {
+      const mobile = matchMedia('(max-width: 899px)').matches;
+      const zoom = mobile ? 12 : Math.max(map.getZoom(), 14);
+      const size = map.getSize();
+      const target = mobile
+        ? map.unproject(map.project([selected.lat, selected.lng], zoom).add([size.x * .24, size.y * .07]), zoom)
+        : L.latLng(selected.lat, selected.lng);
+      map.flyTo(target, zoom, {
         animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
       });
+    }
   }, [selected, active, map]);
   useEffect(() => {
     if (searchTarget) map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
