@@ -47,7 +47,9 @@ export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthM
         onClick={() => setOpen((current) => !current)}
         title={`Sesión: ${session.username}`}
       >
-        <UserRound />
+        {session.fotoPerfilUrl
+          ? <img className={styles.avatar} src={session.fotoPerfilUrl} alt="" />
+          : <UserRound />}
         <span className={styles.username}>{session.username}</span>
       </button>
       {open && (
