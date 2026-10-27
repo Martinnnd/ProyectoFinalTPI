@@ -134,22 +134,10 @@ export default function ProfileHeader({
             <div className="profile-name-row">
               <h2>{displayName}</h2>
               {isOwnProfile && onEditProfile && (
-                <button type="button" className="profile-edit-trigger secondary-button" onClick={onEditProfile}>
-                  <Pencil size={15} /> Editar perfil
+                <button type="button" className="profile-edit-trigger secondary-button" onClick={onEditProfile} aria-label="Editar perfil" title="Editar perfil">
+                  <Pencil size={17} />
                 </button>
               )}
-              {isOwnProfile ? (
-                <button
-                  className="profile-note"
-                  onClick={onOpenTiers}
-                  aria-haspopup="dialog"
-                  aria-expanded={tiersOpen}
-                >
-                  {userCategory}
-                </button>
-              ) : userCategory ? (
-                <span className="profile-note">{userCategory}</span>
-              ) : null}
             </div>
             <div className="personal-counts">
               <span><strong>{memoryCount}</strong> Recuerdos</span>
@@ -160,6 +148,17 @@ export default function ProfileHeader({
                 <strong>{totalFollowed}</strong> Seguidos
               </button>
             </div>
+            {userCategory && (
+              <div className="profile-category">
+                {isOwnProfile ? (
+                  <button className="profile-note" onClick={onOpenTiers} aria-haspopup="dialog" aria-expanded={tiersOpen}>
+                    {userCategory}
+                  </button>
+                ) : (
+                  <span className="profile-note">{userCategory}</span>
+                )}
+              </div>
+            )}
           </div>
           {!isOwnProfile && (onIniciarChat || onToggleFollow) && (
             <div className="profile-visitor-actions">
@@ -200,7 +199,7 @@ export default function ProfileHeader({
               </div>
               {unlocked.length ? (
                 <ul className="achievement-rail">
-                  {unlocked.map((achievement) => (
+                  {unlocked.slice(0, 5).map((achievement) => (
                     <li key={achievement.id}>
                       <img src={achievement.image} alt={achievement.name} title={achievement.name} width={40} height={40} />
                     </li>

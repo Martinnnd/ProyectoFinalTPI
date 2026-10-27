@@ -31,7 +31,8 @@
 .app.view-profile .profile-unfollow-button { color:var(--accent); border-color:var(--accent); }
 .app.view-profile .personal-identity-text { flex:1 1 180px; display:flex; flex-direction:column; min-height:82px; gap:12px; }
 .app.view-profile .profile-name-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px 12px; }
-.app.view-profile .profile-edit-trigger { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; font-size:12px; cursor:pointer; }
+.app.view-profile .profile-edit-trigger { display:inline-flex; align-items:center; justify-content:center; flex:none; width:36px; height:36px; margin-left:auto; padding:0; cursor:pointer; }
+.app.view-profile .profile-category { display:flex; align-items:center; }
 .profile-edit-dialog { width:min(480px,calc(100vw - 28px)); max-height:min(85dvh,700px); padding:0; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); color:var(--ink); box-shadow:var(--shadow); }
 .profile-edit-dialog::backdrop { background:#0009; }
 .profile-edit-dialog > header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 20px; border-bottom:1px solid var(--line); }

@@ -193,16 +193,21 @@
  .app.view-profile .personal-counts { grid-column:1 / -1; justify-content:space-around; gap:10px; padding-top:12px; }
  .app.view-profile .personal-header { grid-template-columns:56px minmax(0,1fr); gap:10px 12px; }
  .app.view-profile .personal-identity,.app.view-profile .personal-identity-text { display:contents; }
- .app.view-profile .profile-name-row { grid-column:2; align-self:center; min-width:0; }
+ .app.view-profile .profile-name-row { grid-column:2; grid-row:1; align-self:start; display:flex; flex-wrap:nowrap; min-width:0; }
  .app.view-profile .profile-name-row h2 { max-width:100%; overflow-wrap:anywhere; }
- .app.view-profile .personal-counts { grid-column:1 / -1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; width:100%; margin:4px 0 0; padding:10px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+ .app.view-profile .profile-edit-trigger { width:44px; min-width:44px; height:44px; min-height:44px; }
+ .app.view-profile .achievements { grid-column:2; grid-row:2; display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:6px; width:100%; min-width:0; margin:0; padding:5px 0; background:transparent; border:0; text-align:left; }
+ .app.view-profile .achievements-heading { display:flex; align-items:center; justify-content:flex-start; gap:4px; flex:none; margin:0; }
+ .app.view-profile .achievements-heading h3 { font-size:11px; }
+ .app.view-profile .achievements-count { padding:3px 5px; font-size:10px; }
+ .app.view-profile .achievement-rail { display:flex; flex-wrap:nowrap; justify-content:flex-end; gap:2px; max-width:none; min-width:0; margin:0; }
+ .app.view-profile .achievement-rail img { width:clamp(20px,5.5vw,26px); height:clamp(20px,5.5vw,26px); }
+ .app.view-profile .achievements-empty { min-width:0; margin:0; font-size:10px; text-align:right; }
+ .app.view-profile .personal-counts { grid-column:1 / -1; grid-row:3; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; width:100%; margin:4px 0 0; padding:10px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
  .app.view-profile .personal-counts > :is(span,button) { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:0; padding:2px 4px; text-align:center; line-height:1.2; }
  .app.view-profile .personal-counts > :is(span,button) + :is(span,button) { border-left:1px solid var(--line); }
  .app.view-profile .personal-counts strong { font-size:19px; line-height:1.1; }
- .app.view-profile .achievements { grid-column:1 / -1; width:100%; min-width:0; margin:0; padding:8px 10px; background:color-mix(in srgb,var(--soft) 68%,var(--surface)); border:1px solid var(--line); border-radius:var(--radius); }
- .app.view-profile .achievements-heading { display:flex; align-items:center; justify-content:space-between; margin:0; }
- .app.view-profile .achievement-rail { max-width:none; margin:6px 0 0; }
- .app.view-profile .achievements-empty { margin:4px 0 0; }
+ .app.view-profile .profile-category { grid-column:1 / -1; grid-row:4; justify-content:flex-end; }
  .app.view-profile .profile-visitor-actions { grid-column:1 / -1; display:flex; justify-content:flex-end; gap:10px; margin:0; }
  .app.view-profile .profile-visitor-actions button { flex:none; width:44px; min-width:44px; height:44px; min-height:44px; padding:0; border-radius:var(--radius); }
  .app.view-profile .profile-visitor-actions .profile-action-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
