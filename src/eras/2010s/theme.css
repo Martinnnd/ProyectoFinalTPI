@@ -109,11 +109,11 @@
 .app.era-2010.view-profile .profile-era-bar { border-radius:10px 10px 0 0; border-bottom:0; }
 .app.era-2010.view-profile .personal-header { border-top:0; border-radius:0; box-shadow:none; }
 .app.era-2010.view-profile .profile-shortcuts { border-top:0; border-radius:0 0 10px 10px; margin-bottom:16px; }
-.app.era-2010.view-profile .profile-posts { width:100%; max-width:1100px; margin:0 auto; padding-bottom:70px; }
+.app.era-2010.view-profile .profile-posts { width:100%; max-width:none; margin:0; padding-bottom:70px; }
 .app.era-2010.view-profile .profile-feed-posts { gap:16px; }
 .app.era-2010.view-profile .profile-feed-posts .feed-post { box-sizing:border-box; width:100%; min-width:0; padding:20px; border:1px solid #d2deda; border-radius:9px; background:#fffdf9; box-shadow:0 7px 20px #1639471c; overflow:visible; }
 @media(min-width:900px) {
-  .app.era-2010.view-profile .post-composition.has-split-photo { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,48%); gap:24px; align-items:stretch; }
+  .app.era-2010.view-profile .post-composition.has-split-photo { display:grid; grid-template-columns:minmax(0,1fr) clamp(260px,38%,440px); gap:24px; align-items:stretch; }
   .app.era-2010.view-profile .has-split-photo > .post-details { display:flex; flex-direction:column; min-width:0; }
   .app.era-2010.view-profile .has-split-photo .post-body { display:flex; flex:1; flex-direction:column; min-width:0; }
   .app.era-2010.view-profile .has-split-photo .post-content .post-image { display:none; }
