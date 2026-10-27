@@ -5,6 +5,7 @@ import { AuthProvider } from "../components/auth/AuthProvider";
 export const metadata: Metadata = {
   title: "Nostalgiar",
   description: "Historias, lugares y música de nuestras épocas",
+  icons: { icon: "/landing/isotipo-actual.png" },
 };
 export const viewport: Viewport = { width:'device-width', initialScale:1, viewportFit:'cover', interactiveWidget:'resizes-content' };
 
