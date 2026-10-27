@@ -135,14 +135,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </strong>
         </div>
         <button
-          ref={mobileOptionsTrigger}
-          className="mobile-era-button"
-          onClick={() => mobileOptions.current?.showModal()}
-          aria-label="Abrir opciones"
-        >
-          <SlidersHorizontal size={20} />
-        </button>
-        <button
           className="mobile-add-button"
           aria-label="Sumar mi recuerdo"
           onClick={handleRecordar}
@@ -150,6 +142,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <Plus size={23} />
         </button>
       </div>
+
+      <button
+        ref={mobileOptionsTrigger}
+        className="mobile-era-button mobile-map-options"
+        onClick={() => mobileOptions.current?.showModal()}
+        aria-label="Abrir opciones de exploración"
+        title="Opciones de exploración"
+      >
+        <SlidersHorizontal size={20} />
+      </button>
 
       <dialog
         ref={mobileOptions}

@@ -151,19 +151,22 @@ export default function ProfileHeader({
           </div>
           {!isOwnProfile && (onIniciarChat || onToggleFollow) && (
             <div className="profile-visitor-actions">
-              {onIniciarChat && <button className="secondary-button" onClick={() => onIniciarChat(author!)}>
-                <MessageCircle size={14} /> Iniciar chat
+              {onIniciarChat && <button className="secondary-button" aria-label={`Iniciar chat con ${displayName}`} title="Iniciar chat" onClick={() => onIniciarChat(author!)}>
+                <MessageCircle size={17} /> <span className="profile-action-label">Iniciar chat</span>
               </button>}
               {onToggleFollow && <button
                 className={isFollowing ? "secondary-button profile-unfollow-button" : "primary-button profile-follow-button"}
+                aria-label={isFollowing ? `Dejar de seguir a ${displayName}` : `Seguir a ${displayName}`}
+                title={isFollowing ? "Dejar de seguir" : "Seguir"}
+                aria-pressed={isFollowing}
                 disabled={followBusy}
                 onClick={async () => {
                   setFollowBusy(true);
                   try { await onToggleFollow(); } finally { setFollowBusy(false); }
                 }}
               >
-                {isFollowing ? <UserMinus size={14} /> : <UserPlus size={14} />}
-                {followBusy ? "Actualizando…" : isFollowing ? "Dejar de seguir" : "Seguir"}
+                {followBusy ? <LoaderCircle size={17} className="spin" /> : isFollowing ? <UserMinus size={17} /> : <UserPlus size={17} />}
+                <span className="profile-action-label">{followBusy ? "Actualizando…" : isFollowing ? "Dejar de seguir" : "Seguir"}</span>
               </button>}
             </div>
           )}

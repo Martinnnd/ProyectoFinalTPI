@@ -2,6 +2,7 @@
 .feed-community>summary,.globe-tools>summary { display:none; }
 .globe-tool-buttons { display:flex; gap:6px; }
 .mobile-appbar { display:none; }
+.mobile-map-options { display:none; }
 .mobile-player-heading { display:none; }
 .mobile-options { color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); }
 .mobile-options::backdrop { background:#0009; backdrop-filter:blur(3px); }
@@ -119,8 +120,11 @@
  .app .time-navigation .time-track { margin:0 8px; height:26px; }
  .app .time-navigation .time-track input { height:28px; }
  .app.map-app .mobile-appbar { display:flex; }
- .app.map-app .mobile-era-button { display:flex; }
+ .app.map-app.view-map .mobile-map-options { position:absolute; top:calc(var(--mobile-top) + 12px); right:12px; z-index:610; display:flex; width:44px; height:44px; min-width:44px; padding:0; border-radius:12px; box-shadow:inset 0 1px #fff7,0 3px 10px #0003; }
  .app.map-app .mobile-add-button { display:grid; }
+ .app.map-app:has(.notif-launcher) .mobile-page-title { margin-right:54px; }
+ .app.map-app .navigation-rail .notif-launcher { position:fixed; top:calc(6px + env(safe-area-inset-top,0px)); right:64px; z-index:720; display:grid; place-items:center; flex:none; width:44px; min-width:44px; height:44px; min-height:44px; padding:0; color:var(--ink); background:color-mix(in srgb,var(--surface) 82%,var(--soft)); border:1px solid var(--line); border-radius:12px; box-shadow:inset 0 1px #fff6,0 2px 4px #0002; }
+ .app.map-app .navigation-rail .notif-launcher .notif-badge { position:absolute; top:-3px; right:-4px; width:auto; min-width:17px; height:17px; padding:0 4px; clip-path:none; overflow:visible; margin:0; color:var(--surface); background:var(--accent); border:1px solid var(--surface); font:700 10px/16px Arial,sans-serif; }
  .app .account-navigation { display:contents; }
  .app.map-app .navigation-rail { inset:auto 0 0; width:100%; height:var(--mobile-bottom); border:0; border-top:1px solid var(--line); gap:3px; overflow:visible; background:var(--surface); }
  .app.map-app .navigation-rail>button,.app.map-app .navigation-rail>div { flex:1; min-width:0; margin:0; }
@@ -165,6 +169,21 @@
  .app.view-profile .personal-identity-text { min-height:0; min-width:0; }
  .app.view-profile .personal-identity h2 { font-size:21px; overflow-wrap:anywhere; }
  .app.view-profile .personal-counts { grid-column:1 / -1; justify-content:space-around; gap:10px; padding-top:12px; }
+ .app.view-profile .personal-header { grid-template-columns:56px minmax(0,1fr); gap:10px 12px; }
+ .app.view-profile .personal-identity,.app.view-profile .personal-identity-text { display:contents; }
+ .app.view-profile .profile-name-row { grid-column:2; align-self:center; min-width:0; }
+ .app.view-profile .profile-name-row h2 { max-width:100%; overflow-wrap:anywhere; }
+ .app.view-profile .personal-counts { grid-column:1 / -1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; width:100%; margin:4px 0 0; padding:10px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+ .app.view-profile .personal-counts > :is(span,button) { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:0; padding:2px 4px; text-align:center; line-height:1.2; }
+ .app.view-profile .personal-counts > :is(span,button) + :is(span,button) { border-left:1px solid var(--line); }
+ .app.view-profile .personal-counts strong { font-size:19px; line-height:1.1; }
+ .app.view-profile .achievements { grid-column:1 / -1; width:100%; min-width:0; margin:0; padding:8px 10px; background:color-mix(in srgb,var(--soft) 68%,var(--surface)); border:1px solid var(--line); border-radius:var(--radius); }
+ .app.view-profile .achievements-heading { display:flex; align-items:center; justify-content:space-between; margin:0; }
+ .app.view-profile .achievement-rail { max-width:none; margin:6px 0 0; }
+ .app.view-profile .achievements-empty { margin:4px 0 0; }
+ .app.view-profile .profile-visitor-actions { grid-column:1 / -1; display:flex; justify-content:flex-end; gap:10px; margin:0; }
+ .app.view-profile .profile-visitor-actions button { flex:none; width:44px; min-width:44px; height:44px; min-height:44px; padding:0; border-radius:var(--radius); }
+ .app.view-profile .profile-visitor-actions .profile-action-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
  .app .profile-post-list { display:grid; grid-template-columns:minmax(0,1fr); }
  .app .profile-post { min-width:0; }
  .app .profile-post-story { overflow-wrap:anywhere; }
