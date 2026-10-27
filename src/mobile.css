@@ -129,6 +129,7 @@
  .app.map-app .mobile-add-button { display:grid; }
  .app.map-app:has(.notif-launcher) .mobile-page-title { margin-right:54px; }
  .app.map-app .navigation-rail .notif-launcher { position:fixed; top:calc(6px + env(safe-area-inset-top,0px)); right:64px; z-index:720; display:grid; place-items:center; flex:none; width:44px; min-width:44px; height:44px; min-height:44px; padding:0; color:var(--ink); background:color-mix(in srgb,var(--surface) 82%,var(--soft)); border:1px solid var(--line); border-radius:12px; box-shadow:inset 0 1px #fff6,0 2px 4px #0002; }
+ .app.map-app.era-1970:is(.view-feed,.view-profile,.view-chat) .navigation-rail .notif-launcher { position:fixed; top:calc(6px + env(safe-area-inset-top,0px)); right:64px; }
  .app.map-app .navigation-rail .notif-launcher .notif-badge { position:absolute; top:-3px; right:-4px; width:auto; min-width:17px; height:17px; padding:0 4px; clip-path:none; overflow:visible; margin:0; color:var(--surface); background:var(--accent); border:1px solid var(--surface); font:700 10px/16px Arial,sans-serif; }
  .app .account-navigation { display:contents; }
  .app.map-app .navigation-rail { inset:auto 0 0; width:100%; height:var(--mobile-bottom); border:0; border-top:1px solid var(--line); gap:3px; overflow:visible; background:var(--surface); }
