@@ -133,6 +133,17 @@ export default function ProfileHeader({
             <span className="eyebrow">{presentation.label}</span>
             <div className="profile-name-row">
               <h2>{displayName}</h2>
+              {userCategory && (
+                <div className="profile-category">
+                  {isOwnProfile ? (
+                    <button className="profile-note" onClick={onOpenTiers} aria-haspopup="dialog" aria-expanded={tiersOpen}>
+                      {userCategory}
+                    </button>
+                  ) : (
+                    <span className="profile-note">{userCategory}</span>
+                  )}
+                </div>
+              )}
               {isOwnProfile && onEditProfile && (
                 <button type="button" className="profile-edit-trigger secondary-button" onClick={onEditProfile} aria-label="Editar perfil" title="Editar perfil">
                   <Pencil size={17} />
@@ -148,17 +159,6 @@ export default function ProfileHeader({
                 <strong>{totalFollowed}</strong> Seguidos
               </button>
             </div>
-            {userCategory && (
-              <div className="profile-category">
-                {isOwnProfile ? (
-                  <button className="profile-note" onClick={onOpenTiers} aria-haspopup="dialog" aria-expanded={tiersOpen}>
-                    {userCategory}
-                  </button>
-                ) : (
-                  <span className="profile-note">{userCategory}</span>
-                )}
-              </div>
-            )}
           </div>
           {!isOwnProfile && (onIniciarChat || onToggleFollow) && (
             <div className="profile-visitor-actions">
