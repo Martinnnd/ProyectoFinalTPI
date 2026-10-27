@@ -27,6 +27,9 @@ export default function DecadeAtmosphere() {
             <span className={styles.screenGlass} />
             <span className={styles.monitorChin}><b>NOSTALGIAR</b><span className={styles.monitorVents} /><span className={styles.monitorControls}><i /><i /><i /><em /></span></span>
           </span>}
+          {era.id === "2010" && <span className={styles.pocketAtmosphere}>
+            <span className={styles.pocketLens}/><span className={styles.pocketPhoto}><i/><b>UN MOMENTO · 2012</b></span><span className={styles.pocketHome}/>
+          </span>}
         </span>
       ))}
       <span className={styles.texture} />

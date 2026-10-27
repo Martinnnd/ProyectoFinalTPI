@@ -19,6 +19,6 @@ const files: Record<string, [string, string]> = {
 export function localTracks(tracks: MusicTrack[]): MusicTrack[] {
   return tracks.flatMap(track => {
     const file = files[track.spotifyId];
-    return file ? [{ ...track, audioSrc: `/music/${file[0]}/${encodeURIComponent(file[1])}` }] : [];
+    return file ? [{ ...track, audioSrc: `/music/${file[0]}/${encodeURIComponent(file[1])}` }] : track.audioSrc ? [track] : [];
   });
 }

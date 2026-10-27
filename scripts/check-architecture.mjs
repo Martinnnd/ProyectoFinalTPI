@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import ts from "typescript";
 import postcss from "postcss";
 
-const teams = { "70s": 1970, "80s": 1980, "90s": 1990, "2000s": 2000 };
+const teams = { "70s": 1970, "80s": 1980, "90s": 1990, "2000s": 2000, "2010s": 2010 };
 function files(dir) {
   return fs
     .readdirSync(dir, { withFileTypes: true })
@@ -76,7 +76,7 @@ for (const [folder, year] of Object.entries(teams)) {
             `${file}: selector sin alcance de epoca: ${selector}`,
           );
           assert(
-            !new RegExp(`\\.era-(?!${year})(1970|1980|1990|2000)`).test(
+            !new RegExp(`\\.era-(?!${year})(1970|1980|1990|2000|2010)`).test(
               selector,
             ),
             `${file}: selector de otro equipo`,
@@ -87,9 +87,9 @@ for (const [folder, year] of Object.entries(teams)) {
 }
 for (const file of ["src/styles.css", "src/themes.css", "src/social.css"])
   assert(
-    !/\.(era|device)-(1970|1980|1990|2000)/.test(fs.readFileSync(file, "utf8")),
+    !/\.(era|device)-(1970|1980|1990|2000|2010)/.test(fs.readFileSync(file, "utf8")),
     `${file}: mover estilos de epoca a su carpeta`,
   );
 console.log(
-  "Arquitectura OK: cuatro equipos aislados, contratos y CSS por epoca.",
+  "Arquitectura OK: cinco épocas aisladas, contratos y CSS por época.",
 );

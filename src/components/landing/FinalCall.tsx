@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Disc3, CassetteTape, Monitor, MessagesSquare, ArrowRight } from "lucide-react";
+import { Disc3, CassetteTape, Monitor, MessagesSquare, Camera, ArrowRight } from "lucide-react";
 import styles from "../../app/landing.module.css";
 
 const eras = [
@@ -9,6 +9,7 @@ const eras = [
   { year: "1980", label: "80s", phrase: "El cassette que escuchabas una y otra vez.", icon: CassetteTape },
   { year: "1990", label: "90s", phrase: "Tu primera ventana a otro mundo.", icon: Monitor },
   { year: "2000", label: "2000s", phrase: "Ese chat que no querías terminar.", icon: MessagesSquare },
+  { year: "2010", label: "2010s", phrase: "La foto que todavía guardás en el celular.", icon: Camera },
 ] as const;
 
 export default function FinalCall() {

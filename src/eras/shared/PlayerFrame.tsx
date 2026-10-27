@@ -11,6 +11,8 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [volumeOpen, setVolumeOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const volumeId = useId();
   const volumeControl = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -53,7 +55,7 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
   return <section className={`music-card device-${decade} ${expanded ? 'player-visible' : 'player-hidden'} ${changing ? 'device-changing' : ''} ${dragging ? 'device-dragging' : ''} ${playing ? 'device-playing' : ''}`} aria-label="Música de la época" id="music-player" onDragStart={() => setDragging(true)} onDragEnd={() => setDragging(false)}>
     <span className="device-change-status" role="status">{changing ? 'Tema cargado · animación de cambio' : ''}</span>
     <div className="mobile-player-heading"><strong>Música de la época</strong><button type="button" onClick={onToggle} aria-label="Minimizar reproductor">Minimizar</button></div>
-    <audio ref={audio} key={track.audioSrc} hidden preload="metadata" src={track.audioSrc} autoPlay={playing} onPlay={() => setPlaying(true)} onPause={event => { if (audio.current === event.currentTarget) setPlaying(false); }} onEnded={() => { setPlaying(true); onNext(); }} onError={() => { setPlaying(false); onError(); }}/>
+    <audio ref={audio} key={track.audioSrc} hidden preload="metadata" src={track.audioSrc} autoPlay={playing} onLoadedMetadata={event => { setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0); setCurrentTime(0); }} onTimeUpdate={event => setCurrentTime(event.currentTarget.currentTime)} onPlay={() => setPlaying(true)} onPause={event => { if (audio.current === event.currentTarget) setPlaying(false); }} onEnded={() => { setPlaying(true); onNext(); }} onError={() => { setPlaying(false); onError(); }}/>
     {failed && <p className="music-playback-error" role="alert">No se pudo reproducir este tema. Probá otra canción.</p>}
     <div className="device-body" onDragOver={event => { if (event.dataTransfer.types.includes('application/x-nostalgia-track')) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; } }} onDrop={event => {
       const index = tracks.findIndex(item => item.spotifyId === event.dataTransfer.getData('application/x-nostalgia-track'));
@@ -65,6 +67,7 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
       <div className="music-compact">
         <div className="record-art" aria-hidden="true"><Disc3 size={32}/></div>
         <button className="track-open" onClick={() => void togglePlayback()} aria-label={`${playing ? 'Pausar' : 'Reproducir'} ${track.title}`}><span className="eyebrow">{label} · {track.year}</span><strong>{track.title}</strong><small>{track.artist}</small></button>
+        {decade === 2010 && <div className="pocket-seek"><span>{Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, '0')}</span><input type="range" min={0} max={duration || 1} step="0.1" value={Math.min(currentTime, duration || 1)} aria-label="Posición de la canción" onChange={event => { if (audio.current && duration) { audio.current.currentTime = Number(event.currentTarget.value); setCurrentTime(audio.current.currentTime); } }}/><span>-{Math.floor(Math.max(0, duration - currentTime) / 60)}:{String(Math.floor(Math.max(0, duration - currentTime) % 60)).padStart(2, '0')}</span></div>}
         <div className="music-buttons">
           <button className="icon-button" aria-label="Pista anterior" onClick={() => { onPrevious(); animate(); }}><SkipBack size={15}/></button>
           <button className="icon-button" aria-label={playing ? 'Pausar música' : 'Reproducir música'} onClick={() => void togglePlayback()}>{playing ? <Pause size={15}/> : <Play size={15}/>}</button>

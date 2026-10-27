@@ -15,7 +15,7 @@ export default function MemoryMapSection() {
       clearInterval(timer);
       if (motion.matches || document.hidden || !inView) return;
       timer = setInterval(() => setEra(current => {
-        const eras = ['1970', '1980', '1990', '2000'];
+        const eras = ['1970', '1980', '1990', '2000', '2010'];
         return eras[(eras.indexOf(current) + 1) % eras.length];
       }), 6500);
     };

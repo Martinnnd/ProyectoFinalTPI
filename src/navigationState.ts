@@ -3,7 +3,7 @@ import { categories, type Period } from './types';
 export function readNavigation(search: string) {
   const params = new URLSearchParams(search);
   const requested = Number(params.get('era'));
-  const decade: Period['decade'] = requested === 1970 || requested === 1980 || requested === 2000 ? requested : 1990;
+  const decade: Period['decade'] = requested === 1970 || requested === 1980 || requested === 2000 || requested === 2010 ? requested : 1990;
   const year = Number(params.get('year'));
   const requestedView = params.get('view');
   const view: 'map' | 'feed' | 'profile' | 'chat' = requestedView === 'feed' || requestedView === 'profile' || requestedView === 'chat' ? requestedView : 'map';

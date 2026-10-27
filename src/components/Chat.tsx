@@ -12,6 +12,7 @@ const titulosPorDecada: Record<Decade, string> = {
   1980: "CHAT CLUB · 80",
   1990: "Nostalgiar Chat — Conectados",
   2000: "Nostalgiar Messenger",
+  2010: "Nostalgiar · Mensajes",
 };
 
 function formatearTiempo(iso: string): string {

@@ -43,11 +43,11 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       const params = new URLSearchParams(window.location.search);
       const eraParam = params.get("era");
       let initialDecade: Decade | null = null;
-      if (eraParam === "1970" || eraParam === "1980" || eraParam === "1990" || eraParam === "2000") {
+      if (eraParam === "1970" || eraParam === "1980" || eraParam === "1990" || eraParam === "2000" || eraParam === "2010") {
         initialDecade = Number(eraParam) as Decade;
       } else {
         const savedEra = window.localStorage.getItem(ERA_STORAGE_KEY);
-        if (savedEra === "1970" || savedEra === "1980" || savedEra === "1990" || savedEra === "2000") {
+        if (savedEra === "1970" || savedEra === "1980" || savedEra === "1990" || savedEra === "2000" || savedEra === "2010") {
           initialDecade = Number(savedEra) as Decade;
         }
       }

@@ -39,48 +39,59 @@
   --era-scroll-thumb-image: linear-gradient(90deg, #3979c1, #91c9fa 48%, #3479bd);
 }
 
+
+.app.era-2010 {
+  --era-scroll-width: 10px;
+  --era-scroll-track: #e9f0ed;
+  --era-scroll-thumb: #6a9ba8;
+  --era-scroll-thumb-hover: #37778f;
+  --era-scroll-border: #afc9cb;
+  --era-scroll-track-image: linear-gradient(#f6f8f4,#dae8e6);
+  --era-scroll-thumb-image: linear-gradient(#9fc4c9,#48859b);
+}
+
 @supports not selector(::-webkit-scrollbar) {
-  .app:is(.era-1970, .era-1980, .era-1990, .era-2000),
-  .app:is(.era-1970, .era-1980, .era-1990, .era-2000) * {
+  .app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010),
+  .app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010) * {
     scrollbar-color: var(--era-scroll-thumb) var(--era-scroll-track) !important;
   }
 }
 
 @supports selector(::-webkit-scrollbar) {
-  .app:is(.era-1970, .era-1980, .era-1990, .era-2000),
-  .app:is(.era-1970, .era-1980, .era-1990, .era-2000) * {
+  .app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010),
+  .app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010) * {
     scrollbar-color: auto !important;
     /* A non-auto standard width takes precedence over the themed pseudo-elements. */
     scrollbar-width: auto !important;
   }
 }
 
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar,
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar {
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010)::-webkit-scrollbar,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010) *::-webkit-scrollbar {
   width: var(--era-scroll-width);
   height: var(--era-scroll-width);
 }
 
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar-track,
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar-track {
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010)::-webkit-scrollbar-track,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010) *::-webkit-scrollbar-track {
   background: var(--era-scroll-track-image);
   border: 1px solid var(--era-scroll-border);
 }
 
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar-thumb,
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar-thumb {
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010)::-webkit-scrollbar-thumb,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010) *::-webkit-scrollbar-thumb {
   background: var(--era-scroll-thumb-image);
   border: 2px solid var(--era-scroll-border);
   border-radius: 3px;
 }
 
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar-thumb:hover,
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar-thumb:hover {
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010)::-webkit-scrollbar-thumb:hover,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010) *::-webkit-scrollbar-thumb:hover {
   background: var(--era-scroll-thumb-hover);
 }
 
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000)::-webkit-scrollbar-corner,
-.app:is(.era-1970, .era-1980, .era-1990, .era-2000) *::-webkit-scrollbar-corner {
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010)::-webkit-scrollbar-corner,
+.app:is(.era-1970, .era-1980, .era-1990, .era-2000, .era-2010) *::-webkit-scrollbar-corner {
   background: var(--era-scroll-track);
 }
 

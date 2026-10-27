@@ -124,9 +124,9 @@ import type { ComponentProps } from 'react';
         !description ||
         !memoryDateIso(date) ||
         year < 1970 ||
-        year > 2009
+        year > 2019
       ) {
-        setError("Completá los campos y elegí una fecha válida entre 1970 y 2009.");
+        setError("Completá los campos y elegí una fecha válida entre 1970 y 2019.");
         return;
       }
       if(loadingFile){setError('Esperá a que termine de cargar el archivo.');return;}

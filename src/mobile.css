@@ -134,7 +134,7 @@
  .app.map-app .navigation-rail button.rail-active svg { stroke-width:2.5; }
  .app.map-app .navigation-rail button:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
  .app > #notif-popup { top:var(--mobile-top); bottom:var(--mobile-bottom); }
- .mobile-decades { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+ .mobile-decades { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; }
  .mobile-decades button { min-height:46px; font:700 14px var(--font-body); color:var(--ink); background:var(--soft); border:1px solid var(--line); border-radius:var(--radius); }
  .mobile-decades button[aria-pressed='true'] { background:var(--accent); color:var(--surface); border-color:var(--accent); }
  .app.map-app .map-canvas { inset:var(--mobile-top) 0 var(--mobile-bottom); margin:0; padding:0; border:0; border-radius:0; box-shadow:none; }

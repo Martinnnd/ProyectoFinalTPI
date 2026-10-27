@@ -46,4 +46,13 @@
 .dialog[data-era='2000'] .disk svg { color:#708ba7; fill:#eaf5fc; filter:drop-shadow(-3px 0 3px #c2ade6) drop-shadow(3px 0 3px #a8dfc8); }
 .dialog[data-era='2000'] .actions button { border:1px solid #718da7; border-radius:4px; background:linear-gradient(white,#e5e7e0); }
 .dialog[data-era='2000'] .actions .keep { outline:none; border-color:#3168af; box-shadow:inset 0 0 0 2px #a5c5ee; }
+.dialog[data-era='2010'] { --surface:#fcfaf4; --ink:#25465a; --accent:#34748e; padding:0; border:1px solid #aac3c8; border-radius:12px; background:var(--surface); box-shadow:0 26px 80px #16344280; font-family:'Trebuchet MS',Arial,sans-serif; }
+.dialog[data-era='2010'] .header { padding:11px 14px; background:linear-gradient(#5a94a8,#2e6c86); letter-spacing:.08em; }
+.dialog[data-era='2010'] .header button { border:1px solid #ffffff99; border-radius:6px; background:#ffffff27; color:#fff; }
+.dialog[data-era='2010'] .scene { border:1px solid #c5d4d2; border-radius:8px; background:linear-gradient(140deg,#dce9e5,#f9f1e5); color:#36657a; }
+.dialog[data-era='2010'] .disk { width:86px; height:104px; display:grid; place-items:center; gap:0; padding:8px 7px 15px; background:#fffdf8; box-shadow:0 7px 15px #234c5b3a; transform:rotate(-4deg); }
+.dialog[data-era='2010'] .disk svg { width:65px; height:62px; color:#4b7e8a; fill:#c1d9d5; }
+.dialog[data-era='2010'] .disk span { padding:0; font:8px Georgia,serif; }
+.dialog[data-era='2010'] .actions button { border:1px solid #b2c8c9; border-radius:7px; background:#f4f7f4; }
+.dialog[data-era='2010'] .actions .keep { border-color:#286981; outline:none; background:linear-gradient(#478aa3,#286981); color:white; }
 @media(max-width:420px) { .content { padding:16px 14px 0; } .dialog .actions { padding:20px 14px; } .dialog .actions button { flex:1; } }

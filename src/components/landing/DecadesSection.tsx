@@ -14,7 +14,7 @@ export default function DecadesSection() {
       <DecadeAtmosphere />
       <div className={styles.sectionHeading} data-decades-heading>
         <div className={styles.headingCopy}>
-          <p className={styles.eyebrow}>CUATRO DÉCADAS, MILES DE RECUERDOS</p>
+          <p className={styles.eyebrow}>CINCO DÉCADAS, MILES DE RECUERDOS</p>
           <h2 id="eras-title">Deslizá para viajar en el tiempo.</h2>
         </div>
         <div className={styles.eraIndicator} aria-hidden="true">
@@ -23,6 +23,7 @@ export default function DecadesSection() {
           <span data-era-label="1980">Arcade · Player one</span>
           <span data-era-label="1990">Nostalgiar 95</span>
           <span data-era-label="2000">Messenger · Conectado</span>
+          <span data-era-label="2010">Diario de bolsillo · Compartido</span>
         </div>
       </div>
       <div className={styles.decadeGrid}>

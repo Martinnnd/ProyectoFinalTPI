@@ -51,6 +51,10 @@
   --era-heading: #1d3555;
 }
 
+.decades:has(.decadeCard[data-era="2010"]:is(:hover, :focus-visible)) {
+  --era-bg:#dce7e5; --era-surface:#fffdf8; --era-ink:#23495a; --era-accent:#2f7891; --era-heading:#23495a;
+}
+
 .atmosphere,
 .atmosphereLayer,
 .texture {
@@ -304,6 +308,7 @@
 .decades:has(.decadeCard[data-era="2000"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="2000"] {
   opacity: 1;
 }
+.decades:has(.decadeCard[data-era="2010"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="2010"] { opacity:1; }
 
 .sectionHeading,
 .decadeGrid {
@@ -382,10 +387,11 @@
 .decades:has(.decadeCard[data-era="2000"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="2000"] {
   display: block;
 }
+.decades:has(.decadeCard[data-era="2010"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="2010"] { display:block; }
 
 .decadeGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: clamp(12px, 1.5vw, 20px);
 }
 
@@ -638,6 +644,20 @@
   border-color: #85a7cf;
   background: linear-gradient(#fefdf4, #e7e5d8);
 }
+
+.atmosphereLayer[data-era-scene="2010"] { background:radial-gradient(circle at 50% 35%,#ffffffa0,transparent 60%),linear-gradient(135deg,#c6dbd9,#e8e3d7); }
+.pocketAtmosphere { position:absolute; inset:6% 5%; display:block; border:18px solid #27313b; border-radius:34px; box-shadow:0 0 0 5px #8c9698,0 25px 70px #0a2c3b55,inset 0 0 0 3px #fff7; background:linear-gradient(140deg,#d9e9e7,#fff8e9); }
+.pocketLens { position:absolute; top:-13px; left:50%; width:55px; height:4px; transform:translateX(-50%); border-radius:6px; background:#798587; }
+.pocketPhoto { position:absolute; inset:9% 10%; display:grid; grid-template-rows:1fr auto; padding:10px 10px 24px; background:#fffefa; box-shadow:0 12px 26px #23445737; transform:rotate(-2deg); }
+.pocketPhoto i { display:block; background:radial-gradient(circle at 75% 20%,#fff8d2 0 5%,transparent 6%),linear-gradient(165deg,#85b9c3 0 48%,#b8cdb4 49% 66%,#627d70 67%); }
+.pocketPhoto b { margin-top:12px; color:#365967; font:700 11px Georgia,serif; letter-spacing:.12em; }
+.pocketHome { position:absolute; bottom:-13px; left:50%; width:14px; height:14px; transform:translateX(-50%); border:2px solid #768489; border-radius:50%; }
+.decadeCard[data-era="2010"] { border:1px solid #aac2c4; border-radius:10px; background:linear-gradient(#fffefa,#f1f5f2); color:#244c5d; box-shadow:0 7px 20px #16394b30; font-family:'Trebuchet MS',Arial,sans-serif; }
+.decadeCard[data-era="2010"] .cardChrome { color:#fff; background:linear-gradient(#5b91a4,#2f6e88); text-shadow:0 1px #24455c; }
+.decadeCard[data-era="2010"] .decadeNumber { color:#31758d; font-family:Georgia,serif; font-style:italic; text-shadow:2px 2px #dbe7e4; }
+.decadeCard[data-era="2010"] .cardFooter { border-color:#adc5c8; color:#486d78; background:#e5eeea; }
+.decades:has(.decadeCard[data-era="2010"]:is(:hover,:focus-visible)) .eyebrow { color:#2f7891; }
+@media(max-width:1100px) and (min-width:901px) { .decadeGrid { gap:10px; } .decadeCard .cardBody { padding:18px 12px 14px; } .decadeCopy strong { font-size:.92rem; } .decadeCopy small { font-size:.75rem; } }
 
 @media (max-width: 900px) {
   .decades {
