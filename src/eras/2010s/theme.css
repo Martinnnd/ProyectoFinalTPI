@@ -129,7 +129,7 @@
 }
 
 /* 2010s tablet: the personal map sits inside a touch screen bezel. */
-.era-2010 .profile-era-device { max-width:900px; margin-inline:auto; padding:12px 14px 0; border:2px solid #39434b; border-radius:26px; background:linear-gradient(135deg,#252c32,#10171c 55%,#343d44); box-shadow:inset 0 1px 0 #8b969a,0 12px 28px #15394740; }
+.era-2010 .profile-era-device { width:100%; max-width:900px; box-sizing:border-box; margin-inline:auto; padding:12px 14px 0; border:2px solid #39434b; border-radius:26px; background:linear-gradient(135deg,#252c32,#10171c 55%,#343d44); box-shadow:inset 0 1px 0 #8b969a,0 12px 28px #15394740; }
 .era-2010 .profile-device-top { justify-content:center; min-height:22px; padding:0 8px 10px; color:#dce8e9; font:600 10px Arial,sans-serif; letter-spacing:.08em; }
 .era-2010 .profile-device-top::before { content:""; width:7px; height:7px; flex:none; border-radius:50%; background:radial-gradient(circle at 35% 35%,#5f8394,#16242e 65%); box-shadow:0 0 0 2px #080e12; }
 .era-2010 .profile-device-top small { display:none; }
