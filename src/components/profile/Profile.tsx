@@ -23,6 +23,7 @@ export default function Profile({
   onEdit,
   onDelete,
   username,
+  fotoPerfilUrl,
   author,
   reputation,
   followerCount,
@@ -47,11 +48,13 @@ export default function Profile({
   onNavigateToProfile,
   onFollow,
   onToggleFollow,
+  onEditProfile,
 }: {
   userId?: number;
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
   username: string;
+  fotoPerfilUrl?: string | null;
   author?: string;
   reputation?: string;
   followerCount?: number;
@@ -76,6 +79,7 @@ export default function Profile({
   onNavigateToProfile?: (username: string) => void;
   onFollow?: (author: string, authorId: number) => void;
   onToggleFollow?: () => void | Promise<void>;
+  onEditProfile?: () => void;
 }) {
   const album = useRef<HTMLElement>(null);
   const mapDialog = useRef<HTMLDialogElement>(null);
@@ -150,6 +154,7 @@ export default function Profile({
           userId={userId}
           author={author}
           username={username}
+          fotoPerfilUrl={fotoPerfilUrl}
           presentation={presentation}
           period={period}
           memoryCount={allMemories.length}
@@ -171,6 +176,7 @@ export default function Profile({
           myFollowingUsers={myFollowingUsers}
           onNavigateToProfile={onNavigateToProfile}
           onToggleFollow={onToggleFollow}
+          onEditProfile={onEditProfile}
           onToggleFollowUser={onFollow}
         />
         <ProfileShortcuts
