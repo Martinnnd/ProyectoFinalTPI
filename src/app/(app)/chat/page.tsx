@@ -48,7 +48,7 @@ function ChatContent() {
   if (!session) return null;
 
   return (
-    <div style={{ flex: 1, height: "100%", width: "100%", position: "relative" }}>
+    <div className="chat-page-host">
       <Chat
         decade={period.decade}
         fullPage={true}

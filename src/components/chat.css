@@ -7,6 +7,7 @@
 .app.view-chat > .map-period,.app.view-chat .brand-card { display:none; }
 .app.view-chat > .music-card.player-visible { z-index:580; }
 .app.view-chat .map-toolbar { display:none; }
+.chat-page-host { position:relative; width:100%; height:100%; }
 .chat-page { position:absolute; inset:16px 24px 44px 94px; display:flex; flex-direction:column; min-height:0; overflow:hidden; color:var(--ink); }
 .chat-page-intro { display:none; }
 .app.view-chat .compact-selectors .filters { display:none; }

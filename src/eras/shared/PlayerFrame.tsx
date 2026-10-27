@@ -53,6 +53,16 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
     timer.current = setTimeout(() => setChanging(false), 1800);
   }
   function select(index: number) { onSelect(index); animate(); }
+  const seek = (className: string) => <div className={className}>
+    <span>{Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, '0')}</span>
+    <input type="range" min={0} max={duration || 1} step="0.1" value={Math.min(currentTime, duration || 1)} aria-label="Posición de la canción" onChange={event => {
+      if (audio.current && duration) {
+        audio.current.currentTime = Number(event.currentTarget.value);
+        setCurrentTime(audio.current.currentTime);
+      }
+    }}/>
+    <span>-{Math.floor(Math.max(0, duration - currentTime) / 60)}:{String(Math.floor(Math.max(0, duration - currentTime) % 60)).padStart(2, '0')}</span>
+  </div>;
   return <section className={`music-card device-${decade} ${expanded ? 'player-visible' : 'player-hidden'} ${changing ? 'device-changing' : ''} ${dragging ? 'device-dragging' : ''} ${playing ? 'device-playing' : ''}`} aria-label="Música de la época" id="music-player" onDragStart={() => setDragging(true)} onDragEnd={() => setDragging(false)}>
     <span className="device-change-status" role="status">{changing ? 'Tema cargado · animación de cambio' : ''}</span>
     <div className="mobile-player-heading"><button type="button" onClick={onToggle} aria-label="Minimizar reproductor">Minimizar</button></div>
@@ -68,7 +78,7 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
       <div className="music-compact">
         <div className="record-art" aria-hidden="true"><Disc3 size={32}/></div>
         <button className="track-open" onClick={() => void togglePlayback()} aria-label={`${playing ? 'Pausar' : 'Reproducir'} ${track.title}`}><span className="eyebrow">{label} · {track.year}</span><strong>{track.title}</strong><small>{track.artist}</small></button>
-        {decade === 2010 && <div className="pocket-seek"><span>{Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, '0')}</span><input type="range" min={0} max={duration || 1} step="0.1" value={Math.min(currentTime, duration || 1)} aria-label="Posición de la canción" onChange={event => { if (audio.current && duration) { audio.current.currentTime = Number(event.currentTarget.value); setCurrentTime(audio.current.currentTime); } }}/><span>-{Math.floor(Math.max(0, duration - currentTime) / 60)}:{String(Math.floor(Math.max(0, duration - currentTime) % 60)).padStart(2, '0')}</span></div>}
+        {decade === 2010 && seek('pocket-seek')}
         <div className="music-buttons">
           <button className="icon-button" aria-label="Pista anterior" onClick={() => { onPrevious(); animate(); }}><SkipBack size={15}/></button>
           <button className="icon-button" aria-label={playing ? 'Pausar música' : 'Reproducir música'} onClick={() => void togglePlayback()}>{playing ? <Pause size={15}/> : <Play size={15}/>}</button>
@@ -79,10 +89,11 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
           </div>
         </div>
       </div>
+      {decade !== 2010 && seek('device-seek')}
     </div>
     <div className="mobile-player-mini">
       <div className="mobile-mini-track"><span className="mobile-mini-art" aria-hidden="true">{decade === 1970 ? <Disc3 size={23}/> : decade === 1980 ? <CassetteTape size={23}/> : decade === 1990 ? <Radio size={23}/> : <Music2 size={23}/>}</span><div><small>{label} · {track.year}</small><strong>{track.title}</strong><span>{track.artist}</span></div></div>
-      {decade === 2010 && <div className="mobile-mini-seek"><span>{Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, '0')}</span><input type="range" min={0} max={duration || 1} step="0.1" value={Math.min(currentTime, duration || 1)} aria-label="Posición de la canción" onChange={event => { if (audio.current && duration) { audio.current.currentTime = Number(event.currentTarget.value); setCurrentTime(audio.current.currentTime); } }}/><span>-{Math.floor(Math.max(0, duration - currentTime) / 60)}:{String(Math.floor(Math.max(0, duration - currentTime) % 60)).padStart(2, '0')}</span></div>}
+      {seek('mobile-mini-seek')}
       <div className="mobile-mini-controls">
         <button className="icon-button" aria-label="Pista anterior" onClick={() => { onPrevious(); animate(); }}><SkipBack size={18}/></button>
         <button className="icon-button mobile-mini-play" aria-label={playing ? 'Pausar música' : 'Reproducir música'} onClick={() => void togglePlayback()}>{playing ? <Pause size={19}/> : <Play size={19}/>}</button>

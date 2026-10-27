@@ -127,3 +127,20 @@
   .app.era-2010.view-profile .post-content.with-image { flex-direction:column-reverse; }
   .app.era-2010.view-profile .post-content .post-image { width:100%; height:auto; max-height:60dvh; aspect-ratio:1; object-fit:cover; }
 }
+
+/* 2010s tablet: the personal map sits inside a touch screen bezel. */
+.era-2010 .profile-era-device { width:100%; box-sizing:border-box; margin:0; padding:12px 14px 0; border:2px solid #39434b; border-radius:26px; background:linear-gradient(135deg,#252c32,#10171c 55%,#343d44); box-shadow:inset 0 1px 0 #8b969a,0 12px 28px #15394740; }
+.era-2010 .profile-device-top { justify-content:center; min-height:22px; padding:0 8px 10px; color:#dce8e9; font:600 10px Arial,sans-serif; letter-spacing:.08em; }
+.era-2010 .profile-device-top::before { content:""; width:7px; height:7px; flex:none; border-radius:50%; background:radial-gradient(circle at 35% 35%,#5f8394,#16242e 65%); box-shadow:0 0 0 2px #080e12; }
+.era-2010 .profile-device-top small { display:none; }
+.era-2010 .profile-era-device .profile-atlas-screen { padding:4px; border:2px solid #080d10; border-radius:8px; background:#141d22; box-shadow:0 0 0 1px #66747a,inset 0 0 8px #000; }
+.era-2010 .profile-era-device .personal-map { border:0; border-radius:4px; box-shadow:none; }
+.era-2010 .profile-device-bottom { justify-content:center; min-height:46px; color:#a9b9bd; }
+.era-2010 .profile-device-brand,.era-2010 .profile-device-grille,.era-2010 .profile-device-buttons,.era-2010 .profile-device-led { display:none; }
+.era-2010 .profile-device-knob { width:24px; height:24px; margin:0; border:2px solid #56656b; border-radius:50%; background:linear-gradient(#283238,#11191d); box-shadow:inset 0 1px 2px #000,0 1px 0 #637177; }
+@media(max-width:480px) {
+  .era-2010 .profile-era-device { padding:8px 8px 0; border-radius:16px; }
+  .era-2010 .profile-device-top { min-height:18px; padding:0 4px 7px; font-size:9px; }
+  .era-2010 .profile-device-bottom { min-height:36px; }
+  .era-2010 .profile-device-knob { width:20px; height:20px; }
+}

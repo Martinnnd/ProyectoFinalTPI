@@ -1065,6 +1065,23 @@ textarea {
   gap: 10px;
   padding: 12px;
 }
+.device-seek {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: calc(100% - 24px);
+  margin: 0 12px 9px;
+  color: var(--muted);
+  font: 10px/1 Arial, sans-serif;
+}
+.device-seek input {
+  flex: 1;
+  min-width: 0;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
 .record-art {
   display: flex;
   align-items: center;

@@ -2,6 +2,7 @@ export interface AuthSession {
   token: string;
   usuarioId: number;
   username: string;
+  fotoPerfilUrl?: string | null;
   email: string;
   esAdmin: boolean;
 }
