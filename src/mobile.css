@@ -133,6 +133,7 @@
  .app.map-app .navigation-rail .notif-launcher .notif-badge { position:absolute; top:-3px; right:-4px; width:auto; min-width:17px; height:17px; padding:0 4px; clip-path:none; overflow:visible; margin:0; color:var(--surface); background:var(--accent); border:1px solid var(--surface); font:700 10px/16px Arial,sans-serif; }
  .app .account-navigation { display:contents; }
  .app.map-app .navigation-rail { inset:auto 0 0; width:100%; height:var(--mobile-bottom); border:0; border-top:1px solid var(--line); gap:3px; overflow:visible; background:var(--surface); }
+ .app.map-app:has(.navigation-rail [role='menu']) .navigation-rail { z-index:850; }
  .app.map-app .navigation-rail>button,.app.map-app .navigation-rail>div { flex:1; min-width:0; margin:0; }
  .app.map-app .navigation-rail button { position:relative; display:flex; align-items:center; justify-content:center; min-width:0; width:100%; height:48px; min-height:44px; padding:10px; border:0; background:transparent; box-shadow:none; border-radius:10px; }
  .app.map-app .navigation-rail button::before,.app.map-app .navigation-rail button::after { display:none; }
@@ -143,6 +144,20 @@
  .app.map-app .navigation-rail button.rail-active { color:var(--accent); background:color-mix(in srgb,var(--accent) 10%,transparent); }
  .app.map-app .navigation-rail button.rail-active svg { stroke-width:2.5; }
  .app.map-app .navigation-rail button:focus-visible { outline:2px solid var(--accent); outline-offset:-3px; }
+ .app.map-app.era-1970 .navigation-rail [role='menu'] { border:3px ridge #947656; border-radius:8px; background:repeating-linear-gradient(2deg,#e9ddbe 0 3px,#e4d5b2 4px 7px); color:#352b20; box-shadow:inset 0 0 0 3px #f4e9cf,0 18px 40px #1b120c99; }
+ .app.map-app.era-1970 .navigation-rail [role='menu'] button { border-color:#9e8967 !important; border-radius:4px !important; font-family:Georgia,serif; }
+ .app.map-app.era-1970 .navigation-rail [role='menu'] button:first-of-type { background:linear-gradient(#e7e6d5,#c6c9b4) !important; color:#303828 !important; }
+ .app.map-app.era-1980 .navigation-rail [role='menu'] { border:2px solid #ef67d6; border-radius:10px; background:linear-gradient(145deg,#281839,#120d23); color:#fff3ff; box-shadow:inset 0 0 0 2px #694577,0 0 18px #e842c180,0 18px 40px #090514b0; }
+ .app.map-app.era-1980 .navigation-rail [role='menu'] button { border-color:#8d5fa0 !important; border-radius:5px !important; }
+ .app.map-app.era-1980 .navigation-rail [role='menu'] button:first-of-type { background:linear-gradient(#452a58,#2b1b3c) !important; color:#75f3ef !important; }
+ .app.map-app.era-1990 .navigation-rail [role='menu'] { border:3px outset #f5f5f5; border-radius:2px; background:#c0c0c0; color:#111; box-shadow:3px 3px 0 #202020,0 18px 38px #0008; }
+ .app.map-app.era-1990 .navigation-rail [role='menu'] button { border:2px outset #f5f5f5 !important; border-radius:0 !important; }
+ .app.map-app.era-1990 .navigation-rail [role='menu'] button:first-of-type { background:#d8d8d8 !important; color:#08085e !important; }
+ .app.map-app.era-2000 .navigation-rail [role='menu'] { border:1px solid #7eacd2; border-radius:12px; background:linear-gradient(#f8fcff,#e5f2fc); color:#173b5a; box-shadow:inset 0 1px #fff,0 18px 40px #153c6480; }
+ .app.map-app.era-2000 .navigation-rail [role='menu'] button { border-color:#9ebdd2 !important; border-radius:8px !important; }
+ .app.map-app.era-2000 .navigation-rail [role='menu'] button:first-of-type { background:linear-gradient(#fff,#d7e9f8) !important; color:#145a97 !important; }
+ .app.map-app.era-2010 .navigation-rail [role='menu'] { border:1px solid #aec7ca; border-radius:16px; background:#fffdf8; color:#294d5b; box-shadow:0 18px 48px #102d3a7a; }
+ .app.map-app.era-2010 .navigation-rail [role='menu'] button:first-of-type { background:#e7f1f1 !important; color:#286b81 !important; }
  .app > #notif-popup { top:var(--mobile-top); bottom:var(--mobile-bottom); }
  .mobile-decades { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; }
  .mobile-decades button { min-height:46px; font:700 14px var(--font-body); color:var(--ink); background:var(--soft); border:1px solid var(--line); border-radius:var(--radius); }
