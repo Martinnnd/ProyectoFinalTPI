@@ -669,10 +669,6 @@
 .decadeCard[data-era="2020"] .cardFooter { border-color:#3f6672; background:#142b35; color:#c1e8e4; }
 .decades:has(.decadeCard[data-era="2020"]:is(:hover,:focus-visible)) .eyebrow { color:#88f3e0; }
 .nowAtmosphere { position:absolute; inset:10% 17%; display:grid; place-items:center; }
-.nowGlow { position:absolute; width:min(58vw,680px); aspect-ratio:1; border-radius:50%; background:radial-gradient(circle,#45d6c066,transparent 65%); filter:blur(40px); }
-.nowGlass { position:relative; display:flex; flex-direction:column; justify-content:flex-end; gap:12px; width:min(46vw,540px); aspect-ratio:1.45; padding:34px; border:1px solid #8df9e699; border-radius:26px; background:linear-gradient(135deg,#ffffff20,#ffffff03),radial-gradient(circle at 75% 25%,#8467e17a,transparent 45%),#142c38aa; color:#eafffb; box-shadow:0 24px 60px #0009; backdrop-filter:blur(20px); font:700 18px 'Segoe UI',Arial,sans-serif; }
-.nowGlass i { position:absolute; top:25%; left:42%; width:16%; aspect-ratio:1; border:2px solid #a4fff2; border-radius:50%; box-shadow:0 0 0 24px #ffffff0b,0 0 35px #6df3dfb0; }
-.nowGlass small { color:#acdfdf; font-size:13px; font-weight:400; }
 @media(max-width:1100px) and (min-width:901px) { .decadeGrid { gap:10px; } .decadeCard .cardBody { padding:18px 12px 14px; } .decadeCopy strong { font-size:.92rem; } .decadeCopy small { font-size:.75rem; } }
 
 @media (max-width: 900px) {
@@ -931,4 +927,67 @@
  .decadeCard:focus-visible { outline-offset:-4px; }
  .cardBody { padding:20px 16px; }
  .decadeNumber { font-size:5rem; }
+}
+
+/* Keep the last explored era visible after the pointer leaves its card. */
+.decades[data-active-era="1980"] { --era-bg:#110a21; --era-surface:#180e2c; --era-ink:#f9edff; --era-accent:#4ff7f3; --era-heading:#fff4ff; }
+.decades[data-active-era="1990"] { --era-bg:#008080; --era-surface:#c0c0c0; --era-ink:#151515; --era-accent:#000080; --era-heading:#fff; }
+.decades[data-active-era="2000"] { --era-bg:#e8f3ff; --era-surface:#f4f7fc; --era-ink:#1d3555; --era-accent:#1558a8; --era-heading:#1d3555; }
+.decades[data-active-era="2010"] { --era-bg:#dce7e5; --era-surface:#fffdf8; --era-ink:#23495a; --era-accent:#2f7891; --era-heading:#23495a; }
+.decades[data-active-era="2020"] { --era-bg:#0b1119; --era-surface:#1c303c; --era-ink:#f4fcff; --era-accent:#5ce5cc; --era-heading:#f4fcff; }
+.decades[data-active-era] .atmosphereLayer { opacity:0; }
+.decades[data-active-era="1970"] .atmosphereLayer[data-era-scene="1970"],
+.decades[data-active-era="1980"] .atmosphereLayer[data-era-scene="1980"],
+.decades[data-active-era="1990"] .atmosphereLayer[data-era-scene="1990"],
+.decades[data-active-era="2000"] .atmosphereLayer[data-era-scene="2000"],
+.decades[data-active-era="2010"] .atmosphereLayer[data-era-scene="2010"],
+.decades[data-active-era="2020"] .atmosphereLayer[data-era-scene="2020"] { opacity:1; }
+.decades[data-active-era] .eraIndicator span { display:none; }
+.decades[data-active-era="1970"] .eraIndicator span[data-era-label="1970"],
+.decades[data-active-era="1980"] .eraIndicator span[data-era-label="1980"],
+.decades[data-active-era="1990"] .eraIndicator span[data-era-label="1990"],
+.decades[data-active-era="2000"] .eraIndicator span[data-era-label="2000"],
+.decades[data-active-era="2010"] .eraIndicator span[data-era-label="2010"],
+.decades[data-active-era="2020"] .eraIndicator span[data-era-label="2020"] { display:block; }
+.decades[data-active-era="1970"] .eyebrow { color:#d0c8ae; }
+.decades[data-active-era="1980"] .eyebrow { color:#4ff7f3; }
+.decades[data-active-era="1990"] .eyebrow { color:#d7f0e8; }
+.decades[data-active-era="2000"] .eyebrow { color:#24517b; }
+.decades[data-active-era="2010"] .eyebrow { color:#2f7891; }
+.decades[data-active-era="2020"] .eyebrow { color:#88f3e0; }
+.decades[data-active-era="1980"] .sectionHeading h2 { text-shadow:1px 1px #c34e9c,0 0 18px #a9459633; }
+.decades[data-active-era="1990"] .sectionHeading h2 { font-family:Tahoma,"MS Sans Serif",Arial,sans-serif; text-shadow:2px 2px #004646; }
+.decades[data-active-era="2000"] .sectionHeading h2 { font-family:"Trebuchet MS",Verdana,sans-serif; text-shadow:1px 1px #fff; }
+.decades[data-active-era="2010"] .sectionHeading h2 { font-family:"Trebuchet MS",Arial,sans-serif; letter-spacing:-.055em; }
+.decades[data-active-era="2020"] .sectionHeading h2 { font-family:"Segoe UI",Arial,sans-serif; font-weight:700; letter-spacing:-.055em; }
+
+/* Give six eras enough width for their labels and copy. */
+.decades { padding-inline:max(28px, calc((100% - 1540px) / 2)); }
+.sectionHeading, .decadeGrid { width:min(1320px, 100%); }
+.decadeGrid { gap:clamp(14px,1.2vw,20px); }
+.cardBody { padding:20px 16px 16px; }
+.cardChrome { gap:6px; }
+.cardChrome > span { min-width:0; }
+.cardChrome i { font-size:.56rem; }
+
+/* The photograph is the iPhone screen wallpaper, so the title and cards stay inside the display. */
+.pocketAtmosphere { inset:4% 3%; border-width:20px; border-radius:38px; }
+.pocketPhoto { inset:0; display:block; padding:0; border-radius:16px; overflow:hidden; background:linear-gradient(145deg,#d6e7e5,#f6f2df); box-shadow:inset 0 0 0 2px #fff8; transform:none; }
+.pocketPhoto i { position:absolute; inset:0; background:radial-gradient(circle at 72% 24%,#fff5c8 0 4%,transparent 5%),linear-gradient(164deg,#91bec7 0 48%,#bdcfb7 49% 65%,#668276 66%); opacity:.68; }
+.pocketPhoto b { position:absolute; right:20px; bottom:15px; margin:0; font-size:9px; opacity:.8; }
+
+/* A current-generation glass display gives the 2020s a device frame of their own. */
+.nowAtmosphere { inset:4% 3%; display:block; border:18px solid #1d2730; border-radius:30px; background:radial-gradient(circle at 75% 22%,#3c567088,transparent 34%),radial-gradient(circle at 42% 65%,#174954aa,transparent 54%),linear-gradient(135deg,#0d1a26,#152634 62%,#0b1723); box-shadow:0 0 0 2px #506371,0 24px 65px #000b,inset 0 0 0 2px #8aafb544,inset 0 0 90px #0007; }
+.nowAtmosphere::before { content:""; position:absolute; top:-12px; left:50%; width:52px; height:5px; border-radius:10px; background:#66838a; transform:translateX(-50%); }
+.nowAtmosphere::after { content:""; position:absolute; right:18px; bottom:-12px; width:8px; height:8px; border-radius:50%; background:#74e9d3; box-shadow:0 0 10px #74e9d3; }
+
+@media(max-width:900px) {
+  .decades { padding-inline:38px; }
+  .decadeGrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:560px) {
+  .decades { padding-inline:30px; }
+  .decadeGrid { display:flex; gap:18px; }
+  .decadeCard { flex:0 0 100%; }
+  .pocketAtmosphere,.nowAtmosphere { inset:3% 3%; border-width:12px; }
 }

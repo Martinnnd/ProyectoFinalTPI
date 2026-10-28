@@ -4,9 +4,10 @@ import styles from "./decades.module.css";
 
 type DecadeCardProps = {
   era: LandingEra;
+  onActivate: () => void;
 };
 
-export default function DecadeCard({ era }: DecadeCardProps) {
+export default function DecadeCard({ era, onActivate }: DecadeCardProps) {
   return (
     <Link
       className={styles.decadeCard}
@@ -14,6 +15,8 @@ export default function DecadeCard({ era }: DecadeCardProps) {
       data-decade-card
       data-era={era.id}
       data-landing-animate
+      onPointerEnter={onActivate}
+      onFocus={onActivate}
       aria-label={`Explorar recuerdos de los años ${era.year}`}
     >
       <span className={styles.cardChrome}>

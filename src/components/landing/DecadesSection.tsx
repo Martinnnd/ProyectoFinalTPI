@@ -1,15 +1,20 @@
+"use client";
+
+import { useState } from "react";
 import DecadeAtmosphere from "./decades/DecadeAtmosphere";
 import DecadeCard from "./decades/DecadeCard";
 import styles from "./decades/decades.module.css";
 import { landingEras } from "./decades/landingEraThemes";
 
 export default function DecadesSection() {
+  const [activeEra, setActiveEra] = useState("1970");
   return (
     <section
       className={styles.decades}
       id="epocas"
       aria-labelledby="eras-title"
       data-decades-section
+      data-active-era={activeEra}
     >
       <DecadeAtmosphere />
       <div className={styles.sectionHeading} data-decades-heading>
@@ -29,7 +34,7 @@ export default function DecadesSection() {
       </div>
       <div className={styles.decadeGrid}>
         {landingEras.map((era) => (
-          <DecadeCard key={era.id} era={era} />
+          <DecadeCard key={era.id} era={era} onActivate={() => setActiveEra(era.id)} />
         ))}
       </div>
     </section>
