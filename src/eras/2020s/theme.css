@@ -148,7 +148,30 @@
 .app.era-2020.view-feed .feed-tabs button { min-height:38px; padding:8px 14px; border:1px solid #66818a; border-radius:11px; background:#162b38; color:#cde8e8; font:650 12px var(--font-body); white-space:nowrap; }
 .app.era-2020.view-feed .feed-tabs button[aria-pressed="true"] { border-color:#91f7e4; background:#62e5ce; color:#09252b; box-shadow:0 4px 13px #45e5cd38; }
 .app.era-2020.view-feed .feed-tabs button:not([aria-pressed="true"]):hover { border-color:#86dace; background:#234552; color:#fff; }
+
+/* Keep the profile layout consistent with the preceding eras. */
+.app.era-2020.view-profile .profile-era-bar { border:1px solid #4e727a; border-bottom:0; border-radius:14px 14px 0 0; background:linear-gradient(100deg,#25535c,#1d3546); color:#e8fffa; }
+.app.era-2020.view-profile .personal-header { border:1px solid #4e727a; border-top:0; border-radius:0; background:linear-gradient(115deg,#203c48,#182b39); box-shadow:none; }
+.app.era-2020.view-profile .personal-counts { border:0; border-radius:0; background:transparent; box-shadow:none; }
+.app.era-2020.view-profile .profile-shortcuts { margin-bottom:16px; border:1px solid #4e727a; border-top:0; border-radius:0 0 14px 14px; background:#152634; }
+.app.era-2020.view-profile .profile-shortcuts button { border:1px solid #527580; border-radius:9px; background:#233c49; color:#d9f6f1; }
+.app.era-2020.view-profile .profile-posts { width:100%; max-width:none; margin:0; padding-bottom:70px; }
+.app.era-2020.view-profile .profile-feed-posts { gap:16px; }
+.app.era-2020.view-profile .profile-feed-posts .feed-post { box-sizing:border-box; width:100%; min-width:0; padding:20px; border:1px solid #46636e; border-radius:16px; background:linear-gradient(125deg,#203542,#182936); box-shadow:0 8px 22px #020a1280; overflow:visible; }
+@media(min-width:900px) {
+  .app.era-2020.view-profile .post-composition.has-split-photo { display:grid; grid-template-columns:minmax(0,1fr) clamp(260px,38%,440px); gap:24px; align-items:stretch; }
+  .app.era-2020.view-profile .has-split-photo > .post-details { display:flex; flex-direction:column; min-width:0; }
+  .app.era-2020.view-profile .has-split-photo .post-body { display:flex; flex:1; flex-direction:column; min-width:0; }
+  .app.era-2020.view-profile .has-split-photo .post-content .post-image { display:none; }
+  .app.era-2020.view-profile .has-split-photo .post-place { margin-top:auto; }
+  .app.era-2020.view-profile .has-split-photo > .post-photo-open { display:block; align-self:stretch; width:100%; min-width:0; aspect-ratio:4/3; padding:0; border:0; border-radius:12px; background:transparent; cursor:pointer; }
+  .app.era-2020.view-profile .post-photo-open img { display:block; width:100%; height:100%; object-fit:cover; border:1px solid #5c7981; border-radius:12px; }
+}
 @media(max-width:899px) {
+  .app.era-2020.view-profile .profile-posts { max-width:none; }
+  .app.era-2020.view-profile .profile-feed-posts .feed-post { padding:14px; }
+  .app.era-2020.view-profile .post-content.with-image { flex-direction:column-reverse; }
+  .app.era-2020.view-profile .post-content .post-image { width:100%; height:auto; max-height:60dvh; aspect-ratio:1; object-fit:cover; }
   .app.era-2020.view-feed .feed-heading { min-height:0; padding:12px; margin-bottom:12px; border-radius:14px; }
   .app.era-2020.view-feed .feed-heading h2 { font-size:21px; }
   .app.era-2020.view-feed .feed-tabs { width:100%; gap:6px; }
