@@ -60,7 +60,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
       className="personal-album profile-posts"
       aria-label={
         isSavedTab
-          ? (author ? `Recuerdos guardados de ${author}` : "Mis recuerdos guardados")
+          ? "Mis recuerdos guardados"
           : (author ? `Recuerdos de ${author}` : "Mis recuerdos")
       }
     >
@@ -242,12 +242,12 @@ const ProfilePosts = forwardRef<HTMLElement, {
         <div className="personal-empty">
           <h3>
             {isSavedTab
-              ? (author ? "No hay recuerdos guardados" : "Todavía no guardaste ningún recuerdo")
+              ? "Todavía no guardaste ningún recuerdo"
               : (author ? "Todavía no hay recuerdos publicados" : "Tu primer recuerdo merece un lugar")}
           </h3>
           <p>
             {isSavedTab
-              ? (author ? "Las publicaciones guardadas aparecerán acá." : "Podés guardar recuerdos desde el feed o explorando para volver a verlos cuando quieras.")
+              ? "Podés guardar recuerdos desde el feed o explorando para volver a verlos cuando quieras."
               : (author ? "Sus publicaciones aparecerán acá." : "Contá tu historia: cada recuerdo que publiques aparecerá acá, uno debajo del otro.")}
           </p>
           {!author && !isSavedTab && <button className="primary-button" onClick={onAdd}>Crear un recuerdo</button>}

@@ -258,6 +258,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     <>
       <Profile
         userId={profileUser.id}
+        isOwnProfile={isOwnProfile}
         onEdit={(m) => setEditing(m)}
         onDelete={(m) => setDeleting(m)}
         username={profileUser.username}

@@ -34,7 +34,7 @@ export default function ProfileShortcuts({
         {author ? "Su colección" : presentation.collection}
         <span>{memoryCount}</span>
       </button>
-      {onOpenSaved && (
+      {!author && onOpenSaved && (
         <button
           type="button"
           onClick={onOpenSaved}
@@ -42,7 +42,7 @@ export default function ProfileShortcuts({
           className={activeTab === "saved" ? "active" : undefined}
         >
           <Bookmark size={16} />
-          {author ? "Sus guardados" : "Recuerdos guardados"}
+          Recuerdos guardados
           {savedCount !== undefined && <span>{savedCount}</span>}
         </button>
       )}

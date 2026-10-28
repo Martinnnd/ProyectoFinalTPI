@@ -23,6 +23,7 @@ const presentations: Record<Period["decade"], ProfilePresentation> = {
 
 export default function Profile({
   userId,
+  isOwnProfile: isOwnProfileProp,
   onEdit,
   onDelete,
   username,
@@ -54,6 +55,7 @@ export default function Profile({
   onEditProfile,
 }: {
   userId?: number;
+  isOwnProfile?: boolean;
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
   username: string;
@@ -84,6 +86,7 @@ export default function Profile({
   onToggleFollow?: () => void | Promise<void>;
   onEditProfile?: () => void;
 }) {
+  const isOwnProfile = isOwnProfileProp ?? !author;
   const album = useRef<HTMLElement>(null);
   const mapDialog = useRef<HTMLDialogElement>(null);
   const mapReturnFocus = useRef<HTMLElement | null>(null);
@@ -114,20 +117,27 @@ export default function Profile({
 
   useEffect(() => () => clearTimeout(mapCloseTimer.current), []);
 
+  useEffect(() => {
+    setActiveTab("posts");
+    setSavedMemories([]);
+    setSavedLoaded(false);
+  }, [userId, author]);
+
+  const currentTab = isOwnProfile ? activeTab : "posts";
+
   async function handleOpenSaved() {
+    if (!isOwnProfile || !userId) return;
     setActiveTab("saved");
     album.current?.scrollIntoView({ block: "start", behavior: "instant" });
-    if (userId) {
-      setLoadingSaved(true);
-      try {
-        const mems = await getPublicacionesGuardadasUsuario(userId);
-        setSavedMemories(mems);
-        setSavedLoaded(true);
-      } catch (err) {
-        console.error("Error al cargar guardados:", err);
-      } finally {
-        setLoadingSaved(false);
-      }
+    setLoadingSaved(true);
+    try {
+      const mems = await getPublicacionesGuardadasUsuario(userId);
+      setSavedMemories(mems);
+      setSavedLoaded(true);
+    } catch (err) {
+      console.error("Error al cargar guardados:", err);
+    } finally {
+      setLoadingSaved(false);
     }
   }
 
@@ -177,7 +187,7 @@ export default function Profile({
   }
 
   return (
-    <main id="explore" className="personal-profile" data-visitor={!!author} aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}>
+    <main id="explore" className="personal-profile" data-visitor={!isOwnProfile} aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}>
       <div className="profile-main">
         <ProfileHeader
           userId={userId}
@@ -213,10 +223,10 @@ export default function Profile({
           presentation={presentation}
           memoryCount={allMemories.length}
           savedCount={savedLoaded ? savedMemories.length : undefined}
-          activeTab={activeTab}
+          activeTab={currentTab}
           mapOpened={mapOpened}
           onOpenCollection={handleOpenCollection}
-          onOpenSaved={userId ? handleOpenSaved : undefined}
+          onOpenSaved={isOwnProfile && userId ? handleOpenSaved : undefined}
           onOpenMap={openMap}
         />
         <ProfileMapDialog
@@ -233,7 +243,7 @@ export default function Profile({
           onDelete={onDelete}
           onClose={closeMap}
         />
-        {loadingSaved ? (
+        {currentTab === "saved" && loadingSaved ? (
           <div className="personal-empty profile-loading" style={{ padding: "40px", textAlign: "center" }}>
             <LoaderCircle className="animate-spin" size={24} style={{ margin: "0 auto" }} />
             <p style={{ marginTop: "12px", color: "var(--muted)" }}>Cargando recuerdos guardados...</p>
@@ -243,9 +253,9 @@ export default function Profile({
             ref={album}
             author={author}
             username={username}
-            memories={activeTab === "saved" ? savedMemories : allMemories}
+            memories={currentTab === "saved" ? savedMemories : allMemories}
             selected={selected}
-            isSavedTab={activeTab === "saved"}
+            isSavedTab={currentTab === "saved"}
             repostedPublicationIds={repostedPublicationIds}
             onEdit={onEdit}
             onDelete={onDelete}
