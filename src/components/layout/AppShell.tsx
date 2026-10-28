@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2, Gamepad2 } from "lucide-react";
+import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2 } from "lucide-react";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
 import { useGuestAccess } from "../auth/GuestAccessProvider";
@@ -16,6 +16,7 @@ import { useRatings } from "../../context/RatingsContext";
 import AchievementToast from "../AchievementToast";
 import useAchievementNotifications from "../../hooks/useAchievementNotifications";
 import Notification from "../Notification";
+import ExpoGameButton from "./ExpoGameButton";
 import type { Period } from '../../types';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -272,20 +273,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <Newspaper />
           <span>Feed</span>
         </button>
-        <button
-          aria-current={currentView === "game" ? "page" : undefined}
-          title="Juego de las décadas"
-          className={currentView === "game" ? "rail-active" : ""}
-          onClick={() => {
-            setPanelOpen(false);
-            setFactsOpen(false);
-            setMusicOpen(false);
-            router.push("/juego");
-          }}
-        >
-          <Gamepad2 />
-          <span>Juego</span>
-        </button>
         {session && (
           <button
             aria-current={currentView === "chat" ? "page" : undefined}
@@ -328,6 +315,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <AuthMenu profileActive={false} onOpenProfile={() => router.push("/perfil")} />
         )}
       </nav>
+
+      {currentView === "map" && (
+        <ExpoGameButton decade={period.decade} onClick={() => {
+          setPanelOpen(false);
+          setFactsOpen(false);
+          setMusicOpen(false);
+          router.push("/juego");
+        }} />
+      )}
 
       {hideGuestContent ? null : children}
 
