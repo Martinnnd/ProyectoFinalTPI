@@ -9,6 +9,7 @@ const labels = {
   1990: ['Mi PC — Recuerdo sin guardar', 'recuerdo.txt', 'DISCO A: / 1.44 MB'],
   2000: ['Nostalgiar — Cambios pendientes', 'Mis recuerdos', 'CD-R / ARCHIVO PERSONAL'],
   2010: ['Nostalgiar · Borrador', 'Foto sin publicar', 'CARRETE / BORRADOR'],
+  2020: ['Nostalgiar · Borrador', 'Historia sin publicar', 'TU MOMENTO / BORRADOR'],
 };
 
 export default function DiscardDraftDialog({ decade, onContinue, onDiscard }: {

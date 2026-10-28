@@ -695,6 +695,7 @@
 .eraInvitation[data-invitation-era="1980"] { --invite-bg:#20102e; --invite-ink:#fff0fc; --invite-accent:#75f5e8; }
 .eraInvitation[data-invitation-era="1990"] { --invite-bg:#124d50; --invite-ink:#f5f3e8; --invite-accent:#bce4c7; }
 .eraInvitation[data-invitation-era="2000"] { --invite-bg:#153d68; --invite-ink:#f0f7ff; --invite-accent:#a3dbff; }
+.eraInvitation[data-invitation-era="2020"] { --invite-bg:#101b27; --invite-ink:#f4fcff; --invite-accent:#73efdc; }
 .eraInvitation::before { background:var(--invite-bg); transition:background-color 1000ms; }
 .invitationContent { position:relative; z-index:1; max-width:850px; margin:auto; }
 .eraInvitation .invitationEyebrow { font-size:11px; letter-spacing:2px; color:var(--invite-accent); }
@@ -1300,6 +1301,13 @@
 .temporalMapSection[data-map-era="2010"] .memoryMap { border-color:#6b888d; box-shadow:0 0 0 3px #e7eeea,inset 0 0 28px #102e3d77,0 20px 45px #0004; }
 .eraInvitation[data-invitation-era="2010"] { --invite-bg:#264f60; --invite-ink:#fff9ed; --invite-accent:#e6b994; }
 .invitationScene[data-scene="2010"] { background:radial-gradient(circle at 70% 30%,#e4b79d44,transparent 55%),linear-gradient(135deg,#1a3e4e,#376878); }
+.eraHero[data-era="2020"] { --paper:#11222e; --green:#77ecd9; --orange:#af8cf0; --ink:#f4fcff; --muted:#b5d4d7; --dial-accent:#7debdc; --hero-title:#f7ffff; background:radial-gradient(circle at 78% 20%,#415d7966,transparent 40%),radial-gradient(circle at 25% 80%,#15475e,transparent 42%),#0b1119; box-shadow:inset 0 0 0 2px #4c7179,inset 0 -80px 140px #122a3f; }
+.eraHero[data-era="2020"]::after { background:radial-gradient(ellipse,#4c7d9b55,transparent 70%); }
+.eraHero[data-era="2020"] .heroMapBackdrop { filter:grayscale(1) hue-rotate(135deg); opacity:.13; }
+.eraHero[data-era="2020"] .primaryAction { border:1px solid #8ff6e4; border-radius:14px; background:#77ecd9; color:#0b2730; box-shadow:0 8px 26px #5ce5cc55; }
+.temporalMapSection[data-map-era="2020"] { --map-accent:#77e9d5; --map-screen:#132a37; --paper:#132a37; --ink:#f3ffff; --muted:#c0d7dc; --green:#77e9d5; --orange:#ae91e8; background-color:#0b1924; }
+.temporalMapSection[data-map-era="2020"] .memoryMap { border-color:#629393; box-shadow:0 0 0 2px #79e9d680,inset 0 0 40px #0b1b2c,0 20px 50px #0008; }
+.invitationScene[data-scene="2020"] { background:radial-gradient(circle at 30% 25%,#6a95ef55,transparent 50%),radial-gradient(circle at 70% 75%,#4eebc755,transparent 45%),#101b27; }
 .temporalMapSection .eyebrow { color: var(--map-accent); font-size: 11px; letter-spacing: .17em; }
 .temporalMapSection .mapSectionCopy h2 { font-size: clamp(2.6rem,4.2vw,4.3rem); line-height: 1.07; letter-spacing: -.04em; }
 .temporalMapSection .memoryMap {

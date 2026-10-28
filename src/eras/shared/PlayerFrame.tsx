@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { deviceSound } from './deviceSound';
 import SongPicker from './SongPicker';
-import { CassetteTape, Disc3, Music2, Pause, Play, Radio, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { AudioLines, CassetteTape, Disc3, ListMusic, Music2, Pause, Play, Radio, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import type { PlayerFrameProps } from '../contracts';
 
 export default function PlayerFrame({ decade, expanded, onToggle, track, failed, onError, onPrevious, onNext, label, pickerTitle, tracks, onSelect, children }: PlayerFrameProps) {
@@ -18,10 +18,47 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
   const mobileVolumeControl = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const audio = useRef<HTMLAudioElement>(null);
+  const player = useRef<HTMLElement>(null);
+  const audioGraph = useRef<{ context: AudioContext; analyser: AnalyserNode } | null>(null);
+  const visualizerFrame = useRef<number | null>(null);
+
+  function stopVisualizer() {
+    if (visualizerFrame.current !== null) cancelAnimationFrame(visualizerFrame.current);
+    visualizerFrame.current = null;
+    player.current?.style.setProperty('--audio-level', '0');
+  }
+  function startVisualizer() {
+    if (decade !== 2020 || !audio.current) return;
+    try {
+      if (!audioGraph.current) {
+        const context = new AudioContext();
+        const source = context.createMediaElementSource(audio.current);
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        analyser.connect(context.destination);
+        audioGraph.current = { context, analyser };
+      }
+      void audioGraph.current.context.resume();
+      if (visualizerFrame.current !== null) return;
+      const samples = new Uint8Array(audioGraph.current.analyser.frequencyBinCount);
+      const sample = () => {
+        audioGraph.current?.analyser.getByteFrequencyData(samples);
+        const bass = samples.slice(1, 36).reduce((sum, value) => sum + value, 0) / (35 * 255);
+        player.current?.style.setProperty('--audio-level', Math.min(1, bass * 2.5).toFixed(3));
+        visualizerFrame.current = requestAnimationFrame(sample);
+      };
+      sample();
+    } catch { stopVisualizer(); }
+  }
 
   useEffect(() => {
     const element = audio.current;
     return () => {
+      stopVisualizer();
+      const graph = audioGraph.current;
+      audioGraph.current = null;
+      if (graph) void graph.context.close();
       if (!element) return;
       element.pause(); element.removeAttribute('src'); element.load();
     };
@@ -63,10 +100,10 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
     }}/>
     <span>-{Math.floor(Math.max(0, duration - currentTime) / 60)}:{String(Math.floor(Math.max(0, duration - currentTime) % 60)).padStart(2, '0')}</span>
   </div>;
-  return <section className={`music-card device-${decade} ${expanded ? 'player-visible' : 'player-hidden'} ${changing ? 'device-changing' : ''} ${dragging ? 'device-dragging' : ''} ${playing ? 'device-playing' : ''}`} aria-label="Música de la época" id="music-player" onDragStart={() => setDragging(true)} onDragEnd={() => setDragging(false)}>
+  return <section ref={player} className={`music-card device-${decade} ${expanded ? 'player-visible' : 'player-hidden'} ${changing ? 'device-changing' : ''} ${dragging ? 'device-dragging' : ''} ${playing ? 'device-playing' : ''}`} aria-label="Música de la época" id="music-player" onDragStart={() => setDragging(true)} onDragEnd={() => setDragging(false)}>
     <span className="device-change-status" role="status">{changing ? 'Tema cargado · animación de cambio' : ''}</span>
     <div className="mobile-player-heading"><button type="button" onClick={onToggle} aria-label="Minimizar reproductor">Minimizar</button></div>
-    <audio ref={audio} key={track.audioSrc} hidden preload="metadata" src={track.audioSrc} autoPlay={playing} onLoadedMetadata={event => { setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0); setCurrentTime(0); }} onTimeUpdate={event => setCurrentTime(event.currentTarget.currentTime)} onPlay={() => setPlaying(true)} onPause={event => { if (audio.current === event.currentTarget) setPlaying(false); }} onEnded={() => { setPlaying(true); onNext(); }} onError={() => { setPlaying(false); onError(); }}/>
+    <audio ref={audio} key={track.audioSrc} hidden preload="metadata" src={track.audioSrc} autoPlay={playing} onLoadedMetadata={event => { setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0); setCurrentTime(0); }} onTimeUpdate={event => setCurrentTime(event.currentTarget.currentTime)} onPlay={() => { setPlaying(true); startVisualizer(); }} onPause={event => { if (audio.current === event.currentTarget) { setPlaying(false); stopVisualizer(); } }} onEnded={() => { stopVisualizer(); setPlaying(true); onNext(); }} onError={() => { stopVisualizer(); setPlaying(false); onError(); }}/>
     {failed && <p className="music-playback-error" role="alert">No se pudo reproducir este tema. Probá otra canción.</p>}
     <div className="device-body" onDragOver={event => { if (event.dataTransfer.types.includes('application/x-nostalgia-track')) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; } }} onDrop={event => {
       const index = tracks.findIndex(item => item.spotifyId === event.dataTransfer.getData('application/x-nostalgia-track'));
@@ -90,9 +127,10 @@ export default function PlayerFrame({ decade, expanded, onToggle, track, failed,
         </div>
       </div>
       {decade !== 2010 && seek('device-seek')}
+      {decade === 2020 && <div className="stream-2020-queue"><div className="stream-2020-queue-title"><ListMusic size={15}/><strong>Tu selección</strong><span>{tracks.length} canciones</span></div><div className="stream-2020-tracks">{tracks.map((item, index) => <button type="button" key={item.spotifyId} className={item.spotifyId === track.spotifyId ? 'is-current' : ''} aria-current={item.spotifyId === track.spotifyId ? 'true' : undefined} onClick={() => select(index)}><span className="stream-2020-number">{item.spotifyId === track.spotifyId ? <AudioLines size={15}/> : String(index + 1).padStart(2, '0')}</span><span><strong>{item.title}</strong><small>{item.artist}</small></span></button>)}</div></div>}
     </div>
     <div className="mobile-player-mini">
-      <div className="mobile-mini-track"><span className="mobile-mini-art" aria-hidden="true">{decade === 1970 ? <Disc3 size={23}/> : decade === 1980 ? <CassetteTape size={23}/> : decade === 1990 ? <Radio size={23}/> : <Music2 size={23}/>}</span><div><small>{label} · {track.year}</small><strong>{track.title}</strong><span>{track.artist}</span></div></div>
+      <div className="mobile-mini-track"><span className="mobile-mini-art" aria-hidden="true">{decade === 1970 ? <Disc3 size={23}/> : decade === 1980 ? <CassetteTape size={23}/> : decade === 1990 ? <Radio size={23}/> : decade === 2020 ? <AudioLines size={23}/> : <Music2 size={23}/>}</span><div><small>{label} · {track.year}</small><strong>{track.title}</strong><span>{track.artist}</span></div></div>
       {seek('mobile-mini-seek')}
       <div className="mobile-mini-controls">
         <button className="icon-button" aria-label="Pista anterior" onClick={() => { onPrevious(); animate(); }}><SkipBack size={18}/></button>

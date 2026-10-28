@@ -8,7 +8,7 @@ export const categories = [
   "Personales",
 ] as const;
 export type Category = (typeof categories)[number];
-export type Decade = 1970 | 1980 | 1990 | 2000 | 2010;
+export type Decade = 1970 | 1980 | 1990 | 2000 | 2010 | 2020;
 export interface Memory {
   id: string;
   title: string;

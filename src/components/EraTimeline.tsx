@@ -9,18 +9,19 @@ export default function EraTimeline({ period, onChange, action, memories }: {
   action: ReactNode;
   memories?: Memory[];
 }) {
+  const currentYear = new Date().getFullYear();
   const [preview, setPreview] = useState<number | null>(null);
   const year = preview ?? period.year ?? period.decade;
   const counts = useMemo(() => {
     const years = new Map<number, number>();
     const seen = new Set<string>();
     for (const memory of memories ?? []) {
-      if (seen.has(memory.id) || !Number.isInteger(memory.year) || memory.year < 1970 || memory.year > 2019) continue;
+      if (seen.has(memory.id) || !Number.isInteger(memory.year) || memory.year < 1970 || memory.year > currentYear) continue;
       seen.add(memory.id);
       years.set(memory.year, (years.get(memory.year) ?? 0) + 1);
     }
     return years;
-  }, [memories]);
+  }, [memories, currentYear]);
   const countLabel = (count: number) => `${count} ${count === 1 ? 'recuerdo' : 'recuerdos'}`;
   function commit(value: number) {
     setPreview(null);
@@ -44,12 +45,12 @@ export default function EraTimeline({ period, onChange, action, memories }: {
           </button>;
           })}
         </div>
-        <div className="time-track" style={{ '--time-progress': `${(year - 1970) / 49 * 100}%` } as CSSProperties}>
+        <div className="time-track" style={{ '--time-progress': `${(year - 1970) / (currentYear - 1970) * 100}%`, '--time-ticks': currentYear - 1970 } as CSSProperties}>
           {memories && <div className="time-memory-marks" aria-hidden="true">
             {Array.from(counts, ([memoryYear]) => <i key={memoryYear}
-              style={{ left: `${(memoryYear - 1970) / 49 * 100}%` }}/>) }
+              style={{ left: `${(memoryYear - 1970) / (currentYear - 1970) * 100}%` }}/>) }
           </div>}
-          <input type="range" min={1970} max={2019} step={1} value={year}
+          <input type="range" min={1970} max={currentYear} step={1} value={year}
             title={memories ? `${year} · ${countLabel(counts.get(year) ?? 0)} cargados` : String(year)}
             aria-label="Año en la línea de tiempo" aria-valuetext={memories ? `${year}, ${countLabel(counts.get(year) ?? 0)} cargados` : String(year)}
             onChange={event => setPreview(Number(event.currentTarget.value))}

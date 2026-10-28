@@ -21,6 +21,7 @@ import "../../components/profileLayout.css";
 import "../../components/chatTaskbar.css";
 import "../../eras/70s/tvViews.css";
 import "../../mobile.css";
+import "../../eras/2020s/theme.css";
 
 import { EraProvider } from "../../context/EraContext";
 import { FollowProvider } from "../../context/FollowContext";

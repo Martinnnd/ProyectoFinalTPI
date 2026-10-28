@@ -159,7 +159,7 @@
  .app.map-app.era-2010 .navigation-rail [role='menu'] { border:1px solid #aec7ca; border-radius:16px; background:#fffdf8; color:#294d5b; box-shadow:0 18px 48px #102d3a7a; }
  .app.map-app.era-2010 .navigation-rail [role='menu'] button:first-of-type { background:#e7f1f1 !important; color:#286b81 !important; }
  .app > #notif-popup { top:var(--mobile-top); bottom:var(--mobile-bottom); }
- .mobile-decades { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; }
+ .mobile-decades { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:5px; }
  .mobile-decades button { min-height:46px; font:700 14px var(--font-body); color:var(--ink); background:var(--soft); border:1px solid var(--line); border-radius:var(--radius); }
  .mobile-decades button[aria-pressed='true'] { background:var(--accent); color:var(--surface); border-color:var(--accent); }
  .app.map-app .map-canvas { inset:var(--mobile-top) 0 var(--mobile-bottom); margin:0; padding:0; border:0; border-radius:0; box-shadow:none; }
