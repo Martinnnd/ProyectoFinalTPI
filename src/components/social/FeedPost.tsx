@@ -260,7 +260,7 @@ export default function FeedPost({
                       e.stopPropagation();
                       onHashtag(tag);
                     }}
-                    aria-label={`Ver hilo #${tag}`}
+                    aria-label={`Ver recuerdos con #${tag}`}
                   >
                     #{tag}
                   </button>

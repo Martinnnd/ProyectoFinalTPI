@@ -6,6 +6,16 @@
   background: var(--surface);
   overflow-wrap: anywhere;
 }
+.hashtag-search { margin-bottom: 20px; }
+.hashtag-search label { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 13px; font-weight: 700; }
+.hashtag-search input { box-sizing: border-box; width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; }
+.hashtag-search-results { margin-top: 8px; }
+.hashtag-search-results p { margin: 0; color: var(--muted); font-size: 12px; }
+.hashtag-search-results ul { list-style: none; padding: 0; margin: 0; }
+.hashtag-search-results li + li { border-top: 1px solid var(--line); }
+.hashtag-search-results button { width: 100%; display: flex; justify-content: space-between; gap: 8px; padding: 10px 4px; border: 0; background: transparent; color: var(--accent); text-align: left; cursor: pointer; }
+.hashtag-search-results button:hover, .hashtag-search-results button:focus-visible { background: var(--soft); }
+.hashtag-search-results small { color: var(--muted); }
 .trends-heading, .thread-heading {
   display: flex;
   align-items: center;

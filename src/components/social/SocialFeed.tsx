@@ -11,10 +11,12 @@ import FeedSidebar from "./FeedSidebar";
 import PostDetailFrame from "./PostDetailFrame";
 import RepostDialog from "./RepostDialog";
 import { repostearPublicacion, quitarRepost, citarPublicacion, isOwnMemory } from "../../api";
-import { memoryHashtags, weeklyTrends } from "../../hashtags";
+import type { WeeklyTrend } from "../../hashtags";
+import { getWeeklyHashtags } from "../../hashtagsApi";
 import WeeklyTrends from "./WeeklyTrends";
 import HashtagThread from "./HashtagThread";
 import useRemoteFeed from '../../hooks/useRemoteFeed';
+import useHashtagFeed from '../../hooks/useHashtagFeed';
 import { useAuth } from '../auth/AuthProvider';
 import { publicationId } from '../../publicationsApi';
 import { LoaderCircle, RefreshCw } from 'lucide-react';
@@ -50,6 +52,7 @@ function getTargetToRepost(mem: Memory, allMemories: Memory[]): { targetId: stri
 
 export default function SocialFeed({
   backLabel = "Volver al feed",
+  initialHashtag,
   active,
   onItems,
   filterFeed,
@@ -80,6 +83,7 @@ export default function SocialFeed({
   onRepostCreated,
 }: {
   backLabel?: string;
+  initialHashtag?: string | null;
   active: boolean;
   onItems: (items: Memory[]) => void;
   filterFeed: (items: Memory[]) => Memory[];
@@ -157,6 +161,25 @@ export default function SocialFeed({
     if (isAuthenticated && tab !== 'groups') onItems(remote.items);
   }, [isAuthenticated, remote.items, tab, onItems]);
   const [hashtag, setHashtag] = useState<string | null>(null);
+  useEffect(() => {
+    if (initialHashtag !== undefined) setHashtag(initialHashtag);
+  }, [initialHashtag]);
+  const hashtagFeed = useHashtagFeed(hashtag, active);
+  const [trends, setTrends] = useState<WeeklyTrend[]>([]);
+  const [trendsLoading, setTrendsLoading] = useState(false);
+  const [trendsError, setTrendsError] = useState("");
+  const [trendsRevision, setTrendsRevision] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    const controller = new AbortController();
+    setTrendsLoading(true);
+    setTrendsError("");
+    getWeeklyHashtags(controller.signal)
+      .then(items => { if (!controller.signal.aborted) setTrends(items); })
+      .catch(cause => { if (!controller.signal.aborted) setTrendsError((cause as Error).message); })
+      .finally(() => { if (!controller.signal.aborted) setTrendsLoading(false); });
+    return () => controller.abort();
+  }, [active, trendsRevision]);
   const [, setNow] = useState(Date.now);
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 60_000);
@@ -230,11 +253,9 @@ export default function SocialFeed({
               !!memory.groupId && groupIds.includes(memory.groupId),
           )
         : allMemories;
-  const filteredPosts = hashtag ? tabPosts.filter(memory => memoryHashtags(memory).includes(hashtag)) : tabPosts;
-  const posts = browsingGroups ? [] : filteredPosts;
-  const trends = weeklyTrends(tabPosts);
+  const posts = hashtag ? hashtagFeed.items : browsingGroups ? [] : tabPosts;
   useEffect(() => {
-    if (!active || !isAuthenticated || selected || tab === 'groups' || remote.loading || remote.error || remote.expired || !remote.hayMas || !loadTarget.current) return;
+    if (!active || hashtag || !isAuthenticated || selected || tab === 'groups' || remote.loading || remote.error || remote.expired || !remote.hayMas || !loadTarget.current) return;
     let root: HTMLElement | null = stream.current;
     while (root && !/(auto|scroll)/.test(getComputedStyle(root).overflowY)) root = root.parentElement;
     const observer = new IntersectionObserver(entries => {
@@ -243,10 +264,23 @@ export default function SocialFeed({
     observer.observe(loadTarget.current);
     return () => observer.disconnect();
   }, [active, isAuthenticated, selected?.id, tab, hashtag, posts.length, remote.loading, remote.error, remote.expired, remote.hayMas, remote.more]);
+  useEffect(() => {
+    if (!active || !hashtag || selected || hashtagFeed.loading || hashtagFeed.error || !hashtagFeed.hayMas || !loadTarget.current) return;
+    let root: HTMLElement | null = stream.current;
+    while (root && !/(auto|scroll)/.test(getComputedStyle(root).overflowY)) root = root.parentElement;
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) hashtagFeed.more();
+    }, { root, rootMargin: '0px 0px 120px 0px' });
+    observer.observe(loadTarget.current);
+    return () => observer.disconnect();
+  }, [active, hashtag, selected?.id, hashtagFeed.loading, hashtagFeed.error, hashtagFeed.hayMas, hashtagFeed.more]);
 
   function chooseHashtag(tag: string) {
+    onTabChange('all');
+    setTab('all');
     setHashtag(tag);
     open(null);
+    router.push(`/feed?tag=${encodeURIComponent(tag)}`);
     setNow(Date.now());
   }
 
@@ -279,6 +313,7 @@ export default function SocialFeed({
     setTab(nextTab);
     setHashtag(null);
     open(null);
+    if (hashtag) router.push('/feed');
   }
 
   function isMemoryRepostedByMe(mem: Memory): boolean {
@@ -404,9 +439,9 @@ export default function SocialFeed({
         }}>← Volver a {relatedHistory[relatedHistory.length - 1].title}</button>}
         
         {!selected && hashtag && (
-          <HashtagThread key={hashtag} tag={hashtag} count={posts.length}
-            hasDemo={posts.some(memory => memory.source === "demo")}
-            onBack={() => setHashtag(null)} onAdd={() => { setTab("all"); onAddHashtag(hashtag); }} />
+          <HashtagThread key={hashtag} tag={hashtag}
+            onBack={() => { setHashtag(null); router.push('/feed'); }}
+            onAdd={() => { setTab("all"); onAddHashtag(hashtag); }} />
         )}
         {!selected && browsingGroups && community && (
           <div className="feed-group-directory">
@@ -508,22 +543,31 @@ export default function SocialFeed({
               />
             );
           })}
-          {!selected && !browsingGroups && !posts.length && (tab === 'groups' || (!remote.loading && !remote.error && !remote.hayMas)) && (
+          {!selected && !browsingGroups && !posts.length && (hashtag
+            ? !hashtagFeed.loading && !hashtagFeed.error && !hashtagFeed.hayMas
+            : tab === 'groups' || (!remote.loading && !remote.error && !remote.hayMas)) && (
             <div className="feed-empty">
               <h3>
-                {tab === "following"
+                {hashtag
+                  ? `Todavía no hay recuerdos con #${hashtag}`
+                  : tab === "following"
                   ? "Todavía no hay publicaciones de tus seguidos"
                   : tab === "groups"
                     ? "Este grupo no tiene publicaciones para esta época y categoría"
                     : "No hay recuerdos con estos filtros"}
               </h3>
               <p>
-                Explorá otras épocas y categorías, o seguí a alguien desde Para
-                vos.
+                {hashtag ? 'Sé la primera persona en publicar un recuerdo con este hashtag.' :
+                  'Explorá otras épocas y categorías, o seguí a alguien desde Para vos.'}
               </p>
             </div>
           )}
-          {!selected && tab !== 'groups' && isAuthenticated && <>
+          {!selected && hashtag && <>
+            <div ref={loadTarget} className="feed-load-target" aria-hidden="true" />
+            {hashtagFeed.loading && <div className="feed-loading" role="status"><LoaderCircle size={20} aria-hidden="true" /><span>Cargando recuerdos…</span></div>}
+            {hashtagFeed.error && <div className="feed-load-error" role="alert"><p>{hashtagFeed.error}</p><button type="button" className="secondary-button" onClick={hashtagFeed.hayMas ? hashtagFeed.more : hashtagFeed.reload}>Reintentar</button></div>}
+          </>}
+          {!selected && !hashtag && tab !== 'groups' && isAuthenticated && <>
             <div ref={loadTarget} className="feed-load-target" aria-hidden="true" />
             {remote.loading && <div className="feed-loading" role="status"><LoaderCircle size={20} aria-hidden="true" /><span>Cargando recuerdos…</span></div>}
             {remote.error && <div className="feed-load-error" role="alert"><p>{remote.error}</p><button type="button" className="secondary-button" onClick={remote.expired || !remote.hayMas ? remote.reload : remote.more}>{remote.expired ? 'Nueva selección' : 'Reintentar'}</button></div>}
@@ -532,7 +576,8 @@ export default function SocialFeed({
       </PostDetailFrame>
       <FeedSidebar
         community={browsingGroups ? undefined : community}
-        trends={<WeeklyTrends trends={trends} onSelect={chooseHashtag} />}
+        trends={<WeeklyTrends trends={trends} loading={trendsLoading} error={trendsError}
+          onRetry={() => setTrendsRevision(value => value + 1)} onSelect={chooseHashtag} />}
         authors={authors}
         following={following}
         onAdd={onAdd}
