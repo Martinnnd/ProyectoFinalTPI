@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { Suspense, useState, useCallback, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SocialFeed from "../../../components/social/SocialFeed";
 import DeleteMemoryDialog from "../../../components/DeleteMemoryDialog";
 import MemoryForm from "../../../components/MemoryForm";
@@ -24,10 +24,21 @@ import {
 } from "../../../groupsApi";
 import { filterMemories, type Memory, type Decade, type CommunityGroup } from "../../../types";
 import type { FeedTab } from "../../../socialTypes";
+import { isHashtag, normalizeHashtag } from "../../../hashtags";
 
 export default function FeedPage() {
+  return <Suspense fallback={<div className="feed-loading" role="status">Cargando feed…</div>}>
+    <FeedPageContent />
+  </Suspense>;
+}
+
+function FeedPageContent() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnQuery = searchParams.get("returnTo")?.split("?")[1] ?? "";
+  const requestedTag = normalizeHashtag(searchParams.get("tag") ?? new URLSearchParams(returnQuery).get("tag") ?? "");
+  const initialHashtag = isHashtag(requestedTag) ? requestedTag : null;
   const { period, changePeriod } = useEra();
   const { session } = useAuth();
   const { followingUsers, followers, followingRevision, toggleFollow } = useFollow();
@@ -132,13 +143,14 @@ export default function FeedPage() {
           changePeriod({ decade, year: null });
         }
         setSelected(memory);
-        window.history.pushState(null, "", `/recuerdo/${memory.id}`);
+        const returnTo = initialHashtag ? `/feed?tag=${encodeURIComponent(initialHashtag)}` : "/feed";
+        window.history.pushState(null, "", `/recuerdo/${memory.id}?returnTo=${encodeURIComponent(returnTo)}`);
       } else {
         setSelected(null);
-        window.history.pushState(null, "", "/feed");
+        window.history.pushState(null, "", initialHashtag ? `/feed?tag=${encodeURIComponent(initialHashtag)}` : "/feed");
       }
     },
-    [period.decade, changePeriod]
+    [period.decade, changePeriod, initialHashtag]
   );
 
   const chooseScope = useCallback(
@@ -317,6 +329,7 @@ export default function FeedPage() {
     <>
       <SocialFeed
         key={session?.usuarioId ?? "guest"}
+        initialHashtag={initialHashtag}
         active={true}
         onItems={setFeedItems}
         filterFeed={(items) =>

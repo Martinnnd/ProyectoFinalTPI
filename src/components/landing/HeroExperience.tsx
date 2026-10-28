@@ -11,6 +11,7 @@ const eras = [
   { year: '1990', label: '90s', description: 'Abrí una ventana al pasado' },
   { year: '2000', label: '2000s', description: 'Conectate con tu historia' },
   { year: '2010', label: '2010s', description: 'Compartí ese instante' },
+  { year: '2020', label: '2020s', description: 'Tu historia sigue pasando' },
 ];
 
 export default function HeroExperience() {
@@ -47,7 +48,11 @@ export default function HeroExperience() {
   }, [step, paused, interacting, reduced, visible, tabVisible]);
 
   function select(next: number) {
-    setStep(value => value + ((next - ((value % eras.length + eras.length) % eras.length) + eras.length + 2) % eras.length - 2));
+    setStep(value => {
+      const current = (value % eras.length + eras.length) % eras.length;
+      const half = Math.floor(eras.length / 2);
+      return value + ((next - current + eras.length + half) % eras.length - half);
+    });
   }
   function turn(event: PointerEvent<HTMLDivElement>) {
     const rect = event.currentTarget.getBoundingClientRect();

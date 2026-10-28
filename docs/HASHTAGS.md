@@ -1,12 +1,17 @@
-# Hashtags y trends del feed
+# Hashtags del feed
 
-- Cada recuerdo admite hasta cinco hashtags de 32 caracteres: letras, números y guion bajo. Se normalizan a minúsculas y se eliminan duplicados. El campo acepta espacios o comas, con o sin `#`.
-- Los hashtags se crean al publicar y se pueden cambiar al editar. Se guardan con el recuerdo en `nostalgia.memories.v1`. Los registros anteriores siguen siendo compatibles.
-- Trends semanales ordena las etiquetas por cantidad de publicaciones de los últimos siete días; desempata por participantes y luego por etiqueta. Usa `createdAt`, nunca el año histórico. Excluye fechas futuras, registros sin fecha y reposts. Respeta los filtros y la pestaña del feed, y se actualiza al cambiar los datos y cada minuto.
-- Los datos de muestra tienen etiquetas en cada `eras/<década>/content.ts`. El agregador asigna fechas simuladas respecto del día de la visita; la UI indica que incluye publicaciones de muestra.
-- Un hashtag abre un hilo con todos sus recuerdos bajo los filtros actuales, incluso los anteriores a esta semana. El hilo permite dejar aportes y comenzar un recuerdo con el hashtag precargado. Los aportes persisten en `nostalgia.hashtag-threads.v1` y son compartidos entre las vistas del mismo hashtag, independientemente de la década.
-- La conversación es una simulación local con algunos participantes de muestra. No hay sincronización multiusuario. El backend externo sigue siendo necesario para crear publicaciones, como antes; los metadatos de hashtags y fechas se conservan en el frontend. Para sincronizarlos, el servidor deberá aceptar y devolver esos campos y ofrecer endpoints para los aportes.
+Los hashtags se escriben en la descripción de un recuerdo. El frontend los detecta y muestra como enlaces; el backend busca directamente en las descripciones almacenadas. No existe una tabla ni un grupo que haya que crear para cada hashtag.
 
-Validación: `npm run check`, `npm test`, `npm run build` y `npx playwright test --config playwright.hashtags.config.ts`. La suite de hashtags usa el build en el puerto 3103 y simula únicamente la respuesta de creación del backend. Incluye creación, edición, persistencia y las cuatro décadas en móvil. Para usar Leaflet en esta suite, compilar con `NEXT_PUBLIC_MAP_MODE=2d`.
+## Recorrido del usuario
 
-En Windows, si solo está instalado Edge, ejecutar la suite con `$env:PLAYWRIGHT_CHANNEL='msedge'`. Después de las pruebas, compilar sin `NEXT_PUBLIC_MAP_MODE=2d` para volver al mapa habitual.
+- El buscador del panel lateral consulta `GET /api/publicaciones/hashtags/buscar?q=...` y muestra hashtags existentes. Se espera un breve intervalo al escribir para evitar una petición por tecla.
+- Al tocar un hashtag en una publicación, en el buscador o en tendencias, se abre `/feed?tag=nombre`. El enlace se puede compartir y muestra publicaciones de cualquier época y usuario.
+- La lista se consulta en `GET /api/publicaciones/hashtags/{nombre}/publicaciones?limite=20&cursor=...`; se cargan más páginas al desplazarse. Los filtros del feed general no restringen esta lista.
+- «Trends semanales» consulta `GET /api/publicaciones/hashtags/tendencias?limite=5`. El backend cuenta publicaciones creadas en los últimos siete días. El año histórico del recuerdo no determina la tendencia.
+- «Sumar un recuerdo» abre el formulario de publicación con el hashtag precargado.
+
+Las respuestas de búsqueda y tendencias contienen `hashtag`, `cantidadPublicaciones` y `cantidadAutores`. La lista usa la misma forma paginada de publicaciones que el feed: `items`, `siguienteCursor`, `hayMas`.
+
+El frontend conserva la extracción local de etiquetas para el formulario y para mostrar los enlaces de cada publicación. El backend es la fuente de verdad para búsqueda, listas y tendencias. Las aportaciones de conversación que se guardaban solo en el navegador dejaron de mostrarse en la página del hashtag.
+
+Validación: `npm run check` y `npx playwright test --config playwright.hashtags.config.ts` tras compilar el frontend. La suite de Playwright simula las respuestas del backend y comprueba el enlace directo, la paginación, la búsqueda y la navegación desde tendencias.

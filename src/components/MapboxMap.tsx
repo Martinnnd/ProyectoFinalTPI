@@ -6,6 +6,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { symbols } from "../types";
 import type { MapProps } from "./MainMap";
+import { useEra } from "../context/EraContext";
 
 const overview = {
   center: [-60, -24] as [number, number],
@@ -71,6 +72,7 @@ export default function MapboxMap(
     locationResolved: boolean;
   },
 ) {
+  const { period } = useEra();
   const container = useRef<HTMLDivElement>(null);
   const instance = useRef<mapboxgl.Map | null>(null);
   const styleReady = useRef(false);
@@ -78,7 +80,13 @@ export default function MapboxMap(
   const initialLocationApplied = useRef(false);
   const latest = useRef(props);
   latest.current = props;
-  const [options, setOptions] = useState(initial);
+  const [options, setOptions] = useState<Options>(() => ({
+    ...initial,
+    light: period.decade === 2020 ? "night" : "day",
+  }));
+  useEffect(() => {
+    setOptions(current => ({ ...current, light: period.decade === 2020 ? "night" : "day" }));
+  }, [period.decade]);
   const optionsRef = useRef(options);
   optionsRef.current = options;
   const [previewContent, setPreviewContent] = useState<HTMLElement | null>(null);

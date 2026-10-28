@@ -1,4 +1,4 @@
-export type LandingEraId = "1970" | "1980" | "1990" | "2000" | "2010";
+export type LandingEraId = "1970" | "1980" | "1990" | "2000" | "2010" | "2020";
 
 export type LandingEra = {
   id: LandingEraId;
@@ -55,5 +55,14 @@ export const landingEras: readonly LandingEra[] = [
     chromeTitle: "Nostalgiar · Diario fotográfico",
     chromeStatus: "2012 · Compartir momento",
     href: "/explorar?era=2010",
+  },
+  {
+    id: "2020",
+    year: "20",
+    title: "Momentos en vivo",
+    description: "Historias, playlists y encuentros que siguen creciendo.",
+    chromeTitle: "NOSTALGIAR / AHORA",
+    chromeStatus: "● EN VIVO · 2020—HOY",
+    href: "/explorar?era=2020",
   },
 ] as const;

@@ -18,6 +18,7 @@ const presentations: Record<Period["decade"], ProfilePresentation> = {
   1990: { title: "Archivo personal — Nostalgiar 95", label: "Mi PC / Personas / Archivo personal", collection: "Recuerdos", map: "Mapa de lugares", footer: "Archivo de recuerdos" },
   2000: { title: "Mi espacio — Nostalgiar Messenger", label: "Un espacio para volver a conectar", collection: "Álbum de recuerdos", map: "Mis lugares", footer: "Historias que nos conectan" },
   2010: { title: "Mi diario fotográfico", label: "Momentos que quedaron en el carrete", collection: "Mi álbum", map: "Mis lugares", footer: "Una imagen puede traerlo todo de vuelta" },
+  2020: { title: "Mi espacio", label: "Momentos para volver a vivir", collection: "Mis recuerdos", map: "Mis lugares", footer: "Cada historia encuentra su lugar" },
 };
 
 export default function Profile({

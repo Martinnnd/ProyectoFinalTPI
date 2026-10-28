@@ -30,6 +30,9 @@ export default function DecadeAtmosphere() {
           {era.id === "2010" && <span className={styles.pocketAtmosphere}>
             <span className={styles.pocketLens}/><span className={styles.pocketPhoto}><i/><b>UN MOMENTO · 2012</b></span><span className={styles.pocketHome}/>
           </span>}
+          {era.id === "2020" && <span className={styles.nowAtmosphere}>
+            <span className={styles.nowGlow}/><span className={styles.nowGlass}><i/><b>NOSTALGIAR · AHORA</b><small>Tu historia sigue.</small></span>
+          </span>}
         </span>
       ))}
       <span className={styles.texture} />

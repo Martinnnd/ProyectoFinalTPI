@@ -125,13 +125,14 @@ describe("Persistencia resistente a errores", () => {
   });
   it("valida límites y coordenadas", () => {
     expect(isMemory(local)).toBe(true);
+    expect(isMemory({ ...local, year: 2020 })).toBe(true);
     for (const patch of [
       { lat: NaN },
       { lng: 181 },
       { title: " " },
       { year: 2009.5 },
       { category: "Otra" },
-      { year: 2020 },
+      { year: new Date().getFullYear() + 1 },
     ])
       expect(isMemory({ ...local, ...patch })).toBe(false);
   });
