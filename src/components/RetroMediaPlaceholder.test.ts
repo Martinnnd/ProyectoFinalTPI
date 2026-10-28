@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import RetroMediaPlaceholder from "./RetroMediaPlaceholder";
 
 describe("RetroMediaPlaceholder", () => {
-  it("renderiza el estado 'ARCHIVO SONORO · SIN FOTO ADJUNTA' cuando no hay imagen", () => {
+  it("renderiza el estado 'RECUERDO SIN ADJUNTO' cuando no hay imagen", () => {
     const html = renderToStaticMarkup(
       createElement(RetroMediaPlaceholder, {
         year: 1985,
@@ -13,7 +13,7 @@ describe("RetroMediaPlaceholder", () => {
         failed: false,
       })
     );
-    expect(html).toContain("ARCHIVO SONORO · SIN FOTO ADJUNTA");
+    expect(html).toContain("RECUERDO SIN ADJUNTO");
     expect(html).toContain("1985");
     expect(html).toContain("Tarde de vinilos");
     expect(html).toContain("NOSTALGIAR STEREO");

@@ -1,3 +1,4 @@
+import { publicationMediaError, REQUIRE_PUBLICATION_MEDIA } from '../publicationMedia';
 import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../media";
 import { eraRegistry } from "../eras/registry";
 import { extractHashtags } from "../hashtags";
@@ -88,9 +89,8 @@ import type { ComponentProps } from 'react';
     function validateStep(form: HTMLFormElement, index: number): boolean {
       if (index === 0) {
         if (loadingFile || googlePhotosBusy) { setError("Esperá a que termine de cargar el archivo."); return false; }
-        if (!mediaUrl || (mediaKind === "youtube" ? !youtubeId(mediaUrl) : !safeMediaUrl(mediaUrl, mediaKind))) {
-          setError("Adjuntá una foto, un video o un enlace válido de YouTube para continuar."); return false;
-        }
+        const mediaError = publicationMediaError(mediaUrl, mediaKind);
+        if (mediaError) { setError(mediaError); return false; }
       }
       const fields = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[data-form-step="${index}"] input, [data-form-step="${index}"] textarea, [data-form-step="${index}"] select`);
       for (const field of fields) {
@@ -130,7 +130,8 @@ import type { ComponentProps } from 'react';
         return;
       }
       if(loadingFile){setError('Esperá a que termine de cargar el archivo.');return;}
-      if(!mediaUrl || (mediaKind==='youtube'?!youtubeId(mediaUrl):!safeMediaUrl(mediaUrl,mediaKind))){setError('Adjuntá una foto, un video o un enlace válido de YouTube para publicar.');return;}
+      const mediaError = publicationMediaError(mediaUrl, mediaKind);
+      if (mediaError) { setError(mediaError); return; }
       let music:Memory['music'];
       if(musicChoice==='custom'){
         const id=spotifyId(String(data.get('spotifyUrl')));
@@ -147,8 +148,8 @@ import type { ComponentProps } from 'react';
         ...initial,
         image: undefined,
         music: undefined,
-        media:normalizeAttachment({kind:mediaKind,url:mediaUrl}),
-        ...(mediaKind==='image'&&!youtubeId(mediaUrl)?{image:mediaUrl}:{}),
+        media: mediaUrl ? normalizeAttachment({kind:mediaKind,url:mediaUrl}) : undefined,
+        ...(mediaUrl && mediaKind==='image'&&!youtubeId(mediaUrl)?{image:mediaUrl}:{}),
         ...(music?{music}:{}),
         id: initial?.id ?? crypto.randomUUID(),
         title,
@@ -198,10 +199,11 @@ import type { ComponentProps } from 'react';
         <ol className="memory-form-progress" aria-label="Pasos del recuerdo">
           {steps.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined}><span aria-hidden="true">{index + 1}</span>{label}</li>)}
         </ol>
-        <h3 ref={stepHeading} tabIndex={-1} className="memory-form-step-title">Paso {step + 1} de {steps.length}: {steps[step]}{step === 3 ? " · opcional" : ""}</h3>
+        <h3 ref={stepHeading} tabIndex={-1} className="memory-form-step-title">Paso {step + 1} de {steps.length}: {steps[step]}{step === 3 || (step === 0 && !REQUIRE_PUBLICATION_MEDIA) ? " · opcional" : ""}</h3>
         <form noValidate onSubmit={submit} onChangeCapture={() => {dirty.current = true; setError("");}}>
           <div data-form-step="0" hidden={step !== 0}>
-          <fieldset className="media-fields"><legend>Foto o video · obligatorio</legend>
+          <fieldset className="media-fields"><legend>Foto o video · {REQUIRE_PUBLICATION_MEDIA ? "obligatorio" : "opcional"}</legend>
+            {!REQUIRE_PUBLICATION_MEDIA && <small>Podés publicar tu historia sin agregar una foto, un video ni un enlace.</small>}
             <div className="media-source-selector" role="group" aria-label="Origen del adjunto">
               <button type="button" aria-pressed={mediaSource === 'file'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('file'); setError(''); }}><Upload size={18} aria-hidden="true" />Archivo</button>
               <button type="button" aria-pressed={mediaSource === 'google'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('google'); setError(''); }}><Images size={18} aria-hidden="true" />Google Photos</button>
@@ -229,6 +231,10 @@ import type { ComponentProps } from 'react';
               </>}
               <button type="button" className="memory-attachment-remove" aria-label="Quitar adjunto" disabled={googlePhotosBusy || saving} onClick={() => { fileVersion.current++; setLoadingFile(false); setMediaUrl(''); setMediaSelected(false); setError(''); dirty.current=true; }}><X size={20} aria-hidden="true" /></button>
             </div>}
+            {!REQUIRE_PUBLICATION_MEDIA && !mediaSelected && <button type="button" className="secondary-button"
+              disabled={saving || loadingFile || googlePhotosBusy} onClick={() => {
+                fileVersion.current++; setMediaUrl(''); setMediaSelected(false); setError(''); setStep(1);
+              }}>Continuar sin adjunto</button>}
             {step === 0 && error && <p className="form-error" role="alert">{error}</p>}
           </fieldset>
           </div>
@@ -293,7 +299,7 @@ import type { ComponentProps } from 'react';
             </p>
           )}
           <p className="local-note">
-            Revisá tu historia y el adjunto antes de guardar el recuerdo.
+            Revisá tu historia antes de guardar el recuerdo.
           </p>
           <div className="dialog-actions">
             {step > 0 && <button type="button" className="secondary-button" disabled={saving || loadingFile || googlePhotosBusy} onClick={() => { setError(""); setStep(step - 1); }}>Atrás</button>}

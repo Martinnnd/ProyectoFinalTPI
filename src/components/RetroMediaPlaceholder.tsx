@@ -39,7 +39,7 @@ export default function RetroMediaPlaceholder({
         <div className="retro-media-text">
           <span className="retro-media-status">
             <span className="retro-rec-dot" />
-            {failed ? "SEÑAL PERDIDA · ARCHIVO NO DISPONIBLE" : "ARCHIVO SONORO · SIN FOTO ADJUNTA"}
+            {failed ? "SEÑAL PERDIDA · ARCHIVO NO DISPONIBLE" : "RECUERDO SIN ADJUNTO"}
           </span>
 
           {!compact && (

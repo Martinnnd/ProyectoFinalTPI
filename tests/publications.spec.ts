@@ -1,6 +1,10 @@
 import { API_BASE_URL } from '../src/api';
 import { expect, test, type Page } from '@playwright/test';
 
+test.beforeEach(async ({page}) => {
+  await page.route('https://fonts.googleapis.com/**', route => route.fulfill({contentType: 'text/css', body: ''}));
+});
+
 async function mockNoMoments(page: Page) {
   await page.route(/\/api\/publicaciones\/\d+\/(momentos|analisis)(?:\?|$)/, route => {
     const analysis = new URL(route.request().url()).pathname.endsWith('/analisis');
@@ -34,8 +38,10 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
   });
   await mockNoMoments(page);
   await page.goto(`/explorar?era=${era}`);
-  await page.getByRole('button', { name: 'Recordar', exact: true }).click();
-  await page.locator('#explore .memory-map').click({ position: { x: 180, y: 250 } });
+  await page.getByRole('button', { name: mobile ? 'Sumar mi recuerdo' : 'Recordar', exact: true }).click();
+  await expect(page.getByText('Elegí un lugar en el mapa para tu recuerdo.', {exact: true})).toBeVisible();
+  await expect(page.locator('#explore .memory-map')).toHaveCSS('cursor', 'crosshair');
+  await page.locator('#explore .memory-map').click({ position: { x: mobile ? 160 : 350, y: 240 } });
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('heading', { name: 'Paso 1 de 4: Foto o video' })).toBeVisible();
   await expect(dialog.getByLabel('Título del recuerdo')).not.toBeVisible();
@@ -45,8 +51,7 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
   await expect(dialog.getByRole('button', { name: 'Elegir desde Google Photos' })).toBeVisible();
   await expect(dialog.locator('input[type="file"]')).toHaveCount(0);
   await dialog.screenshot({ path: testInfo.outputPath('memory-form-media.png') });
-  await dialog.getByRole('button', { name: 'Continuar', exact: true }).click();
-  await expect(dialog.getByRole('alert')).toContainText('Adjuntá una foto');
+  await expect(dialog.getByRole('button', { name: 'Continuar sin adjunto', exact: true })).toBeVisible();
   await dialog.getByRole('button', { name: 'Archivo', exact: true }).click();
   await dialog.locator('input[type="file"]').setInputFiles({ name: 'grande.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(2 * 1024 * 1024 + 1) });
   await expect(dialog.getByRole('alert')).toContainText('El archivo supera 2 MB');
@@ -168,6 +173,8 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
     await expect(savedNotice).toHaveCount(0);
   }
   if (era === 1990) {
+    // La selección del pin se recupera a partir de su enlace en el mapa.
+    await page.goto('/explorar?era=1990&recuerdo=999');
     await page.reload();
     const pinThumbnail = page.locator('#explore .pin-message-preview .pin-preview-photo');
     await expect(pinThumbnail).toBeVisible();

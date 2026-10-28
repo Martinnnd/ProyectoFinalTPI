@@ -50,3 +50,11 @@ it('acepta el 29 de febrero bisiesto y rechaza fechas inexistentes', () => {
 it('mantiene las fechas antiguas con solo año en UTC', () => {
   expect(buildPublicationFormData(memory).get('Fecha')).toBe('1985-01-01T00:00:00.000Z');
 });
+
+
+it('crea recuerdos de texto sin agregar un archivo ni inventar una URL', () => {
+  const form = buildPublicationFormData({ ...memory, media: undefined, image: undefined });
+  expect(form.has('Archivo')).toBe(false);
+  expect(form.has('UrlArchivo')).toBe(false);
+  expect(form.get('Titulo')).toBe(memory.title);
+});
