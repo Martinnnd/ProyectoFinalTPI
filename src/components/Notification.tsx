@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./auth/AuthProvider";
+import { useFollow } from "../context/FollowContext";
 import type { NotificationDto, NotificationType } from "../notifications/types";
 import {
   getNotifications,
@@ -56,6 +57,9 @@ export default function Notification({
   onOpenChat: () => void;
 }) {
   const { session } = useAuth();
+  const { isFollowing, toggleFollow } = useFollow();
+  const [pendingFollows, setPendingFollows] = useState<Set<string>>(new Set());
+  const followRequests = useRef(new Set<string>());
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -160,6 +164,21 @@ export default function Notification({
     }
   }
 
+  async function handleFollow(notification: NotificationDto) {
+    const username = notification.senderUsername;
+    if (!username) return;
+    const key = String(notification.senderId ?? username.toLowerCase());
+    if (followRequests.current.has(key)) return;
+    followRequests.current.add(key);
+    setPendingFollows(new Set(followRequests.current));
+    try {
+      await toggleFollow(username, notification.senderId, isFollowing(notification.senderId ?? username));
+    } finally {
+      followRequests.current.delete(key);
+      setPendingFollows(new Set(followRequests.current));
+    }
+  }
+
   if (hidden) return null;
 
   const unreadCount = notifications.filter((item) => !item.isRead).length;
@@ -174,9 +193,12 @@ export default function Notification({
         <p className="notif-empty">No tenés notificaciones nuevas.</p>
       )}
       {notifications.map((item) => (
-        <button
+        <div
           key={item.id}
           className={`notif-item ${item.isRead ? "" : "unread"}`}
+        >
+        <button
+          className="notif-item-link"
           onClick={() => handleNotificationClick(item)}
           aria-label={getNotificationText(item)}
         >
@@ -191,6 +213,20 @@ export default function Notification({
           </span>
           {!item.isRead && <span className="notif-unread-dot" aria-label="No leída" />}
         </button>
+        {item.type === "newFollower" && item.senderUsername && item.senderId !== session?.usuarioId && (
+          <button
+            className="notif-follow-button"
+            aria-label={`${isFollowing(item.senderId ?? item.senderUsername) ? "Dejar de seguir a" : "Seguir a"} @${item.senderUsername}`}
+            aria-pressed={isFollowing(item.senderId ?? item.senderUsername)}
+            disabled={pendingFollows.has(String(item.senderId ?? item.senderUsername.toLowerCase()))}
+            onClick={() => void handleFollow(item)}
+          >
+            {pendingFollows.has(String(item.senderId ?? item.senderUsername.toLowerCase()))
+              ? "Actualizando…"
+              : isFollowing(item.senderId ?? item.senderUsername) ? "Dejar de seguir" : "Seguir"}
+          </button>
+        )}
+        </div>
       ))}
     </div>
   );

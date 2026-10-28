@@ -60,7 +60,7 @@ describe('getNotificationText', () => {
 describe('getNotificationNavigation', () => {
   it('returns push to sender profile for newFollower with senderUsername', () => {
     const nav = getNotificationNavigation(makeNotification({ type: 'newFollower', senderUsername: 'pepito' }));
-    expect(nav).toEqual({ kind: 'push', path: '/explorar?view=profile&profile=pepito' });
+    expect(nav).toEqual({ kind: 'push', path: '/perfil/pepito' });
   });
 
   it('returns none for newFollower without senderId', () => {

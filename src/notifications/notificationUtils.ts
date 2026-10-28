@@ -50,7 +50,7 @@ export function getNotificationNavigation(notification: NotificationDto): Notifi
   switch (type) {
     case "newFollower":
       return senderUsername
-        ? { kind: "push", path: `/explorar?view=profile&profile=${encodeURIComponent(senderUsername)}` }
+        ? { kind: "push", path: `/perfil/${encodeURIComponent(senderUsername)}` }
         : { kind: "none" };
 
     case "publicationComment":
