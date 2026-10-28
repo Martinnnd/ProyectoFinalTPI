@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2 } from "lucide-react";
+import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2, Gamepad2 } from "lucide-react";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
 import { useFollow } from "../../context/FollowContext";
@@ -53,13 +53,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     changePeriod(next);
   }
 
-  let currentView: "map" | "feed" | "profile" | "chat" = "map";
+  let currentView: "map" | "feed" | "profile" | "chat" | "game" = "map";
   if (pathname.startsWith("/feed") || pathname.startsWith("/recuerdo")) {
     currentView = "feed";
   } else if (pathname.startsWith("/chat")) {
     currentView = "chat";
   } else if (pathname.startsWith("/perfil")) {
     currentView = "profile";
+  } else if (pathname.startsWith("/juego")) {
+    currentView = "game";
   } else if (pathname.startsWith("/explorar")) {
     currentView = "map";
   }
@@ -131,6 +133,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               ? "Feed"
               : currentView === "chat"
               ? "Chat"
+              : currentView === "game"
+              ? "Juego de décadas"
               : "Mi perfil"}
           </strong>
         </div>
@@ -247,6 +251,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         >
           <Newspaper />
           <span>Feed</span>
+        </button>
+        <button
+          aria-current={currentView === "game" ? "page" : undefined}
+          title="Juego de las décadas"
+          className={currentView === "game" ? "rail-active" : ""}
+          onClick={() => {
+            setPanelOpen(false);
+            setFactsOpen(false);
+            setMusicOpen(false);
+            router.push("/juego");
+          }}
+        >
+          <Gamepad2 />
+          <span>Juego</span>
         </button>
         {session && (
           <button
