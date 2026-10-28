@@ -8,8 +8,30 @@ export const content = {
     { id: "demo-2017-mendoza", title: "Nuestro álbum improvisado", year: 2017, category: "Lugares", author: "Mica", place: "Parque General San Martín, Mendoza", lat: -32.8948, lng: -68.8785, description: "Fuimos al parque con la intención de sacar una sola foto y terminamos con un álbum entero. Probamos retratos junto al lago, una toma desde el pasto y hasta una panorámica en la que alguien quedó cortado. La mejor es la última: nadie mira a cámara, pero se nota que estábamos felices. La mandamos al grupo antes de subir al colectivo y durante semanas fue la imagen de la conversación. A veces un recuerdo se guarda así, sin planearlo.", source: "demo" },
   ],
   facts: [
-    { id: "iphone-4s-2011", year: 2011, kind: "Tecnología", title: "Las historias caben en un bolsillo", description: "En 2011 llegó el iPhone 4S. Las fotos y la música empezaban a acompañarnos a cada lugar con más naturalidad.", dateLabel: "2011", scope: "Tecnología", source: "https://www.apple.com/newsroom/2011/10/17iPhone-4S-First-Weekend-Sales-Top-Four-Million/", sourceName: "Apple Newsroom" },
-    { id: "iphone-5-2012", year: 2012, kind: "Tecnología", title: "Una pantalla para llevar recuerdos", description: "Apple presentó el iPhone 5 en 2012 con una pantalla de cuatro pulgadas. El teléfono se volvía cada vez más importante para mirar y compartir imágenes.", dateLabel: "2012", scope: "Tecnología", source: "https://www.apple.com/newsroom/2012/09/12Apple-Introduces-iPhone-5/", sourceName: "Apple Newsroom" },
+    {
+      id: "iphone-4s-2011", year: 2011, kind: "Tecnología",
+      title: "Las historias caben en un bolsillo",
+      description: "Apple presentó el iPhone 4S junto con iCloud en 2011. Su cámara de 8 megapíxeles y Photo Stream hicieron más fácil sacar una foto y encontrarla después en otros dispositivos. El teléfono empezó a acompañar cada salida, viaje y encuentro como una pequeña cámara y un álbum siempre a mano.",
+      dateLabel: "4 de octubre de 2011", scope: "Tecnología",
+      source: "https://www.apple.com/newsroom/2011/10/04Apple-Launches-iPhone-4S-iOS-5-iCloud/", sourceName: "Apple Newsroom",
+      media: { url: "/facts/iphone4s.jpg", caption: "iPhone 4S · Scott Swigart · CC BY 2.0", source: "https://commons.wikimedia.org/wiki/File:Apple_iPhone_4S_(6767371111).jpg" },
+    },
+    {
+      id: "pokemon-go-2016", year: 2016, kind: "Acontecimientos",
+      title: "La ciudad se volvió un juego",
+      description: "Pokémon GO llegó a los teléfonos en julio de 2016 y convirtió plazas, calles y monumentos en paradas de una aventura compartida. Salir a caminar también era buscar criaturas, encontrarse con otros jugadores y descubrir rincones que antes pasaban inadvertidos.",
+      dateLabel: "6 de julio de 2016", scope: "Mundo",
+      source: "https://press.pokemon.com/es-MX/Pokemon-GO/Focus/Leyendas-Pokemon-Z-A---Logo", sourceName: "The Pokémon Company",
+      media: { url: "/facts/pokemon.jpg", caption: "Jugadores de Pokémon GO en Ciudad de México · ProtoplasmaKid · CC BY 4.0", source: "https://commons.wikimedia.org/wiki/File:Pokemon_GO_players_in_M%C3%A9xico_City.jpg" },
+    },
+    {
+      id: "despacito-2017", year: 2017, kind: "Música",
+      title: "Una canción dio la vuelta al mundo",
+      description: "En 2017, «Despacito», de Luis Fonsi y Daddy Yankee, sonó en fiestas, radios y teléfonos de todo el mundo. Su video se convirtió en un fenómeno de YouTube: una muestra de cómo una canción podía viajar de pantalla en pantalla y quedar asociada a los recuerdos de un verano entero.",
+      dateLabel: "2017", scope: "Música",
+      source: "https://blog.youtube/culture-and-trends/its-time-for-youtuberewind-celebrating/", sourceName: "YouTube Blog",
+      media: { url: "/facts/fonsi.jpg", caption: "Luis Fonsi en concierto · anokarina · CC BY-SA 2.0", source: "https://commons.wikimedia.org/wiki/File:Luis_Fonsi_in_concert.jpg" },
+    },
   ],
   music: [
     { title: "Somebody That I Used to Know", artist: "Gotye feat. Kimbra", year: 2011, spotifyId: "nostalgiar-2011-gotye", audioSrc: "/music/2010s/Gotye%20-%20Somebody%20That%20I%20Used%20To%20Know%20(feat.mp3", reference: "/music/2010s/Gotye%20-%20Somebody%20That%20I%20Used%20To%20Know%20(feat.mp3" },
