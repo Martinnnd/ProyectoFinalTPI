@@ -1,78 +1,50 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-test("trends, hilo persistente y publicación con hashtags editables", async ({ page }) => {
-  const errors: string[] = [];
-  page.on("pageerror", error => errors.push(error.message));
-  await page.route("http://localhost:5199/api/publicaciones", route => route.fulfill({ json: { id: 99001 } }));
-  await page.goto("/explorar?era=1990");
-  await page.getByRole("button", { name: "Feed", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Trends semanales" })).toBeVisible();
-  await page.getByRole("button", { name: "Abrir hilo #cassettes", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "#cassettes", exact: true })).toBeVisible();
-  expect(await page.locator(".feed-post").count()).toBeGreaterThan(1);
-  for (const post of await page.locator(".feed-post").all()) {
-    await expect(post.getByRole("button", { name: "Ver hilo #cassettes", exact: true })).toBeVisible();
-  }
-  await page.getByLabel("Tu aporte a #cassettes").fill("Grababa mis canciones favoritas de la radio.");
-  await page.getByRole("button", { name: "Publicar aporte", exact: true }).click();
-  await page.reload();
-  await page.getByRole("button", { name: "Feed", exact: true }).click();
-  await page.getByRole("button", { name: "Abrir hilo #cassettes", exact: true }).click();
-  await expect(page.locator(".thread-messages")).toContainText("Grababa mis canciones favoritas de la radio.");
-
-  await page.getByRole("button", { name: "Sumar un recuerdo a #cassettes", exact: true }).click();
-  await page.locator(".map-canvas .memory-map").click({ position: { x: 600, y: 420 } });
-  const dialog = page.getByRole("dialog");
-  await dialog.getByRole("button", { name: "Enlace", exact: true }).click();
-  await dialog.getByLabel("O pegá un enlace HTTPS al archivo").fill("https://example.com/foto.jpg");
-  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
-  await expect(dialog.getByLabel("Tu historia")).toHaveValue("#cassettes");
-  await dialog.getByLabel("Título del recuerdo").fill("Mi cinta del colegio");
-  await dialog.getByLabel("Tu historia").fill("Una tarde escuchando música con mis amigos. #CASSETTES, #micolegio #cassettes");
-  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
-  await dialog.getByLabel("Fecha del recuerdo", { exact: true }).fill("1991-04-15");
-  await dialog.getByLabel("Nombre del lugar").fill("La plaza");
-  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
-  await dialog.getByRole("button", { name: "Guardar recuerdo" }).click();
-  await expect(dialog).toHaveCount(0);
-  await expect(page.locator(".app")).toHaveClass(/view-feed/);
-  const post = page.locator(".feed-post", { hasText: "Mi cinta del colegio" });
-  await expect(post).toBeVisible();
-  await post.getByRole("button", { name: "Ver hilo #micolegio", exact: true }).click();
-  await expect(page.locator(".feed-post")).toHaveCount(1);
-  await page.getByRole("button", { name: "Editar recuerdo", exact: true }).click();
-  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
-  await expect(dialog.getByLabel("Tu historia")).toHaveValue(/#CASSETTES/);
-  await expect(dialog.locator(".memory-form-tags > span")).toHaveText(["#cassettes", "#micolegio"]);
-  await dialog.getByLabel("Tu historia").fill("Una tarde escuchando música con mis amigos. #micolegio #nuevotema");
-  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
-  await dialog.getByRole("button", { name: "Continuar", exact: true }).click();
-  await dialog.getByRole("button", { name: "Guardar recuerdo" }).click();
-  await post.getByRole("button", { name: "Ver hilo #nuevotema", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "#nuevotema", exact: true })).toBeVisible();
-  await page.reload();
-  await page.getByRole("button", { name: "Feed", exact: true }).click();
-  await expect(post.getByRole("button", { name: "Ver hilo #nuevotema", exact: true })).toBeVisible();
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("nostalgia.memories.v1") ?? "[]"));
-  expect(saved[0].hashtags).toEqual(["micolegio", "nuevotema"]);
-  expect(saved[0].createdAt).toBeTruthy();
-  expect(errors).toEqual([]);
+const headers = { "access-control-allow-origin": "*", "access-control-allow-headers": "*" };
+const publication = (id: number) => ({
+  id, titulo: `Recuerdo ${id}`, descripcion: `Una mañana de #amanecer ${id}`,
+  fecha: "1991-04-15T00:00:00Z", fechaCreacion: "2026-10-27T12:00:00Z",
+  categoria: 6, urlMultimedia: "", tipoMultimedia: 0,
+  autor: { id, username: `autor${id}` },
+  lugar: { nombre: "La plaza", latitud: -34.6, longitud: -58.5 },
 });
 
-for (const era of [1970, 1980, 1990, 2000]) {
-  test(`trends e hilo accesibles en móvil, década ${era}`, async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`/explorar?era=${era}`);
-    await page.getByRole("button", { name: "Feed", exact: true }).click();
-    await page.locator(".trends-list button").first().click();
-    await expect(page.locator(".hashtag-thread")).toBeVisible();
-    await page.getByLabel(/Tu aporte a #/).fill("Un recuerdo compartido desde el celular.");
-    await page.getByRole("button", { name: "Publicar aporte", exact: true }).click();
-    await expect(page.locator(".thread-messages")).toContainText("Un recuerdo compartido desde el celular.");
-    expect(await page.evaluate(() => {
-      const stream = document.querySelector(".social-stream")!;
-      return document.documentElement.scrollWidth <= innerWidth && stream.scrollWidth <= stream.clientWidth;
-    })).toBe(true);
-    await page.screenshot({ path: `test-results/hashtags-${era}-mobile.png` });
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/**", route => {
+    const url = new URL(route.request().url());
+    if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers });
+    if (url.pathname === "/api/publicaciones/hashtags/tendencias")
+      return route.fulfill({ headers, json: [{ hashtag: "amanecer", cantidadPublicaciones: 2, cantidadAutores: 2 }] });
+    if (url.pathname === "/api/publicaciones/hashtags/buscar")
+      return route.fulfill({ headers, json: [{ hashtag: "amanecer", cantidadPublicaciones: 3, cantidadAutores: 2 }] });
+    if (url.pathname === "/api/publicaciones/hashtags/amanecer/publicaciones") {
+      const next = url.searchParams.has("cursor");
+      return route.fulfill({ headers, json: {
+        items: [publication(next ? 2 : 1)], siguienteCursor: next ? null : "segunda", hayMas: !next,
+      } });
+    }
+    if (url.pathname === "/api/auth/refresh") return route.fulfill({ status: 401, headers });
+    if (url.pathname.endsWith("/mapa")) return route.fulfill({ headers, json: { pines: [], hayMas: false } });
+    if (url.pathname.startsWith("/api/feed/")) return route.fulfill({ headers, json: { items: [], siguienteCursor: null, hayMas: false } });
+    return route.fulfill({ headers, json: [] });
   });
-}
+});
+
+test("un enlace directo al hashtag muestra publicaciones de todas las épocas con paginación", async ({ page }) => {
+  await page.goto("/feed?tag=amanecer");
+  await expect(page.getByRole("heading", { name: "#amanecer", exact: true })).toBeVisible();
+  await expect(page.locator(".feed-post")).toHaveCount(2);
+  await expect(page.locator(".feed-post").first()).toContainText("Recuerdo 1");
+  await expect(page.locator(".feed-post").last()).toContainText("Recuerdo 2");
+});
+
+test("buscar o tocar una tendencia abre la página compartible del hashtag", async ({ page }) => {
+  await page.goto("/feed");
+  await page.getByRole("searchbox", { name: "Buscar hashtags" }).fill("#aman");
+  await page.getByRole("button", { name: /#amanecer.*3 recuerdos/ }).click();
+  await expect(page).toHaveURL(/\/feed\?tag=amanecer$/);
+  await expect(page.getByRole("heading", { name: "#amanecer", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Volver al feed" }).click();
+  await page.getByRole("button", { name: "Ver recuerdos con #amanecer" }).click();
+  await expect(page).toHaveURL(/\/feed\?tag=amanecer$/);
+});
