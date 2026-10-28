@@ -27,7 +27,7 @@ export default function LandingHeader() {
         />
         <span className={styles.brandName}>Nostalgiar</span>
       </Link>
-      <div className={styles.navActions}>
+      <div className={`${styles.navActions} ${session ? styles.navActionsAuthenticated : ""}`}>
         {!session && (
           <>
             <Link className={styles.navSecondary} href="/auth/login">
@@ -41,10 +41,10 @@ export default function LandingHeader() {
         {session && (
           <>
 
-            <Link className={styles.navLink} href="/explorar">
+            <Link className={`${styles.navLink} ${styles.navMapLink}`} href="/explorar">
               Entrar al mapa
             </Link>
-            <button className={styles.navLogout} type="button" onClick={logout}>
+            <button className={`${styles.navLogout} ${styles.navLogoutCompact}`} type="button" onClick={logout} aria-label="Cerrar sesión" title="Cerrar sesión">
               <LogOut size={16} aria-hidden="true" />
               <span>Cerrar sesión</span>
             </button>

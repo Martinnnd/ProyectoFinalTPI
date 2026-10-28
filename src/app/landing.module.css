@@ -1442,3 +1442,14 @@
  .epochsActionDial>svg,.epochsAction>span:last-child { animation:none; }
  .epochsAction>span:last-child { background:none; -webkit-text-fill-color:currentColor; }
 }
+/* Compact controls for a signed-in visitor. */
+.navActionsAuthenticated { gap:8px; }
+.navMapLink { display:inline-flex; align-items:center; justify-content:center; min-height:36px; padding:8px 14px; font-size:11px; letter-spacing:.02em; text-transform:none; box-shadow:none; }
+.navLogoutCompact { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:1px solid color-mix(in srgb,var(--green) 35%,transparent); border-radius:10px; background:color-mix(in srgb,var(--green) 8%,transparent); }
+.navLogoutCompact span { display:none; }
+.navLogoutCompact:hover { background:color-mix(in srgb,var(--green) 15%,transparent); }
+@media(max-width:560px) {
+  .navActionsAuthenticated { width:auto; align-self:center; justify-content:center; gap:8px; }
+  .navMapLink { flex:none; min-height:36px; padding:8px 14px; font-size:11px; border-radius:10px; }
+  .navLogoutCompact { flex:none; width:36px; height:36px; }
+}
