@@ -55,4 +55,27 @@
 .dialog[data-era='2010'] .disk span { padding:0; font:8px Georgia,serif; }
 .dialog[data-era='2010'] .actions button { border:1px solid #b2c8c9; border-radius:7px; background:#f4f7f4; }
 .dialog[data-era='2010'] .actions .keep { border-color:#286981; outline:none; background:linear-gradient(#478aa3,#286981); color:white; }
+.dialog[data-era='2020'] { --surface:#14232f; --ink:#f1fbfa; --accent:#73ead7; box-sizing:border-box; padding:0; border:1px solid #6c9a9b; border-radius:20px; background:linear-gradient(145deg,#213947,#111e2c); box-shadow:inset 0 1px #ffffff29,0 28px 85px #010912d9; font-family:Arial,sans-serif; overflow:hidden; }
+.dialog[data-era='2020']::backdrop { background:#020b15c9; backdrop-filter:blur(10px); }
+.dialog[data-era='2020'] .header { min-height:39px; padding:9px 16px; border-bottom:1px solid #64898b54; background:#10212dcc; color:#9cf3e4; font:700 10px/1.3 Arial,sans-serif; letter-spacing:.12em; text-transform:uppercase; }
+.dialog[data-era='2020'] .header button { width:30px; height:30px; border:1px solid #7393977a; border-radius:10px; background:#29424e; color:#ecfffb; cursor:pointer; }
+.dialog[data-era='2020'] .content { padding:18px 22px 0; }
+.dialog[data-era='2020'] .scene { position:relative; gap:14px; padding:15px; border:1px solid #85d8d148; border-radius:15px; background:radial-gradient(circle at 76% 0,#725dbd6b,transparent 40%),radial-gradient(circle at 12% 88%,#35b5ab40,transparent 44%),#102532; box-shadow:inset 0 1px #ffffff1e; }
+.dialog[data-era='2020'] .status { width:100%; color:#a7c9cb; font:700 9px/1.3 Arial,sans-serif; letter-spacing:.13em; }
+.dialog[data-era='2020'] .status i { width:7px; height:7px; background:#80f2dc; box-shadow:0 0 0 4px #80f2dc23,0 0 13px #80f2dc; }
+.dialog[data-era='2020'] .caption { color:#a9d4d2; font:700 8px/1.3 Arial,sans-serif; letter-spacing:.18em; opacity:1; }
+.draft2020 { display:flex; align-items:center; gap:13px; box-sizing:border-box; width:min(100%,330px); padding:10px; border:1px solid #9ad8d444; border-radius:14px; background:#182b3aca; box-shadow:0 10px 25px #010b1770; text-align:left; }
+.draft2020Artwork { display:grid; place-items:center; flex:none; width:62px; height:62px; border:1px solid #b4ffed9c; border-radius:12px; background:radial-gradient(circle at 28% 18%,#83dbe5b4,transparent 44%),linear-gradient(135deg,#267c84,#624f9b); color:#f2fffd; box-shadow:inset 0 1px #ffffff5c,0 0 18px #5ce5cc4a; }
+.draft2020Copy { display:grid; gap:5px; min-width:0; }
+.draft2020Copy small { color:#8aeee0; font:700 8px Arial,sans-serif; letter-spacing:.12em; }
+.draft2020Copy strong { color:#fff; font:700 14px/1.2 Arial,sans-serif; }
+.draft2020Copy em { display:flex; align-items:center; gap:5px; color:#b6cfd2; font:11px Arial,sans-serif; font-style:normal; }
+.dialog[data-era='2020'] .content h2 { margin:20px 0 8px; font:750 24px/1.2 Arial,sans-serif; letter-spacing:-.035em; }
+.dialog[data-era='2020'] .content p { color:#c4d8dc; }
+.dialog[data-era='2020'] .actions { padding:20px 22px 22px; gap:10px; }
+.dialog[data-era='2020'] .actions button { min-height:42px; border:1px solid #64828c; border-radius:11px; background:#293d49; color:#e8f4f3; font:700 12px Arial,sans-serif; }
+.dialog[data-era='2020'] .actions button:hover { background:#36505d; }
+.dialog[data-era='2020'] .actions .keep { border-color:#9bf4e3; outline:0; background:#70e8d4; color:#09252b; box-shadow:0 5px 16px #5ce5cc42; }
+.dialog[data-era='2020'] .actions .keep:hover { background:#a4f7e8; }
+.dialog[data-era='2020'] button:focus-visible { outline:2px solid #a0ffed; outline-offset:2px; }
 @media(max-width:420px) { .content { padding:16px 14px 0; } .dialog .actions { padding:20px 14px; } .dialog .actions button { flex:1; } }
