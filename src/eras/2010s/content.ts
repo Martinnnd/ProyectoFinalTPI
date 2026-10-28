@@ -12,8 +12,8 @@ export const content = {
     { id: "iphone-5-2012", year: 2012, kind: "Tecnología", title: "Una pantalla para llevar recuerdos", description: "Apple presentó el iPhone 5 en 2012 con una pantalla de cuatro pulgadas. El teléfono se volvía cada vez más importante para mirar y compartir imágenes.", dateLabel: "2012", scope: "Tecnología", source: "https://www.apple.com/newsroom/2012/09/12Apple-Introduces-iPhone-5/", sourceName: "Apple Newsroom" },
   ],
   music: [
-    { title: "Foto de verano", artist: "Nostalgiar · original", year: 2012, spotifyId: "nostalgiar-2012-photo", audioSrc: "/music/2010s/foto-de-verano.wav", reference: "/music/2010s/foto-de-verano.wav" },
-    { title: "Notas en el bolsillo", artist: "Nostalgiar · original", year: 2013, spotifyId: "nostalgiar-2013-notes", audioSrc: "/music/2010s/notas-en-el-bolsillo.wav", reference: "/music/2010s/notas-en-el-bolsillo.wav" },
-    { title: "La última foto", artist: "Nostalgiar · original", year: 2015, spotifyId: "nostalgiar-2015-last", audioSrc: "/music/2010s/la-ultima-foto.wav", reference: "/music/2010s/la-ultima-foto.wav" },
+    { title: "Somebody That I Used to Know", artist: "Gotye feat. Kimbra", year: 2011, spotifyId: "nostalgiar-2011-gotye", audioSrc: "/music/2010s/Gotye%20-%20Somebody%20That%20I%20Used%20To%20Know%20(feat.mp3", reference: "/music/2010s/Gotye%20-%20Somebody%20That%20I%20Used%20To%20Know%20(feat.mp3" },
+    { title: "Wake Me Up", artist: "Avicii", year: 2013, spotifyId: "nostalgiar-2013-avicii", audioSrc: "/music/2010s/Avicii%20-%20Wake%20Me%20Up%20(Official%20Lyric%20Video).mp3", reference: "/music/2010s/Avicii%20-%20Wake%20Me%20Up%20(Official%20Lyric%20Video).mp3" },
+    { title: "Despacito", artist: "Luis Fonsi feat. Daddy Yankee", year: 2017, spotifyId: "nostalgiar-2017-despacito", audioSrc: "/music/2010s/Luis%20Fonsi%20-%20Despacito%20(Letra%20_%20Lyrics)%20ft.mp3", reference: "/music/2010s/Luis%20Fonsi%20-%20Despacito%20(Letra%20_%20Lyrics)%20ft.mp3" },
   ],
 } satisfies EraContent;

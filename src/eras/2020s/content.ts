@@ -45,8 +45,8 @@ export const content = {
     },
   ],
   music: [
-    { title: "Foto de verano", artist: "Nostalgiar · original", year: 2021, spotifyId: "nostalgiar-2021-photo", audioSrc: "/music/2010s/foto-de-verano.wav", reference: "/music/2010s/foto-de-verano.wav" },
-    { title: "Notas en el bolsillo", artist: "Nostalgiar · original", year: 2023, spotifyId: "nostalgiar-2023-notes", audioSrc: "/music/2010s/notas-en-el-bolsillo.wav", reference: "/music/2010s/notas-en-el-bolsillo.wav" },
-    { title: "La última foto", artist: "Nostalgiar · original", year: 2025, spotifyId: "nostalgiar-2025-last", audioSrc: "/music/2010s/la-ultima-foto.wav", reference: "/music/2010s/la-ultima-foto.wav" },
+    { title: "Blinding Lights", artist: "The Weeknd", year: 2020, spotifyId: "nostalgiar-2020-blinding-lights", audioSrc: "/music/2020s/The%20Weeknd%20Blinding%20Lights%20Lyrics.mp3", reference: "/music/2020s/The%20Weeknd%20Blinding%20Lights%20Lyrics.mp3" },
+    { title: "Levitating", artist: "Dua Lipa", year: 2020, spotifyId: "nostalgiar-2020-levitating", audioSrc: "/music/2020s/Dua%20Lipa%20Levitating%20Lyrics.mp3", reference: "/music/2020s/Dua%20Lipa%20Levitating%20Lyrics.mp3" },
+    { title: "Quevedo: Bzrp Music Sessions, Vol. 52", artist: "Bizarrap y Quevedo", year: 2022, spotifyId: "nostalgiar-2022-quevedo-bzrp", audioSrc: "/music/2020s/QUEVEDO%20BZRP%20Music%20Sessions%2052%2066.mp3", reference: "/music/2020s/QUEVEDO%20BZRP%20Music%20Sessions%2052%2066.mp3" },
   ],
 } satisfies EraContent;
