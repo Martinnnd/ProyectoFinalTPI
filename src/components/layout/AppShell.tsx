@@ -128,7 +128,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <EraTimeline
         period={period}
         onChange={handlePeriodChange}
-        action={
+        action={session ? (
           <button
             aria-label="Recordar"
             className="primary-button time-add-memory"
@@ -137,7 +137,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <Plus size={16} />
             <span>Recordar</span>
           </button>
-        }
+        ) : null}
       />
 
       <div className="mobile-appbar">
@@ -153,13 +153,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               : "Mi perfil"}
           </strong>
         </div>
-        <button
+        {session && <button
           className="mobile-add-button"
           aria-label="Sumar mi recuerdo"
           onClick={handleRecordar}
         >
           <Plus size={23} />
-        </button>
+        </button>}
       </div>
 
       <button
