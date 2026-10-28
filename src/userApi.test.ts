@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { buscarUsuarios, getPerfilUsuario, getPublicacionesUsuario } from './userApi';
+import { buscarUsuarios, getPerfilUsuario, getPublicacionesUsuario, getPublicacionesGuardadasUsuario } from './userApi';
 import { guardarSesion, cerrarSesion } from './api';
 
 function respond(data: unknown, status = 200) {
@@ -100,6 +100,41 @@ describe('userApi', () => {
       lat: -34.676,
       lng: -58.56,
       source: 'backend',
+    });
+  });
+
+  it('obtiene las publicaciones guardadas de un usuario adaptándolas a Memory', async () => {
+    const mockPublicaciones = [
+      {
+        id: 99,
+        titulo: 'Recuerdo guardado de otro autor',
+        descripcion: 'Un gran recuerdo guardado',
+        fecha: '1985-06-20T00:00:00Z',
+        categoria: 0,
+        urlMultimedia: '',
+        tipoMultimedia: 0,
+        autor: { id: 5, username: 'Carlos' },
+        lugar: null,
+        cantidadLikes: 10,
+        cantidadComentarios: 2,
+        guardada: true,
+      },
+    ];
+    const fetch = respond(mockPublicaciones);
+    vi.stubGlobal('fetch', fetch);
+
+    const memories = await getPublicacionesGuardadasUsuario(17);
+
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(fetch.mock.calls[0][0]).toContain('/api/publicaciones/usuario/17/guardadas');
+    expect(memories).toHaveLength(1);
+    expect(memories[0]).toMatchObject({
+      id: '99',
+      title: 'Recuerdo guardado de otro autor',
+      author: 'Carlos',
+      authorId: 5,
+      year: 1985,
+      viewerSaved: true,
     });
   });
 });

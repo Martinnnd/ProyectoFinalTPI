@@ -13,6 +13,7 @@ export type Publication = {
   miPuntuacion?: number | null;
   cantidadReposts?: number;
   dioRepost?: boolean;
+  guardada?: boolean;
   id: number;
   titulo: string;
   descripcion?: string;
@@ -111,6 +112,7 @@ export function toMemory(data: Publication, pin: Memory): Memory {
     viewerRating: data.miPuntuacion ?? undefined,
     repostCount: data.cantidadReposts,
     viewerReposted: data.dioRepost,
+    viewerSaved: data.guardada,
     repost,
     quotedMemory,
     title: data.titulo,
@@ -185,3 +187,21 @@ export async function unlikePublication(id: number | string): Promise<LikeState>
     method: 'DELETE',
   });
 }
+
+export type SaveState = {
+  publicacionId: number;
+  guardada: boolean;
+};
+
+export async function savePublication(id: number | string): Promise<SaveState> {
+  return publicationRequest<SaveState>(`/${id}/guardar`, {
+    method: 'POST',
+  });
+}
+
+export async function unsavePublication(id: number | string): Promise<SaveState> {
+  return publicationRequest<SaveState>(`/${id}/guardar`, {
+    method: 'DELETE',
+  });
+}
+
