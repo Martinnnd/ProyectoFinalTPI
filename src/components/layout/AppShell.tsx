@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck } from "lucide-react";
+import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2 } from "lucide-react";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
 import { useFollow } from "../../context/FollowContext";
@@ -135,14 +135,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </strong>
         </div>
         <button
-          ref={mobileOptionsTrigger}
-          className="mobile-era-button"
-          onClick={() => mobileOptions.current?.showModal()}
-          aria-label="Abrir opciones"
-        >
-          <SlidersHorizontal size={20} />
-        </button>
-        <button
           className="mobile-add-button"
           aria-label="Sumar mi recuerdo"
           onClick={handleRecordar}
@@ -150,6 +142,27 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <Plus size={23} />
         </button>
       </div>
+
+      <button
+        ref={mobileOptionsTrigger}
+        className="mobile-era-button mobile-map-options"
+        onClick={() => mobileOptions.current?.showModal()}
+        aria-label="Abrir opciones de exploración"
+        title="Opciones de exploración"
+      >
+        <SlidersHorizontal size={20} />
+      </button>
+      <button
+        className="mobile-era-button mobile-music-access"
+        type="button"
+        onClick={() => handleNavigate("music")}
+        aria-label={musicOpen ? "Cerrar reproductor de música" : "Abrir reproductor de música"}
+        aria-controls="music-player"
+        aria-pressed={musicOpen}
+        title="Música de la época"
+      >
+        <Music2 size={20} aria-hidden="true" />
+      </button>
 
       <dialog
         ref={mobileOptions}

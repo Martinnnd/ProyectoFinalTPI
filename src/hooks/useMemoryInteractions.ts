@@ -1,16 +1,24 @@
 import { useState, useCallback } from "react";
-import { likePublication, unlikePublication } from "../publicationsApi";
+import { likePublication, unlikePublication, savePublication, unsavePublication } from "../publicationsApi";
 
 export default function useMemoryInteractions() {
   const [likes, setLikes] = useState<Record<string, boolean>>({});
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
   const [repostCounts, setRepostCounts] = useState<Record<string, number>>({});
+  const [saves, setSaves] = useState<Record<string, boolean>>({});
 
   const isLiked = useCallback(
     (memoryId: string, initial = false) => {
       return likes[memoryId] ?? initial;
     },
     [likes],
+  );
+
+  const isSaved = useCallback(
+    (memoryId: string, initial = false) => {
+      return saves[memoryId] ?? initial;
+    },
+    [saves],
   );
 
   const getLikeCount = useCallback(
@@ -72,5 +80,37 @@ export default function useMemoryInteractions() {
     [likes, likeCounts],
   );
 
-  return { isLiked, getLikeCount, toggleLike, getRepostCount, updateRepostCount, incrementRepostCount };
+  const toggleSave = useCallback(
+    async (memoryId: string, initialSaved = false) => {
+      const currentlySaved = saves[memoryId] ?? initialSaved;
+      const nextSaved = !currentlySaved;
+
+      // Actualización optimista inmediata
+      setSaves((prev) => ({ ...prev, [memoryId]: nextSaved }));
+
+      try {
+        const res = nextSaved
+          ? await savePublication(memoryId)
+          : await unsavePublication(memoryId);
+
+        setSaves((prev) => ({ ...prev, [memoryId]: res.guardada }));
+      } catch (err) {
+        console.error("Error al actualizar guardado:", err);
+        // Revertir estado
+        setSaves((prev) => ({ ...prev, [memoryId]: currentlySaved }));
+      }
+    },
+    [saves],
+  );
+
+  return {
+    isLiked,
+    isSaved,
+    getLikeCount,
+    toggleLike,
+    toggleSave,
+    getRepostCount,
+    updateRepostCount,
+    incrementRepostCount,
+  };
 }

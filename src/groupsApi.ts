@@ -31,7 +31,7 @@ type ApiGroupMember = {
   esCreador: boolean;
 };
 
-const supportedDecades = new Set<Decade>([1970, 1980, 1990, 2000]);
+const supportedDecades = new Set<Decade>([1970, 1980, 1990, 2000, 2010, 2020]);
 
 function mapGroup(group: ApiGroup): CommunityGroup {
   if (!supportedDecades.has(group.decada as Decade)) {

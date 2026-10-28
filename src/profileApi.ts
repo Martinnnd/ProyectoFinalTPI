@@ -1,5 +1,6 @@
 import { API_BASE_URL, getSesion } from './api';
 import { apiFetch } from './components/auth/apiClient';
+import { storeSession } from './components/auth/authStorage';
 import { publicationRequest, toMemory, type Publication } from './publicationsApi';
 import type { Achievement, Memory } from './types';
 
@@ -8,11 +9,46 @@ export type AchievementState = {
   puntosRecompensa: number; desbloqueado: boolean; fechaDesbloqueo: string | null;
 };
 export type UserProfile = {
-  id: number; username: string; nombre: string | null; apellido: string | null;
+  id: number; username: string; fotoPerfilUrl: string | null; nombre: string | null; apellido: string | null;
   reputacion: string; puntosNostalgia: number; cantidadPublicaciones: number;
   cantidadSeguidores: number; cantidadSeguidos: number; loSigo: boolean;
   logros: AchievementState[];
 };
+
+async function profileMutation(response: Response): Promise<UserProfile> {
+  if (!response.ok) {
+    const problem = await response.json().catch(() => null);
+    const fields = problem?.errors ? Object.values(problem.errors).flat().join(' ') : '';
+    throw new Error(fields || problem?.detail || problem?.mensaje || problem?.title ||
+      (response.status === 409 ? 'Ese nombre de usuario ya está en uso.' : 'No se pudo actualizar el perfil.'));
+  }
+  const profile: UserProfile = await response.json();
+  const session = getSesion();
+  if (session?.usuarioId === profile.id) {
+    storeSession({ ...session, username: profile.username, fotoPerfilUrl: profile.fotoPerfilUrl });
+  }
+  return profile;
+}
+
+export async function changeOwnUsername(username: string): Promise<UserProfile> {
+  const response = await apiFetch(`${API_BASE_URL}/api/usuario/me/username`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username.trim() }),
+  });
+  return profileMutation(response);
+}
+
+export async function changeOwnProfilePhoto(file: File): Promise<UserProfile> {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    throw new Error('Elegí una imagen JPG, PNG o WebP.');
+  }
+  if (file.size > 2 * 1024 * 1024) throw new Error('La foto no puede superar 2 MiB.');
+  const body = new FormData();
+  body.append('archivo', file);
+  const response = await apiFetch(`${API_BASE_URL}/api/usuario/me/foto`, { method: 'PUT', body });
+  return profileMutation(response);
+}
 
 export async function getUserProfile(user: number | string, signal?: AbortSignal, cache: RequestCache = 'no-store'): Promise<UserProfile> {
   const token = getSesion()?.token;

@@ -1,12 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import CalendarSelect from './CalendarSelect';
-import { memoryDateIso } from '../memoryDate';
+import { localToday, memoryDateIso } from '../memoryDate';
 import type { Decade } from '../types';
 
 const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 const weekdays = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
-const yearOptions = Array.from({ length: 40 }, (_, index) => ({ value: 1970 + index, label: String(1970 + index) }));
+const currentYear = new Date().getFullYear();
+const today = localToday();
+const yearOptions = Array.from({ length: currentYear - 1969 }, (_, index) => ({ value: 1970 + index, label: String(1970 + index) }));
 const monthOptions = months.map((label, value) => ({ value, label }));
 const isoDay = (year: number, month: number, day: number) => `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
@@ -51,7 +53,7 @@ export default function MemoryDatePicker({ initialDate, decade, onChange }: { in
   function close() { setOpen(false); trigger.current?.focus(); }
   function moveMonth(delta: number) {
     const date = new Date(view.year, view.month + delta, 1);
-    if (date.getFullYear() >= 1970 && date.getFullYear() <= 2009) setView({ year: date.getFullYear(), month: date.getMonth() });
+    if (date.getFullYear() >= 1970 && `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` <= today.slice(0, 7)) setView({ year: date.getFullYear(), month: date.getMonth() });
   }
   return <div className="memory-date-picker" onKeyDown={event => {
     if (open && event.key === 'Escape') {
@@ -61,7 +63,7 @@ export default function MemoryDatePicker({ initialDate, decade, onChange }: { in
   }}>
     <label htmlFor="memory-date">Fecha del recuerdo</label>
     <div ref={inputBox} className="memory-date-input">
-      <input id="memory-date" name="date" type="date" required min="1970-01-01" max="2009-12-31" value={value} onChange={event => {
+      <input id="memory-date" name="date" type="date" required min="1970-01-01" max={today} value={value} onChange={event => {
         const date = event.target.value;
         setValue(date);
         onChange();
@@ -75,7 +77,7 @@ export default function MemoryDatePicker({ initialDate, decade, onChange }: { in
       <header>
         <button type="button" aria-label="Mes anterior" disabled={view.year === 1970 && view.month === 0} onClick={() => moveMonth(-1)}><ChevronLeft size={18} aria-hidden="true" /></button>
         <strong aria-live="polite">{months[view.month]} {view.year}</strong>
-        <button type="button" aria-label="Mes siguiente" disabled={view.year === 2009 && view.month === 11} onClick={() => moveMonth(1)}><ChevronRight size={18} aria-hidden="true" /></button>
+        <button type="button" aria-label="Mes siguiente" disabled={view.year === currentYear && view.month === new Date().getMonth()} onClick={() => moveMonth(1)}><ChevronRight size={18} aria-hidden="true" /></button>
       </header>
       <div className="memory-calendar-selects">
         <CalendarSelect label="Año" value={view.year} options={yearOptions} startValue={decade} onChange={year => setView({ ...view, year })} />
@@ -87,7 +89,7 @@ export default function MemoryDatePicker({ initialDate, decade, onChange }: { in
         {Array.from({ length: days }, (_, index) => {
           const day = index + 1;
           const date = isoDay(view.year, view.month, day);
-          return <button key={date} type="button" aria-label={`${day} de ${months[view.month].toLowerCase()} de ${view.year}`} aria-pressed={date === value} onClick={() => { setValue(date); onChange(); close(); }}>{day}</button>;
+          return <button key={date} type="button" disabled={date > today} aria-label={`${day} de ${months[view.month].toLowerCase()} de ${view.year}`} aria-pressed={date === value} onClick={() => { setValue(date); onChange(); close(); }}>{day}</button>;
         })}
       </div>
       <button type="button" className="memory-calendar-close" onClick={close}>Cerrar calendario</button>

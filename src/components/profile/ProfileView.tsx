@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import Profile from "./Profile";
+import ProfileEditDialog from "./ProfileEditDialog";
 import DeleteMemoryDialog from "../DeleteMemoryDialog";
 import MemoryForm from "../MemoryForm";
 import CommunityControls from "../CommunityControls";
@@ -14,7 +15,7 @@ import { useFollow } from "../../context/FollowContext";
 import { useRatings } from "../../context/RatingsContext";
 import { eliminarPublicacion } from "../../api";
 import { getPublicacionesUsuario } from "../../userApi";
-import { getUserProfile, toAchievement, type UserProfile } from "../../profileApi";
+import { changeOwnProfilePhoto, changeOwnUsername, getUserProfile, toAchievement, type UserProfile } from "../../profileApi";
 import { ACHIEVEMENTS_UPDATED } from "../../achievementEvents";
 import {
   getGroups,
@@ -37,10 +38,11 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
   const { followingUsers, followers, toggleFollow } = useFollow();
   const { setNotice } = useRatings();
 
-  const isOwnProfile = !targetUsername || targetUsername === session?.username;
-  const usernameToFetch = targetUsername ?? session?.username;
-
   const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const isOwnProfile = !targetUsername || targetUsername === session?.username ||
+    (profileUser !== null && profileUser.id === session?.usuarioId);
+  const usernameToFetch = isOwnProfile ? session?.usuarioId : targetUsername;
   const [revision, setRevision] = useState(0);
   useEffect(() => {
     const refresh = () => setRevision(value => value + 1);
@@ -102,7 +104,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
       });
 
     return () => controller.abort();
-  }, [usernameToFetch, isOwnProfile, session, status, router, revision]);
+  }, [usernameToFetch, isOwnProfile, session?.usuarioId, status, router, revision]);
 
   if (loading) {
     return (
@@ -256,9 +258,11 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     <>
       <Profile
         userId={profileUser.id}
+        isOwnProfile={isOwnProfile}
         onEdit={(m) => setEditing(m)}
         onDelete={(m) => setDeleting(m)}
-        username={session?.username ?? profileUser.username}
+        username={profileUser.username}
+        fotoPerfilUrl={profileUser.fotoPerfilUrl}
         author={isOwnProfile ? undefined : profileUser.username}
         reputation={profileUser.reputacion}
         followerCount={profileUser.cantidadSeguidores}
@@ -284,7 +288,25 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
         }}
         onIniciarChat={(user) => router.push(`/chat?con=${user}`)}
         onToggleFollow={!isOwnProfile ? handleToggleFollow : undefined}
+        onEditProfile={isOwnProfile ? () => setEditingProfile(true) : undefined}
       />
+
+      {editingProfile && isOwnProfile && (
+        <ProfileEditDialog
+          profile={profileUser}
+          onClose={() => setEditingProfile(false)}
+          onChangeUsername={async username => {
+            const updated = await changeOwnUsername(username);
+            setProfileUser(updated);
+            return updated;
+          }}
+          onChangePhoto={async file => {
+            const updated = await changeOwnProfilePhoto(file);
+            setProfileUser(updated);
+            return updated;
+          }}
+        />
+      )}
 
       {activeGroupInfo && (
         <GroupInfoModal

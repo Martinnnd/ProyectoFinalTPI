@@ -46,8 +46,8 @@ describe("Contenido de época", () => {
       factsForPeriod({ decade: 1990, year: 1995 }).map((f) => f.id),
     ).toEqual(["toystory"]);
     expect(factsForPeriod({ decade: 1980, year: 1980 })).toEqual([]);
-    for (const decade of [1970, 1980, 1990, 2000] as const) {
-      expect(factsForPeriod({ decade, year: null })).toHaveLength(3);
+    for (const decade of [1970, 1980, 1990, 2000, 2010] as const) {
+      expect(factsForPeriod({ decade, year: null })).toHaveLength(decade === 2010 ? 2 : 3);
       expect(
         musicByDecade[decade].every(
           (t) => t.year >= decade && t.year < decade + 10,
@@ -64,9 +64,8 @@ describe("Contenido de época", () => {
     expect(musicByDecade[2000][0].artist).toBe("Linkin Park");
     for (const tracks of Object.values(musicByDecade)) {
       for (const track of tracks)
-        expect(track.reference).toBe(
-          `https://open.spotify.com/track/${track.spotifyId}`,
-        );
+        if (track.audioSrc) expect(track.reference).toBe(track.audioSrc);
+        else expect(track.reference).toBe(`https://open.spotify.com/track/${track.spotifyId}`);
     }
     expect(
       initialMemories.every(
@@ -126,13 +125,14 @@ describe("Persistencia resistente a errores", () => {
   });
   it("valida límites y coordenadas", () => {
     expect(isMemory(local)).toBe(true);
+    expect(isMemory({ ...local, year: 2020 })).toBe(true);
     for (const patch of [
       { lat: NaN },
       { lng: 181 },
       { title: " " },
       { year: 2009.5 },
       { category: "Otra" },
-      { year: 2010 },
+      { year: new Date().getFullYear() + 1 },
     ])
       expect(isMemory({ ...local, ...patch })).toBe(false);
   });

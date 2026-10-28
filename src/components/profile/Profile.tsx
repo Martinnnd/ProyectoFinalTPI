@@ -3,25 +3,31 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { userTiers } from "../../data";
 import type { Achievement, DescribedTier, Memory, Period, TierProgress, UserCategory } from "../../types";
 import type { FollowedUser } from "../../seguimientosApi";
+import { LoaderCircle } from "lucide-react";
 import ProfileDialogs from "./ProfileDialogs";
 import ProfileHeader from "./ProfileHeader";
 import ProfileMapDialog from "./ProfileMapDialog";
 import ProfilePosts from "./ProfilePosts";
 import ProfileShortcuts from "./ProfileShortcuts";
 import type { ProfilePresentation } from "./profileTypes";
+import { getPublicacionesGuardadasUsuario } from "../../userApi";
 
 const presentations: Record<Period["decade"], ProfilePresentation> = {
   1970: { title: "Historias con nombre propio", label: "Suplemento personal", collection: "Mis recuerdos", map: "Lugares de una vida", footer: "Cada vida merece ser contada" },
   1980: { title: "Archivo de videoclub", label: "Colección personal · VHS", collection: "Mis cintas", map: "Locaciones", footer: "Rebobiná. Volvé a esos días." },
   1990: { title: "Archivo personal — Nostalgiar 95", label: "Mi PC / Personas / Archivo personal", collection: "Recuerdos", map: "Mapa de lugares", footer: "Archivo de recuerdos" },
   2000: { title: "Mi espacio — Nostalgiar Messenger", label: "Un espacio para volver a conectar", collection: "Álbum de recuerdos", map: "Mis lugares", footer: "Historias que nos conectan" },
+  2010: { title: "Mi diario fotográfico", label: "Momentos que quedaron en el carrete", collection: "Mi álbum", map: "Mis lugares", footer: "Una imagen puede traerlo todo de vuelta" },
+  2020: { title: "Mi espacio", label: "Momentos para volver a vivir", collection: "Mis recuerdos", map: "Mis lugares", footer: "Cada historia encuentra su lugar" },
 };
 
 export default function Profile({
   userId,
+  isOwnProfile: isOwnProfileProp,
   onEdit,
   onDelete,
   username,
+  fotoPerfilUrl,
   author,
   reputation,
   followerCount,
@@ -46,11 +52,14 @@ export default function Profile({
   onNavigateToProfile,
   onFollow,
   onToggleFollow,
+  onEditProfile,
 }: {
   userId?: number;
+  isOwnProfile?: boolean;
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
   username: string;
+  fotoPerfilUrl?: string | null;
   author?: string;
   reputation?: string;
   followerCount?: number;
@@ -75,7 +84,9 @@ export default function Profile({
   onNavigateToProfile?: (username: string) => void;
   onFollow?: (author: string, authorId: number) => void;
   onToggleFollow?: () => void | Promise<void>;
+  onEditProfile?: () => void;
 }) {
+  const isOwnProfile = isOwnProfileProp ?? !author;
   const album = useRef<HTMLElement>(null);
   const mapDialog = useRef<HTMLDialogElement>(null);
   const mapReturnFocus = useRef<HTMLElement | null>(null);
@@ -86,6 +97,10 @@ export default function Profile({
   const [mapClosing, setMapClosing] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [tiersOpen, setTiersOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"posts" | "saved">("posts");
+  const [savedMemories, setSavedMemories] = useState<Memory[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [savedLoaded, setSavedLoaded] = useState(false);
 
   const presentation = presentations[period.decade];
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
@@ -101,6 +116,35 @@ export default function Profile({
   }, [userCategory]);
 
   useEffect(() => () => clearTimeout(mapCloseTimer.current), []);
+
+  useEffect(() => {
+    setActiveTab("posts");
+    setSavedMemories([]);
+    setSavedLoaded(false);
+  }, [userId, author]);
+
+  const currentTab = isOwnProfile ? activeTab : "posts";
+
+  async function handleOpenSaved() {
+    if (!isOwnProfile || !userId) return;
+    setActiveTab("saved");
+    album.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    setLoadingSaved(true);
+    try {
+      const mems = await getPublicacionesGuardadasUsuario(userId);
+      setSavedMemories(mems);
+      setSavedLoaded(true);
+    } catch (err) {
+      console.error("Error al cargar guardados:", err);
+    } finally {
+      setLoadingSaved(false);
+    }
+  }
+
+  function handleOpenCollection() {
+    setActiveTab("posts");
+    album.current?.scrollIntoView({ block: "start", behavior: "instant" });
+  }
 
   function openMap() {
     clearTimeout(mapCloseTimer.current);
@@ -143,12 +187,13 @@ export default function Profile({
   }
 
   return (
-    <main id="explore" className="personal-profile" data-visitor={!!author} aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}>
+    <main id="explore" className="personal-profile" data-visitor={!isOwnProfile} aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}>
       <div className="profile-main">
         <ProfileHeader
           userId={userId}
           author={author}
           username={username}
+          fotoPerfilUrl={fotoPerfilUrl}
           presentation={presentation}
           period={period}
           memoryCount={allMemories.length}
@@ -170,14 +215,18 @@ export default function Profile({
           myFollowingUsers={myFollowingUsers}
           onNavigateToProfile={onNavigateToProfile}
           onToggleFollow={onToggleFollow}
+          onEditProfile={onEditProfile}
           onToggleFollowUser={onFollow}
         />
         <ProfileShortcuts
           author={author}
           presentation={presentation}
           memoryCount={allMemories.length}
+          savedCount={savedLoaded ? savedMemories.length : undefined}
+          activeTab={currentTab}
           mapOpened={mapOpened}
-          onOpenCollection={() => album.current?.scrollIntoView({ block: "start", behavior: "instant" })}
+          onOpenCollection={handleOpenCollection}
+          onOpenSaved={isOwnProfile && userId ? handleOpenSaved : undefined}
           onOpenMap={openMap}
         />
         <ProfileMapDialog
@@ -194,19 +243,27 @@ export default function Profile({
           onDelete={onDelete}
           onClose={closeMap}
         />
-        <ProfilePosts
-          ref={album}
-          author={author}
-          username={username}
-          memories={allMemories}
-          selected={selected}
-          repostedPublicationIds={repostedPublicationIds}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onOpen={onOpen}
-          onSelectOnMap={(memory) => { onSelect(memory); openMap(); }}
-          onAdd={onAdd}
-        />
+        {currentTab === "saved" && loadingSaved ? (
+          <div className="personal-empty profile-loading" style={{ padding: "40px", textAlign: "center" }}>
+            <LoaderCircle className="animate-spin" size={24} style={{ margin: "0 auto" }} />
+            <p style={{ marginTop: "12px", color: "var(--muted)" }}>Cargando recuerdos guardados...</p>
+          </div>
+        ) : (
+          <ProfilePosts
+            ref={album}
+            author={author}
+            username={username}
+            memories={currentTab === "saved" ? savedMemories : allMemories}
+            selected={selected}
+            isSavedTab={currentTab === "saved"}
+            repostedPublicationIds={repostedPublicationIds}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onOpen={onOpen}
+            onSelectOnMap={(memory) => { onSelect(memory); openMap(); }}
+            onAdd={onAdd}
+          />
+        )}
         <ProfileDialogs
           catalogueDialog={catalogueDialog}
           tiersDialog={tiersDialog}

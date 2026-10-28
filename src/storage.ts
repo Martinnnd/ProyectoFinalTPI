@@ -19,7 +19,7 @@ export function isMemory(value: unknown): value is Memory {
     typeof m.year === "number" &&
     Number.isInteger(m.year) &&
     m.year >= 1970 &&
-    m.year <= 2009 &&
+    m.year <= new Date().getFullYear() &&
     categories.includes(m.category as Memory["category"]) &&
     m.source === "local" &&
     typeof m.lat === "number" &&

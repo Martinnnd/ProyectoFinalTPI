@@ -51,6 +51,13 @@
   --era-heading: #1d3555;
 }
 
+.decades:has(.decadeCard[data-era="2010"]:is(:hover, :focus-visible)) {
+  --era-bg:#dce7e5; --era-surface:#fffdf8; --era-ink:#23495a; --era-accent:#2f7891; --era-heading:#23495a;
+}
+.decades:has(.decadeCard[data-era="2020"]:is(:hover, :focus-visible)) {
+  --era-bg:#0b1119; --era-surface:#1c303c; --era-ink:#f4fcff; --era-accent:#5ce5cc; --era-heading:#f4fcff;
+}
+
 .atmosphere,
 .atmosphereLayer,
 .texture {
@@ -304,6 +311,8 @@
 .decades:has(.decadeCard[data-era="2000"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="2000"] {
   opacity: 1;
 }
+.decades:has(.decadeCard[data-era="2010"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="2010"] { opacity:1; }
+.decades:has(.decadeCard[data-era="2020"]:is(:hover, :focus-visible)) .atmosphereLayer[data-era-scene="2020"] { opacity:1; }
 
 .sectionHeading,
 .decadeGrid {
@@ -382,10 +391,12 @@
 .decades:has(.decadeCard[data-era="2000"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="2000"] {
   display: block;
 }
+.decades:has(.decadeCard[data-era="2010"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="2010"] { display:block; }
+.decades:has(.decadeCard[data-era="2020"]:is(:hover, :focus-visible)) .eraIndicator span[data-era-label="2020"] { display:block; }
 
 .decadeGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: clamp(12px, 1.5vw, 20px);
 }
 
@@ -639,6 +650,31 @@
   background: linear-gradient(#fefdf4, #e7e5d8);
 }
 
+.atmosphereLayer[data-era-scene="2010"] { background:radial-gradient(circle at 50% 35%,#ffffffa0,transparent 60%),linear-gradient(135deg,#c6dbd9,#e8e3d7); }
+.pocketAtmosphere { position:absolute; inset:6% 5%; display:block; border:18px solid #27313b; border-radius:34px; box-shadow:0 0 0 5px #8c9698,0 25px 70px #0a2c3b55,inset 0 0 0 3px #fff7; background:linear-gradient(140deg,#d9e9e7,#fff8e9); }
+.pocketLens { position:absolute; top:-13px; left:50%; width:55px; height:4px; transform:translateX(-50%); border-radius:6px; background:#798587; }
+.pocketPhoto { position:absolute; inset:9% 10%; display:grid; grid-template-rows:1fr auto; padding:10px 10px 24px; background:#fffefa; box-shadow:0 12px 26px #23445737; transform:rotate(-2deg); }
+.pocketPhoto i { display:block; background:radial-gradient(circle at 75% 20%,#fff8d2 0 5%,transparent 6%),linear-gradient(165deg,#85b9c3 0 48%,#b8cdb4 49% 66%,#627d70 67%); }
+.pocketPhoto b { margin-top:12px; color:#365967; font:700 11px Georgia,serif; letter-spacing:.12em; }
+.pocketHome { position:absolute; bottom:-13px; left:50%; width:14px; height:14px; transform:translateX(-50%); border:2px solid #768489; border-radius:50%; }
+.decadeCard[data-era="2010"] { border:1px solid #aac2c4; border-radius:10px; background:linear-gradient(#fffefa,#f1f5f2); color:#244c5d; box-shadow:0 7px 20px #16394b30; font-family:'Trebuchet MS',Arial,sans-serif; }
+.decadeCard[data-era="2010"] .cardChrome { color:#fff; background:linear-gradient(#5b91a4,#2f6e88); text-shadow:0 1px #24455c; }
+.decadeCard[data-era="2010"] .decadeNumber { color:#31758d; font-family:Georgia,serif; font-style:italic; text-shadow:2px 2px #dbe7e4; }
+.decadeCard[data-era="2010"] .cardFooter { border-color:#adc5c8; color:#486d78; background:#e5eeea; }
+.decades:has(.decadeCard[data-era="2010"]:is(:hover,:focus-visible)) .eyebrow { color:#2f7891; }
+.atmosphereLayer[data-era-scene="2020"] { background:radial-gradient(circle at 58% 46%,#325c6a,transparent 55%),linear-gradient(145deg,#111620,#0b1119); }
+.decadeCard[data-era="2020"] { border:1px solid #47717b; border-radius:16px; background:linear-gradient(145deg,#233947,#111c29); color:#f3fbfc; box-shadow:0 8px 26px #02070ecc; font-family:'Segoe UI',Arial,sans-serif; }
+.decadeCard[data-era="2020"] .cardChrome { border-color:#476f78; background:#1c3440cc; color:#81f3dc; letter-spacing:.12em; }
+.decadeCard[data-era="2020"] .decadeNumber { color:#8ef8e5; font-family:'Segoe UI',Arial,sans-serif; font-weight:800; letter-spacing:-.08em; text-shadow:0 0 22px #52e9d48a; }
+.decadeCard[data-era="2020"] .cardFooter { border-color:#3f6672; background:#142b35; color:#c1e8e4; }
+.decades:has(.decadeCard[data-era="2020"]:is(:hover,:focus-visible)) .eyebrow { color:#88f3e0; }
+.nowAtmosphere { position:absolute; inset:10% 17%; display:grid; place-items:center; }
+.nowGlow { position:absolute; width:min(58vw,680px); aspect-ratio:1; border-radius:50%; background:radial-gradient(circle,#45d6c066,transparent 65%); filter:blur(40px); }
+.nowGlass { position:relative; display:flex; flex-direction:column; justify-content:flex-end; gap:12px; width:min(46vw,540px); aspect-ratio:1.45; padding:34px; border:1px solid #8df9e699; border-radius:26px; background:linear-gradient(135deg,#ffffff20,#ffffff03),radial-gradient(circle at 75% 25%,#8467e17a,transparent 45%),#142c38aa; color:#eafffb; box-shadow:0 24px 60px #0009; backdrop-filter:blur(20px); font:700 18px 'Segoe UI',Arial,sans-serif; }
+.nowGlass i { position:absolute; top:25%; left:42%; width:16%; aspect-ratio:1; border:2px solid #a4fff2; border-radius:50%; box-shadow:0 0 0 24px #ffffff0b,0 0 35px #6df3dfb0; }
+.nowGlass small { color:#acdfdf; font-size:13px; font-weight:400; }
+@media(max-width:1100px) and (min-width:901px) { .decadeGrid { gap:10px; } .decadeCard .cardBody { padding:18px 12px 14px; } .decadeCopy strong { font-size:.92rem; } .decadeCopy small { font-size:.75rem; } }
+
 @media (max-width: 900px) {
   .decades {
     min-height: auto;
@@ -829,7 +865,7 @@
 .arcadeButtons i { width: 32px; height: 24px; box-shadow: 0 4px #08070b,0 5px 5px #0008,inset 0 2px #fff5; }
 
 .atmosphereLayer[data-era-scene="1990"] .monitorCabinet {
-  inset: 22px 28px 70px;
+  inset: 22px 28px 18px;
   border-width: 48px;
   border-bottom-width: 86px;
   border-color: #c7c2ad;
@@ -848,7 +884,7 @@
 .atmosphereLayer[data-era-scene="1990"] .monitorStand { top: calc(100% + 86px); left: 38%; width: 24%; height: 42px; border-radius: 0 0 45% 45%; background: linear-gradient(#807e6d,#c9c5b0 40%,#a9a58f); box-shadow: inset 0 -4px #787765,0 8px 12px #0006; }
 
 .atmosphereLayer[data-era-scene="2000"] .monitorCabinet {
-  inset: 18px 28px 85px;
+  inset: 18px 28px 18px;
   border: 22px solid #25282b;
   border-top-color: #363a3d;
   border-left-color: #303437;
@@ -875,11 +911,11 @@
   .arcadeCabinet { border-inline-width: 14px; }
   .arcadeCabinet::before { left: -12px; width: 3px; } .arcadeCabinet::after { right: -12px; width: 3px; }
   .arcadeCabinet .screenGlass { border-width: 3px; border-radius: 15px; }
-  .atmosphereLayer[data-era-scene="1990"] .monitorCabinet { inset: 14px 10px 60px; border-width: 19px; border-bottom-width: 70px; border-radius: 26px; }
+  .atmosphereLayer[data-era-scene="1990"] .monitorCabinet { inset: 14px 10px 14px; border-width: 19px; border-bottom-width: 70px; border-radius: 26px; }
   .atmosphereLayer[data-era-scene="1990"] .monitorChin { bottom: -64px; height: 52px; }
   .atmosphereLayer[data-era-scene="1990"] .monitorControls { gap: 8px; }
   .atmosphereLayer[data-era-scene="1990"] .monitorStand { top: calc(100% + 70px); }
-  .atmosphereLayer[data-era-scene="2000"] .monitorCabinet { inset: 14px 10px 78px; border-width: 13px; border-bottom-width: 49px; }
+  .atmosphereLayer[data-era-scene="2000"] .monitorCabinet { inset: 14px 10px 14px; border-width: 13px; border-bottom-width: 49px; }
   .atmosphereLayer[data-era-scene="2000"] .monitorChin { padding-inline: 2px; }
   .atmosphereLayer[data-era-scene="2000"] .monitorChin b { left: 0; transform: none; font-size: 8px; }
   .atmosphereLayer[data-era-scene="2000"] .monitorControls { gap: 7px; }

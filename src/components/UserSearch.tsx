@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Search, UserRound, UserPlus, UserMinus, LoaderCircle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { buscarUsuarios, type UsuarioBusqueda } from "../userApi";
 import type { FollowedUser } from "../seguimientosApi";
@@ -153,16 +153,20 @@ export default function UserSearch({ currentUserId, followedUsers, onFollow, onO
             return <li key={user.id}>
               <span className={styles.avatar} aria-hidden="true">{user.username.trim().charAt(0).toLocaleUpperCase()}</span>
               <strong>{user.username}</strong>
-              <button type="button" className={styles.profileButton} onClick={() => { close(); onOpenProfile(user); }}>
-                {ownUser ? "Tu perfil" : "Ver perfil"}
+              <button type="button" className={styles.profileButton} aria-label={`Ver perfil de ${user.username}`} title="Ver perfil" onClick={() => { close(); onOpenProfile(user); }}>
+                <UserRound size={17} aria-hidden="true" /><span>{ownUser ? "Tu perfil" : "Ver perfil"}</span>
               </button>
               {!ownUser && <button
                 type="button"
                 className={followed ? styles.unfollowButton : styles.followButton}
+                aria-label={followed ? `Dejar de seguir a ${user.username}` : `Seguir a ${user.username}`}
+                title={followed ? "Dejar de seguir" : "Seguir"}
+                aria-pressed={followed}
                 disabled={pendingUserId !== null}
                 onClick={() => void toggleFollow(user)}
               >
-                {pending ? "Actualizando…" : followed ? "Dejar de seguir" : "Seguir"}
+                {pending ? <LoaderCircle size={17} aria-hidden="true" /> : followed ? <UserMinus size={17} aria-hidden="true" /> : <UserPlus size={17} aria-hidden="true" />}
+                <span>{pending ? "Actualizando…" : followed ? "Dejar de seguir" : "Seguir"}</span>
               </button>}
             </li>;
           })}

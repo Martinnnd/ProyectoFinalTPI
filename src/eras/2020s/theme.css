@@ -1,0 +1,220 @@
+.era-2020 {
+  --picking-bg: linear-gradient(150deg,#1d2b38,#101923);
+  --picking-ink: #f3f7fb;
+  --picking-border: 1px solid #4d6574;
+  --picking-radius: 18px;
+  --picking-shadow: 0 24px 60px #02060dbb;
+  --picking-highlight: #5ce5cc;
+  --picking-button-bg: #263744;
+  --picking-button-ink: #edf9f8;
+  --picking-button-border: 1px solid #476273;
+  --picking-button-radius: 12px;
+  --picking-button-shadow: inset 0 1px #ffffff18;
+  --picking-button-hover: #354b57;
+}
+.app.era-2020 { background:radial-gradient(circle at 45% -10%,#184c55 0,transparent 42%),#0b1119; color:#f3f7fb; }
+.app.era-2020 .time-navigation { background:#111b24ee; border-bottom:1px solid #4d6871; box-shadow:0 8px 25px #03090e77; backdrop-filter:blur(20px); }
+.era-2020 .time-decades button[aria-pressed="true"] { background:#5ce5cc; border-color:#8ff8e3; border-radius:12px; color:#09232a; box-shadow:0 4px 16px #5ce5cc55; }
+.era-2020 .primary-button { background:#5ce5cc; border:1px solid #83f5df; border-radius:12px; color:#08242a; font-weight:700; box-shadow:0 5px 19px #2de9c43b; }
+.era-2020 .secondary-button { border-radius:12px; }
+.era-2020 .navigation-rail { background:#101a23ed; border-right:1px solid #405561; backdrop-filter:blur(20px); }
+.era-2020 .navigation-rail button { color:#afc6d2; border-radius:14px; }
+.era-2020 .navigation-rail .rail-active,.era-2020 .navigation-rail button[aria-expanded="true"] { background:#233740; border:1px solid #467b7b; color:#78f0dc; box-shadow:inset 0 1px #ffffff20; }
+.era-2020 .rail-logo { color:#79edd8; }
+.era-2020 .memory-marker { border:2px solid #a6fff0; border-radius:16px; background:linear-gradient(140deg,#48dcc2,#3b83b7); color:#07151d; box-shadow:0 5px 20px #03131caa,0 0 0 4px #6ff4d241; }
+.era-2020 .memory-marker.selected { box-shadow:0 4px 24px #5ce5ccab,0 0 0 6px #5ce5cc50; }
+.era-2020 .leaflet-tile-pane { filter:brightness(.72) saturate(.72) hue-rotate(12deg); }
+.era-2020 .mapbox-section .memory-map { background:#071923; }
+.app.era-2020 .mapbox-section::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:radial-gradient(ellipse at 50% 45%,transparent 40%,#050e1b42 100%),linear-gradient(90deg,#06152254,transparent 20%,transparent 80%,#06152230); }
+.app.era-2020 .map-2020-hud { position:absolute; top:32px; left:30px; z-index:2; display:flex; align-items:center; gap:14px; min-width:280px; padding:13px 18px; border:1px solid #a2fff33d; border-radius:18px; background:linear-gradient(130deg,#132a38da,#101a2abf); box-shadow:inset 0 1px #ffffff2e,0 14px 36px #020a15a3; color:#f5fffd; backdrop-filter:blur(22px); pointer-events:none; }
+.app.era-2020 .map-2020-hud::before { content:""; position:absolute; inset:-1px; border-radius:inherit; background:linear-gradient(120deg,#78f6e860,transparent 46%,#b598ed36); mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask-composite:exclude; padding:1px; pointer-events:none; }
+.era-2020 .map-2020-hud-pulse { flex:none; width:10px; height:10px; border-radius:50%; background:#73f5db; box-shadow:0 0 0 5px #73f5db24,0 0 20px #73f5dbaa; animation:map-2020-pulse 2.8s ease-in-out infinite; }
+.era-2020 .map-2020-hud div { display:flex; flex-direction:column; gap:3px; }
+.era-2020 .map-2020-hud strong { font:750 13px/1.2 var(--font-display); letter-spacing:.01em; }
+.era-2020 .map-2020-hud div span { color:#b2cdd4; font:11px/1.3 var(--font-body); }
+.era-2020 .map-2020-hud-coordinate { align-self:stretch; display:flex; align-items:center; gap:6px; margin-left:8px; padding-left:14px; border-left:1px solid #a2fff32c; color:#8af3e1; font:700 9px/1.3 var(--font-body); letter-spacing:.12em; white-space:nowrap; }
+.era-2020 .map-2020-hud-coordinate i { width:3px; height:3px; border-radius:50%; background:currentColor; }
+@keyframes map-2020-pulse { 50% { box-shadow:0 0 0 8px #73f5db12,0 0 28px #73f5dbed; } }
+.era-2020 .brand-card { border:1px solid #516a77; border-radius:20px; background:#14242fcf; box-shadow:0 14px 38px #02070dbb; backdrop-filter:blur(24px); }
+.era-2020 .brand-card h1 { color:#edfefa; font-family:var(--font-display); font-weight:750; letter-spacing:-.06em; }
+.era-2020 .brand-card .brand-era-label { color:#76e7d6; }
+.era-2020 :is(.drawer-heading,.fact-top,.music-heading,.dialog-heading) { border-bottom:1px solid #405b66; background:#1b303bd9; color:#e8fbf8; backdrop-filter:blur(16px); }
+.era-2020 :is(.side-panel,.memory-dialog,.fact-art) { border:1px solid #506a78; border-radius:18px; background:linear-gradient(145deg,#233442ed,#121f2bed); color:#edf5f7; box-shadow:0 20px 50px #01060db3; backdrop-filter:blur(22px); }
+.era-2020 .fact-art { background:radial-gradient(circle at 72% 25%,#8364ba77,transparent 45%),linear-gradient(145deg,#1d4a55,#192735); }
+.era-2020 .category-badge { border-radius:999px; background:#31505a; color:#a9f3e7; }
+.era-2020 :is(input,textarea,select,.memory-select-control) { border:1px solid #57717c; border-radius:11px; background:#172731; color:#f4fafb; }
+.era-2020 :is(input,textarea)::placeholder { color:#9aafbb; }
+.era-2020 .memory-dialog .dialog-heading { border-radius:17px 17px 0 0; }
+.era-2020 .system-taskbar { gap:8px; padding:8px; border-top:1px solid #526a74; background:#101b24e8; box-shadow:0 -8px 26px #02081288; backdrop-filter:blur(20px); }
+.era-2020 .system-taskbar button { display:flex; align-items:center; justify-content:center; gap:7px; min-height:40px; border:1px solid transparent; border-radius:12px; background:transparent; color:#b7cad1; font-weight:650; }
+.era-2020 .system-taskbar .task-active { border-color:#497777; background:#214348; color:#86f4de; box-shadow:inset 0 1px #ffffff22; }
+.era-2020 .social-stream { background:radial-gradient(circle at 70% 0,#1b3c47,transparent 35%),#101a23; }
+.era-2020 .feed-heading { border-bottom:1px solid #49606d; color:#efffff; }
+.era-2020 .feed-post { overflow:hidden; border:1px solid #3f5966; border-radius:20px; background:#192a35; color:#f0f7f8; box-shadow:0 10px 30px #030a12b0; }
+.era-2020 .feed-post img { border-radius:12px; }
+.era-2020 .feed-post :is(h2,h3,strong) { color:#f6fbfd; }
+.era-2020 .feed-post :is(small,.post-place) { color:#b9cbd2; }
+.era-2020 .social-avatar { border:2px solid #75decf; background:linear-gradient(145deg,#279c99,#5756aa); color:white; box-shadow:0 0 0 3px #5ce5cc24; }
+.era-2020 .personal-profile { background:#101b24; }
+.era-2020 .personal-profile .personal-header { border-bottom:1px solid #4c6770; background:linear-gradient(110deg,#1c3b45,#17202e); }
+.era-2020 .personal-profile .profile-portrait { border:3px solid #78ebdb; border-radius:18px; box-shadow:0 0 0 5px #5ce5cc22; }
+.era-2020 .personal-profile .personal-counts { border:1px solid #45616a; border-radius:14px; background:#203640; }
+.era-2020 .personal-profile .personal-memory { border:1px solid #47616a; border-radius:16px; background:#1a2a35; box-shadow:0 8px 28px #02091277; }
+.era-2020 .profile-note { border-radius:999px; }
+.app.era-2020 .device-2020 { width:min(365px,calc(100vw - 32px)); padding:0; overflow:visible; border:1px solid #69838d; border-radius:24px; background:linear-gradient(145deg,#253b49e8,#101923ed); color:#f4fcff; box-shadow:0 22px 55px #02060dba,inset 0 1px #ffffff26; backdrop-filter:blur(28px); }
+.era-2020 .device-2020 .device-body { padding:12px; border:0; background:transparent; }
+.era-2020 .device-2020 .device-illustration { display:block; overflow:hidden; border-radius:17px; background:#102635; }
+.era-2020 .device-2020 .record-art,.era-2020 .device-2020 .device-visualizer { display:none; }
+.era-2020 .now-artwork { position:relative; display:grid; place-items:center; height:188px; overflow:hidden; background:radial-gradient(circle at 35% 25%,#7ed5de9c,transparent 24%),radial-gradient(circle at 70% 72%,#a35bea8f,transparent 29%),linear-gradient(135deg,#184755,#101b30 75%); }
+.era-2020 .now-artwork::before { content:""; position:absolute; inset:-40%; background:conic-gradient(from 30deg at 50% 50%,transparent 0deg,#62e9d83d 48deg,transparent 105deg,#a389ea77 165deg,transparent 230deg,#4da6d255 305deg,transparent 360deg); filter:blur(16px); animation:now-artwork-drift 22s linear infinite; }
+.era-2020 .now-artwork::after { content:""; position:absolute; inset:0; background:linear-gradient(135deg,#ffffff23,transparent 32%),linear-gradient(0deg,#071322ab,transparent 35%); pointer-events:none; }
+.era-2020 .now-artwork-orbit { width:138px; height:138px; border-color:#dcffff8c; background:radial-gradient(circle,#75e8d518 0 31%,#101a2b7d 32% 66%,transparent 67%); box-shadow:0 0 0 1px #d8ffff38,0 0 0 22px #a1edeb12,0 0 0 47px #af93e70c,inset 0 0 34px #5ce5cc40,0 0 45px #5ce5cc38; }
+.era-2020 .now-artwork-orbit::before,.era-2020 .now-artwork-orbit::after { content:""; position:absolute; inset:-25px; border:1px solid #d9ffff38; border-radius:50%; border-left-color:#75f0d4; border-right-color:#bb99ec; }
+.era-2020 .now-artwork-orbit::after { inset:-50px; border-color:#ffffff1a; border-top-color:#80f8e379; transform:rotate(-28deg); }
+.era-2020 .device-playing .now-artwork-orbit { animation:now-artwork-turn 18s linear infinite; }
+.era-2020 .now-artwork-disc { color:#eafffb; filter:drop-shadow(0 0 12px #92fff4c4); }
+.era-2020 .now-artwork-caption { z-index:2; padding:8px 10px; border:1px solid #ffffff30; border-radius:9px; background:#0919256e; backdrop-filter:blur(12px); }
+@keyframes now-artwork-drift { to { transform:rotate(360deg); } }
+@keyframes now-artwork-turn { to { transform:rotate(360deg); } }
+.era-2020 .now-artwork[data-cover="1"] { background:radial-gradient(circle at 70% 25%,#d2a2fcb0,transparent 28%),radial-gradient(circle at 25% 80%,#33e4bb99,transparent 36%),#19263b; }
+.era-2020 .now-artwork[data-cover="2"] { background:radial-gradient(circle at 25% 28%,#89d9ffc2,transparent 27%),radial-gradient(circle at 75% 75%,#f3a1bb99,transparent 32%),#1b1d35; }
+.era-2020 .now-artwork-orbit { position:absolute; width:180px; height:180px; border:1px solid #ffffff6b; border-radius:50%; box-shadow:0 0 0 23px #ffffff09,0 0 0 48px #ffffff09; }
+.era-2020 .now-artwork-disc { z-index:1; color:#ffffffd9; filter:drop-shadow(0 0 18px #a4fff6a0); }
+.era-2020 .now-artwork-caption { position:absolute; right:12px; bottom:11px; left:12px; display:flex; align-items:center; gap:8px; color:#eafff9; font:700 9px var(--font-body); letter-spacing:.15em; }
+.era-2020 .now-artwork-caption svg:last-child { margin-left:auto; }
+.era-2020 .device-2020 .music-compact { display:flex; flex-direction:column; gap:8px; padding:16px 7px 8px; }
+.era-2020 .device-2020 .track-open { width:100%; align-items:flex-start; text-align:left; color:#fff; }
+.era-2020 .device-2020 .track-open .eyebrow { color:#75e8d6; font:700 9px var(--font-body); letter-spacing:.12em; }
+.era-2020 .device-2020 .track-open strong { font:750 21px/1.2 var(--font-display); letter-spacing:-.03em; }
+.era-2020 .device-2020 .track-open small { color:#c3d3dd; font:12px var(--font-body); }
+.era-2020 .device-2020 .music-buttons { display:flex; justify-content:center; gap:17px; }
+.era-2020 .device-2020 .music-buttons .icon-button { display:grid; place-items:center; width:36px; height:36px; border-radius:50%; color:#eaf9f8; }
+.era-2020 .device-2020 .music-buttons .icon-button:hover { background:#ffffff1c; }
+.era-2020 .device-2020 .music-buttons .icon-button:nth-child(2) { background:#7ff2dc; color:#08222a; }
+.era-2020 .device-2020 .music-buttons { gap:10px; margin:2px 0 4px; }
+.era-2020 .device-2020 .music-buttons .icon-button { width:40px; height:40px; border:1px solid #ffffff22; background:#ffffff0d; transition:transform .18s ease,background .18s ease,box-shadow .18s ease; }
+.era-2020 .device-2020 .music-buttons .icon-button:nth-child(2) { width:44px; height:44px; border-color:#b6fff3; box-shadow:0 0 0 4px #67efd41b,0 6px 20px #5ce5cc50; }
+.era-2020 .device-2020 .music-buttons .icon-button:hover { transform:translateY(-2px); background:#ffffff25; }
+.era-2020 .device-2020 .music-buttons .icon-button:nth-child(2):hover { background:#b2ffed; }
+.era-2020 .device-2020 .track-open:hover strong { color:#8bf7e3; }
+.era-2020 .device-2020 .device-seek input { cursor:pointer; }
+.era-2020 .device-2020 .song-picker-trigger:hover { background:#29434d; color:#fff; }
+@media(max-width:899px) {
+  .app.era-2020 .map-2020-hud { top:68px; left:12px; min-width:0; max-width:calc(100% - 100px); gap:10px; padding:9px 12px; border-radius:13px; }
+  .era-2020 .map-2020-hud strong { font-size:11px; }
+  .era-2020 .map-2020-hud div span,.era-2020 .map-2020-hud-coordinate { display:none; }
+  .era-2020 .map-2020-hud-pulse { width:7px; height:7px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .era-2020 .map-2020-hud-pulse,.era-2020 .now-artwork::before,.era-2020 .device-playing .now-artwork-orbit { animation:none; }
+}
+
+/* 2020s: a physical smart speaker opens into the streaming surface. */
+.era-2020 .speaker-2020-face { position:relative; display:grid; place-items:center; flex:none; width:142px; height:142px; border:5px solid #202934; border-radius:50%; background:radial-gradient(circle at 35% 28%,#3c4454,#121823 62%,#080d14); box-shadow:inset 0 4px 13px #ffffff1c,inset 0 -12px 20px #000a,0 0 0 2px #070d15,0 13px 28px #0009; }
+.era-2020 .speaker-2020-face::before { content:""; position:absolute; inset:2px; border-radius:50%; background:conic-gradient(from 140deg,#6eecff,#ffffff,#71e9d4,#8d72ed,#6eecff); box-shadow:0 0 12px #53d8ff,0 0 26px #6d9cf983; mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px)); opacity:calc(.58 + var(--audio-level,0) * .42); }
+.era-2020 .speaker-2020-face::after { content:""; position:absolute; inset:13px; border-radius:50%; background:radial-gradient(#8495ad30 1px,transparent 1.5px); background-size:4px 4px; box-shadow:inset 0 0 22px #000b; }
+.era-2020 .speaker-2020-core { z-index:1; display:grid; place-items:center; width:47px; height:47px; border:1px solid #ffffff29; border-radius:50%; background:#1e2935; color:#d2fff8; box-shadow:inset 0 1px #ffffff24,0 0 19px #83dfff50; }
+.app.era-2020 .device-2020 { width:min(318px,calc(100vw - 32px)); max-height:calc(100dvh - 112px); overflow:visible; backdrop-filter:none; }
+.era-2020 .device-2020 .device-illustration { border:1px solid #8bd8d449; }
+.era-2020 .device-2020 .now-artwork { height:151px; background:radial-gradient(circle at 54% 50%,#215b6c,#172238 48%,#101422 78%); }
+.era-2020 .device-2020 .now-artwork::before { opacity:.7; }
+.era-2020 .device-2020 .now-artwork::after { background:linear-gradient(135deg,#ffffff18,transparent 40%),linear-gradient(0deg,#09142198,transparent 35%); }
+.era-2020 .device-2020 .speaker-2020 { position:relative; z-index:1; transform:scale(calc(1 + var(--audio-level,0) * .055)); transition:transform .12s linear; }
+.era-2020 .device-2020 .speaker-2020-face { width:112px; height:112px; }
+.era-2020 .device-2020 .speaker-2020-core { width:38px; height:38px; }
+.era-2020 .device-2020 .speaker-2020-core svg { width:28px; height:28px; }
+.era-2020 .device-2020 .speaker-2020-face { box-shadow:inset 0 4px 13px #ffffff1c,inset 0 -12px 20px #000a,0 0 0 2px #070d15,0 0 calc(19px + var(--audio-level,0) * 36px) #51ddf2a1,0 13px 28px #0009; }
+.era-2020 .device-2020 .music-compact { padding:10px 7px 6px; }
+.era-2020 .device-2020 .track-open .eyebrow { color:#81eee0; }
+.era-2020 .device-2020 .device-seek { margin-bottom:9px; }
+.era-2020 .stream-2020-queue { margin:1px 12px 10px; padding:7px 9px 4px; border:1px solid #ffffff24; border-radius:12px; background:#0c1b29bd; }
+.era-2020 .stream-2020-queue-title { display:flex; align-items:center; gap:7px; padding:2px 4px 8px; color:#e9fffb; }
+.era-2020 .stream-2020-queue-title strong { font:700 12px var(--font-body); }
+.era-2020 .stream-2020-queue-title span { margin-left:auto; color:#9dbbc4; font:10px var(--font-body); }
+.era-2020 .stream-2020-tracks { display:grid; gap:2px; max-height:125px; overflow:auto; scrollbar-width:thin; }
+.era-2020 .stream-2020-tracks button { display:flex; align-items:center; gap:9px; width:100%; min-height:33px; padding:4px 7px; border:0; border-radius:8px; background:transparent; color:#d4e8e9; text-align:left; cursor:pointer; }
+.era-2020 .stream-2020-tracks button:hover,.era-2020 .stream-2020-tracks button.is-current { background:#233e48; color:#80f0df; }
+.era-2020 .stream-2020-number { display:grid; place-items:center; width:22px; flex:none; color:#9eb7c2; font:10px var(--font-body); }
+.era-2020 .stream-2020-tracks button.is-current .stream-2020-number { color:#7df1e1; }
+.era-2020 .stream-2020-tracks button>span:last-child { display:grid; min-width:0; gap:1px; }
+.era-2020 .stream-2020-tracks strong,.era-2020 .stream-2020-tracks small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.era-2020 .stream-2020-tracks strong { font:650 11px var(--font-body); }
+.era-2020 .stream-2020-tracks small { color:#9ab3bc; font:10px var(--font-body); }
+
+/* Feed header and community actions share the spacing of the other eras. */
+.app.era-2020.view-feed .feed-heading { box-sizing:border-box; min-height:76px; padding:15px 18px; margin-bottom:18px; border:1px solid #456674; border-radius:18px; background:linear-gradient(110deg,#233c49,#182a38 70%); box-shadow:inset 0 1px #ffffff20,0 8px 24px #020b1580; color:#f2fffd; }
+.app.era-2020.view-feed .feed-heading h2 { font:750 25px/1.2 var(--font-display); letter-spacing:-.035em; }
+.app.era-2020.view-feed .feed-tabs { flex-wrap:nowrap; align-items:center; gap:7px; }
+.app.era-2020.view-feed .feed-tabs button { min-height:38px; padding:8px 14px; border:1px solid #66818a; border-radius:11px; background:#162b38; color:#cde8e8; font:650 12px var(--font-body); white-space:nowrap; }
+.app.era-2020.view-feed .feed-tabs button[aria-pressed="true"] { border-color:#91f7e4; background:#62e5ce; color:#09252b; box-shadow:0 4px 13px #45e5cd38; }
+.app.era-2020.view-feed .feed-tabs button:not([aria-pressed="true"]):hover { border-color:#86dace; background:#234552; color:#fff; }
+
+/* Keep the profile layout consistent with the preceding eras. */
+.app.era-2020.view-profile .profile-era-bar { border:1px solid #4e727a; border-bottom:0; border-radius:14px 14px 0 0; background:linear-gradient(100deg,#25535c,#1d3546); color:#e8fffa; }
+.app.era-2020.view-profile .personal-header { border:1px solid #4e727a; border-top:0; border-radius:0; background:linear-gradient(115deg,#203c48,#182b39); box-shadow:none; }
+.app.era-2020.view-profile .personal-counts { border:0; border-radius:0; background:transparent; box-shadow:none; }
+.app.era-2020.view-profile .profile-shortcuts { margin-bottom:16px; border:1px solid #4e727a; border-top:0; border-radius:0 0 14px 14px; background:#152634; }
+.app.era-2020.view-profile .profile-shortcuts button { border:1px solid #527580; border-radius:9px; background:#233c49; color:#d9f6f1; }
+.app.era-2020.view-profile .profile-posts { width:100%; max-width:none; margin:0; padding-bottom:70px; }
+.app.era-2020.view-profile .profile-feed-posts { gap:16px; }
+.app.era-2020.view-profile .profile-feed-posts .feed-post { box-sizing:border-box; width:100%; min-width:0; padding:20px; border:1px solid #46636e; border-radius:16px; background:linear-gradient(125deg,#203542,#182936); box-shadow:0 8px 22px #020a1280; overflow:visible; }
+@media(min-width:900px) {
+  .app.era-2020.view-profile .post-composition.has-split-photo { display:grid; grid-template-columns:minmax(0,1fr) clamp(260px,38%,440px); gap:24px; align-items:stretch; }
+  .app.era-2020.view-profile .has-split-photo > .post-details { display:flex; flex-direction:column; min-width:0; }
+  .app.era-2020.view-profile .has-split-photo .post-body { display:flex; flex:1; flex-direction:column; min-width:0; }
+  .app.era-2020.view-profile .has-split-photo .post-content .post-image { display:none; }
+  .app.era-2020.view-profile .has-split-photo .post-place { margin-top:auto; }
+  .app.era-2020.view-profile .has-split-photo > .post-photo-open { display:block; align-self:stretch; width:100%; min-width:0; aspect-ratio:4/3; padding:0; border:0; border-radius:12px; background:transparent; cursor:pointer; }
+  .app.era-2020.view-profile .post-photo-open img { display:block; width:100%; height:100%; object-fit:cover; border:1px solid #5c7981; border-radius:12px; }
+}
+@media(max-width:899px) {
+  .app.era-2020.view-profile .profile-posts { max-width:none; }
+  .app.era-2020.view-profile .profile-feed-posts .feed-post { padding:14px; }
+  .app.era-2020.view-profile .post-content.with-image { flex-direction:column-reverse; }
+  .app.era-2020.view-profile .post-content .post-image { width:100%; height:auto; max-height:60dvh; aspect-ratio:1; object-fit:cover; }
+  .app.era-2020.view-feed .feed-heading { min-height:0; padding:12px; margin-bottom:12px; border-radius:14px; }
+  .app.era-2020.view-feed .feed-heading h2 { font-size:21px; }
+  .app.era-2020.view-feed .feed-tabs { width:100%; gap:6px; }
+  .app.era-2020.view-feed .feed-tabs button { flex:1; min-width:0; min-height:40px; padding:7px 5px; font-size:11px; }
+}
+@media(max-width:899px) {
+  .app.era-2020 .device-2020 .stream-2020-queue { display:none; }
+  .app.era-2020 .device-2020 { max-height:calc(100dvh - var(--mobile-top) - var(--mobile-bottom) - 16px); overflow:visible; }
+  .app.map-app.era-2020 .music-card.device-2020.player-visible { border:1px solid #8df8e06b; border-radius:20px; background:linear-gradient(145deg,#223b48f2,#101d2cf5); box-shadow:inset 0 1px #ffffff32,0 16px 42px #010916c9; }
+  .app.era-2020 .device-2020 .mobile-player-heading { min-height:30px; padding:4px 9px; border-bottom:1px solid #ffffff18; border-radius:19px 19px 0 0; background:#10202dbb; }
+  .app.era-2020 .device-2020 .mobile-player-heading::before { content:""; position:absolute; top:9px; left:50%; width:27px; height:3px; transform:translateX(-50%); border-radius:3px; background:#91c7cb78; }
+  .app.map-app.era-2020 .device-2020.player-visible .mobile-player-mini { padding:8px 10px 9px; border-radius:0 0 19px 19px; background:linear-gradient(145deg,#1c3541,#13212e); }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-track { min-height:53px; gap:11px; padding:4px 7px; border:1px solid #9fead038; border-radius:12px; background:linear-gradient(110deg,#244251,#132635); box-shadow:inset 0 1px #ffffff17; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-art { position:relative; width:40px; height:40px; border:2px solid #1c2b38; border-radius:50%; background:radial-gradient(circle at 37% 25%,#4e6474,#111923 68%); color:#cffff6; box-shadow:0 0 0 1px #080f18,0 2px 8px #0009; transform:scale(calc(1 + var(--audio-level,0) * .06)); }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-art::before { content:""; position:absolute; inset:0; border-radius:50%; background:conic-gradient(#70e3fa,#a58afd,#7cf4db,#70e3fa); box-shadow:0 0 calc(7px + var(--audio-level,0) * 15px) #6dece3b8; mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px)); opacity:calc(.62 + var(--audio-level,0) * .38); }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-art svg { position:relative; z-index:1; width:19px; height:19px; filter:drop-shadow(0 0 5px #b0fff7); }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-track small { color:#86eee0; letter-spacing:.1em; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-track strong { color:#f3fffd; font-weight:750; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-seek { margin:7px 3px 3px; color:#c6dfe0; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-controls { gap:5px; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-controls :is(.icon-button,.mobile-song-picker-trigger) { border:1px solid #71949e75; border-radius:12px; background:#29414e; color:#ecfffd; box-shadow:inset 0 1px #ffffff24; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-controls .mobile-mini-play { border-color:#baffed; background:#7df1da; color:#0a2830; box-shadow:0 0 0 3px #62edd61d,0 3px 13px #69f5dd61; }
+}
+.era-2020 .device-2020 .device-seek { padding:6px 7px 11px; color:#aec6cf; }
+.era-2020 .device-2020 .device-seek input { accent-color:#6aedd8; }
+.app.era-2020 .device-2020 .song-picker-trigger { min-height:40px; border-top:1px solid #526b76; border-radius:0 0 23px 23px; background:#1a2b36; color:#d4f5ef; }
+.app.era-2020 .device-2020 .song-picker { border:1px solid #64818c; border-radius:16px; background:#182a35; }
+@media(max-width:899px) {
+  .app.era-2020 .mobile-appbar { border-bottom:1px solid #426770; background:#111e28ef; backdrop-filter:blur(18px); color:#edfafa; }
+  .app.era-2020 .navigation-rail { border-top:1px solid #486571; background:#111e28f5; backdrop-filter:none; }
+  .app.era-2020 .navigation-rail button { color:#bad4d9; }
+  .app.map-app.era-2020 .navigation-rail>button,.app.map-app.era-2020 .navigation-rail>.account-navigation { flex:1 1 0; }
+  .app.map-app.era-2020 .navigation-rail button.rail-active { border:1px solid #5ce5cc4d; border-radius:12px; background:#25444a; color:#85f5df; box-shadow:inset 0 1px #ffffff1d; }
+  .app.map-app.era-2020 .navigation-rail .notif-launcher { position:fixed; top:calc(6px + env(safe-area-inset-top,0px)); right:64px; z-index:720; flex:none; width:44px; height:44px; border:1px solid #577984; border-radius:12px; background:#1c303c; color:#d6f7f2; box-shadow:0 3px 10px #0005,inset 0 1px #ffffff21; }
+  .app.map-app.era-2020 .navigation-rail .notif-launcher:hover { border-color:#82e9da; color:#8cf5e1; }
+  .app.map-app.era-2020 .music-card.device-2020.player-visible { border:1px solid #66818c; border-radius:20px; background:#142632ee; color:#f3fffd; backdrop-filter:blur(22px); box-shadow:0 15px 44px #030c18ba; }
+  .app.era-2020 .device-2020 .mobile-player-heading { border-radius:20px 20px 0 0; background:transparent; color:#c1e3e0; }
+  .app.era-2020 .device-2020 .mobile-player-heading button { border:1px solid #5b7a83; background:#2d4852; color:#e4faf6; }
+  .app.map-app.era-2020 .device-2020.player-visible .mobile-player-mini { border-radius:0 0 19px 19px; background:linear-gradient(145deg,#223f49,#14232e); }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-art { border:1px solid #7fe6dc; border-radius:12px; background:linear-gradient(135deg,#4a9fa6,#795fba); color:#fff; box-shadow:0 0 16px #56e4d74d; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-track strong { color:#fff; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-track :is(small,span) { color:#b5d4d7; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-controls :is(.icon-button,.mobile-song-picker-trigger) { border:1px solid #52707c; border-radius:13px; background:#2a4450; color:#e4f8f5; box-shadow:none; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-controls .mobile-mini-play { border-color:#80eddc; background:#6eebd6; color:#0b2730; }
+  .app.map-app.era-2020 .device-2020 .mobile-mini-seek input { accent-color:#6aedd8; }
+}

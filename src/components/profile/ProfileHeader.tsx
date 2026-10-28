@@ -1,4 +1,4 @@
-import { LoaderCircle, MessageCircle, UserMinus, UserPlus, UserRound, X } from "lucide-react";
+import { LoaderCircle, MessageCircle, Pencil, UserMinus, UserPlus, UserRound, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../auth/AuthProvider";
@@ -13,6 +13,7 @@ export default function ProfileHeader({
   userId,
   author,
   username,
+  fotoPerfilUrl,
   presentation,
   period,
   memoryCount,
@@ -35,10 +36,12 @@ export default function ProfileHeader({
   onNavigateToProfile,
   onToggleFollow,
   onToggleFollowUser,
+  onEditProfile,
 }: {
   userId?: number;
   author?: string;
   username: string;
+  fotoPerfilUrl?: string | null;
   presentation: ProfilePresentation;
   period: Period;
   memoryCount: number;
@@ -61,6 +64,7 @@ export default function ProfileHeader({
   onNavigateToProfile?: (username: string) => void;
   onToggleFollow?: () => void | Promise<void>;
   onToggleFollowUser?: (author: string, authorId: number) => void;
+  onEditProfile?: () => void;
 }) {
   const router = useRouter();
   const { session } = useAuth();
@@ -72,6 +76,7 @@ export default function ProfileHeader({
   const [fetchedUsers, setFetchedUsers] = useState<FollowedUser[] | null>(null);
   const [loadingList, setLoadingList] = useState(false);
   const [pendingUserIds, setPendingUserIds] = useState<Set<number>>(new Set());
+  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
 
   const isOwnProfile = !author;
   const displayName = author ?? username;
@@ -118,26 +123,32 @@ export default function ProfileHeader({
         <span className="profile-edition">{period.decade}—{period.decade + 9}</span>
       </div>
       <header className="personal-header">
-        <div className="profile-portrait" aria-hidden="true">
-          <span className="visitor-initial">{displayName.slice(0, 1).toUpperCase()}</span>
+        <div className="profile-portrait">
+          {fotoPerfilUrl && failedPhotoUrl !== fotoPerfilUrl
+            ? <img src={fotoPerfilUrl} alt={`Foto de perfil de ${displayName}`} onError={() => setFailedPhotoUrl(fotoPerfilUrl)} />
+            : <span className="visitor-initial" aria-hidden="true">{displayName.slice(0, 1).toUpperCase()}</span>}
         </div>
         <div className="personal-identity">
           <div className="personal-identity-text">
             <span className="eyebrow">{presentation.label}</span>
             <div className="profile-name-row">
               <h2>{displayName}</h2>
-              {isOwnProfile ? (
-                <button
-                  className="profile-note"
-                  onClick={onOpenTiers}
-                  aria-haspopup="dialog"
-                  aria-expanded={tiersOpen}
-                >
-                  {userCategory}
+              {userCategory && (
+                <div className="profile-category">
+                  {isOwnProfile ? (
+                    <button className="profile-note" onClick={onOpenTiers} aria-haspopup="dialog" aria-expanded={tiersOpen}>
+                      {userCategory}
+                    </button>
+                  ) : (
+                    <span className="profile-note">{userCategory}</span>
+                  )}
+                </div>
+              )}
+              {isOwnProfile && onEditProfile && (
+                <button type="button" className="profile-edit-trigger secondary-button" onClick={onEditProfile} aria-label="Editar perfil" title="Editar perfil">
+                  <Pencil size={17} />
                 </button>
-              ) : userCategory ? (
-                <span className="profile-note">{userCategory}</span>
-              ) : null}
+              )}
             </div>
             <div className="personal-counts">
               <span><strong>{memoryCount}</strong> Recuerdos</span>
@@ -151,19 +162,22 @@ export default function ProfileHeader({
           </div>
           {!isOwnProfile && (onIniciarChat || onToggleFollow) && (
             <div className="profile-visitor-actions">
-              {onIniciarChat && <button className="secondary-button" onClick={() => onIniciarChat(author!)}>
-                <MessageCircle size={14} /> Iniciar chat
+              {onIniciarChat && <button className="secondary-button" aria-label={`Iniciar chat con ${displayName}`} title="Iniciar chat" onClick={() => onIniciarChat(author!)}>
+                <MessageCircle size={17} /> <span className="profile-action-label">Iniciar chat</span>
               </button>}
               {onToggleFollow && <button
                 className={isFollowing ? "secondary-button profile-unfollow-button" : "primary-button profile-follow-button"}
+                aria-label={isFollowing ? `Dejar de seguir a ${displayName}` : `Seguir a ${displayName}`}
+                title={isFollowing ? "Dejar de seguir" : "Seguir"}
+                aria-pressed={isFollowing}
                 disabled={followBusy}
                 onClick={async () => {
                   setFollowBusy(true);
                   try { await onToggleFollow(); } finally { setFollowBusy(false); }
                 }}
               >
-                {isFollowing ? <UserMinus size={14} /> : <UserPlus size={14} />}
-                {followBusy ? "Actualizando…" : isFollowing ? "Dejar de seguir" : "Seguir"}
+                {followBusy ? <LoaderCircle size={17} className="spin" /> : isFollowing ? <UserMinus size={17} /> : <UserPlus size={17} />}
+                <span className="profile-action-label">{followBusy ? "Actualizando…" : isFollowing ? "Dejar de seguir" : "Seguir"}</span>
               </button>}
             </div>
           )}
@@ -185,7 +199,7 @@ export default function ProfileHeader({
               </div>
               {unlocked.length ? (
                 <ul className="achievement-rail">
-                  {unlocked.map((achievement) => (
+                  {unlocked.slice(0, 5).map((achievement) => (
                     <li key={achievement.id}>
                       <img src={achievement.image} alt={achievement.name} title={achievement.name} width={40} height={40} />
                     </li>

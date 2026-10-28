@@ -569,6 +569,47 @@
   padding: 130px 0;
 }
 
+.memoryAlbum {
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+  align-items:center;
+  gap:clamp(40px,7vw,100px);
+  padding-block:100px;
+}
+.memoryAlbum h2 { font-size:clamp(2.2rem,4.1vw,4rem); line-height:1.08; text-wrap:balance; margin:20px 0; }
+.memoryAlbum .eyebrow { font-size:11px; letter-spacing:2px; }
+.memoryAlbum .featureList { margin-top:28px; }
+.memoryAlbum .featureList li { display:block; padding:0; border-color:#1f4d3b26; }
+.memoryAlbum .featureList a { display:flex; align-items:center; gap:16px; padding:18px 4px; color:var(--ink); text-decoration:none; transition:background 180ms; }
+.memoryAlbum .featureList a>svg:first-child { color:var(--green); flex-shrink:0; }
+.memoryAlbum .featureList a>svg:last-child { margin-left:auto; flex-shrink:0; color:var(--orange); }
+.memoryAlbum .featureList a:hover { background:#1f4d3b08; }
+.memoryAlbum .featureList a:focus-visible { outline:2px solid var(--green); outline-offset:4px; }
+.memoryAlbum .featureList p { font-size:13px; line-height:1.5; margin:5px 0 0; }
+.albumArtwork { position:relative; width:100%; aspect-ratio: .95; isolation:isolate; }
+.albumArtwork::before { content:''; position:absolute; inset:8% -3% 2%; border-radius:50%; background:radial-gradient(ellipse,#b7ad9250,transparent 68%); z-index:-1; }
+.albumRecord { position:absolute; top:0; right:0; width:78%; aspect-ratio:1; border-radius:50%; display:grid; place-items:center; transform:rotate(12deg); background:repeating-radial-gradient(circle,#252b28 0 1px,#121b17 2px 4px); box-shadow:0 15px 30px #14241b30,inset 0 0 0 8px #202923; }
+.albumRecord span { display:grid; place-content:center; text-align:center; width:34%; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle,#efe4c8 0 3px,transparent 4px),#b45c38; color:#fff0cc; font:700 clamp(7px,.7vw,10px)/2 monospace; letter-spacing:1px; padding-top:20px; }
+.albumPostcard { position:absolute; left:0; bottom:8%; width:82%; padding:14px 14px 22px; background:#faf3e2; border:1px solid #c7bda6; transform:rotate(-7deg); box-shadow:0 14px 28px #30261925,3px 4px 0 #dfd4bd; }
+.albumPostcard::before { content:''; position:absolute; top:-13px; left:34%; width:32%; height:29px; background:#c5ad7670; transform:rotate(4deg); z-index:1; }
+.postcardMap { min-height:180px; aspect-ratio:1.6; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:#f6e7c6; background:linear-gradient(#183d32bb,#183d32cc),url('/landing/hero-temporal-map.webp') center/cover; border:1px solid #1f4d3b; }
+.postcardMap span { font:10px monospace; letter-spacing:2px; }
+.memoryAlbum .albumPostcard p { margin:18px 0 8px; font:italic clamp(17px,1.6vw,23px)/1.3 Georgia,serif; color:#294839; }
+.albumPostcard small { display:block; font:8px/1.5 monospace; letter-spacing:1px; color:#82735a; }
+.albumNote { position:absolute; right:0; bottom:0; font:italic 18px Georgia,serif; color:#8d5136; transform:rotate(-4deg); }
+@media(max-width:900px) {
+  .story.memoryAlbum { display:grid; grid-template-columns:minmax(0,1fr); gap:48px; padding-block:64px; }
+  .albumArtwork { width:min(100%,400px); justify-self:center; }
+  .memoryAlbum h2 { max-width:650px; }
+}
+@media(max-width:560px) {
+  .story.memoryAlbum { width:calc(100% - 48px); gap:36px; }
+  .memoryAlbum h2 { font-size:clamp(2rem,8vw,2.7rem); }
+  .postcardMap { min-height:120px; }
+  .albumPostcard { padding:10px 10px 16px; }
+  .albumNote { font-size:15px; }
+  .memoryAlbum .featureList a { gap:12px; }
+}
+
 .storyQuote {
   color: var(--orange);
   font-family: Georgia, "Times New Roman", serif;
@@ -648,6 +689,46 @@
   margin-top: 42px;
   color: var(--ink);
   background: var(--paper);
+}
+
+.finalCall.eraInvitation { --invite-bg:#193c30; --invite-ink:#fff1d7; --invite-accent:#edbb76; overflow:hidden; padding:90px 24px 65px; color:var(--invite-ink); transition:color 900ms; }
+.eraInvitation[data-invitation-era="1980"] { --invite-bg:#20102e; --invite-ink:#fff0fc; --invite-accent:#75f5e8; }
+.eraInvitation[data-invitation-era="1990"] { --invite-bg:#124d50; --invite-ink:#f5f3e8; --invite-accent:#bce4c7; }
+.eraInvitation[data-invitation-era="2000"] { --invite-bg:#153d68; --invite-ink:#f0f7ff; --invite-accent:#a3dbff; }
+.eraInvitation[data-invitation-era="2020"] { --invite-bg:#101b27; --invite-ink:#f4fcff; --invite-accent:#73efdc; }
+.eraInvitation::before { background:var(--invite-bg); transition:background-color 1000ms; }
+.invitationContent { position:relative; z-index:1; max-width:850px; margin:auto; }
+.eraInvitation .invitationEyebrow { font-size:11px; letter-spacing:2px; color:var(--invite-accent); }
+.eraInvitation h2 { max-width:800px; margin:auto; font-size:clamp(2.5rem,5vw,4.8rem); line-height:1.08; text-wrap:balance; }
+.invitationPhrases { display:grid; margin:28px auto 12px; min-height:52px; align-items:center; }
+.eraInvitation .invitationPhrases p { grid-area:1/1; margin:0; font:italic clamp(18px,2.3vw,27px)/1.4 Georgia,serif; text-transform:none; letter-spacing:0; color:var(--invite-accent); opacity:0; transform:translateY(12px); filter:blur(5px); transition:opacity 700ms,transform 900ms,filter 900ms; }
+.eraInvitation .invitationPhrases p[data-active="true"] { opacity:1; transform:translateY(0); filter:blur(0); }
+.eraInvitation .invitationDescription { max-width:440px; margin:0 auto; font:15px/1.7 Arial,sans-serif; text-transform:none; letter-spacing:0; }
+.eraInvitation .lightAction { display:inline-flex; align-items:center; gap:22px; margin-top:28px; min-height:52px; border:1px solid #ffffff66; border-radius:10px; background:#fff5e3; color:#193c30; box-shadow:0 8px 25px #0003; text-transform:none; letter-spacing:0; font-size:15px; }
+.invitationControls { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:32px; }
+.invitationControls button { display:grid; place-items:center; min-width:44px; min-height:44px; padding:8px 12px; border:1px solid #ffffff30; border-radius:20px; font:12px monospace; color:var(--invite-ink); background:transparent; cursor:pointer; transition:background 400ms,color 400ms; }
+.invitationControls button[aria-pressed="true"] { color:var(--invite-bg); background:var(--invite-accent); border-color:transparent; }
+.invitationControls button:focus-visible,.eraInvitation .lightAction:focus-visible { outline:2px solid var(--invite-accent); outline-offset:4px; }
+.invitationScenes { position:absolute; inset:0; pointer-events:none; }
+.invitationScene { position:absolute; inset:0; opacity:0; transform:scale(1.07); transition:opacity 1200ms,transform 1800ms; background:radial-gradient(ellipse at 10% 50%,#e6b46a25,transparent 60%); }
+.invitationScene[data-active="true"] { opacity:1; transform:scale(1); }
+.invitationScene>svg { position:absolute; left:-45px; top:15%; width:clamp(220px,27vw,420px); height:70%; opacity:.12; }
+.invitationScene>span { position:absolute; right:2%; bottom:5%; color:#fff; opacity:.055; font:900 clamp(130px,22vw,320px)/1 Arial,sans-serif; }
+.invitationScene[data-scene="1980"] { background:linear-gradient(125deg,#e640b820,transparent 45%,#53e4dd15),repeating-linear-gradient(0deg,transparent 0 4px,#ffffff03 4px 5px); }
+.invitationScene[data-scene="1990"] { background:linear-gradient(90deg,#ffffff04 1px,transparent 1px),linear-gradient(#ffffff04 1px,transparent 1px); background-size:32px 32px; }
+.invitationScene[data-scene="2000"] { background:radial-gradient(ellipse at 85% 5%,#b1e4ff38,transparent 60%),linear-gradient(140deg,transparent 55%,#ffffff08 55%,transparent 80%); }
+@media(max-width:560px) {
+ .finalCall.eraInvitation { padding:64px 24px 44px; }
+ .eraInvitation h2 { font-size:clamp(2.2rem,9vw,3rem); }
+ .invitationScene>svg { left:-90px; top:15%; opacity:.08; }
+ .invitationPhrases { min-height:76px; margin-top:22px; }
+ .eraInvitation .invitationDescription { font-size:14px; }
+ .invitationControls { gap:5px; }
+ .invitationControls button { padding:8px 10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .eraInvitation,.eraInvitation::before,.invitationScene,.eraInvitation .invitationPhrases p,.invitationControls button { transition:none; }
+ .invitationScene,.eraInvitation .invitationPhrases p { transform:none; filter:none; }
 }
 
 .footer {
@@ -1072,6 +1153,10 @@
 .eraHero[data-era="2000"]::after { background: radial-gradient(ellipse,#ffffffb3,transparent); }
 .eraHero[data-era="2000"] .heroMapBackdrop { filter: grayscale(1) sepia(.3) hue-rotate(155deg); opacity: .24; }
 .eraHero[data-era="2000"] .primaryAction { border-radius: 20px; background: linear-gradient(#438dd0,#195a99); color: white; box-shadow: inset 0 1px #fff9,0 5px 18px #195a9926; }
+.eraHero[data-era="2010"] { --paper:#f2f0e7; --green:#2c718b; --orange:#c68764; --ink:#264859; --muted:#5b7580; --dial-accent:#ba795a; --hero-title:#28718d; background:radial-gradient(circle at 75% 15%,#fffaf0,#e2ece9 60%,#c8d9d7); box-shadow:inset 0 0 0 2px #9dbbc0,inset 0 -80px 140px #bdcecb55; }
+.eraHero[data-era="2010"]::after { background:radial-gradient(ellipse,#fff9eaaa,transparent 70%); }
+.eraHero[data-era="2010"] .heroMapBackdrop { filter:grayscale(.7) sepia(.3) hue-rotate(135deg); opacity:.22; }
+.eraHero[data-era="2010"] .primaryAction { border-radius:9px; background:linear-gradient(#498da6,#276d88); color:#fff; box-shadow:inset 0 1px #fff8,0 5px 18px #22546f33; }
 .eraControl { display: flex; align-items: center; justify-content: center; gap: 22px; margin: 32px auto 0; text-align: left; }
 .eraDial { position: relative; flex: 0 0 100px; height: 100px; border-radius: 50%; touch-action: none; cursor: grab; background: repeating-conic-gradient(from -1deg,#b8ac9277 0 1deg,transparent 1deg 10deg); box-shadow: 0 6px 18px #0003; }
 .eraDial:active { cursor: grabbing; }
@@ -1212,6 +1297,17 @@
 .temporalMapSection[data-map-era="1980"] { --map-accent:#66e5e0; --map-screen:#1c142b; --paper:#1c142b; --ink:#f4e8fc; --muted:#c6b9d3; --green:#66e5e0; --orange:#e18ac3; background-color:#140f20; }
 .temporalMapSection[data-map-era="1990"] { --map-accent:#95d8c4; --map-screen:#164b49; --paper:#164b49; --ink:#eff3e9; --muted:#bdd1c6; --green:#95d8c4; --orange:#d3d0b9; background-color:#132f2e; }
 .temporalMapSection[data-map-era="2000"] { --map-accent:#8fcaf5; --map-screen:#17334e; --paper:#17334e; --ink:#eef7ff; --muted:#b9cede; --green:#8fcaf5; --orange:#a9d7b4; background-color:#112438; }
+.temporalMapSection[data-map-era="2010"] { --map-accent:#9ac4ca; --map-screen:#254d5d; --paper:#254d5d; --ink:#fffaf0; --muted:#d0e1df; --green:#9ac4ca; --orange:#dab09a; background-color:#193f4d; }
+.temporalMapSection[data-map-era="2010"] .memoryMap { border-color:#6b888d; box-shadow:0 0 0 3px #e7eeea,inset 0 0 28px #102e3d77,0 20px 45px #0004; }
+.eraInvitation[data-invitation-era="2010"] { --invite-bg:#264f60; --invite-ink:#fff9ed; --invite-accent:#e6b994; }
+.invitationScene[data-scene="2010"] { background:radial-gradient(circle at 70% 30%,#e4b79d44,transparent 55%),linear-gradient(135deg,#1a3e4e,#376878); }
+.eraHero[data-era="2020"] { --paper:#11222e; --green:#77ecd9; --orange:#af8cf0; --ink:#f4fcff; --muted:#b5d4d7; --dial-accent:#7debdc; --hero-title:#f7ffff; background:radial-gradient(circle at 78% 20%,#415d7966,transparent 40%),radial-gradient(circle at 25% 80%,#15475e,transparent 42%),#0b1119; box-shadow:inset 0 0 0 2px #4c7179,inset 0 -80px 140px #122a3f; }
+.eraHero[data-era="2020"]::after { background:radial-gradient(ellipse,#4c7d9b55,transparent 70%); }
+.eraHero[data-era="2020"] .heroMapBackdrop { filter:grayscale(1) hue-rotate(135deg); opacity:.13; }
+.eraHero[data-era="2020"] .primaryAction { border:1px solid #8ff6e4; border-radius:14px; background:#77ecd9; color:#0b2730; box-shadow:0 8px 26px #5ce5cc55; }
+.temporalMapSection[data-map-era="2020"] { --map-accent:#77e9d5; --map-screen:#132a37; --paper:#132a37; --ink:#f3ffff; --muted:#c0d7dc; --green:#77e9d5; --orange:#ae91e8; background-color:#0b1924; }
+.temporalMapSection[data-map-era="2020"] .memoryMap { border-color:#629393; box-shadow:0 0 0 2px #79e9d680,inset 0 0 40px #0b1b2c,0 20px 50px #0008; }
+.invitationScene[data-scene="2020"] { background:radial-gradient(circle at 30% 25%,#6a95ef55,transparent 50%),radial-gradient(circle at 70% 75%,#4eebc755,transparent 45%),#101b27; }
 .temporalMapSection .eyebrow { color: var(--map-accent); font-size: 11px; letter-spacing: .17em; }
 .temporalMapSection .mapSectionCopy h2 { font-size: clamp(2.6rem,4.2vw,4.3rem); line-height: 1.07; letter-spacing: -.04em; }
 .temporalMapSection .memoryMap {
@@ -1293,4 +1389,56 @@
  .story h2,.finalCall h2 { font-size:clamp(2rem,9vw,2.6rem); line-height:1.15; }
  .finalCall { padding:64px 24px; }
  .footer { padding-bottom:env(safe-area-inset-bottom,0px); }
+}
+
+/* Two distinct invitations: a map pin to enter, a small dial to discover. */
+.eraHero .actions .exploreAction {
+  display:inline-flex; align-items:center; justify-content:center; gap:12px;
+  min-height:48px; padding:8px 16px 8px 9px; width:auto;
+  border:1px solid color-mix(in srgb,var(--green) 70%,var(--paper));
+  border-radius:12px; background:var(--green); color:var(--paper);
+  font-size:14px; font-weight:800; letter-spacing:0; text-transform:none;
+  box-shadow:inset 0 1px #ffffff55,0 4px 0 color-mix(in srgb,var(--green) 60%,#000),0 8px 22px #0003;
+  transition:box-shadow 180ms,background-color 300ms;
+}
+.exploreActionPin { display:grid; place-items:center; width:32px; height:32px; flex-shrink:0; border-radius:8px; background:color-mix(in srgb,var(--paper) 14%,transparent); border:1px solid color-mix(in srgb,var(--paper) 25%,transparent); }
+.eraHero .actions .exploreAction>svg { transition:translate 180ms; }
+.eraHero .actions .exploreAction:hover>svg { translate:2px -2px; }
+.eraHero .actions .epochsAction { display:inline-flex; align-items:center; justify-content:center; gap:10px; width:auto; min-height:44px; padding:5px 8px; border:0; border-radius:0; background:transparent; color:var(--green); box-shadow:none; font-size:13px; font-weight:600; text-decoration:none; }
+.epochsActionDial { display:grid; place-items:center; width:34px; height:34px; flex-shrink:0; border:1px dashed color-mix(in srgb,var(--green) 65%,transparent); border-radius:50%; transition:rotate 400ms; }
+.epochsAction>span:last-child { padding-block:5px; border-bottom:1px solid color-mix(in srgb,var(--green) 35%,transparent); }
+.epochsAction:hover .epochsActionDial { rotate:35deg; }
+.epochsAction:hover>span:last-child { border-bottom-color:currentColor; }
+.epochsActionDial>svg { animation:epochsCompassTurn 9s ease-in-out infinite; transform-origin:center; }
+.epochsAction>span:last-child {
+  background-image:linear-gradient(110deg,currentColor 0%,currentColor 33%,#fff 46%,#fff 54%,currentColor 67%,currentColor 100%);
+  background-size:300% 100%;
+  background-position:100% 0;
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:epochsTextShine 4.5s ease-in-out infinite;
+}
+@keyframes epochsCompassTurn {
+  0%,15% { transform:rotate(0deg); }
+  55%,100% { transform:rotate(360deg); }
+}
+@keyframes epochsTextShine {
+  0%,20% { background-position:100% 0; filter:drop-shadow(0 0 0 transparent); }
+  42% { filter:drop-shadow(0 0 5px color-mix(in srgb,var(--green) 55%,#fff)) drop-shadow(0 0 10px color-mix(in srgb,var(--green) 40%,transparent)); }
+  65%,100% { background-position:0% 0; filter:drop-shadow(0 0 0 transparent); }
+}
+.eraHero .actions a:focus-visible { outline:2px solid var(--green); outline-offset:5px; }
+.eraHero[data-era="1980"] .actions .exploreAction { border-radius:5px; box-shadow:3px 3px 0 #df65ba,0 0 20px #62f0df22; }
+.eraHero[data-era="1990"] .actions .exploreAction { border-radius:2px; border:2px outset #d8e5d7; box-shadow:3px 3px 0 #002e2e66; }
+.eraHero[data-era="2000"] .actions .exploreAction { background:linear-gradient(#347cbd,#195a99); color:white; box-shadow:inset 0 1px #ffffff88,0 4px 0 #164774,0 8px 20px #195a9926; }
+@media(max-width:560px) {
+ .eraHero .actions { gap:18px; width:min(90%,300px); align-items:center; }
+ .eraHero .actions .exploreAction { font-size:13px; gap:9px; }
+ .eraHero .actions .epochsAction { font-size:12px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .exploreActionPin,.eraHero .actions .exploreAction>svg,.epochsActionDial { transition:none; }
+ .epochsActionDial>svg,.epochsAction>span:last-child { animation:none; }
+ .epochsAction>span:last-child { background:none; -webkit-text-fill-color:currentColor; }
 }

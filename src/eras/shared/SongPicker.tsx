@@ -2,8 +2,8 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronRight, ListMusic, X } from 'lucide-react';
 import type { MusicTrack } from '../contracts';
 
-export default function SongPicker({ title, tracks, track, onSelect }: {
-  title: string; tracks: MusicTrack[]; track: MusicTrack; onSelect: (index: number) => void;
+export default function SongPicker({ title, tracks, track, onSelect, compact = false }: {
+  title: string; tracks: MusicTrack[]; track: MusicTrack; onSelect: (index: number) => void; compact?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -31,8 +31,8 @@ export default function SongPicker({ title, tracks, track, onSelect }: {
     setOpen(true);
   }
   return <>
-    <button ref={trigger} className="song-picker-trigger" onClick={show} aria-haspopup="dialog" aria-expanded={open} aria-controls={id}>
-      <ListMusic size={15}/><span>Elegir canción</span><small>{tracks.findIndex(item => item.spotifyId === track.spotifyId) + 1} / {tracks.length}</small><ChevronRight size={15}/>
+    <button ref={trigger} className={`song-picker-trigger${compact ? ' mobile-song-picker-trigger' : ''}`} onClick={show} aria-label={compact ? 'Elegir canción' : undefined} title={compact ? 'Elegir canción' : undefined} aria-haspopup="dialog" aria-expanded={open} aria-controls={id}>
+      <ListMusic size={compact ? 19 : 15}/>{!compact && <><span>Elegir canción</span><small>{tracks.findIndex(item => item.spotifyId === track.spotifyId) + 1} / {tracks.length}</small><ChevronRight size={15}/></>}
     </button>
     <dialog ref={dialog} id={id} className="song-picker" aria-labelledby={`${id}-title`} onClose={() => setOpen(false)} onClick={event => { if (event.target === event.currentTarget) { const box = event.currentTarget.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.current?.close(); } }}>
       <header className="song-picker-heading"><div><small>COLECCIÓN · {tracks.length} TEMAS</small><h2 id={`${id}-title`}>{title}</h2></div><button className="icon-button" aria-label="Cerrar selección de canciones" onClick={() => dialog.current?.close()}><X size={18}/></button></header>

@@ -15,6 +15,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
   memories: Memory[];
   selected: Memory | null;
   repostedPublicationIds: string[];
+  isSavedTab?: boolean;
   onEdit: (memory: Memory) => void;
   onDelete: (memory: Memory) => void;
   onOpen?: (memory: Memory) => void;
@@ -26,6 +27,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
   memories,
   selected,
   repostedPublicationIds,
+  isSavedTab = false,
   onEdit,
   onDelete,
   onOpen,
@@ -40,7 +42,6 @@ const ProfilePosts = forwardRef<HTMLElement, {
 
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [reposts, setReposts] = useState<string[]>(repostedPublicationIds);
-  const [saves, setSaves] = useState<string[]>([]);
   const [removedReposts, setRemovedReposts] = useState<string[]>([]);
 
   const sortedMemories = memories.filter((memory) => !(
@@ -57,7 +58,11 @@ const ProfilePosts = forwardRef<HTMLElement, {
     <section
       ref={ref}
       className="personal-album profile-posts"
-      aria-label={author ? `Recuerdos de ${author}` : "Mis recuerdos"}
+      aria-label={
+        isSavedTab
+          ? "Mis recuerdos guardados"
+          : (author ? `Recuerdos de ${author}` : "Mis recuerdos")
+      }
     >
       {sortedMemories.length ? (
         <div className="feed-posts profile-feed-posts">
@@ -126,7 +131,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                 reposted={isReposted}
                 directUnrepost={true}
                 repostCount={interactions.getRepostCount(targetKey, memory.repostCount ?? 0)}
-                saved={saves.includes(memory.id)}
+                saved={interactions.isSaved(targetKey, memory.viewerSaved ?? (isSavedTab ? true : false))}
                 quotedMemory={quotedMemory}
                 onDelete={onDelete}
                 onEdit={onEdit}
@@ -222,9 +227,11 @@ const ProfilePosts = forwardRef<HTMLElement, {
                   }
                 }}
                 onSave={() => {
-                  setSaves((curr) =>
-                    curr.includes(memory.id) ? curr.filter((id) => id !== memory.id) : [...curr, memory.id]
-                  );
+                  if (!session) {
+                    router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
+                    return;
+                  }
+                  interactions.toggleSave(targetKey, memory.viewerSaved ?? (isSavedTab ? true : false));
                 }}
                 onHashtag={(tag) => router.push(`/feed?tag=${encodeURIComponent(tag)}`)}
               />
@@ -233,9 +240,17 @@ const ProfilePosts = forwardRef<HTMLElement, {
         </div>
       ) : (
         <div className="personal-empty">
-          <h3>{author ? "Todavía no hay recuerdos publicados" : "Tu primer recuerdo merece un lugar"}</h3>
-          <p>{author ? "Sus publicaciones aparecerán acá." : "Contá tu historia: cada recuerdo que publiques aparecerá acá, uno debajo del otro."}</p>
-          {!author && <button className="primary-button" onClick={onAdd}>Crear un recuerdo</button>}
+          <h3>
+            {isSavedTab
+              ? "Todavía no guardaste ningún recuerdo"
+              : (author ? "Todavía no hay recuerdos publicados" : "Tu primer recuerdo merece un lugar")}
+          </h3>
+          <p>
+            {isSavedTab
+              ? "Podés guardar recuerdos desde el feed o explorando para volver a verlos cuando quieras."
+              : (author ? "Sus publicaciones aparecerán acá." : "Contá tu historia: cada recuerdo que publiques aparecerá acá, uno debajo del otro.")}
+          </p>
+          {!author && !isSavedTab && <button className="primary-button" onClick={onAdd}>Crear un recuerdo</button>}
         </div>
       )}
       {repostMemory && (

@@ -38,11 +38,11 @@ export async function apiFetch(
 
   if (response.ok && method !== 'GET' && method !== 'HEAD' && !path.endsWith('/impresiones')) {
     queryCache.clear();
-    if (/^\/api\/publicaciones(?:\/|$)/.test(path) || path.startsWith('/api/seguimientos')) feedCache.clear();
+    if (/^\/api\/publicaciones(?:\/|$)/.test(path) || path.startsWith('/api/seguimientos') || path === '/api/usuario/me/username') feedCache.clear();
   }
 
   if (response.status !== 401 || !allowRefresh) {
-    if (response.ok && /^(POST|PUT|PATCH|DELETE)$/i.test(init.method ?? "GET") && !path.endsWith('/impresiones')) {
+    if (response.ok && /^(POST|PUT|PATCH|DELETE)$/i.test(init.method ?? "GET") && !path.endsWith('/impresiones') && !path.startsWith('/api/usuario/me/')) {
       notifyAchievementsChanged();
     }
     return response;

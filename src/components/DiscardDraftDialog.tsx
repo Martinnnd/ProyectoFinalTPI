@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { X, Disc3, Save } from 'lucide-react';
+import { X, Disc3, Save, MapPin, FilePenLine } from 'lucide-react';
 import type { Decade } from '../types';
 import styles from './DiscardDraftDialog.module.css';
 
@@ -8,6 +8,8 @@ const labels = {
   1980: ['NOSTALGIAR · VIDEO CLUB', 'MI HISTORIA', 'VHS / PAUSE'],
   1990: ['Mi PC — Recuerdo sin guardar', 'recuerdo.txt', 'DISCO A: / 1.44 MB'],
   2000: ['Nostalgiar — Cambios pendientes', 'Mis recuerdos', 'CD-R / ARCHIVO PERSONAL'],
+  2010: ['Nostalgiar · Borrador', 'Foto sin publicar', 'CARRETE / BORRADOR'],
+  2020: ['Nostalgiar · Borrador', 'Historia sin publicar', 'TU MOMENTO / BORRADOR'],
 };
 
 export default function DiscardDraftDialog({ decade, onContinue, onDiscard }: {
@@ -31,6 +33,7 @@ export default function DiscardDraftDialog({ decade, onContinue, onDiscard }: {
       <div className={styles.scene} aria-hidden="true">
         <span className={styles.status}><i/>{status}</span>
         {decade < 1990 ? <div className={styles.tape}><b>{label}</b><div className={styles.window}><i/><span/><i/></div><small>{decade === 1970 ? 'LOW NOISE · C60' : 'HIGH QUALITY · E-180'}</small><div className={styles.base}/></div>
+          : decade === 2020 ? <div className={styles.draft2020}><span className={styles.draft2020Artwork}><MapPin size={27} strokeWidth={1.5}/></span><span className={styles.draft2020Copy}><small>RECUERDO EN PROGRESO</small><strong>{label}</strong><em><FilePenLine size={13}/> Aún sin guardar</em></span></div>
           : <div className={styles.disk}>{decade === 1990 ? <Save strokeWidth={1.2}/> : <Disc3 strokeWidth={1}/>}<span>{label}</span></div>}
         <span className={styles.caption}>TU HISTORIA SIGUE EN BORRADOR</span>
       </div>

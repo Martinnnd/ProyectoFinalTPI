@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { availableDecades, eraRegistry } from "./registry";
-it("integra las cuatro épocas sin colisiones de IDs", () => {
-  expect(availableDecades).toEqual([1970, 1980, 1990, 2000]);
+it("integra las seis épocas sin colisiones de IDs", () => {
+  expect(availableDecades).toEqual([1970, 1980, 1990, 2000, 2010, 2020]);
   const memories = availableDecades.flatMap(
     (year) => eraRegistry[year].content.memories,
   );

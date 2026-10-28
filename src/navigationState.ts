@@ -3,13 +3,13 @@ import { categories, type Period } from './types';
 export function readNavigation(search: string) {
   const params = new URLSearchParams(search);
   const requested = Number(params.get('era'));
-  const decade: Period['decade'] = requested === 1970 || requested === 1980 || requested === 2000 ? requested : 1990;
+  const decade: Period['decade'] = requested === 1970 || requested === 1980 || requested === 2000 || requested === 2010 || requested === 2020 ? requested : 1990;
   const year = Number(params.get('year'));
   const requestedView = params.get('view');
   const view: 'map' | 'feed' | 'profile' | 'chat' = requestedView === 'feed' || requestedView === 'profile' || requestedView === 'chat' ? requestedView : 'map';
   const post = params.get('post');
   return {
-    period: { decade, year: Number.isInteger(year) && year >= decade && year < decade + 10 ? year : null } as Period,
+    period: { decade, year: Number.isInteger(year) && year >= decade && year < decade + 10 && year <= new Date().getFullYear() ? year : null } as Period,
     view,
     selectedId: post && /^[1-9]\d*$/.test(post) ? post : null,
     profileAuthor: params.get('profile') || null,

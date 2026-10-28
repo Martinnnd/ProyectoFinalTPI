@@ -2,7 +2,7 @@ import { publicationMediaError, REQUIRE_PUBLICATION_MEDIA } from '../publication
 import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../media";
 import { eraRegistry } from "../eras/registry";
 import { extractHashtags } from "../hashtags";
-import { memoryDateIso } from "../memoryDate";
+import { localToday, memoryDateIso } from "../memoryDate";
 import GooglePhotosPicker from "./GooglePhotosPicker";
 import MemoryDatePicker from "./MemoryDatePicker";
 import DiscardDraftDialog from './DiscardDraftDialog';
@@ -124,9 +124,9 @@ import type { ComponentProps } from 'react';
         !description ||
         !memoryDateIso(date) ||
         year < 1970 ||
-        year > 2009
+        date > localToday()
       ) {
-        setError("Completá los campos y elegí una fecha válida entre 1970 y 2009.");
+        setError("Completá los campos y elegí una fecha válida entre 1970 y hoy.");
         return;
       }
       if(loadingFile){setError('Esperá a que termine de cargar el archivo.');return;}

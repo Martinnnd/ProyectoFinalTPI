@@ -26,7 +26,12 @@ export default function DecadeAtmosphere() {
           {(era.id === "1990" || era.id === "2000") && <span className={styles.monitorCabinet}>
             <span className={styles.screenGlass} />
             <span className={styles.monitorChin}><b>NOSTALGIAR</b><span className={styles.monitorVents} /><span className={styles.monitorControls}><i /><i /><i /><em /></span></span>
-            <span className={styles.monitorStand} />
+          </span>}
+          {era.id === "2010" && <span className={styles.pocketAtmosphere}>
+            <span className={styles.pocketLens}/><span className={styles.pocketPhoto}><i/><b>UN MOMENTO · 2012</b></span><span className={styles.pocketHome}/>
+          </span>}
+          {era.id === "2020" && <span className={styles.nowAtmosphere}>
+            <span className={styles.nowGlow}/><span className={styles.nowGlass}><i/><b>NOSTALGIAR · AHORA</b><small>Tu historia sigue.</small></span>
           </span>}
         </span>
       ))}

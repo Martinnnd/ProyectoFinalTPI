@@ -26,13 +26,13 @@
 .time-brand small { grid-column:2; display:block; font:10px/1.3 var(--font-body); letter-spacing:1.5px; }
 .time-scale { min-width:0; width:100%; max-width:580px; align-self:center; justify-self:center; }
 .time-navigation .time-add-memory { display:flex; align-items:center; justify-content:center; justify-self:end; gap:5px; min-height:34px; padding:7px 12px; white-space:nowrap; }
-.time-decades { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; }
+.time-decades { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px; }
 .time-decades button { padding:1px 4px; border:1px solid transparent; border-radius:var(--radius); color:var(--muted); background:transparent; font:bold 13px var(--font-display); line-height:1.1; cursor:pointer; }
 .time-decades button span { display:block; font:10px var(--font-body); margin-top:3px; }
 .time-decades button[aria-pressed="true"] { color:var(--surface); background:var(--accent); border-color:var(--line); box-shadow:var(--shadow); }
 .time-decades button:hover:not([aria-pressed="true"]) { box-shadow:0 2px 8px #0003; }
 .time-decades button[aria-pressed="true"]:hover { filter:none; }
-.time-track { margin-top:9px; height:11px; display:flex; align-items:center; background:repeating-linear-gradient(90deg,transparent 0 calc(100% / 39 - 1px),var(--line) calc(100% / 39 - 1px) calc(100% / 39)); }
+.time-track { margin-top:9px; height:11px; display:flex; align-items:center; background:repeating-linear-gradient(90deg,transparent 0 calc(100% / var(--time-ticks) - 1px),var(--line) calc(100% / var(--time-ticks) - 1px) calc(100% / var(--time-ticks))); }
 .app .time-track input { appearance:none; width:100%; height:18px; min-height:0; padding:0; margin:0; border:0; border-radius:0; box-shadow:none; cursor:ew-resize; background:transparent; touch-action:pan-y; }
 .time-track input::-webkit-slider-runnable-track { height:4px; border-radius:8px; background:linear-gradient(to right,var(--accent) var(--time-progress),var(--line) var(--time-progress)); }
 .time-track input::-moz-range-track { height:4px; border-radius:8px; background:linear-gradient(to right,var(--accent) var(--time-progress),var(--line) var(--time-progress)); }
@@ -62,7 +62,7 @@
 .app .time-track input { position:relative; }
 .app.era-1970 .time-track {
   border-radius:3px;
-  background:repeating-linear-gradient(90deg,transparent 0 calc(100% / 39 - 1px),#d0b88d66 calc(100% / 39 - 1px) calc(100% / 39));
+  background:repeating-linear-gradient(90deg,transparent 0 calc(100% / var(--time-ticks) - 1px),#d0b88d66 calc(100% / var(--time-ticks) - 1px) calc(100% / var(--time-ticks)));
   box-shadow:0 1px #d9b98920,inset 0 1px 3px #100c0959;
 }
 .app.era-1970 .time-decades button {
@@ -154,7 +154,7 @@
   pointer-events: none;
   background: repeating-linear-gradient(90deg,
     color-mix(in srgb, var(--time-label) 28%, transparent) 0 1px,
-    transparent 1px calc(100% / 39));
+    transparent 1px calc(100% / var(--time-ticks)));
   mask-image: linear-gradient(#000, #0005);
 }
 .app .time-track input { position: relative; }
@@ -206,15 +206,9 @@
   position: absolute;
   inset: -1px 8px 0;
   pointer-events: none;
-  background: linear-gradient(90deg,
-    var(--time-label) 0 1px, transparent 1px calc(100% * 10 / 39),
-    var(--time-label) calc(100% * 10 / 39) calc(100% * 10 / 39 + 1px),
-    transparent calc(100% * 10 / 39 + 1px) calc(100% * 20 / 39),
-    var(--time-label) calc(100% * 20 / 39) calc(100% * 20 / 39 + 1px),
-    transparent calc(100% * 20 / 39 + 1px) calc(100% * 30 / 39),
-    var(--time-label) calc(100% * 30 / 39) calc(100% * 30 / 39 + 1px),
-    transparent calc(100% * 30 / 39 + 1px) calc(100% - 1px),
-    var(--time-label) calc(100% - 1px));
+  background: repeating-linear-gradient(90deg,
+    var(--time-label) 0 1px,
+    transparent 1px calc(100% * 10 / var(--time-ticks)));
   opacity: .48;
 }
 .app .time-track input { z-index: 1; }

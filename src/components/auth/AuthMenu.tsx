@@ -47,15 +47,20 @@ export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthM
         onClick={() => setOpen((current) => !current)}
         title={`Sesión: ${session.username}`}
       >
-        <UserRound />
+        {session.fotoPerfilUrl
+          ? <img className={styles.avatar} src={session.fotoPerfilUrl} alt="" />
+          : <UserRound />}
         <span className={styles.username}>{session.username}</span>
       </button>
       {open && (
-        <div className={styles.menu} role="menu">
+        <>
+          <div className={styles.backdrop} aria-hidden="true" onClick={() => setOpen(false)} />
+          <div className={styles.menu} role="menu">
           <strong>{session.username}</strong>
           <span>{session.email}</span>
           {logoutError && <span role="alert">{logoutError}</span>}
-          <button
+            <div className={styles.menuActions}>
+            <button
             type="button"
             role="menuitem"
             aria-current={profileActive ? "page" : undefined}
@@ -66,8 +71,8 @@ export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthM
             }}
           >
             <UserRound size={16} /> Perfil
-          </button>
-          <button
+            </button>
+            <button
             type="button"
             role="menuitem"
             className={styles.logoutAction}
@@ -82,8 +87,10 @@ export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthM
             }}
           >
             <LogOut size={16} /> Cerrar sesión
-          </button>
-        </div>
+            </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

@@ -43,18 +43,18 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       const params = new URLSearchParams(window.location.search);
       const eraParam = params.get("era");
       let initialDecade: Decade | null = null;
-      if (eraParam === "1970" || eraParam === "1980" || eraParam === "1990" || eraParam === "2000") {
+      if (eraParam === "1970" || eraParam === "1980" || eraParam === "1990" || eraParam === "2000" || eraParam === "2010" || eraParam === "2020") {
         initialDecade = Number(eraParam) as Decade;
       } else {
         const savedEra = window.localStorage.getItem(ERA_STORAGE_KEY);
-        if (savedEra === "1970" || savedEra === "1980" || savedEra === "1990" || savedEra === "2000") {
+        if (savedEra === "1970" || savedEra === "1980" || savedEra === "1990" || savedEra === "2000" || savedEra === "2010" || savedEra === "2020") {
           initialDecade = Number(savedEra) as Decade;
         }
       }
 
       const decade = initialDecade ?? DEFAULT_PERIOD.decade;
       const year = Number(params.get("year") ?? window.localStorage.getItem("nostalgia_year"));
-      setPeriod({ decade, year: Number.isInteger(year) && year >= decade && year < decade + 10 ? year : null });
+      setPeriod({ decade, year: Number.isInteger(year) && year >= decade && year < decade + 10 && year <= new Date().getFullYear() ? year : null });
     } catch {
       // Ignorar si el almacenamiento local está restringido
     }

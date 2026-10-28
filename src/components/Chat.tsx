@@ -12,6 +12,8 @@ const titulosPorDecada: Record<Decade, string> = {
   1980: "CHAT CLUB · 80",
   1990: "Nostalgiar Chat — Conectados",
   2000: "Nostalgiar Messenger",
+  2010: "Nostalgiar · Mensajes",
+  2020: "Nostalgiar · Conversaciones",
 };
 
 function formatearTiempo(iso: string): string {
@@ -379,11 +381,6 @@ export default function Chat({
   if (fullPage) {
     return (
       <main className="chat-page" aria-label="Chat">
-        <div className="chat-page-intro">
-          <span>VOLVÉ A CONECTAR</span>
-          <h1>Las historias siguen en una charla.</h1>
-          <p>Un lugar para reencontrarte y compartir lo que recordás.</p>
-        </div>
         <section className="chat-window">{panel}</section>
       </main>
     );

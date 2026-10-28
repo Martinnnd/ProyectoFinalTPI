@@ -8,7 +8,7 @@ export const categories = [
   "Personales",
 ] as const;
 export type Category = (typeof categories)[number];
-export type Decade = 1970 | 1980 | 1990 | 2000;
+export type Decade = 1970 | 1980 | 1990 | 2000 | 2010 | 2020;
 export interface Memory {
   id: string;
   title: string;
@@ -27,6 +27,7 @@ export interface Memory {
   viewerRating?: number;
   repostCount?: number;
   viewerReposted?: boolean;
+  viewerSaved?: boolean;
   lat: number;
   lng: number;
   source: "demo" | "local" | "backend" | "community" | "db";
