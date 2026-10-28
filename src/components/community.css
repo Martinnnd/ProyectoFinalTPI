@@ -159,6 +159,9 @@
 .media-source-selector button svg { flex-shrink:0; }
 .media-source-selector button[aria-pressed=true] { background:var(--surface); border-color:var(--accent); box-shadow:var(--shadow); }
 .media-source-selector button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.media-source-selector .google-photos-coming-soon { position:relative; padding-top:19px; padding-bottom:5px; opacity:.62; cursor:not-allowed; }
+.media-source-selector .google-photos-soon-badge { position:absolute; top:2px; left:50%; transform:translateX(-50%); width:max-content; max-width:100%; padding:1px 5px; border:1px solid var(--line); border-radius:999px; background:var(--surface); color:var(--ink); font:700 9px/1.2 var(--font-body); letter-spacing:.03em; }
+.google-photos-unavailable { margin:0; padding:10px; border:1px solid var(--line); color:var(--muted); font-size:12px; }
 .media-source-panel { display:grid; gap:12px; min-width:0; }
 .media-source-panel[hidden] { display:none; }
 .media-source-panel .google-photos-picker { padding:0; border:0; background:transparent; }

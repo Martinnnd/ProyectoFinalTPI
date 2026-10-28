@@ -8,6 +8,7 @@ import MemoryDatePicker from "./MemoryDatePicker";
 import DiscardDraftDialog from './DiscardDraftDialog';
 import MemoryEditForm from './MemoryEditForm';
 import type { ComponentProps } from 'react';
+const GOOGLE_PHOTOS_AVAILABLE = false;
   import { useEffect, useRef, useState } from "react";
   import { X, Save, Loader2, Upload, Images, Link } from "lucide-react";
   import { categories, type Memory, type Decade } from "../types";
@@ -206,12 +207,12 @@ import type { ComponentProps } from 'react';
             {!REQUIRE_PUBLICATION_MEDIA && <small>Podés publicar tu historia sin agregar una foto, un video ni un enlace.</small>}
             <div className="media-source-selector" role="group" aria-label="Origen del adjunto">
               <button type="button" aria-pressed={mediaSource === 'file'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('file'); setError(''); }}><Upload size={18} aria-hidden="true" />Archivo</button>
-              <button type="button" aria-pressed={mediaSource === 'google'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('google'); setError(''); }}><Images size={18} aria-hidden="true" />Google Photos</button>
+              <button type="button" className="google-photos-coming-soon" aria-pressed={mediaSource === 'google'} aria-controls="media-source-panel" disabled={!GOOGLE_PHOTOS_AVAILABLE || mediaSelected || googlePhotosBusy || saving || loadingFile} title="Google Photos: próximamente" onClick={() => { setMediaSource('google'); setError(''); }}><span className="google-photos-soon-badge">Próximamente</span><Images size={18} aria-hidden="true" />Google Photos</button>
               <button type="button" aria-pressed={mediaSource === 'link'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('link'); setError(''); }}><Link size={18} aria-hidden="true" />Enlace</button>
             </div>
             <div id="media-source-panel" className="media-source-panel" hidden={mediaSelected}>
               {mediaSource === 'file' && <label>Subir foto o video (hasta 2 MB)<input type="file" disabled={saving || loadingFile} accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/ogg" onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>}
-              {mediaSource === 'google' && <GooglePhotosPicker disabled={saving || loadingFile} onFile={readFile} onBusyChange={setGooglePhotosBusy} />}
+              {mediaSource === 'google' && (GOOGLE_PHOTOS_AVAILABLE ? <GooglePhotosPicker disabled={saving || loadingFile} onFile={readFile} onBusyChange={setGooglePhotosBusy} /> : <p className="google-photos-unavailable">Google Photos estará disponible próximamente. Podés subir un archivo o pegar un enlace.</p>)}
               {mediaSource === 'link' && <>
                 <label>Tipo de adjunto<select disabled={saving} value={mediaKind} onChange={e=>{fileVersion.current++;setLoadingFile(false);setMediaKind(e.target.value as typeof mediaKind);setMediaUrl('');}}><option value="image">Foto</option><option value="video">Video</option><option value="youtube">YouTube</option></select></label>
                 <label>{mediaKind==='youtube'?'Enlace de YouTube':'O pegá un enlace HTTPS al archivo'}<input type="url" disabled={saving} value={mediaUrl.startsWith('data:')?'':mediaUrl} placeholder={mediaKind==='youtube'?'https://www.youtube.com/watch?v=…':'https://…'} onChange={e=>{fileVersion.current++;setLoadingFile(false);const url=e.target.value.trim();setMediaUrl(url);if(youtubeId(url))setMediaKind('youtube');}}/></label>
