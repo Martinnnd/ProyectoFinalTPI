@@ -71,6 +71,10 @@
     radial-gradient(ellipse at 90% 5%, #9000ff15, transparent 55%),
     radial-gradient(ellipse at 10% 100%, #ec00be25, transparent 55%);
   box-shadow: inset 0 0 100px #19052965;
+  pointer-events: none;
+}
+.era-1980.view-map .era-atmosphere {
+  inset: 0 0 30px 72px;
 }
 .era-1980 .era-atmosphere:after {
   content: "";
@@ -496,7 +500,10 @@
     font-size: 9px;
   }
   .era-1980 .era-atmosphere {
-    inset: 0 0 80px;
+    inset: 0;
+  }
+  .era-1980.view-map .era-atmosphere {
+    inset: var(--mobile-top) 0 var(--mobile-bottom);
   }
   .era-1980 .vhs-tape {
     display: none;
