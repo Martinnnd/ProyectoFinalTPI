@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Facebook, Instagram, Youtube } from "lucide-react";
+import { Instagram, Music2 } from "lucide-react";
 import styles from "../../app/landing.module.css";
 
 export default function LandingFooter() {
@@ -18,17 +18,13 @@ export default function LandingFooter() {
           <span className={styles.footerBrandName}>Nostalgiar</span>
           <p>Un día. Un momento. Un lugar.</p>
           <div className={styles.socialLinks} aria-label="Redes sociales">
-            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">
+            <a href="https://www.instagram.com/nostalgi_ar/" target="_blank" rel="noopener noreferrer">
               <Instagram size={17} aria-hidden="true" />
               <span>Instagram</span>
             </a>
-            <a href="https://www.facebook.com/" target="_blank" rel="noreferrer">
-              <Facebook size={17} aria-hidden="true" />
-              <span>Facebook</span>
-            </a>
-            <a href="https://www.youtube.com/" target="_blank" rel="noreferrer">
-              <Youtube size={18} aria-hidden="true" />
-              <span>YouTube</span>
+            <a href="https://www.tiktok.com/@nostalgi_ar?_r=1&_t=ZS-9Aw2DjgW7i3" target="_blank" rel="noopener noreferrer">
+              <Music2 size={17} aria-hidden="true" />
+              <span>TikTok</span>
             </a>
           </div>
         </div>
