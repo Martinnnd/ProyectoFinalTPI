@@ -509,7 +509,7 @@ export default function SocialFeed({
                 canRate={canRate}
                 reposted={isReposted}
                 repostCount={interactions.getRepostCount(targetKey, targetMemory.repostCount ?? 0)}
-                saved={saves.includes(memory.id)}
+                saved={interactions.isSaved(targetKey, targetMemory.viewerSaved)}
                 onDelete={onDelete}
                 onEdit={onEdit}
                 onProfile={onProfile}
@@ -537,7 +537,7 @@ export default function SocialFeed({
                 }}
                 onSave={() => {
                   if (!requireAuthentication()) return;
-                  setSaves((current) => toggleId(current, memory.id));
+                  interactions.toggleSave(targetKey, targetMemory.viewerSaved);
                 }}
                 onHashtag={chooseHashtag}
               />

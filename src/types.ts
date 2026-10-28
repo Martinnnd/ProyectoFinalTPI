@@ -27,6 +27,7 @@ export interface Memory {
   viewerRating?: number;
   repostCount?: number;
   viewerReposted?: boolean;
+  viewerSaved?: boolean;
   lat: number;
   lng: number;
   source: "demo" | "local" | "backend" | "community" | "db";
