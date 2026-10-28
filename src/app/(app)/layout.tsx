@@ -22,11 +22,13 @@ import "../../components/chatTaskbar.css";
 import "../../eras/70s/tvViews.css";
 import "../../mobile.css";
 import "../../eras/2020s/theme.css";
+import "../../components/auth/guestAccess.css";
 
 import { EraProvider } from "../../context/EraContext";
 import { FollowProvider } from "../../context/FollowContext";
 import { RatingsProvider } from "../../context/RatingsContext";
 import AppShell from "../../components/layout/AppShell";
+import { GuestAccessProvider } from "../../components/auth/GuestAccessProvider";
 
 export const metadata: Metadata = {
   title: "Nostalgiar",
@@ -38,7 +40,7 @@ export default function MainAppLayout({ children }: { children: React.ReactNode 
     <EraProvider>
       <RatingsProvider>
         <FollowProvider>
-          <AppShell>{children}</AppShell>
+          <GuestAccessProvider><AppShell>{children}</AppShell></GuestAccessProvider>
         </FollowProvider>
       </RatingsProvider>
     </EraProvider>

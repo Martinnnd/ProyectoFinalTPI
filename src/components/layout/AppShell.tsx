@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2 } from "lucide-react";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
+import { useGuestAccess } from "../auth/GuestAccessProvider";
 import { useFollow } from "../../context/FollowContext";
 import EraTimeline from "../EraTimeline";
 import EraChrome, { EraIcon } from "../EraChrome";
@@ -20,7 +21,8 @@ import type { Period } from '../../types';
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { session } = useAuth();
+  const { session, status } = useAuth();
+  const { firstMemoryId, ready, canViewMemory, requireAccount } = useGuestAccess();
   const {
     period,
     changePeriod,
@@ -39,11 +41,26 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
+  const detailId = pathname.startsWith("/recuerdo/") ? decodeURIComponent(pathname.slice("/recuerdo/".length).split("/")[0]) : null;
+  const guestRestrictedRoute = pathname === "/feed" || pathname.startsWith("/feed/") ||
+    (!!firstMemoryId && (pathname === "/perfil" || pathname.startsWith("/perfil/") || pathname === "/chat" || pathname.startsWith("/chat/")));
+  const hideGuestContent = (status === "loading" || status === "anonymous" && !ready) && (guestRestrictedRoute || !!detailId) ||
+    status === "anonymous" && ready && (guestRestrictedRoute || !!detailId && firstMemoryId !== detailId);
+
+  useEffect(() => {
+    if (!ready || status !== "anonymous") return;
+    if (guestRestrictedRoute) {
+      requireAccount();
+      router.replace("/explorar");
+    } else if (detailId) {
+      if (!canViewMemory(detailId)) router.replace("/explorar");
+    }
+  }, [detailId, guestRestrictedRoute, ready, status, canViewMemory, requireAccount, router]);
 
   function handlePeriodChange(next: Period) {
     if (pathname.startsWith('/recuerdo/')) {
       const requestedReturn = new URLSearchParams(window.location.search).get('returnTo');
-      const destination = requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
+      const destination = !session ? '/explorar' : requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
         ? requestedReturn : '/feed';
       // La sincronización de la época escribe la URL; navegar después evita que
       // history.replaceState restaure la ruta de detalle sobre el router.push.
@@ -65,6 +82,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const handleNavigate = (destination: "map" | "stories" | "facts" | "music") => {
+    if (destination !== "map" && !session && firstMemoryId && !requireAccount()) return;
     if (destination === "music") {
       setMusicOpen(!musicOpen);
       if (window.innerWidth < 900) {
@@ -93,6 +111,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   const handleRecordar = () => {
+    if (!session && firstMemoryId && !requireAccount()) return;
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));
     }
@@ -146,7 +165,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <button
         ref={mobileOptionsTrigger}
         className="mobile-era-button mobile-map-options"
-        onClick={() => mobileOptions.current?.showModal()}
+        onClick={() => { if (!session && firstMemoryId && !requireAccount()) return; mobileOptions.current?.showModal(); }}
         aria-label="Abrir opciones de exploración"
         title="Opciones de exploración"
       >
@@ -242,6 +261,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           onClick={() => {
             setPanelOpen(false);
             setFactsOpen(false);
+            if (!session && !requireAccount()) return;
             router.push("/feed");
           }}
         >
@@ -291,7 +311,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         )}
       </nav>
 
-      {children}
+      {hideGuestContent ? null : children}
 
       <Player
         key={period.decade}

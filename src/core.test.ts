@@ -46,8 +46,8 @@ describe("Contenido de época", () => {
       factsForPeriod({ decade: 1990, year: 1995 }).map((f) => f.id),
     ).toEqual(["toystory"]);
     expect(factsForPeriod({ decade: 1980, year: 1980 })).toEqual([]);
-    for (const decade of [1970, 1980, 1990, 2000, 2010] as const) {
-      expect(factsForPeriod({ decade, year: null })).toHaveLength(decade === 2010 ? 2 : 3);
+    for (const decade of [1970, 1980, 1990, 2000, 2010, 2020] as const) {
+      expect(factsForPeriod({ decade, year: null })).toHaveLength(3);
       expect(
         musicByDecade[decade].every(
           (t) => t.year >= decade && t.year < decade + 10,

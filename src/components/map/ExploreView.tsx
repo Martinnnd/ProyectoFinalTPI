@@ -10,6 +10,7 @@ import EraFacts from "../EraFacts";
 import MemoryForm from "../MemoryForm";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
+import { useGuestAccess } from "../auth/GuestAccessProvider";
 import {
   categories,
   filterMemories,
@@ -51,6 +52,7 @@ function ExploreContent() {
   } = useEra();
 
   const { session, status } = useAuth();
+  const { canViewMemory, ready: guestAccessReady, firstMemoryId, requireAccount } = useGuestAccess();
   const { setNotice } = useRatings();
 
   const [category, setCategory] = useState<Category | "Todas">("Todas");
@@ -67,6 +69,22 @@ function ExploreContent() {
   const [selectedId, setSelectedId] = useState<string | null>(recuerdoParam);
   const [remoteSelected, setRemoteSelected] = useState<Memory | null>(null);
   const selectedSeed = useRef<Memory | null>(null);
+
+  useEffect(() => {
+    if (!recuerdoParam || status === "loading" || !guestAccessReady) return;
+    if (!canViewMemory(recuerdoParam)) {
+      setSelectedId(null);
+      router.replace("/explorar", { scroll: false });
+    }
+  }, [recuerdoParam, status, guestAccessReady, canViewMemory, router]);
+
+  useEffect(() => {
+    if (actionParam !== "recordar" || status !== "anonymous" || !firstMemoryId) return;
+    setPicking(false);
+    setDraft(null);
+    requireAccount();
+    router.replace("/explorar", { scroll: false });
+  }, [actionParam, status, firstMemoryId, requireAccount, router]);
 
   const [picking, setPicking] = useState(actionParam === "recordar");
   const [draft, setDraft] = useState<Point | null>(null);
@@ -130,6 +148,7 @@ function ExploreContent() {
       return;
     }
     if (status === "loading") return;
+    if (!guestAccessReady || !canViewMemory(selectedId)) return;
     const pin = [selectedSeed.current, remoteSelected, ...remotePins].find((m) => m?.id === selectedId);
     const controller = new AbortController();
 
@@ -148,7 +167,7 @@ function ExploreContent() {
       });
 
     return () => controller.abort();
-  }, [selectedId, mapRevision, status]);
+  }, [selectedId, mapRevision, status, guestAccessReady, canViewMemory]);
 
   const memories = filterMemories(remotePins, period, category);
   const selected =
@@ -159,6 +178,7 @@ function ExploreContent() {
       : memories.find((m) => m.id === selectedId) ?? null;
 
   function select(memory: Memory) {
+    if (!canViewMemory(memory.id)) return;
     selectedSeed.current = memory;
     setRemoteSelected(memory);
     setSelectedId(memory.id);
@@ -177,6 +197,7 @@ function ExploreContent() {
   }
 
   function selectRelatedMemory(memory: Memory) {
+    if (!canViewMemory(memory.id)) return;
     const decade = (Math.floor(memory.year / 10) * 10) as Decade;
     if (!availableDecades.includes(decade)) {
       setNotice("Este recuerdo pertenece a una década que todavía no está disponible en el mapa.");
@@ -195,10 +216,12 @@ function ExploreContent() {
   }
 
   function openPublication(memory: Memory) {
+    if (!canViewMemory(memory.id)) return;
     router.push(`/recuerdo/${memory.id}`);
   }
 
   function startAdding() {
+    if (!session && firstMemoryId && !requireAccount()) return;
     setPicking(true);
     setSelectedId(null);
     setPanelOpen(false);
