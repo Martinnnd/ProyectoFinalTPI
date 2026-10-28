@@ -129,6 +129,23 @@
   transition: background 120ms ease;
 }
 .notif-item:last-child { border-bottom: 0; }
+.notif-item { flex-wrap: wrap; cursor: default; }
+.notif-item-link {
+  display: flex; align-items: flex-start; gap: 10px;
+  width: 100%; min-width: 0; padding: 0;
+  border: 0; background: transparent; color: inherit;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.notif-follow-button {
+  margin-left: 46px; padding: 6px 10px;
+  border: 1px solid var(--accent); border-radius: var(--radius);
+  background: var(--accent); color: var(--surface);
+  font: 12px var(--font-body); cursor: pointer;
+}
+.notif-follow-button[aria-pressed="true"] { background: var(--surface); color: var(--accent); }
+.notif-follow-button:disabled { opacity: 0.6; cursor: wait; }
+.notif-item-link:focus-visible,
+.notif-follow-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .notif-item:hover { background: var(--soft); }
 .notif-item.unread { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
 .notif-item.unread:hover { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
