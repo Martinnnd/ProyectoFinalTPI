@@ -31,11 +31,11 @@
 .expo-game-button[data-era="2020"] { --expo-accent:#6bf2db; --expo-face:#182a37; }
 @keyframes expo-orbit { to { transform:rotate(360deg); } }
 @keyframes expo-game-pulse {
-  0%, 100% { transform:scale(1); }
-  50% { transform:scale(1.09); }
+  0%, 100% { transform:translateZ(0) scale(1); }
+  50% { transform:translateZ(0) scale(1.055); }
 }
 @media(min-width:900px) {
-  .app .expo-game-button { animation:expo-game-pulse 2.8s ease-in-out infinite; }
+  .app .expo-game-button { animation:expo-game-pulse 1.9s cubic-bezier(.45,0,.55,1) infinite; will-change:transform; }
   .app .expo-game-button:hover,.app .expo-game-button:focus-visible { animation-play-state:paused; }
 }
 @media(max-width:899px) {
