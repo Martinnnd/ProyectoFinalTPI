@@ -55,7 +55,11 @@ function FeedPageContent() {
   // Grupos y comunidad
   const [groups, setGroups] = useState<CommunityGroup[]>([]);
   const myGroups = groups.filter((g) => g.isMember);
-  const [scope, setScope] = useState("all");
+  const requestedScope = searchParams.get("scope");
+  const [scope, setScope] = useState(requestedScope ?? "all");
+  useEffect(() => {
+    if (requestedScope) setScope(requestedScope);
+  }, [requestedScope]);
   const [query, setQuery] = useState("");
   const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
   const [groupInfoId, setGroupInfoId] = useState<string | null>(null);

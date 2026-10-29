@@ -1,4 +1,5 @@
 import { Ellipsis, MapPin, Pencil, Repeat2, Trash2, UsersRound } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
@@ -126,7 +127,7 @@ export default function FeedPost({
       {memory.groupId && !memory.repost && (
         <div className="post-group-context">
           <UsersRound size={14} aria-hidden="true" />
-          <span>{isReposterOwn ? "Publicaste un recuerdo en" : `${displayAuthor} publicó un recuerdo en`} <strong>{groupName ?? "un grupo"}</strong></span>
+          <span>{isReposterOwn ? "Publicaste un recuerdo en" : `${displayAuthor} publicó un recuerdo en`} <Link className="post-group-link" href={`/feed?scope=${encodeURIComponent(memory.groupId)}`}>{groupName ?? "Ver grupo"}</Link></span>
         </div>
       )}
       <div className={`post-composition${splitPhoto ? ' has-split-photo' : ''}`}>
