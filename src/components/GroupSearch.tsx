@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { ArrowUpRight, Plus, Search, Users } from 'lucide-react';
+import { Plus, Search, Users } from 'lucide-react';
 import type { CommunityGroup } from '../types';
 
 type GroupSearchProps = {
@@ -47,7 +47,7 @@ export default function GroupSearch({ groups, onSelect, onJoin }: GroupSearchPro
     {query && <div className="group-search-results" id={resultsId} aria-live="polite">
       {results.length ? results.map(group => <div className="group-search-result" key={group.id}>
         <Users size={18} aria-hidden="true"/>
-        <button type="button" className="group-search-open" onClick={() => select(group.id)}><span className="group-search-result-copy"><strong>{group.name}</strong><small>No sos integrante · Ver grupo</small></span><ArrowUpRight size={16} aria-hidden="true"/></button>
+        <button type="button" className="group-search-open" onClick={() => select(group.id)}><span className="group-search-result-copy"><strong>{group.name}</strong><small>No sos integrante · Ver grupo</small></span></button>
         <button type="button" className="group-search-join" aria-label={`Unirse a ${group.name}`} disabled={joiningId !== null} onClick={() => void join(group.id)}><Plus size={16} aria-hidden="true"/><span>{joiningId === group.id ? 'Uniéndome…' : 'Unirse'}</span></button>
       </div>) : <p>No encontramos grupos con ese nombre.</p>}
       {error && <p role="alert" className="community-form-error">{error}</p>}

@@ -20,8 +20,14 @@
 .group-search-result { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; width:100%; padding:7px 12px; text-align:left; background:var(--surface); border-bottom:1px solid var(--line); box-sizing:border-box; }
 .group-search-result:last-child { border-bottom:0; }
 .group-search-result:hover { background:var(--soft); }
-.group-search-result .group-search-open { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; padding:4px 0; text-align:left; background:transparent; border:0; }
-.group-search-result .group-search-join { display:inline-flex; align-items:center; justify-content:center; gap:4px; min-height:36px; padding:6px 10px; color:var(--surface); background:var(--accent); border-color:var(--accent); font-size:11px; font-weight:700; text-transform:uppercase; }
+.group-search-result .group-search-open { display:flex; align-items:center; min-width:0; padding:4px 0; text-align:left; background:transparent; border:0; }
+.group-search-result .group-search-join { display:inline-flex; align-items:center; justify-content:center; gap:4px; min-height:36px; padding:6px 12px; border:1px solid var(--accent); border-radius:var(--radius); color:var(--surface); background:var(--accent); box-shadow:var(--shadow); font-size:11px; font-weight:700; text-transform:uppercase; }
+.era-1970 .community-controls .group-search-result .group-search-join { border:1px solid #514a38; border-radius:0; color:#f4ebd2; background:#414335; box-shadow:2px 2px 0 #514a3840; }
+.era-1980 .community-controls .group-search-result .group-search-join { border:1px solid #40f5ef; border-radius:4px; color:#111027; background:#40f5ef; box-shadow:2px 2px 0 #cf47e5,0 0 10px #40f5ef55; }
+.era-1990 .community-controls .group-search-result .group-search-join { border:2px solid; border-color:#fff #555 #555 #fff; border-radius:0; color:#111; background:#c0c0c0; box-shadow:1px 1px 0 #000; font-family:Tahoma,Arial,sans-serif; }
+.era-2000 .community-controls .group-search-result .group-search-join { border:1px solid #79a7d5; border-radius:7px; color:#245a91; background:linear-gradient(#fff,#c9e2fa); box-shadow:inset 0 1px #fff,0 2px 4px #26518035; }
+.era-2010 .community-controls .group-search-result .group-search-join { border:1px solid #2d718c; border-radius:8px; color:#fff; background:#2d718c; box-shadow:0 2px 5px #102d3d33; }
+.era-2020 .community-controls .group-search-result .group-search-join { border:1px solid #91f7e4; border-radius:11px; color:#09252b; background:#62e5ce; box-shadow:0 4px 13px #45e5cd38; }
 .group-search-result .group-search-join:disabled { opacity:.7; cursor:wait; }
 @media (max-width:600px) { .group-search-result .group-search-join { width:36px; padding:6px; } .group-search-result .group-search-join span { display:none; } }
 .group-search-result-copy { display:grid; gap:3px; min-width:0; }
