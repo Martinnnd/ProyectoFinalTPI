@@ -341,6 +341,7 @@ function FeedPageContent() {
         onDelete={(m) => setDeleting(m)}
         onProfile={handleProfile}
         groupIds={groups.map((g) => g.id)}
+        groupNames={Object.fromEntries(groups.map((g) => [g.id, g.name]))}
         suggestedAuthors={[
           ...feedItems
             .filter((m) => m.authorId)

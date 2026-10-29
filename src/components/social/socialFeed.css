@@ -113,6 +113,9 @@
   overflow-wrap: anywhere;
 }
 .repost-header-badge > svg { flex-shrink: 0; }
+.post-group-context { display:flex; align-items:center; gap:7px; min-width:0; padding:10px 16px 2px; color:var(--muted); font:600 12px/1.35 var(--font-body); }
+.post-group-context svg { flex:none; color:var(--accent); }
+.post-group-context strong { color:var(--ink); font-weight:700; }
 .repost-header-badge .repost-author {
   display: inline;
   padding: 0;
