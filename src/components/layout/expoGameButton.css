@@ -19,6 +19,7 @@
 }
 .expo-game-ring { position:absolute; inset:0; width:100%; height:100%; animation:expo-orbit 16s linear infinite; overflow:visible; }
 .expo-game-ring text { fill:currentColor; font:700 8px/1 monospace; letter-spacing:1px; }
+.expo-game-ring-band { stroke:transparent; }
 .expo-game-device { position:relative; display:grid; place-items:center; width:84px; height:84px; border:2px solid var(--expo-accent); border-radius:50%; background:radial-gradient(circle at 35% 25%,#ffffff28,transparent 50%),var(--expo-face); box-shadow:0 0 0 4px #071118b8,inset 0 2px 7px #fff3,0 0 17px color-mix(in srgb,var(--expo-accent) 60%,transparent); transition:transform .2s ease,box-shadow .2s ease; }
 .expo-game-button:hover .expo-game-device,.expo-game-button:focus-visible .expo-game-device { transform:scale(1.1); box-shadow:0 0 0 4px #071118b8,inset 0 2px 7px #fff3,0 0 27px var(--expo-accent); }
 .expo-game-button:focus-visible { outline:2px solid var(--expo-accent); outline-offset:3px; }
@@ -29,6 +30,10 @@
 .expo-game-button[data-era="2000"] { --expo-accent:#90ceff; --expo-face:#2165af; }
 .expo-game-button[data-era="2010"] { --expo-accent:#82bfce; --expo-face:#284c60; }
 .expo-game-button[data-era="2020"] { --expo-accent:#6bf2db; --expo-face:#182a37; }
+.expo-game-button:is([data-era="1990"],[data-era="2000"],[data-era="2010"]) .expo-game-ring-band { stroke:#101e2ce0; }
+.expo-game-button[data-era="1990"] .expo-game-ring text { fill:#fff5bf; }
+.expo-game-button[data-era="2000"] .expo-game-ring text { fill:#f5fbff; }
+.expo-game-button[data-era="2010"] .expo-game-ring text { fill:#d5fbff; }
 @keyframes expo-orbit { to { transform:rotate(360deg); } }
 @keyframes expo-game-pulse {
   0%, 100% { transform:translateZ(0) scale(1); }
