@@ -152,6 +152,10 @@
  .memory-calendar[popover] { position:fixed; inset:auto; margin:0; width:260px; max-height:calc(100dvh - 16px); overflow:auto; }
 }
 .media-fields legend { padding:0 6px; font-size:14px; }
+.memory-group-choice { display:grid; gap:7px; padding:12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--soft); }
+.memory-group-choice label { margin:0; font-weight:700; }
+.memory-group-choice select { width:100%; }
+.memory-group-choice small { color:var(--muted); font-size:11px; line-height:1.45; }
 .media-fields small { font-size:11px; line-height:1.5; }
 .media-fields input[type=file] { font-size:12px; padding:8px; }
 .media-source-selector { display:grid; grid-template-columns:1fr 1.4fr 1fr; gap:4px; padding:4px; border:1px solid var(--line); border-radius:var(--radius); background:var(--soft); }

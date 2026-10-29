@@ -234,6 +234,7 @@ function ExploreContent() {
     if (actionParam) {
       const params = new URLSearchParams(searchParams.toString());
       params.delete("action");
+      params.delete("groupId");
       const qs = params.toString();
       router.replace(qs ? `/explorar?${qs}` : "/explorar", { scroll: false });
     }
@@ -242,15 +243,15 @@ function ExploreContent() {
   async function saveCreation(memory: Memory) {
     try {
       let res;
-      if (groupIdParam) {
+      if (memory.groupId) {
         const { createGroupMemory } = await import("../../groupsApi");
-        res = await createGroupMemory(groupIdParam, memory);
+        res = await createGroupMemory(memory.groupId, memory);
       } else {
         const { crearPublicacion } = await import("../../api");
         res = await crearPublicacion(memory, undefined, userLocation);
       }
       if (res && res.id) {
-        memory = { ...memory, id: res.id.toString(), source: "backend", groupId: groupIdParam ?? undefined };
+        memory = { ...memory, id: res.id.toString(), source: "backend" };
       }
       setRemotePins((curr) => [memory, ...curr.filter((m) => m.id !== memory.id)]);
       setMapRevision((r) => r + 1);
@@ -259,6 +260,7 @@ function ExploreContent() {
       if (actionParam) {
         const params = new URLSearchParams(searchParams.toString());
         params.delete("action");
+        params.delete("groupId");
         const qs = params.toString();
         router.replace(qs ? `/explorar?${qs}` : "/explorar", { scroll: false });
       }
@@ -354,6 +356,7 @@ function ExploreContent() {
         <MemoryForm
           point={draft}
           defaultHashtags={tagParam ? [tagParam] : undefined}
+          groupId={groupIdParam ?? undefined}
           decade={period.decade}
           onCancel={cancelCreation}
           onSave={saveCreation}

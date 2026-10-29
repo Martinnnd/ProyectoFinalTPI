@@ -3,6 +3,7 @@ import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../medi
 import { eraRegistry } from "../eras/registry";
 import { extractHashtags } from "../hashtags";
 import { localToday, memoryDateIso } from "../memoryDate";
+import { getGroups } from "../groupsApi";
 import GooglePhotosPicker from "./GooglePhotosPicker";
 import MemoryDatePicker from "./MemoryDatePicker";
 import DiscardDraftDialog from './DiscardDraftDialog';
@@ -11,11 +12,12 @@ import type { ComponentProps } from 'react';
 const GOOGLE_PHOTOS_AVAILABLE = false;
   import { useEffect, useRef, useState } from "react";
   import { X, Save, Loader2, Upload, Images, Link } from "lucide-react";
-  import { categories, type Memory, type Decade } from "../types";
+  import { categories, type Memory, type Decade, type CommunityGroup } from "../types";
   import type { Point } from "./MemoryMap";
   function MemoryCreationForm({
     initial,
     defaultHashtags = [],
+    groupId,
     point,
     decade,
     onCancel,
@@ -24,6 +26,7 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
     initial?: Memory;
     defaultHashtags?: string[];
     groupName?: string;
+    groupId?: string;
     point: Point;
     decade: Decade;
     onCancel: () => void;
@@ -46,6 +49,20 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
       const missing = (initial?.hashtags ?? defaultHashtags).filter(tag => !existing.includes(tag));
       return [text, missing.map(tag => `#${tag}`).join(" ")].filter(Boolean).join("\n\n");
     });
+    const [groups, setGroups] = useState<CommunityGroup[]>([]);
+    const [groupsLoading, setGroupsLoading] = useState(true);
+    const [groupsError, setGroupsError] = useState(false);
+    const [selectedGroupId, setSelectedGroupId] = useState(groupId ?? '');
+    useEffect(() => {
+      const controller = new AbortController();
+      getGroups(controller.signal).then(result => {
+        const memberships = result.filter(group => group.isMember);
+        setGroups(memberships);
+        setSelectedGroupId(current => current && !memberships.some(group => group.id === current) ? '' : current);
+        setGroupsError(false);
+      }).catch(() => { if (!controller.signal.aborted) { setSelectedGroupId(''); setGroupsError(true); } }).finally(() => { if (!controller.signal.aborted) setGroupsLoading(false); });
+      return () => controller.abort();
+    }, []);
     const detectedHashtags = extractHashtags(description);
     const [mediaKind,setMediaKind]=useState<'image'|'video'|'youtube'>(initial?.media?.kind ?? (youtubeId(initial?.image ?? '') ? 'youtube' : 'image'));
     const [mediaUrl,setMediaUrl]=useState(initial?.media?.url ?? initial?.image ?? '');
@@ -159,6 +176,7 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
         date,
         category: data.get("category") as Memory["category"],
         description,
+        groupId: selectedGroupId || undefined,
         hashtags: hashtags.tags,
         createdAt: initial?.createdAt ?? (initial ? undefined : new Date().toISOString()),
         author: "Vos",
@@ -264,6 +282,14 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
           <small id="hashtags-help">Agregá #palabras en tu historia para crear hashtags. Hasta 5, de 32 caracteres cada uno.</small>
           <div className="memory-form-tags" aria-live="polite">
             {detectedHashtags.error ? <small className="form-error">{detectedHashtags.error}</small> : detectedHashtags.tags.map(tag => <span key={tag}>#{tag}</span>)}
+          </div>
+          <div className="memory-group-choice">
+            <label htmlFor="memory-group-select">Publicar en</label>
+            <select id="memory-group-select" value={selectedGroupId} disabled={groupsLoading || groupsError || saving} onChange={event => { setSelectedGroupId(event.target.value); dirty.current = true; }}>
+              <option value="">Recuerdos generales</option>
+              {groups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}
+            </select>
+            <small role="status">{groupsLoading ? 'Buscando tus grupos…' : groupsError ? 'No se pudieron cargar tus grupos. Podés publicar en recuerdos generales.' : groups.length ? 'Elegí uno de los grupos a los que pertenecés o publicá para todos.' : 'Todavía no te uniste a ningún grupo. Tu recuerdo se publicará para todos.'}</small>
           </div>
           </div>
           <div data-form-step="2" hidden={step !== 2}>
