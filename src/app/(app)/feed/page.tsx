@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SocialFeed from "../../../components/social/SocialFeed";
 import DeleteMemoryDialog from "../../../components/DeleteMemoryDialog";
 import MemoryForm from "../../../components/MemoryForm";
+import GroupHeaderActions from "../../../components/GroupHeaderActions";
 import CommunityControls from "../../../components/CommunityControls";
 import GroupInfoModal from "../../../components/GroupInfoModal";
 import { useEra } from "../../../context/EraContext";
@@ -55,11 +56,12 @@ function FeedPageContent() {
 
   // Grupos y comunidad
   const [groups, setGroups] = useState<CommunityGroup[]>([]);
+  const [groupsLoaded, setGroupsLoaded] = useState(false);
   const myGroups = groups.filter((g) => g.isMember);
   const requestedScope = searchParams.get("scope");
   const [scope, setScope] = useState(requestedScope ?? "all");
   useEffect(() => {
-    if (requestedScope) setScope(requestedScope);
+    setScope(requestedScope ?? "all");
   }, [requestedScope]);
   const [query, setQuery] = useState("");
   const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
@@ -74,7 +76,7 @@ function FeedPageContent() {
     const controller = new AbortController();
     getGroups(controller.signal)
       .then((res) => {
-        if (!controller.signal.aborted) setGroups(res);
+        if (!controller.signal.aborted) { setGroups(res); setGroupsLoaded(true); }
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
@@ -83,6 +85,14 @@ function FeedPageContent() {
       });
     return () => controller.abort();
   }, [session, setNotice]);
+
+  const selectedGroupDecade = groups.find((g) => g.id === scope)?.decade;
+  useEffect(() => {
+    if (selectedGroupDecade) changePeriod({ decade: selectedGroupDecade, year: null });
+    // Reset the period only when entering a group, preserving subsequent filters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scope, selectedGroupDecade]);
+  const unavailableGroup = groupsLoaded && !["all", "general", "own", "groups"].includes(scope) && !groups.some((g) => g.id === scope);
 
   // Cargar recuerdos del grupo seleccionado
   useEffect(() => {
@@ -148,19 +158,30 @@ function FeedPageContent() {
           changePeriod({ decade, year: null });
         }
         setSelected(memory);
-        const returnTo = initialHashtag ? `/feed?tag=${encodeURIComponent(initialHashtag)}` : "/feed";
+        const returnParams = new URLSearchParams();
+        if (initialHashtag) returnParams.set("tag", initialHashtag);
+        if (scope !== "all") returnParams.set("scope", scope);
+        const returnTo = `/feed${returnParams.size ? `?${returnParams}` : ""}`;
         window.history.pushState(null, "", `/recuerdo/${memory.id}?returnTo=${encodeURIComponent(returnTo)}`);
       } else {
         setSelected(null);
-        window.history.pushState(null, "", initialHashtag ? `/feed?tag=${encodeURIComponent(initialHashtag)}` : "/feed");
+        const params = new URLSearchParams();
+        if (initialHashtag) params.set("tag", initialHashtag);
+        if (scope !== "all") params.set("scope", scope);
+        window.history.pushState(null, "", `/feed${params.size ? `?${params}` : ""}`);
       }
     },
-    [period.decade, changePeriod, initialHashtag]
+    [period.decade, changePeriod, initialHashtag, scope]
   );
 
   const chooseScope = useCallback(
     (value: string) => {
       setScope(value);
+      const params = new URLSearchParams(window.location.search);
+      if (value === "all") params.delete("scope");
+      else params.set("scope", value);
+      const queryString = params.toString();
+      window.history.pushState(null, "", '/feed' + (queryString ? '?' + queryString : ''));
       setQuery("");
       setSelected(null);
       const group = groups.find((g) => g.id === value);
@@ -192,7 +213,7 @@ function FeedPageContent() {
       try {
         const created = await createRemoteGroup(group);
         setGroups((curr) => [...curr, created]);
-        setScope(created.id);
+        chooseScope(created.id);
         setSelected(null);
         setQuery("");
         changePeriod({ decade: created.decade, year: null });
@@ -201,7 +222,7 @@ function FeedPageContent() {
         return err instanceof Error ? err.message : "No se pudo crear el grupo.";
       }
     },
-    [groups, changePeriod]
+    [groups, changePeriod, chooseScope]
   );
 
   const joinGroup = useCallback(
@@ -321,6 +342,8 @@ function FeedPageContent() {
   );
 
   const communityControls = (
+    <>
+    {unavailableGroup && <p role="alert">Este grupo no existe o ya no está disponible.</p>}
     <CommunityControls
       groups={myGroups}
       searchGroups={groups}
@@ -340,6 +363,7 @@ function FeedPageContent() {
       onAddToGroup={(groupId) => router.push(`/explorar?action=recordar&groupId=${groupId}`)}
       onShowInfo={setGroupInfoId}
     />
+    </>
   );
 
   const activeGroupInfo = groups.find((g) => g.id === groupInfoId);
@@ -368,6 +392,12 @@ function FeedPageContent() {
           ...followers.map((u) => ({ name: u.username, id: u.id })),
         ]}
         groupOpenRequest={groupOpenRequest}
+        groupActions={groups.filter(g => g.id === scope).map(group => <GroupHeaderActions
+          key={group.id} group={group} canPublish={!!session}
+          onInfo={() => setGroupInfoId(group.id)}
+          onPublish={() => router.push('/explorar?action=recordar&groupId=' + group.id)}
+          onJoin={() => joinGroup(group.id)}
+        />)}
         community={communityControls}
         groupName={groups.find((g) => g.id === scope)?.name}
         onRepostCreated={(id) =>

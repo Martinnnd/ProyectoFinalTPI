@@ -64,6 +64,7 @@ export default function SocialFeed({
   suggestedAuthors,
   groupOpenRequest,
   groupName,
+  groupActions,
   community,
   memories,
   decade,
@@ -104,6 +105,7 @@ export default function SocialFeed({
   suggestedAuthors: { name: string; id: number }[];
   groupOpenRequest: number;
   groupName?: string;
+  groupActions?: ReactNode;
   community?: ReactNode;
   memories: Memory[];
   selected: Memory | null;
@@ -426,6 +428,7 @@ export default function SocialFeed({
         onToggleMaximize={() => setMaximized((current) => !current)}
       >
         <FeedHeader
+          actions={groupName ? groupActions : undefined}
           backLabel={backLabel}
           title={groupName ?? (tab === "groups" ? "Mis grupos" : "Feed")}
           tab={tab}

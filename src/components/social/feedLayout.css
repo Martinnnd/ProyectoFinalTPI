@@ -101,3 +101,11 @@
     padding: 12px 10px 0;
   }
 }
+
+.feed-heading-title { display:flex; align-items:center; gap:12px; min-width:0; flex-wrap:wrap; }
+.feed-heading-title h2 { min-width:0; overflow-wrap:anywhere; }
+.feed-group-header-actions { display:flex; align-items:center; gap:6px; position:relative; flex-wrap:wrap; }
+.feed-group-header-actions button { display:inline-flex; align-items:center; justify-content:center; min-width:40px; min-height:40px; padding:8px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); color:var(--ink); cursor:pointer; }
+.feed-group-header-actions button:hover { background:var(--soft); }
+.feed-group-header-actions button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.feed-group-action-status { font-size:12px; }
