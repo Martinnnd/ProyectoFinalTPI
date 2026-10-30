@@ -54,6 +54,15 @@
 .era-2020 .feed-post img { border-radius:12px; }
 .era-2020 .feed-post :is(h2,h3,strong) { color:#f6fbfd; }
 .era-2020 .feed-post :is(small,.post-place) { color:#b9cbd2; }
+.app.era-2020.view-feed .feed-post { box-sizing:border-box; width:100%; max-width:none; margin:0 0 16px; padding:20px; }
+.app.era-2020.view-feed .feed-post header { min-width:0; padding-bottom:11px; border-bottom:1px solid #3f5966; }
+.app.era-2020.view-feed .feed-post footer { padding-top:8px; border-top:1px solid #3f5966; }
+.app.era-2020.view-feed .post-details { min-width:0; }
+.app.era-2020.view-feed .post-content h3,
+.app.era-2020.view-feed .feed-post header strong { overflow-wrap:anywhere; }
+@media(max-width:899px) {
+  .app.era-2020.view-feed .feed-post { padding:14px; margin-bottom:12px; }
+}
 .era-2020 .social-avatar { border:2px solid #75decf; background:linear-gradient(145deg,#279c99,#5756aa); color:white; box-shadow:0 0 0 3px #5ce5cc24; }
 .era-2020 .personal-profile { background:#101b24; }
 .era-2020 .personal-profile .personal-header { border-bottom:1px solid #4c6770; background:linear-gradient(110deg,#1c3b45,#17202e); }

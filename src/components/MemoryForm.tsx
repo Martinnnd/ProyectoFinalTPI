@@ -1,8 +1,8 @@
 import { publicationMediaError, REQUIRE_PUBLICATION_MEDIA } from '../publicationMedia';
-import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../media";
-import { eraRegistry } from "../eras/registry";
+import { youtubeId, safeMediaUrl, normalizeAttachment } from "../media";
 import { extractHashtags } from "../hashtags";
 import { localToday, memoryDateIso } from "../memoryDate";
+import { getGroups } from "../groupsApi";
 import GooglePhotosPicker from "./GooglePhotosPicker";
 import MemoryDatePicker from "./MemoryDatePicker";
 import DiscardDraftDialog from './DiscardDraftDialog';
@@ -11,11 +11,12 @@ import type { ComponentProps } from 'react';
 const GOOGLE_PHOTOS_AVAILABLE = false;
   import { useEffect, useRef, useState } from "react";
   import { X, Save, Loader2, Upload, Images, Link } from "lucide-react";
-  import { categories, type Memory, type Decade } from "../types";
+  import { categories, type Memory, type Decade, type CommunityGroup } from "../types";
   import type { Point } from "./MemoryMap";
   function MemoryCreationForm({
     initial,
     defaultHashtags = [],
+    groupId,
     point,
     decade,
     onCancel,
@@ -24,6 +25,7 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
     initial?: Memory;
     defaultHashtags?: string[];
     groupName?: string;
+    groupId?: string;
     point: Point;
     decade: Decade;
     onCancel: () => void;
@@ -39,13 +41,27 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
     const dialog = useRef<HTMLDialogElement>(null);
     const stepHeading = useRef<HTMLHeadingElement>(null);
     const [step, setStep] = useState(0);
-    const steps = ["Foto o video", "Tu historia", "Lugar y fecha", "Música"];
+    const steps = ["Foto o video", "Tu historia", "Lugar y fecha"];
     const [description, setDescription] = useState(() => {
       const text = initial?.description ?? "";
       const existing = extractHashtags(text).tags;
       const missing = (initial?.hashtags ?? defaultHashtags).filter(tag => !existing.includes(tag));
       return [text, missing.map(tag => `#${tag}`).join(" ")].filter(Boolean).join("\n\n");
     });
+    const [groups, setGroups] = useState<CommunityGroup[]>([]);
+    const [groupsLoading, setGroupsLoading] = useState(true);
+    const [groupsError, setGroupsError] = useState(false);
+    const [selectedGroupId, setSelectedGroupId] = useState(groupId ?? '');
+    useEffect(() => {
+      const controller = new AbortController();
+      getGroups(controller.signal).then(result => {
+        const memberships = result.filter(group => group.isMember);
+        setGroups(memberships);
+        setSelectedGroupId(current => current && !memberships.some(group => group.id === current) ? '' : current);
+        setGroupsError(false);
+      }).catch(() => { if (!controller.signal.aborted) { setSelectedGroupId(''); setGroupsError(true); } }).finally(() => { if (!controller.signal.aborted) setGroupsLoading(false); });
+      return () => controller.abort();
+    }, []);
     const detectedHashtags = extractHashtags(description);
     const [mediaKind,setMediaKind]=useState<'image'|'video'|'youtube'>(initial?.media?.kind ?? (youtubeId(initial?.image ?? '') ? 'youtube' : 'image'));
     const [mediaUrl,setMediaUrl]=useState(initial?.media?.url ?? initial?.image ?? '');
@@ -57,8 +73,6 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
     const [loadingFile,setLoadingFile]=useState(false);
     const [googlePhotosBusy, setGooglePhotosBusy] = useState(false);
     const fileVersion=useRef(0);
-    const [musicChoice,setMusicChoice]=useState(initial?.music ? 'custom' : '');
-    const tracks=eraRegistry[decade].content.music;
     async function readFile(file:File|undefined){
       const version=++fileVersion.current;
       if(!file)return;
@@ -134,14 +148,6 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
       if(loadingFile){setError('Esperá a que termine de cargar el archivo.');return;}
       const mediaError = publicationMediaError(mediaUrl, mediaKind);
       if (mediaError) { setError(mediaError); return; }
-      let music:Memory['music'];
-      if(musicChoice==='custom'){
-        const id=spotifyId(String(data.get('spotifyUrl')));
-        const title=String(data.get('songTitle')??'').trim(),artist=String(data.get('songArtist')??'').trim();
-        if(!id||!title||!artist){setError('Completá el enlace de una canción de Spotify, el título y el artista.');return;}
-        music={spotifyId:id,title,artist};
-      }else if(musicChoice){const track=tracks.find(t=>t.spotifyId===musicChoice);if(track)music={spotifyId:track.spotifyId,title:track.title,artist:track.artist};}
-      
       setSaving(true);
       setError("");
       
@@ -152,7 +158,6 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
         music: undefined,
         media: mediaUrl ? normalizeAttachment({kind:mediaKind,url:mediaUrl}) : undefined,
         ...(mediaUrl && mediaKind==='image'&&!youtubeId(mediaUrl)?{image:mediaUrl}:{}),
-        ...(music?{music}:{}),
         id: initial?.id ?? crypto.randomUUID(),
         title,
         place,
@@ -160,6 +165,7 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
         date,
         category: data.get("category") as Memory["category"],
         description,
+        groupId: selectedGroupId || undefined,
         hashtags: hashtags.tags,
         createdAt: initial?.createdAt ?? (initial ? undefined : new Date().toISOString()),
         author: "Vos",
@@ -201,7 +207,7 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
         <ol className="memory-form-progress" aria-label="Pasos del recuerdo">
           {steps.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined}><span aria-hidden="true">{index + 1}</span>{label}</li>)}
         </ol>
-        <h3 ref={stepHeading} tabIndex={-1} className="memory-form-step-title">Paso {step + 1} de {steps.length}: {steps[step]}{step === 3 || (step === 0 && !REQUIRE_PUBLICATION_MEDIA) ? " · opcional" : ""}</h3>
+        <h3 ref={stepHeading} tabIndex={-1} className="memory-form-step-title">Paso {step + 1} de {steps.length}: {steps[step]}{step === 0 && !REQUIRE_PUBLICATION_MEDIA ? " · opcional" : ""}</h3>
         <form noValidate onSubmit={submit} onChangeCapture={() => {dirty.current = true; setError("");}}>
           <div data-form-step="0" hidden={step !== 0}>
           <fieldset className="media-fields"><legend>Foto o video · {REQUIRE_PUBLICATION_MEDIA ? "obligatorio" : "opcional"}</legend>
@@ -266,6 +272,14 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
           <div className="memory-form-tags" aria-live="polite">
             {detectedHashtags.error ? <small className="form-error">{detectedHashtags.error}</small> : detectedHashtags.tags.map(tag => <span key={tag}>#{tag}</span>)}
           </div>
+          <div className="memory-group-choice">
+            <label htmlFor="memory-group-select">Publicar en</label>
+            <select id="memory-group-select" value={selectedGroupId} disabled={groupsLoading || groupsError || saving} onChange={event => { setSelectedGroupId(event.target.value); dirty.current = true; }}>
+              <option value="">Recuerdos generales</option>
+              {groups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}
+            </select>
+            <small role="status">{groupsLoading ? 'Buscando tus grupos…' : groupsError ? 'No se pudieron cargar tus grupos. Podés publicar en recuerdos generales.' : groups.length ? 'Elegí uno de los grupos a los que pertenecés o publicá para todos.' : 'Todavía no te uniste a ningún grupo. Tu recuerdo se publicará para todos.'}</small>
+          </div>
           </div>
           <div data-form-step="2" hidden={step !== 2}>
           <label>
@@ -289,11 +303,6 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
             </label>
           </div>
 
-          </div>
-          <div data-form-step="3" hidden={step !== 3}>
-          <fieldset className="media-fields"><legend>Música de fondo · opcional</legend><label>Elegir canción<select value={musicChoice} onChange={e=>setMusicChoice(e.target.value)}><option value="">Sin música</option>{tracks.map(track=><option key={track.spotifyId} value={track.spotifyId}>{track.title} — {track.artist}</option>)}<option value="custom">Otra canción de Spotify…</option></select></label>
-          {musicChoice==='custom'&&<><label>Enlace de Spotify<input name="spotifyUrl" defaultValue={initial?.music ? `https://open.spotify.com/track/${initial.music.spotifyId}` : ""} type="url" required placeholder="https://open.spotify.com/track/…"/></label><label>Tema<input name="songTitle" defaultValue={initial?.music?.title} required maxLength={120}/></label><label>Artista<input name="songArtist" defaultValue={initial?.music?.artist} required maxLength={120}/></label></>}
-          <small>Este paso es opcional. Podés guardar tu recuerdo sin agregar música.</small></fieldset>
           </div>
           {step !== 0 && error && (
             <p className="form-error" role="alert">

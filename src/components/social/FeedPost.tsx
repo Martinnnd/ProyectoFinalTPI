@@ -1,4 +1,5 @@
-import { Ellipsis, MapPin, Pencil, Repeat2, Trash2 } from "lucide-react";
+import { Ellipsis, MapPin, Pencil, Repeat2, Trash2, UsersRound } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import PostMedia, { PostMusic } from "../PostMedia";
 import { youtubeId } from "../../media";
@@ -14,6 +15,7 @@ import FeedRelations from './FeedRelations';
 export default function FeedPost({
   topOverlay,
   memory,
+  groupName,
   active = true,
   selected,
   following,
@@ -45,6 +47,7 @@ export default function FeedPost({
 }: {
   topOverlay?: ReactNode;
   memory: Memory;
+  groupName?: string;
   active?: boolean;
   selected: boolean;
   following: boolean;
@@ -119,6 +122,12 @@ export default function FeedPost({
               ha reposteado
             </span>
           )}
+        </div>
+      )}
+      {memory.groupId && !memory.repost && (
+        <div className="post-group-context">
+          <UsersRound size={14} aria-hidden="true" />
+          <span>{isReposterOwn ? "Publicaste un recuerdo en" : `${displayAuthor} publicó un recuerdo en`} <Link className="post-group-link" href={`/feed?scope=${encodeURIComponent(memory.groupId)}`}>{groupName ?? "Ver grupo"}</Link></span>
         </div>
       )}
       <div className={`post-composition${splitPhoto ? ' has-split-photo' : ''}`}>

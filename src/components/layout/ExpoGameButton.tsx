@@ -45,6 +45,7 @@ export default function ExpoGameButton({ decade, onClick }: { decade: number; on
       <svg className="expo-game-ring" viewBox="0 0 100 100" aria-hidden="true">
         <defs><path id="expo-game-orbit" d="M 50,50 m -39,0 a 39,39 0 1,1 78,0 a 39,39 0 1,1 -78,0" /></defs>
         <circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" strokeOpacity=".45" strokeWidth="1" strokeDasharray="2 4" />
+        <circle className="expo-game-ring-band" cx="50" cy="50" r="39" fill="none" strokeWidth="13" />
         <text><textPath href="#expo-game-orbit" startOffset="0%">✦ EXPO 2026 ✦ JUGÁ ENTRE ÉPOCAS ✦</textPath></text>
       </svg>
       <span className="expo-game-device" aria-hidden="true">

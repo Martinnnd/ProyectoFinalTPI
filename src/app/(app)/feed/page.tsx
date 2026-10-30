@@ -19,6 +19,7 @@ import {
   getGroupMemories,
   createGroup as createRemoteGroup,
   joinGroup as joinRemoteGroup,
+  leaveGroup as leaveRemoteGroup,
   type CreateGroupInput,
   type GroupMember,
 } from "../../../groupsApi";
@@ -55,7 +56,11 @@ function FeedPageContent() {
   // Grupos y comunidad
   const [groups, setGroups] = useState<CommunityGroup[]>([]);
   const myGroups = groups.filter((g) => g.isMember);
-  const [scope, setScope] = useState("all");
+  const requestedScope = searchParams.get("scope");
+  const [scope, setScope] = useState(requestedScope ?? "all");
+  useEffect(() => {
+    if (requestedScope) setScope(requestedScope);
+  }, [requestedScope]);
   const [query, setQuery] = useState("");
   const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
   const [groupInfoId, setGroupInfoId] = useState<string | null>(null);
@@ -213,6 +218,19 @@ function FeedPageContent() {
     [setNotice]
   );
 
+  const leaveSelectedGroup = useCallback(async (groupId: string): Promise<string | null> => {
+    try {
+      await leaveRemoteGroup(groupId);
+      setGroups(curr => curr.map(g => g.id === groupId ? { ...g, isMember: false } : g));
+      setGroupMemories([]);
+      setScope('groups');
+      setNotice('Saliste del grupo.');
+      return null;
+    } catch (error) {
+      return error instanceof Error ? error.message : 'No se pudo salir del grupo.';
+    }
+  }, [setNotice]);
+
   const groupUpdated = useCallback(
     (updated: CommunityGroup) => {
       setGroups((curr) => curr.map((g) => (g.id === updated.id ? updated : g)));
@@ -318,6 +336,7 @@ function FeedPageContent() {
       onScope={chooseScope}
       onCreate={createGroup}
       onJoinGroup={joinGroup}
+      onLeaveGroup={leaveSelectedGroup}
       onAddToGroup={(groupId) => router.push(`/explorar?action=recordar&groupId=${groupId}`)}
       onShowInfo={setGroupInfoId}
     />
@@ -341,6 +360,7 @@ function FeedPageContent() {
         onDelete={(m) => setDeleting(m)}
         onProfile={handleProfile}
         groupIds={groups.map((g) => g.id)}
+        groupNames={Object.fromEntries(groups.map((g) => [g.id, g.name]))}
         suggestedAuthors={[
           ...feedItems
             .filter((m) => m.authorId)
@@ -401,7 +421,13 @@ function FeedPageContent() {
               "Grupo eliminado. Sus recuerdos se conservaron como publicaciones generales."
             )
           }
-          onLeft={(groupId) => groupRemoved(groupId, "Saliste del grupo.")}
+          onLeft={(groupId) => {
+            setGroups(curr => curr.map(g => g.id === groupId ? { ...g, isMember: false } : g));
+            setGroupMemories([]);
+            setGroupInfoId(null);
+            setScope('groups');
+            setNotice('Saliste del grupo.');
+          }}
           onOpenMember={openMemberProfile}
         />
       )}

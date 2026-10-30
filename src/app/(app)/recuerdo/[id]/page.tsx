@@ -7,6 +7,7 @@ import SocialFeed from "../../../../components/social/SocialFeed";
 import DeleteMemoryDialog from "../../../../components/DeleteMemoryDialog";
 import MemoryForm from "../../../../components/MemoryForm";
 import { getPublication } from "../../../../publicationsApi";
+import { getGroup } from "../../../../groupsApi";
 import { eliminarPublicacion } from "../../../../api";
 import { useEra } from "../../../../context/EraContext";
 import { useAuth } from "../../../../components/auth/AuthProvider";
@@ -34,6 +35,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
 
   const [memory, setMemory] = useState<Memory | null>(null);
+  const [groupName, setGroupName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Memory | null>(null);
@@ -66,6 +68,15 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
 
     return () => controller.abort();
   }, [id, status]);
+
+  useEffect(() => {
+    if (!memory?.groupId) return;
+    const controller = new AbortController();
+    getGroup(memory.groupId, controller.signal)
+      .then((group) => { if (!controller.signal.aborted) setGroupName(group.name); })
+      .catch(() => { if (!controller.signal.aborted) setGroupName(null); });
+    return () => controller.abort();
+  }, [memory?.groupId]);
 
   const handleProfile = useCallback(
     (targetMemory: Memory) => {
@@ -158,6 +169,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         onDelete={(m) => setDeleting(m)}
         onProfile={handleProfile}
         groupIds={[]}
+        groupNames={memory.groupId && groupName ? { [memory.groupId]: groupName } : {}}
         suggestedAuthors={[
           ...(effectiveMemory.authorId
             ? [{ name: effectiveMemory.author, id: effectiveMemory.authorId }]

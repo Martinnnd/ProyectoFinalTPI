@@ -60,6 +60,7 @@ export default function SocialFeed({
   onDelete,
   onProfile,
   groupIds,
+  groupNames = {},
   suggestedAuthors,
   groupOpenRequest,
   groupName,
@@ -99,6 +100,7 @@ export default function SocialFeed({
   canRate: boolean;
   onRate: (postId: string, score: number) => void;
   groupIds: string[];
+  groupNames?: Record<string, string>;
   suggestedAuthors: { name: string; id: number }[];
   groupOpenRequest: number;
   groupName?: string;
@@ -483,6 +485,7 @@ export default function SocialFeed({
 
             return (
               <FeedPost
+                groupName={memory.groupId ? groupNames[memory.groupId] : undefined}
                 topOverlay={index === 0 && isAuthenticated && tab !== 'groups' && !selected && suggestRefresh ? (
                   <button type="button" className="feed-refresh-button" disabled={remote.loading} onClick={() => {
                     setSuggestRefresh(false);

@@ -21,6 +21,7 @@ import {
   getGroups,
   createGroup,
   joinGroup,
+  leaveGroup,
   type CreateGroupInput,
 } from "../../groupsApi";
 import type { CommunityGroup, Decade, Memory, TierProgress } from "../../types";
@@ -220,6 +221,18 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     }
   };
 
+  const handleLeaveGroup = async (groupId: string): Promise<string | null> => {
+    try {
+      await leaveGroup(groupId);
+      setGroups(curr => curr.map(g => g.id === groupId ? { ...g, isMember: false } : g));
+      setScope('groups');
+      setNotice('Saliste del grupo.');
+      return null;
+    } catch (error) {
+      return error instanceof Error ? error.message : 'No se pudo salir del grupo.';
+    }
+  };
+
   const handleGroupScope = (value: string) => {
     if (value === "groups" || value === "all") {
       setScope("groups");
@@ -242,6 +255,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
       onScope={handleGroupScope}
       onCreate={handleCreateGroup}
       onJoinGroup={handleJoinGroup}
+      onLeaveGroup={handleLeaveGroup}
       onAddToGroup={(groupId) => {
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));
