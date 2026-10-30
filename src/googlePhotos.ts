@@ -76,7 +76,7 @@ export async function waitForGooglePhoto(
       signal.throwIfAborted();
       const extensions: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
       if (!extensions[blob.type]) throw new GooglePhotosError('La foto tiene un formato no compatible.');
-      if (!blob.size || blob.size > 2 * 1024 * 1024) throw new GooglePhotosError('La foto debe tener un tamaño de hasta 2 MB.');
+      if (!blob.size || blob.size > 5 * 1024 * 1024) throw new GooglePhotosError('La foto debe tener un tamaño de hasta 5 MB.');
       return new File([blob], `google-photos.${extensions[blob.type]}`, { type: blob.type });
     }
     if (state.status !== 'authorizing' && state.status !== 'selecting')
