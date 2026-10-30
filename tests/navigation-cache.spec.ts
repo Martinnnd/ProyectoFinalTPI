@@ -26,11 +26,12 @@ test('conserva páginas del feed al volver del mapa y actualiza solo a pedido; r
     if (url.pathname === '/api/feed/para-vos') {
       if (!url.searchParams.has('cursor')) {
         firstPages++;
+        if (firstPages > 1) await new Promise(resolve => setTimeout(resolve, 900));
         return respond({ items: [publication(1, firstPages > 1 ? 'Nueva publicación' : undefined), publication(2)], siguienteCursor: 'next', hayMas: true });
       }
       return respond({ items: [publication(3)], siguienteCursor: null, hayMas: false });
     }
-    if (url.pathname === '/api/usuario/perfil/ana') {
+    if (url.pathname === '/api/usuario/perfil/ana' || url.pathname === '/api/usuario/1/perfil') {
       profileReads++;
       return respond({ id: 1, username: 'ana', logros: [], tipoUsuario: 'Usuario_Personal', reputacion: 'Errante', puntosNostalgia: 0, cantidadPublicaciones: 0, cantidadSeguidores: 0, cantidadSeguidos: 0 });
     }
@@ -76,11 +77,15 @@ test('conserva páginas del feed al volver del mapa y actualiza solo a pedido; r
   const overlap = await page.getByRole('button', { name: 'nuevas publicaciones' }).evaluate(button => {
     const control = button.getBoundingClientRect();
     const post = button.closest('.feed-post')!.getBoundingClientRect();
-    return { top: control.top, bottom: control.bottom, border: post.top };
+    const front = document.elementFromPoint(control.x + control.width / 2, control.y + 2);
+    return { top: control.top, bottom: control.bottom, border: post.top, inFront: !!front && button.contains(front) };
   });
+  expect(overlap.inFront).toBe(true);
   expect(overlap.top).toBeLessThan(overlap.border);
   expect(overlap.bottom).toBeGreaterThan(overlap.border);
   await page.getByRole('button', { name: 'nuevas publicaciones' }).click();
+  await expect(page.getByRole('button', { name: 'Cargando publicaciones…' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Cargando publicaciones…' })).toBeDisabled();
   await expect(page.getByText('Nueva publicación', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'nuevas publicaciones' })).toHaveCount(0);
   expect(firstPages).toBe(2);
