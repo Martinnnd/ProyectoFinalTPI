@@ -4,6 +4,7 @@ import { toMemory, type Publication } from "./publicationsApi";
 import type { Memory } from "./types";
 
 export interface UsuarioPerfil {
+  fotoPerfilUrl?: string | null;
   id: number;
   username: string;
   nombre?: string;

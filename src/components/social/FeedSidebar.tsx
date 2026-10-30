@@ -1,10 +1,27 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-function avatarFor(name: string, id?: number) {
-  const seed = id ?? [...name].reduce((sum, letter) => sum + letter.codePointAt(0)!, 0);
-  return `/avatars/foto-${seed % 12 + 1}.jpg`;
+import { getPerfilUsuario } from '../../userApi';
+
+function SuggestedAvatar({ name }: { name: string }) {
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    setPhotoUrl(null);
+    setFailedUrl(null);
+    getPerfilUsuario(name, controller.signal)
+      .then(profile => {
+        if (!controller.signal.aborted) setPhotoUrl(profile.fotoPerfilUrl ?? null);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [name]);
+  return <>
+    <span aria-hidden="true">{name[0]}</span>
+    {photoUrl && photoUrl !== failedUrl && <img src={photoUrl} alt="" onError={() => setFailedUrl(photoUrl)} />}
+  </>;
 }
 
 export default function FeedSidebar({
@@ -47,8 +64,7 @@ export default function FeedSidebar({
           {suggestions.map((author) => (
             <div className={`suggested-person${leaving === author.name ? " is-leaving" : ""}`} key={author.name}>
               <Link className="social-avatar" href={`/perfil/${encodeURIComponent(author.name)}`} aria-label={`Ver perfil de ${author.name}`}>
-                <span aria-hidden="true">{author.name[0]}</span>
-                <img src={avatarFor(author.name, author.id)} alt="" onError={event => { event.currentTarget.hidden = true; }} />
+                <SuggestedAvatar name={author.name} />
               </Link>
               <Link className="suggested-person-name" href={`/perfil/${encodeURIComponent(author.name)}`}><strong>{author.name}</strong></Link>
               <button
