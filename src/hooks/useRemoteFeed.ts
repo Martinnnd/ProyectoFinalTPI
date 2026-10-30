@@ -13,6 +13,7 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
   const [cursor, setCursor] = useState<string | null>(cached?.cursor ?? null);
   const [hayMas, setHayMas] = useState(cached?.hayMas ?? false);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [expired, setExpired] = useState(false);
   const [revision, setRevision] = useState(0);
@@ -60,11 +61,11 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
       if (gone) { setCursor(null); setHayMas(false); }
     } finally {
       window.clearTimeout(timeout);
-      if (!controller.signal.aborted) { busy.current = false; setLoading(false); }
+      if (!controller.signal.aborted) { busy.current = false; setLoading(false); setRefreshing(false); }
     }
   }
   useEffect(() => {
-    if (!active || !feed) { setLoading(false); return; }
+    if (!active || !feed) { setLoading(false); setRefreshing(false); return; }
     const controller = new AbortController(); request.current = controller;
     const snapshot = forceRefresh.current ? undefined : feedCache.get<Snapshot>(key);
     const refreshing = forceRefresh.current;
@@ -91,5 +92,5 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
     void load(true, controller);
   }
   useEffect(() => () => request.current?.abort(), [feed, active, revision, key]);
-  return { items, loading, error, expired, hayMas: hayMas && !!cursor, more, reload: () => { request.current?.abort(); feedCache.delete(key); forceRefresh.current = true; setRevision(value => value + 1); } };
+  return { items, loading, refreshing, error, expired, hayMas: hayMas && !!cursor, more, reload: () => { setRefreshing(true); request.current?.abort(); feedCache.delete(key); forceRefresh.current = true; setRevision(value => value + 1); } };
 }

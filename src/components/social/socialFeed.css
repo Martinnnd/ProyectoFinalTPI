@@ -31,13 +31,13 @@
 }
 .feed-heading.is-scroll-hidden { transform:translateY(calc(-100% - 2px)); opacity:0; pointer-events:none; }
 .feed-heading.is-scroll-hidden:has(:focus-visible) { transform:none; opacity:1; pointer-events:auto; }
-.feed-post.has-top-overlay { position:relative; }
+.app .feed-post.has-top-overlay { position:relative; z-index:30; overflow:visible; }
 .app .feed-post > .feed-refresh-button {
   position:absolute;
   top:0;
   left:50%;
   transform:translate(-50%, -50%);
-  z-index:25;
+  z-index:60;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -1041,3 +1041,8 @@
 .feed-load-error p { margin:0 0 12px; }
 @keyframes feed-loading-spin { to { transform:rotate(360deg); } }
 @media(prefers-reduced-motion:reduce) { .feed-loading svg { animation:none; } }
+
+.feed-refresh-button:disabled { cursor:wait; opacity:1; }
+.feed-refresh-spinning { animation:feed-refresh-spin 1s linear infinite; }
+@keyframes feed-refresh-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .feed-refresh-spinning { animation:none; } }

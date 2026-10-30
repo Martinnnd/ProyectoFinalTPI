@@ -489,12 +489,12 @@ export default function SocialFeed({
             return (
               <FeedPost
                 groupName={memory.groupId ? groupNames[memory.groupId] : undefined}
-                topOverlay={index === 0 && isAuthenticated && tab !== 'groups' && !selected && suggestRefresh ? (
-                  <button type="button" className="feed-refresh-button" disabled={remote.loading} onClick={() => {
+                topOverlay={index === 0 && isAuthenticated && tab !== 'groups' && !selected && (suggestRefresh || remote.refreshing) ? (
+                  <button type="button" className="feed-refresh-button" aria-label={remote.refreshing ? "Cargando publicaciones…" : "nuevas publicaciones"} aria-busy={remote.refreshing} disabled={remote.loading || remote.refreshing} onClick={() => {
                     setSuggestRefresh(false);
                     scrolledDown.current = false;
                     remote.reload();
-                  }}><RefreshCw size={15} aria-hidden="true" />nuevas publicaciones</button>
+                  }}><RefreshCw size={15} aria-hidden="true" className={remote.refreshing ? "feed-refresh-spinning" : undefined} /><span role="status">{remote.refreshing ? "Cargando publicaciones…" : "nuevas publicaciones"}</span></button>
                 ) : undefined}
                 key={memory.id}
                 memory={effectiveMemory}
