@@ -63,9 +63,10 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
       const version=++fileVersion.current;
       if(!file)return;
       setLoadingFile(false);
-      if(file.size>2*1024*1024){setError('El archivo supera 2 MB. Usá un enlace para archivos más grandes.');return;}
       const kind=file.type.startsWith('image/')?'image':file.type.startsWith('video/')?'video':null;
       if(!kind){setError('Elegí una foto o video compatible.');return;}
+      const maxSizeMB=kind==='image'?5:2;
+      if(file.size>maxSizeMB*1024*1024){setError(`El archivo supera ${maxSizeMB} MB. Usá un enlace para archivos más grandes.`);return;}
       setLoadingFile(true);setError('');
       await new Promise<void>(resolve => {
         const reader=new FileReader();
@@ -211,7 +212,7 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
               <button type="button" aria-pressed={mediaSource === 'link'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('link'); setError(''); }}><Link size={18} aria-hidden="true" />Enlace</button>
             </div>
             <div id="media-source-panel" className="media-source-panel" hidden={mediaSelected}>
-              {mediaSource === 'file' && <label>Subir foto o video (hasta 2 MB)<input type="file" disabled={saving || loadingFile} accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/ogg" onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>}
+              {mediaSource === 'file' && <label>Subir foto (hasta 5 MB) o video (hasta 2 MB)<input type="file" disabled={saving || loadingFile} accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/ogg" onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>}
               {mediaSource === 'google' && (GOOGLE_PHOTOS_AVAILABLE ? <GooglePhotosPicker disabled={saving || loadingFile} onFile={readFile} onBusyChange={setGooglePhotosBusy} /> : <p className="google-photos-unavailable">Google Photos estará disponible próximamente. Podés subir un archivo o pegar un enlace.</p>)}
               {mediaSource === 'link' && <>
                 <label>Tipo de adjunto<select disabled={saving} value={mediaKind} onChange={e=>{fileVersion.current++;setLoadingFile(false);setMediaKind(e.target.value as typeof mediaKind);setMediaUrl('');}}><option value="image">Foto</option><option value="video">Video</option><option value="youtube">YouTube</option></select></label>

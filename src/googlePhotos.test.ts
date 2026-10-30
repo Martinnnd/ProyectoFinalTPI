@@ -59,9 +59,9 @@ it.each(['text/html', 'video/mp4'])('no adjunta una descarga de tipo %s', async 
   await expect(waitForGooglePhoto(session(), new AbortController().signal, vi.fn())).rejects.toThrow('formato no compatible');
 });
 
-it('rechaza una imagen mayor a 2 MB', async () => {
-  request.mockResolvedValueOnce(state('ready')).mockResolvedValueOnce(new Response(new Blob([new Uint8Array(2 * 1024 * 1024 + 1)], { type: 'image/png' })));
-  await expect(waitForGooglePhoto(session(), new AbortController().signal, vi.fn())).rejects.toThrow('hasta 2 MB');
+it('rechaza una imagen mayor a 5 MB', async () => {
+  request.mockResolvedValueOnce(state('ready')).mockResolvedValueOnce(new Response(new Blob([new Uint8Array(5 * 1024 * 1024 + 1)], { type: 'image/png' })));
+  await expect(waitForGooglePhoto(session(), new AbortController().signal, vi.fn())).rejects.toThrow('hasta 5 MB');
 });
 
 it('limpiar una operación ya eliminada no impide volver a empezar', async () => {

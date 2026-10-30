@@ -45,7 +45,7 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('heading', { name: 'Paso 1 de 4: Foto o video' })).toBeVisible();
   await expect(dialog.getByLabel('Título del recuerdo')).not.toBeVisible();
-  await expect(dialog.getByLabel('Subir foto o video (hasta 2 MB)')).toBeVisible();
+  await expect(dialog.getByLabel('Subir foto (hasta 5 MB) o video (hasta 2 MB)')).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Elegir desde Google Photos' })).toHaveCount(0);
   await dialog.getByRole('button', { name: 'Google Photos', exact: true }).click();
   await expect(dialog.getByRole('button', { name: 'Elegir desde Google Photos' })).toBeVisible();
@@ -53,13 +53,13 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
   await dialog.screenshot({ path: testInfo.outputPath('memory-form-media.png') });
   await expect(dialog.getByRole('button', { name: 'Continuar sin adjunto', exact: true })).toBeVisible();
   await dialog.getByRole('button', { name: 'Archivo', exact: true }).click();
-  await dialog.locator('input[type="file"]').setInputFiles({ name: 'grande.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(2 * 1024 * 1024 + 1) });
-  await expect(dialog.getByRole('alert')).toContainText('El archivo supera 2 MB');
+  await dialog.locator('input[type="file"]').setInputFiles({ name: 'grande.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(5 * 1024 * 1024 + 1) });
+  await expect(dialog.getByRole('alert')).toContainText('El archivo supera 5 MB');
   await expect(dialog.getByRole('button', { name: 'Continuar', exact: true })).toBeEnabled();
   await dialog.locator('input[type="file"]').setInputFiles('public/facts/bttf.jpg');
   await expect(dialog.getByAltText('Vista previa del adjunto')).toBeVisible();
   await expect(dialog.getByRole('alert')).toHaveCount(0);
-  await expect(dialog.getByLabel('Subir foto o video (hasta 2 MB)')).not.toBeVisible();
+  await expect(dialog.getByLabel('Subir foto (hasta 5 MB) o video (hasta 2 MB)')).not.toBeVisible();
   await expect(dialog.getByText('Archivo adjunto listo.', { exact: true })).toHaveCount(0);
   for (const name of ['Archivo', 'Google Photos', 'Enlace']) {
     await expect(dialog.getByRole('button', { name, exact: true })).toBeDisabled();
@@ -69,7 +69,7 @@ test(`crear un recuerdo exige fecha completa y envía el día elegido en UTC${mo
   await dialog.screenshot({ path: testInfo.outputPath('memory-form-selected-photo.png') });
   await dialog.getByRole('button', { name: 'Quitar adjunto', exact: true }).click();
   await expect(dialog.getByRole('button', { name: 'Enlace', exact: true })).toBeEnabled();
-  await expect(dialog.getByLabel('Subir foto o video (hasta 2 MB)')).toBeVisible();
+  await expect(dialog.getByLabel('Subir foto (hasta 5 MB) o video (hasta 2 MB)')).toBeVisible();
   await dialog.getByRole('button', { name: 'Enlace', exact: true }).click();
   await page.route('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg', route => route.fulfill({ path: 'public/facts/bttf.jpg', contentType: 'image/jpeg' }));
   await dialog.getByLabel('O pegá un enlace HTTPS al archivo').fill('https://youtu.be/dQw4w9WgXcQ');
