@@ -74,6 +74,7 @@ for (const viewport of [
     if (viewport.width < 900) {
       await page.getByText('Tendencias, búsqueda y comunidad', { exact: true }).click();
     }
+    await page.getByRole('button', { name: 'Mis grupos', exact: true }).click();
     await page.getByRole('button', { name: 'Crear grupo', exact: true }).click();
 
     const form = page.locator('.community-create-form');
@@ -86,7 +87,7 @@ for (const viewport of [
     await form.getByRole('button', { name: 'Crear grupo', exact: true }).click();
 
     await expect(form).toHaveCount(0);
-    await expect(page.getByText('Películas que marcaron la década.', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Cine de los 90', exact: true })).toBeVisible();
     const publishInGroup = page.getByRole('button', { name: 'Publicar recuerdo en este grupo', exact: true });
     await expect(publishInGroup).toBeVisible();
     expect(createdBody()).toEqual({
@@ -98,3 +99,26 @@ for (const viewport of [
     await expect(page.getByText('Elegí un lugar en el mapa para tu recuerdo.')).toBeVisible();
   });
 }
+
+test('abre un grupo compartido, copia su enlace y permite volver con el navegador', async ({ page, context }) => {
+  await mockApi(page);
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.route('**/api/grupos', route => route.fulfill({ json: [{ id: 12, nombre: 'Cine de los 80', descripcion: 'Nuestro cine compartido', decada: 1980, esIntegrante: false, esCreador: false }] }));
+  await page.route('**/api/grupos/12/recuerdos', route => route.fulfill({ json: [] }));
+  await page.goto('/feed?scope=12');
+  await expect(page.getByRole('heading', { name: 'Cine de los 80', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Unirme al grupo', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Compartir grupo', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: '¡Enlace copiado!' })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(new URL('/feed?scope=12', page.url()).href);
+  await page.getByRole('button', { name: 'Mis grupos', exact: true }).click();
+  await expect(page).toHaveURL(/scope=groups/);
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Cine de los 80', exact: true })).toBeVisible();
+});
+
+test('informa cuando el grupo compartido no existe', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('/feed?scope=999');
+  await expect(page.getByRole('alert').filter({ hasText: 'Este grupo no existe o ya no está disponible.' })).toBeVisible();
+});

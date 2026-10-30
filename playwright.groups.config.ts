@@ -6,12 +6,12 @@ export default defineConfig({
   workers: 1,
   timeout: 60_000,
   use: {
-    baseURL: 'http://localhost:3107',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3107',
     channel: 'chrome',
     headless: true,
     screenshot: 'only-on-failure',
   },
-  webServer: {
+  webServer: process.env.PLAYWRIGHT_BASE_URL ? undefined : {
     command: 'node node_modules/next/dist/bin/next dev -p 3107',
     url: 'http://localhost:3107',
     reuseExistingServer: false,
