@@ -3,11 +3,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowUpRight, Check, ChevronUp, MessageCircle, Minus, Send, Trash2, X } from "lucide-react";
 import type { Decade } from "../types";
 import { useAuth } from "./auth/AuthProvider";
-import type { MensajeChatDto, ConversacionResumenDto } from "../chat/types";
-import { eliminarConversacion, obtenerConversaciones } from "../chat/chatApi";
+import type { ChatMessageDto, ConversationSummaryDto } from "../chat/types";
+import { deleteConversation, getConversations } from "../chat/chatApi";
 import { useChatConnection } from "../chat/useChatConnection";
 
-const titulosPorDecada: Record<Decade, string> = {
+const conversationTitlesByDecade: Record<Decade, string> = {
   1970: "Canal 70 | En contacto",
   1980: "CHAT CLUB · 80",
   1990: "Nostalgiar Chat — Conectados",
@@ -16,266 +16,258 @@ const titulosPorDecada: Record<Decade, string> = {
   2020: "Nostalgiar · Conversaciones",
 };
 
-function formatearTiempo(iso: string): string {
-  const fecha = new Date(iso);
-  const ahora = new Date();
-  const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-  const ayer = new Date(hoy.getTime() - 86_400_000);
-  const diaDeFecha = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
-  if (diaDeFecha.getTime() === hoy.getTime()) {
-    return fecha.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+function formatTime(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86_400_000);
+  const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  if (dateDay.getTime() === today.getTime()) {
+    return date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
   }
-  if (diaDeFecha.getTime() === ayer.getTime()) return "Ayer";
-  return fecha.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
+  if (dateDay.getTime() === yesterday.getTime()) return "Ayer";
+  return date.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
 }
 
-type ConversacionActiva = { usuarioId: number; username: string };
+type ActiveConversation = { userId: number; username: string };
 
 export default function Chat({
   decade,
   fullPage,
   onOpenPage,
   hidden,
-  chatearCon,
+  chatWith,
 }: {
   decade: Decade;
   fullPage: boolean;
   onOpenPage: () => void;
   hidden: boolean;
-  chatearCon?: { usuarioId: number; username: string; ts: number } | null;
+  chatWith?: { userId: number; username: string; ts: number } | null;
 }) {
   const { session } = useAuth();
 
-  // --- Portal al slot de la taskbar (integración con las eras) ---
+  // --- Portal to the taskbar slot (era integration) ---
   const [dockSlot, setDockSlot] = useState<HTMLElement | null>(null);
   useEffect(() => {
     const media = window.matchMedia("(min-width:900px)");
-    const actualizar = () =>
+    const updateDockSlot = () =>
       setDockSlot(media.matches ? document.getElementById("chat-taskbar-slot") : null);
-    actualizar();
-    media.addEventListener("change", actualizar);
-    return () => media.removeEventListener("change", actualizar);
+    updateDockSlot();
+    media.addEventListener("change", updateDockSlot);
+    return () => media.removeEventListener("change", updateDockSlot);
   }, [decade]);
 
   // --- Estado ---
   const [open, setOpen] = useState(false);
-  const [conversaciones, setConversaciones] = useState<ConversacionResumenDto[]>([]);
-  const [cargandoConversaciones, setCargandoConversaciones] = useState(false);
-  const [conversacionActiva, setConversacionActiva] = useState<ConversacionActiva | null>(null);
-  const [mensajes, setMensajes] = useState<MensajeChatDto[]>([]);
-  const [cargandoMensajes, setCargandoMensajes] = useState(false);
-  const [inputTexto, setInputTexto] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const [eliminando, setEliminando] = useState(false);
-  const [confirmandoBorrar, setConfirmandoBorrar] = useState(false);
+  const [conversations, setConversations] = useState<ConversationSummaryDto[]>([]);
+  const [loadingConversations, setLoadingConversations] = useState(false);
+  const [activeConversation, setActiveConversation] = useState<ActiveConversation | null>(null);
+  const [messages, setMessages] = useState<ChatMessageDto[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [messageText, setMessageText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const trigger = useRef<HTMLButtonElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const conversacionActivaRef = useRef<ConversacionActiva | null>(null);
-  useEffect(() => { conversacionActivaRef.current = conversacionActiva; }, [conversacionActiva]);
+  const activeConversationRef = useRef<ActiveConversation | null>(null);
+  useEffect(() => { activeConversationRef.current = activeConversation; }, [activeConversation]);
 
-  // --- Callbacks estables para SignalR ---
-  const handleMensajeRecibido = useCallback((mensaje: MensajeChatDto) => {
-    if (conversacionActivaRef.current?.usuarioId === mensaje.emisorId) {
-      setMensajes(prev => [...prev, mensaje]);
+  const handleMessageReceived = useCallback((message: ChatMessageDto) => {
+    if (activeConversationRef.current?.userId === message.senderId) {
+      setMessages(previous => [...previous, message]);
     }
-    setConversaciones(prev => {
-      const idx = prev.findIndex(c => c.otroUsuarioId === mensaje.emisorId);
-      const actualizada: ConversacionResumenDto = {
-        otroUsuarioId: mensaje.emisorId,
-        otroUsuarioUsername: mensaje.emisorUsername,
-        ultimoMensaje: mensaje.contenido,
-        fechaUltimoMensaje: mensaje.fechaEnvio,
+    setConversations(previous => {
+      const index = previous.findIndex(conversation => conversation.otherUserId === message.senderId);
+      const updatedConversation: ConversationSummaryDto = {
+        otherUserId: message.senderId,
+        otherUsername: message.senderUsername,
+        lastMessage: message.content,
+        lastMessageAt: message.sentAt,
       };
-      if (idx >= 0) { const copia = [...prev]; copia[idx] = actualizada; return copia; }
-      return [actualizada, ...prev];
+      if (index >= 0) { const nextConversations = [...previous]; nextConversations[index] = updatedConversation; return nextConversations; }
+      return [updatedConversation, ...previous];
     });
   }, []);
 
-  const handleMensajeEnviado = useCallback((mensaje: MensajeChatDto) => {
-    if (conversacionActivaRef.current?.usuarioId === mensaje.destinatarioId) {
-      setMensajes(prev => [...prev, mensaje]);
+  const handleMessageSent = useCallback((message: ChatMessageDto) => {
+    if (activeConversationRef.current?.userId === message.recipientId) {
+      setMessages(previous => [...previous, message]);
     }
-    const usernameDestinatario = conversacionActivaRef.current?.username ?? "";
-    setConversaciones(prev => {
-      const idx = prev.findIndex(c => c.otroUsuarioId === mensaje.destinatarioId);
-      const actualizada: ConversacionResumenDto = {
-        otroUsuarioId: mensaje.destinatarioId,
-        otroUsuarioUsername: usernameDestinatario,
-        ultimoMensaje: mensaje.contenido,
-        fechaUltimoMensaje: mensaje.fechaEnvio,
+    const recipientUsername = activeConversationRef.current?.username ?? "";
+    setConversations(previous => {
+      const index = previous.findIndex(conversation => conversation.otherUserId === message.recipientId);
+      const updatedConversation: ConversationSummaryDto = {
+        otherUserId: message.recipientId,
+        otherUsername: recipientUsername,
+        lastMessage: message.content,
+        lastMessageAt: message.sentAt,
       };
-      if (idx >= 0) { const copia = [...prev]; copia[idx] = actualizada; return copia; }
-      return [actualizada, ...prev];
+      if (index >= 0) { const nextConversations = [...previous]; nextConversations[index] = updatedConversation; return nextConversations; }
+      return [updatedConversation, ...previous];
     });
   }, []);
 
-  // --- Conexión SignalR ---
-  const { connected, enviarMensaje, obtenerHistorial } = useChatConnection({
-    activo: !!session,
-    onMensajeRecibido: handleMensajeRecibido,
-    onMensajeEnviado: handleMensajeEnviado,
+  const { connected, sendMessage, getHistory } = useChatConnection({
+    enabled: !!session,
+    onMessageReceived: handleMessageReceived,
+    onMessageSent: handleMessageSent,
   });
 
-  // --- Cargar conversaciones al iniciar sesión ---
+  // --- Load conversations after sign-in ---
   useEffect(() => {
-    if (!session) { setConversaciones([]); setError(null); return; }
-    let cancelado = false;
-    setCargandoConversaciones(true);
-    obtenerConversaciones()
-      .then(data => { if (!cancelado) setConversaciones(data); })
-      .catch(err => { if (!cancelado) console.error("[Chat] Error al cargar conversaciones:", err); })
-      .finally(() => { if (!cancelado) setCargandoConversaciones(false); });
-    return () => { cancelado = true; };
+    if (!session) { setConversations([]); setError(null); return; }
+    let cancelled = false;
+    setLoadingConversations(true);
+    getConversations()
+      .then(data => { if (!cancelled) setConversations(data); })
+      .catch(error => { if (!cancelled) console.error("[Chat] Error loading conversations:", error); })
+      .finally(() => { if (!cancelled) setLoadingConversations(false); });
+    return () => { cancelled = true; };
   }, [session?.usuarioId]);
 
-  // --- Abrir conversación desde el perfil de otro usuario ---
+  // --- Open a conversation from another user's profile ---
   useEffect(() => {
-    if (!chatearCon) return;
-    setConversacionActiva({ usuarioId: chatearCon.usuarioId, username: chatearCon.username });
+    if (!chatWith) return;
+    setActiveConversation({ userId: chatWith.userId, username: chatWith.username });
     setOpen(true);
     setError(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatearCon?.ts]);
+  }, [chatWith?.ts]);
 
-  // --- Cargar historial al seleccionar una conversación ---
+  // --- Load history when selecting a conversation ---
   useEffect(() => {
-    setConfirmandoBorrar(false);
-    if (!conversacionActiva || !connected) return;
-    let cancelado = false;
-    setCargandoMensajes(true);
-    setMensajes([]);
+    setConfirmingDelete(false);
+    if (!activeConversation || !connected) return;
+    let cancelled = false;
+    setLoadingMessages(true);
+    setMessages([]);
     setError(null);
-    obtenerHistorial(conversacionActiva.usuarioId)
-      .then(historial => { if (!cancelado) setMensajes(historial); })
-      .catch(err => { if (!cancelado) setError(`No se pudo cargar el historial: ${err.message}`); })
-      .finally(() => { if (!cancelado) setCargandoMensajes(false); });
-    return () => { cancelado = true; };
-  }, [conversacionActiva?.usuarioId, connected]);
+    getHistory(activeConversation.userId)
+      .then(history => { if (!cancelled) setMessages(history); })
+      .catch(error => { if (!cancelled) setError(`No se pudo cargar el historial: ${error.message}`); })
+      .finally(() => { if (!cancelled) setLoadingMessages(false); });
+    return () => { cancelled = true; };
+  }, [activeConversation?.userId, connected]);
 
-  // --- Auto-scroll al último mensaje ---
+  // --- Auto-scroll to the latest message ---
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [mensajes]);
+  }, [messages]);
 
-  // --- Cerrar con Escape ---
   function close() { setOpen(false); trigger.current?.focus(); }
   useEffect(() => {
     if (!open) return;
-    const escape = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
-    window.addEventListener("keydown", escape);
-    return () => window.removeEventListener("keydown", escape);
+    const handleEscape = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, [open]);
 
-  // --- Resetear conversación al cambiar de época ---
-  useEffect(() => { setConversacionActiva(null); }, [decade]);
+  useEffect(() => { setActiveConversation(null); }, [decade]);
 
-  // --- Envío de mensaje ---
-  async function handleEnviar() {
-    if (!conversacionActiva || !inputTexto.trim() || !connected || enviando) return;
-    const texto = inputTexto.trim();
-    setInputTexto("");
-    setEnviando(true);
+  async function handleSend() {
+    if (!activeConversation || !messageText.trim() || !connected || sending) return;
+    const content = messageText.trim();
+    setMessageText("");
+    setSending(true);
     setError(null);
     try {
-      await enviarMensaje(conversacionActiva.usuarioId, texto);
-    } catch (err: unknown) {
-      const mensaje = err instanceof Error ? err.message : "No se pudo enviar el mensaje.";
-      setError(mensaje);
-      setInputTexto(texto);
+      await sendMessage(activeConversation.userId, content);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "No se pudo enviar el mensaje.";
+      setError(errorMessage);
+      setMessageText(content);
     } finally {
-      setEnviando(false);
+      setSending(false);
     }
   }
 
-  // --- Eliminación de conversación ---
-  async function handleEliminarConversacion() {
-    if (!conversacionActiva) return;
-    setEliminando(true);
+  async function handleDeleteConversation() {
+    if (!activeConversation) return;
+    setDeleting(true);
     setError(null);
     try {
-      await eliminarConversacion(conversacionActiva.usuarioId);
-      setConversaciones(prev => prev.filter(c => c.otroUsuarioId !== conversacionActiva.usuarioId));
-      setConversacionActiva(null);
-      setMensajes([]);
-      setConfirmandoBorrar(false);
-    } catch (err: unknown) {
-      const mensaje = err instanceof Error ? err.message : "No se pudo eliminar la conversación.";
-      setError(mensaje);
-      setConfirmandoBorrar(false);
+      await deleteConversation(activeConversation.userId);
+      setConversations(previous => previous.filter(conversation => conversation.otherUserId !== activeConversation.userId));
+      setActiveConversation(null);
+      setMessages([]);
+      setConfirmingDelete(false);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "No se pudo eliminar la conversación.";
+      setError(errorMessage);
+      setConfirmingDelete(false);
     } finally {
-      setEliminando(false);
+      setDeleting(false);
     }
   }
 
   if (hidden) return null;
 
-  const titulo = titulosPorDecada[decade];
+  const title = conversationTitlesByDecade[decade];
 
-  // ─── Lista de conversaciones ────────────────────────────────────────────────
-  const listaConversaciones = (
+  const conversationList = (
     <div className="chat-list">
       <div className="chat-list-label">
-        TUS CONVERSACIONES <span>{conversaciones.length}</span>
+        TUS CONVERSACIONES <span>{conversations.length}</span>
       </div>
-      {cargandoConversaciones && (
+      {loadingConversations && (
         <p style={{ padding: "16px", fontSize: "13px", color: "var(--muted)", margin: 0 }}>
           Cargando conversaciones…
         </p>
       )}
-      {!cargandoConversaciones && conversaciones.length === 0 && (
+      {!loadingConversations && conversations.length === 0 && (
         <p style={{ padding: "16px", fontSize: "13px", color: "var(--muted)", margin: 0 }}>
           No tenés conversaciones activas. Visitá el perfil de otro usuario para iniciar un chat.
         </p>
       )}
-      {conversaciones.map(conv => (
+      {conversations.map(conversation => (
         <button
-          key={conv.otroUsuarioId}
-          className={`chat-contact ${conversacionActiva?.usuarioId === conv.otroUsuarioId ? "is-selected" : ""}`}
-          onClick={() => { setConversacionActiva({ usuarioId: conv.otroUsuarioId, username: conv.otroUsuarioUsername }); setError(null); }}
-          aria-pressed={conversacionActiva?.usuarioId === conv.otroUsuarioId}
+          key={conversation.otherUserId}
+          className={`chat-contact ${activeConversation?.userId === conversation.otherUserId ? "is-selected" : ""}`}
+          onClick={() => { setActiveConversation({ userId: conversation.otherUserId, username: conversation.otherUsername }); setError(null); }}
+          aria-pressed={activeConversation?.userId === conversation.otherUserId}
         >
           <span className="chat-avatar">
-            {conv.otroUsuarioUsername.slice(0, 1).toUpperCase()}
+            {conversation.otherUsername.slice(0, 1).toUpperCase()}
             {connected && <i />}
           </span>
           <span className="chat-contact-copy">
-            <strong>{conv.otroUsuarioUsername}</strong>
-            <small>{conv.ultimoMensaje}</small>
+            <strong>{conversation.otherUsername}</strong>
+            <small>{conversation.lastMessage}</small>
           </span>
-          <time>{formatearTiempo(conv.fechaUltimoMensaje)}</time>
+          <time>{formatTime(conversation.lastMessageAt)}</time>
         </button>
       ))}
     </div>
   );
 
-  // ─── Vista de conversación ──────────────────────────────────────────────────
-  const vistaConversacion = conversacionActiva ? (
+  const conversationView = activeConversation ? (
     <div className="chat-conversation">
       <header>
         <button
           className="icon-button"
           aria-label="Volver a conversaciones"
-          onClick={() => { setConversacionActiva(null); setError(null); }}
+          onClick={() => { setActiveConversation(null); setError(null); }}
         >
           <ArrowLeft size={18} />
         </button>
         <span className="chat-avatar">
-          {conversacionActiva.username.slice(0, 1).toUpperCase()}
+          {activeConversation.username.slice(0, 1).toUpperCase()}
           {connected && <i />}
         </span>
         <div>
-          <strong>{conversacionActiva.username}</strong>
+          <strong>{activeConversation.username}</strong>
           <small>{connected ? "Conectados" : "Conectando…"}</small>
         </div>
-        {confirmandoBorrar ? (
+        {confirmingDelete ? (
           <>
             <button
               className="icon-button"
               aria-label="Confirmar eliminación de conversación"
-              onClick={handleEliminarConversacion}
-              disabled={eliminando}
+              onClick={handleDeleteConversation}
+              disabled={deleting}
               style={{ marginLeft: "auto", color: "var(--error, #c0392b)" }}
             >
               <Check size={18} />
@@ -283,8 +275,8 @@ export default function Chat({
             <button
               className="icon-button"
               aria-label="Cancelar eliminación"
-              onClick={() => setConfirmandoBorrar(false)}
-              disabled={eliminando}
+              onClick={() => setConfirmingDelete(false)}
+              disabled={deleting}
             >
               <X size={18} />
             </button>
@@ -293,7 +285,7 @@ export default function Chat({
           <button
             className="icon-button"
             aria-label="Eliminar conversación"
-            onClick={() => setConfirmandoBorrar(true)}
+            onClick={() => setConfirmingDelete(true)}
             style={{ marginLeft: "auto" }}
             title="Eliminar conversación"
           >
@@ -303,18 +295,18 @@ export default function Chat({
       </header>
 
       <div className="chat-messages">
-        {cargandoMensajes && (
+        {loadingMessages && (
           <span className="chat-date">Cargando historial…</span>
         )}
-        {!cargandoMensajes && mensajes.length === 0 && (
+        {!loadingMessages && messages.length === 0 && (
           <span className="chat-date">Empezá la conversación diciendo ¡Hola!</span>
         )}
-        {mensajes.map(msg => (
-          <p key={msg.id} className={`chat-bubble ${msg.emisorId === session?.usuarioId ? "own" : ""}`}>
-            {msg.contenido}
+        {messages.map(message => (
+          <p key={message.id} className={`chat-bubble ${message.senderId === session?.usuarioId ? "own" : ""}`}>
+            {message.content}
             <br />
             <small className="chat-message-time">
-              {new Date(msg.fechaEnvio).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+              {new Date(message.sentAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
             </small>
           </p>
         ))}
@@ -330,18 +322,18 @@ export default function Chat({
       <div className="chat-composer">
         <input
           type="text"
-          value={inputTexto}
-          onChange={e => setInputTexto(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEnviar(); } }}
+          value={messageText}
+          onChange={e => setMessageText(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
           placeholder="Escribí un mensaje…"
-          disabled={!connected || enviando}
+          disabled={!connected || sending}
           style={{ flex: 1, border: "none", background: "transparent", outline: "none", color: "var(--ink)", fontSize: "13px" }}
           aria-label="Escribir mensaje"
         />
         <button
           className="icon-button"
-          onClick={handleEnviar}
-          disabled={!connected || !inputTexto.trim() || enviando}
+          onClick={handleSend}
+          disabled={!connected || !messageText.trim() || sending}
           aria-label="Enviar mensaje"
           style={{ color: "var(--accent)" }}
         >
@@ -357,13 +349,12 @@ export default function Chat({
     </div>
   ) : null;
 
-  // ─── Panel ─────────────────────────────────────────────────────────────────
   const panel = (
     <>
       <header className="chat-titlebar">
         {connected && <span className="chat-online-dot" role="img" aria-label="Conectado" />}
         <MessageCircle size={18} />
-        <strong>{titulo}</strong>
+        <strong>{title}</strong>
         {!fullPage && (
           <>
             <button className="icon-button" onClick={onOpenPage} aria-label="Abrir apartado de chat"><ArrowUpRight size={18} /></button>
@@ -371,9 +362,9 @@ export default function Chat({
           </>
         )}
       </header>
-      <div className={`chat-content ${conversacionActiva !== null ? "has-conversation" : ""}`}>
-        {(fullPage || conversacionActiva === null) && listaConversaciones}
-        {(fullPage || conversacionActiva !== null) && vistaConversacion}
+      <div className={`chat-content ${activeConversation !== null ? "has-conversation" : ""}`}>
+        {(fullPage || activeConversation === null) && conversationList}
+        {(fullPage || activeConversation !== null) && conversationView}
       </div>
     </>
   );
@@ -395,14 +386,14 @@ export default function Chat({
   const dock = (
     <div className="chat-dock">
       {!dockSlot && popup}
-      <button ref={trigger} className="chat-launcher" aria-expanded={open} aria-controls="chat-popup" onClick={() => setOpen(v => !v)}>
+      <button ref={trigger} className="chat-launcher" aria-expanded={open} aria-controls="chat-popup" onClick={() => setOpen(value => !value)}>
         {connected && <span className="chat-online-dot" role="img" aria-label="Conectado" />}
         <MessageCircle size={21} />
         <strong>Mensajes</strong>
-        {conversaciones.length > 0 && <span className="chat-count">{conversaciones.length}</span>}
-        {conversaciones.length > 0 && (
+        {conversations.length > 0 && <span className="chat-count">{conversations.length}</span>}
+        {conversations.length > 0 && (
           <span className="chat-faces" aria-hidden="true">
-            {conversaciones.slice(0, 3).map(c => <i key={c.otroUsuarioId}>{c.otroUsuarioUsername.slice(0, 1).toUpperCase()}</i>)}
+            {conversations.slice(0, 3).map(conversation => <i key={conversation.otherUserId}>{conversation.otherUsername.slice(0, 1).toUpperCase()}</i>)}
           </span>
         )}
         {open ? <X size={14} /> : <ChevronUp size={14} />}

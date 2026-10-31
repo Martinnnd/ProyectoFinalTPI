@@ -300,7 +300,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
           }
           router.push("/explorar?action=recordar");
         }}
-        onIniciarChat={(user) => router.push(`/chat?con=${user}`)}
+        onStartChat={(user) => router.push(`/chat?con=${user}`)}
         onToggleFollow={!isOwnProfile ? handleToggleFollow : undefined}
         onEditProfile={isOwnProfile ? () => setEditingProfile(true) : undefined}
       />

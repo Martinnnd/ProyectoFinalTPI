@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Chat from "../../../components/Chat";
 import { useAuth } from "../../../components/auth/AuthProvider";
 import { useEra } from "../../../context/EraContext";
-import { obtenerUsuarioPorUsername } from "../../../chat/chatApi";
+import { getUserByUsername } from "../../../chat/chatApi";
 import { LoaderCircle } from "lucide-react";
 
 function ChatContent() {
@@ -16,7 +16,7 @@ function ChatContent() {
   const { session, status } = useAuth();
   const { period } = useEra();
 
-  const [chatearCon, setChatearCon] = useState<{ usuarioId: number; username: string; ts: number } | null>(null);
+  const [chatWith, setChatWith] = useState<{ userId: number; username: string; ts: number } | null>(null);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -26,9 +26,9 @@ function ChatContent() {
     }
 
     if (conParam && conParam !== session.username) {
-      obtenerUsuarioPorUsername(conParam)
+      getUserByUsername(conParam)
         .then((user) => {
-          setChatearCon({ usuarioId: user.usuarioId, username: user.username, ts: Date.now() });
+          setChatWith({ userId: user.userId, username: user.username, ts: Date.now() });
         })
         .catch((err) => {
           console.warn("No se pudo iniciar chat con usuario:", err);
@@ -54,7 +54,7 @@ function ChatContent() {
         fullPage={true}
         onOpenPage={() => {}}
         hidden={false}
-        chatearCon={chatearCon}
+        chatWith={chatWith}
       />
     </div>
   );

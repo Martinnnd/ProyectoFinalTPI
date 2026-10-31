@@ -76,9 +76,9 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
       let targetId = authorId ?? followingUsers.find((u) => u.username.toLowerCase() === author.toLowerCase())?.id;
       if (!targetId) {
         try {
-          const { obtenerUsuarioPorUsername } = await import("../chat/chatApi");
-          const u = await obtenerUsuarioPorUsername(author);
-          targetId = u.usuarioId;
+          const { getUserByUsername } = await import("../chat/chatApi");
+          const user = await getUserByUsername(author);
+          targetId = user.userId;
         } catch {
           // Si no se encuentra
         }
