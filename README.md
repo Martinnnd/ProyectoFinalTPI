@@ -55,6 +55,17 @@ La responsabilidad de cada pareja está en [docs/TRABAJO_EN_EQUIPO.md](docs/TRAB
 
 ## Verificar
 
+### ESLint y Prettier
+
+```sh
+npm run lint
+npm run format:check
+npm run format -- src/components/NombreDelArchivo.tsx
+npm run format:check:all
+```
+
+ESLint revisa el proyecto completo. Algunas reglas de React y TypeScript muestran avisos mientras se corrige el código existente por partes; no bloquean el comando. `format:check` comprueba los archivos nuevos de configuración. Para dar formato a un archivo concreto, pasá su ruta a `npm run format --`. `format:check:all` muestra la deuda de formato de todo el repositorio; no se aplica un cambio masivo automáticamente.
+
 ```sh
 npm run check
 npm test
