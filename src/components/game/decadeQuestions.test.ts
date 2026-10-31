@@ -24,7 +24,7 @@ describe("decade game", () => {
   });
 
   it("formats decade labels for both centuries", () => {
-    expect(formatDecade(1970)).toBe("Años 70");
-    expect(formatDecade(2020)).toBe("Años 2020");
+    expect(formatDecade(1970)).toBe("Decada 70");
+    expect(formatDecade(2020)).toBe("Decada 2020");
   });
 });
