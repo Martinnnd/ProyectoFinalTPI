@@ -2,69 +2,61 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import type { HubConnection } from '@microsoft/signalr';
 import { API_BASE_URL, getSesion } from '../api';
-import type { MensajeChatDto } from './types';
+import { parseChatMessage, parseChatMessages, type ChatMessageDto } from './types';
 
-export interface UseChatConnectionOpciones {
-  /** Cuando es false, la conexión no se establece (p.ej. usuario no logueado). */
-  activo: boolean;
-  /** Se invoca al recibir un mensaje de otro usuario. */
-  onMensajeRecibido: (mensaje: MensajeChatDto) => void;
-  /** Se invoca cuando el servidor confirma que el mensaje propio fue entregado. */
-  onMensajeEnviado: (mensaje: MensajeChatDto) => void;
+export interface UseChatConnectionOptions {
+  enabled: boolean;
+  onMessageReceived: (message: ChatMessageDto) => void;
+  onMessageSent: (message: ChatMessageDto) => void;
 }
 
-export interface ChatConexion {
-  /** True cuando la conexión WebSocket está establecida. */
+export interface ChatConnection {
   connected: boolean;
-  /**
-   * Envía un mensaje privado. Lanza si el destinatario está offline o el
-   * contenido está vacío. El error viene directamente del servidor (HubException).
-   */
-  enviarMensaje: (destinatarioId: number, contenido: string) => Promise<void>;
-  /**
-   * Obtiene el historial de mensajes no expirados con otro usuario.
-   * Devuelve [] si la conexión no está establecida.
-   */
-  obtenerHistorial: (otroUsuarioId: number) => Promise<MensajeChatDto[]>;
+  sendMessage: (recipientId: number, content: string) => Promise<void>;
+  getHistory: (otherUserId: number) => Promise<ChatMessageDto[]>;
 }
 
 export function useChatConnection({
-  activo,
-  onMensajeRecibido,
-  onMensajeEnviado,
-}: UseChatConnectionOpciones): ChatConexion {
+  enabled,
+  onMessageReceived,
+  onMessageSent,
+}: UseChatConnectionOptions): ChatConnection {
   const connectionRef = useRef<HubConnection | null>(null);
   const [connected, setConnected] = useState(false);
 
-  // Refs para los callbacks: evitan que el efecto de conexión se re-ejecute
-  // cuando el componente padre re-renderiza con nuevas funciones inline.
-  const onRecibidoRef = useRef(onMensajeRecibido);
-  const onEnviadoRef = useRef(onMensajeEnviado);
-  useEffect(() => { onRecibidoRef.current = onMensajeRecibido; }, [onMensajeRecibido]);
-  useEffect(() => { onEnviadoRef.current = onMensajeEnviado; }, [onMensajeEnviado]);
+  const onReceivedRef = useRef(onMessageReceived);
+  const onSentRef = useRef(onMessageSent);
+  useEffect(() => { onReceivedRef.current = onMessageReceived; }, [onMessageReceived]);
+  useEffect(() => { onSentRef.current = onMessageSent; }, [onMessageSent]);
 
   useEffect(() => {
-    if (!activo) return;
+    if (!enabled) return;
 
-    const sesion = getSesion();
-    if (!sesion?.token) return;
+    const session = getSesion();
+    if (!session?.token) return;
 
     const connection = new HubConnectionBuilder()
       .withUrl(`${API_BASE_URL}/hubs/chat`, {
-        // SignalR necesita el token en la query string para WebSockets.
-        // accessTokenFactory lo gestiona automáticamente.
         accessTokenFactory: () => getSesion()?.token ?? '',
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();
 
-    connection.on('RecibirMensaje', (mensaje: MensajeChatDto) => {
-      onRecibidoRef.current(mensaje);
+    connection.on('RecibirMensaje', (payload: unknown) => {
+      try {
+        onReceivedRef.current(parseChatMessage(payload));
+      } catch (error) {
+        console.error('[Chat] Invalid received message:', error);
+      }
     });
 
-    connection.on('MensajeEnviado', (mensaje: MensajeChatDto) => {
-      onEnviadoRef.current(mensaje);
+    connection.on('MensajeEnviado', (payload: unknown) => {
+      try {
+        onSentRef.current(parseChatMessage(payload));
+      } catch (error) {
+        console.error('[Chat] Invalid sent message:', error);
+      }
     });
 
     connection.onreconnecting(() => setConnected(false));
@@ -76,41 +68,40 @@ export function useChatConnection({
     connection
       .start()
       .then(() => setConnected(true))
-      .catch((err) => {
-        console.error('[Chat] Error al conectar con el hub:', err);
+      .catch((error) => {
+        console.error('[Chat] Error connecting to the hub:', error);
         setConnected(false);
       });
 
     return () => {
-      connection.stop().catch(() => { /* ignorar errores al desconectar */ });
+      connection.stop().catch(() => { /* Ignore errors while stopping during cleanup. */ });
       connectionRef.current = null;
       setConnected(false);
     };
-  }, [activo]);
+  }, [enabled]);
 
-  const enviarMensaje = useCallback(
-    async (destinatarioId: number, contenido: string): Promise<void> => {
-      const conn = connectionRef.current;
-      if (!conn || conn.state !== HubConnectionState.Connected) {
+  const sendMessage = useCallback(
+    async (recipientId: number, content: string): Promise<void> => {
+      const connection = connectionRef.current;
+      if (!connection || connection.state !== HubConnectionState.Connected) {
         throw new Error('No estás conectado al chat. Intentá de nuevo en unos segundos.');
       }
-      // Si el destinatario está offline, el servidor lanza HubException.
-      // SignalR lo propaga como un Error normal con el mensaje del servidor.
-      await conn.invoke('EnviarMensaje', destinatarioId, contenido);
+      await connection.invoke('EnviarMensaje', recipientId, content);
     },
     [],
   );
 
-  const obtenerHistorial = useCallback(
-    async (otroUsuarioId: number): Promise<MensajeChatDto[]> => {
-      const conn = connectionRef.current;
-      if (!conn || conn.state !== HubConnectionState.Connected) {
+  const getHistory = useCallback(
+    async (otherUserId: number): Promise<ChatMessageDto[]> => {
+      const connection = connectionRef.current;
+      if (!connection || connection.state !== HubConnectionState.Connected) {
         return [];
       }
-      return conn.invoke<MensajeChatDto[]>('ObtenerHistorial', otroUsuarioId);
+      const history = await connection.invoke<unknown>('ObtenerHistorial', otherUserId);
+      return parseChatMessages(history);
     },
     [],
   );
 
-  return { connected, enviarMensaje, obtenerHistorial };
+  return { connected, sendMessage, getHistory };
 }
