@@ -32,7 +32,7 @@ export default function ProfileHeader({
   onBack,
   onOpenAchievements,
   onOpenTiers,
-  onIniciarChat,
+  onStartChat,
   onNavigateToProfile,
   onToggleFollow,
   onToggleFollowUser,
@@ -60,7 +60,7 @@ export default function ProfileHeader({
   onBack?: () => void;
   onOpenAchievements: () => void;
   onOpenTiers: () => void;
-  onIniciarChat?: (username: string) => void;
+  onStartChat?: (username: string) => void;
   onNavigateToProfile?: (username: string) => void;
   onToggleFollow?: () => void | Promise<void>;
   onToggleFollowUser?: (author: string, authorId: number) => void;
@@ -160,9 +160,9 @@ export default function ProfileHeader({
               </button>
             </div>
           </div>
-          {!isOwnProfile && (onIniciarChat || onToggleFollow) && (
+          {!isOwnProfile && (onStartChat || onToggleFollow) && (
             <div className="profile-visitor-actions">
-              {onIniciarChat && <button className="secondary-button" aria-label={`Iniciar chat con ${displayName}`} title="Iniciar chat" onClick={() => onIniciarChat(author!)}>
+              {onStartChat && <button className="secondary-button" aria-label={`Iniciar chat con ${displayName}`} title="Iniciar chat" onClick={() => onStartChat(author!)}>
                 <MessageCircle size={17} /> <span className="profile-action-label">Iniciar chat</span>
               </button>}
               {onToggleFollow && <button

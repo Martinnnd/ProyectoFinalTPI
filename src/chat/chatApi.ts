@@ -1,20 +1,25 @@
 import { API_BASE_URL, getSesion } from '../api';
-import type { ConversacionResumenDto, UsuarioResumenDto } from './types';
+import {
+  parseConversationSummaries,
+  parseUserSummary,
+  type ConversationSummaryDto,
+  type UserSummaryDto,
+} from './types';
 
-/** Construye los headers de autorización. Lanza si no hay sesión activa. */
-function headersAutorizados(): Record<string, string> {
-  const sesion = getSesion();
-  if (!sesion?.token) throw new Error('No hay sesión activa.');
-  return { Authorization: `Bearer ${sesion.token}` };
+/** Builds authorization headers. Throws when there is no active session. */
+function getAuthorizedHeaders(): Record<string, string> {
+  const session = getSesion();
+  if (!session?.token) throw new Error('No hay sesión activa.');
+  return { Authorization: `Bearer ${session.token}` };
 }
 
 /**
- * Obtiene el resumen de todas las conversaciones activas del usuario autenticado.
- * Las conversaciones expiradas (>7 días sin mensajes) no se incluyen.
+ * Gets all active conversations for the authenticated user.
+ * Conversations with no messages for more than seven days are excluded.
  * GET /api/chat/conversaciones
  */
-export async function obtenerConversaciones(): Promise<ConversacionResumenDto[]> {
-  const headers = headersAutorizados();
+export async function getConversations(): Promise<ConversationSummaryDto[]> {
+  const headers = getAuthorizedHeaders();
   const response = await fetch(`${API_BASE_URL}/api/chat/conversaciones`, {
     headers,
     cache: 'no-store',
@@ -23,16 +28,16 @@ export async function obtenerConversaciones(): Promise<ConversacionResumenDto[]>
     if (response.status === 401) throw new Error('Sesión expirada. Iniciá sesión de nuevo.');
     throw new Error(`Error al cargar conversaciones (${response.status}).`);
   }
-  return response.json();
+  return parseConversationSummaries(await response.json());
 }
 
 /**
- * Busca un usuario por su nombre de usuario exacto.
- * Usado para resolver el usuarioId antes de iniciar un chat desde un perfil.
+ * Finds a user by their exact username.
+ * Used to resolve the user ID before starting a chat from a profile.
  * GET /api/usuario/por-username/{username}
  */
-export async function obtenerUsuarioPorUsername(username: string): Promise<UsuarioResumenDto> {
-  const headers = headersAutorizados();
+export async function getUserByUsername(username: string): Promise<UserSummaryDto> {
+  const headers = getAuthorizedHeaders();
   const response = await fetch(
     `${API_BASE_URL}/api/usuario/por-username/${encodeURIComponent(username)}`,
     { headers, cache: 'no-store' },
@@ -42,19 +47,18 @@ export async function obtenerUsuarioPorUsername(username: string): Promise<Usuar
     if (response.status === 401) throw new Error('Sesión expirada. Iniciá sesión de nuevo.');
     throw new Error(`Error al buscar usuario (${response.status}).`);
   }
-  return response.json();
+  return parseUserSummary(await response.json());
 }
 
 /**
- * Elimina todos los mensajes de la conversación entre el usuario autenticado
- * y otro usuario específico. La eliminación es inmediata, sin esperar los 7 días
- * de expiración natural.
+ * Deletes all messages in the conversation between the authenticated user
+ * and another user.
  * DELETE /api/chat/conversaciones/{otroUsuarioId}
  */
-export async function eliminarConversacion(otroUsuarioId: number): Promise<void> {
-  const headers = headersAutorizados();
+export async function deleteConversation(otherUserId: number): Promise<void> {
+  const headers = getAuthorizedHeaders();
   const response = await fetch(
-    `${API_BASE_URL}/api/chat/conversaciones/${otroUsuarioId}`,
+    `${API_BASE_URL}/api/chat/conversaciones/${otherUserId}`,
     { method: 'DELETE', headers },
   );
   if (!response.ok) {

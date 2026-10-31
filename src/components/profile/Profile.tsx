@@ -48,7 +48,7 @@ export default function Profile({
   onSelect,
   onOpen,
   onAdd,
-  onIniciarChat,
+  onStartChat,
   onNavigateToProfile,
   onFollow,
   onToggleFollow,
@@ -80,7 +80,7 @@ export default function Profile({
   onOpen?: (memory: Memory) => void;
   onSelect: (memory: Memory | null) => void;
   onAdd: () => void;
-  onIniciarChat?: (username: string) => void;
+  onStartChat?: (username: string) => void;
   onNavigateToProfile?: (username: string) => void;
   onFollow?: (author: string, authorId: number) => void;
   onToggleFollow?: () => void | Promise<void>;
@@ -210,7 +210,7 @@ export default function Profile({
           onBack={onBack}
           onOpenAchievements={openCatalogue}
           onOpenTiers={openTiers}
-          onIniciarChat={onIniciarChat}
+          onStartChat={onStartChat}
           currentUserId={currentUserId}
           myFollowingUsers={myFollowingUsers}
           onNavigateToProfile={onNavigateToProfile}
