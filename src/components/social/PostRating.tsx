@@ -24,8 +24,12 @@ export default function PostRating({
     if (!allowRate || inFlight.current) return;
     inFlight.current = true;
     setSaving(true);
-    try { await onRate(score); }
-    finally { inFlight.current = false; setSaving(false); }
+    try {
+      await onRate(score);
+    } finally {
+      inFlight.current = false;
+      setSaving(false);
+    }
   }
 
   return (
@@ -49,7 +53,9 @@ export default function PostRating({
         </button>
       ))}
       <small className="post-rating-value">
-        <strong>{totalPoints} {totalPoints === 1 ? "punto" : "puntos"}</strong>
+        <strong>
+          {totalPoints} {totalPoints === 1 ? "punto" : "puntos"}
+        </strong>
         {isOwn
           ? " • Tu publicación"
           : !canRate

@@ -6,7 +6,11 @@
   padding: clamp(16px, 2.5vw, 32px);
   place-items: center;
   background:
-    radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 34%),
+    radial-gradient(
+      circle at 20% 10%,
+      color-mix(in srgb, var(--accent) 13%, transparent),
+      transparent 34%
+    ),
     var(--bg);
   font-family: var(--font-body);
 }
@@ -29,7 +33,9 @@
   background: color-mix(in srgb, var(--surface) 96%, transparent);
   border: 1px solid var(--line);
   border-radius: calc(var(--radius) + 8px);
-  box-shadow: var(--shadow), 0 24px 70px rgb(0 0 0 / 12%);
+  box-shadow:
+    var(--shadow),
+    0 24px 70px rgb(0 0 0 / 12%);
 }
 
 .gameCard {

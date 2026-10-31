@@ -1,11 +1,6 @@
 import { useEffect, useRef } from "react";
 import { FolderOpen, BookOpen, Music2 } from "lucide-react";
-import type {
-  ChromeProps,
-  Destination,
-  EraModule,
-  EraTheme,
-} from "../contracts";
+import type { ChromeProps, Destination, EraModule, EraTheme } from "../contracts";
 
 interface Props extends ChromeProps {
   theme: EraTheme;
@@ -75,14 +70,32 @@ export default function DesktopChrome({
           {startLabel}
         </button>
         <span className="taskbar-separator" />
-        <button className={panelOpen ? "task-active" : ""} aria-expanded={panelOpen} aria-controls="stories" onClick={() => navigate("stories")} title="Historias: recorrer recuerdos">
-          <FolderOpen size={15}/> Historias
+        <button
+          className={panelOpen ? "task-active" : ""}
+          aria-expanded={panelOpen}
+          aria-controls="stories"
+          onClick={() => navigate("stories")}
+          title="Historias: recorrer recuerdos"
+        >
+          <FolderOpen size={15} /> Historias
         </button>
-        <button className={factsOpen ? "task-active" : ""} aria-expanded={!!factsOpen} aria-controls="era-facts" onClick={() => navigate("facts")} title="La época: efemérides y cultura">
-          <BookOpen size={15}/> La época
+        <button
+          className={factsOpen ? "task-active" : ""}
+          aria-expanded={!!factsOpen}
+          aria-controls="era-facts"
+          onClick={() => navigate("facts")}
+          title="La época: efemérides y cultura"
+        >
+          <BookOpen size={15} /> La época
         </button>
-        <button className={musicOpen ? "task-active" : ""} aria-expanded={musicOpen} aria-controls="music-player" onClick={() => navigate("music")} title="Música: abrir el reproductor">
-          <Music2 size={15}/> Música
+        <button
+          className={musicOpen ? "task-active" : ""}
+          aria-expanded={musicOpen}
+          aria-controls="music-player"
+          onClick={() => navigate("music")}
+          title="Música: abrir el reproductor"
+        >
+          <Music2 size={15} /> Música
         </button>
         <div className="system-tray" id="chat-taskbar-slot" />
       </footer>

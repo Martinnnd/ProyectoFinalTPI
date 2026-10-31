@@ -72,26 +72,39 @@ export async function createComment(memoryId: string, text: string, parentId?: s
   const data = await publicationRequest<RemoteComment>(`/${memoryId}/comentarios`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contenido: text.trim(), comentarioPadreId: parentId ? Number(parentId) : null }),
+    body: JSON.stringify({
+      contenido: text.trim(),
+      comentarioPadreId: parentId ? Number(parentId) : null,
+    }),
   });
   return toComment(data, memoryId);
 }
 
-export async function setCommentReaction(memoryId: string, commentId: string, reaction: CommentReaction) {
+export async function setCommentReaction(
+  memoryId: string,
+  commentId: string,
+  reaction: CommentReaction,
+) {
   if (!getSesion()) throw new Error("Tenés que iniciar sesión para reaccionar.");
-  const data = await publicationRequest<RemoteComment>(`/${memoryId}/comentarios/${commentId}/reaccion`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tipo: reaction }),
-  });
+  const data = await publicationRequest<RemoteComment>(
+    `/${memoryId}/comentarios/${commentId}/reaccion`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tipo: reaction }),
+    },
+  );
   return toComment(data, memoryId);
 }
 
 export async function removeCommentReaction(memoryId: string, commentId: string) {
   if (!getSesion()) throw new Error("Tenés que iniciar sesión para reaccionar.");
-  const data = await publicationRequest<RemoteComment>(`/${memoryId}/comentarios/${commentId}/reaccion`, {
-    method: "DELETE",
-  });
+  const data = await publicationRequest<RemoteComment>(
+    `/${memoryId}/comentarios/${commentId}/reaccion`,
+    {
+      method: "DELETE",
+    },
+  );
   return toComment(data, memoryId);
 }
 

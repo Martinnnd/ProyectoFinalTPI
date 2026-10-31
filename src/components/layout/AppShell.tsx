@@ -2,7 +2,15 @@
 
 import React, { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2 } from "lucide-react";
+import {
+  Plus,
+  X,
+  Newspaper,
+  MessageCircle,
+  SlidersHorizontal,
+  CircleCheck,
+  Music2,
+} from "lucide-react";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
 import { useGuestAccess } from "../auth/GuestAccessProvider";
@@ -17,7 +25,7 @@ import AchievementToast from "../AchievementToast";
 import useAchievementNotifications from "../../hooks/useAchievementNotifications";
 import Notification from "../Notification";
 import ExpoGameButton from "./ExpoGameButton";
-import type { Period } from '../../types';
+import type { Period } from "../../types";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -42,11 +50,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
-  const detailId = pathname.startsWith("/recuerdo/") ? decodeURIComponent(pathname.slice("/recuerdo/".length).split("/")[0]) : null;
-  const guestRestrictedRoute = pathname === "/feed" || pathname.startsWith("/feed/") ||
-    (!!firstMemoryId && (pathname === "/perfil" || pathname.startsWith("/perfil/") || pathname === "/chat" || pathname.startsWith("/chat/")));
-  const hideGuestContent = (status === "loading" || status === "anonymous" && !ready) && (guestRestrictedRoute || !!detailId) ||
-    status === "anonymous" && ready && (guestRestrictedRoute || !!detailId && firstMemoryId !== detailId);
+  const detailId = pathname.startsWith("/recuerdo/")
+    ? decodeURIComponent(pathname.slice("/recuerdo/".length).split("/")[0])
+    : null;
+  const guestRestrictedRoute =
+    pathname === "/feed" ||
+    pathname.startsWith("/feed/") ||
+    (!!firstMemoryId &&
+      (pathname === "/perfil" ||
+        pathname.startsWith("/perfil/") ||
+        pathname === "/chat" ||
+        pathname.startsWith("/chat/")));
+  const hideGuestContent =
+    ((status === "loading" || (status === "anonymous" && !ready)) &&
+      (guestRestrictedRoute || !!detailId)) ||
+    (status === "anonymous" &&
+      ready &&
+      (guestRestrictedRoute || (!!detailId && firstMemoryId !== detailId)));
 
   useEffect(() => {
     if (!ready || status !== "anonymous") return;
@@ -59,10 +79,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [detailId, guestRestrictedRoute, ready, status, canViewMemory, requireAccount, router]);
 
   function handlePeriodChange(next: Period) {
-    if (pathname.startsWith('/recuerdo/')) {
-      const requestedReturn = new URLSearchParams(window.location.search).get('returnTo');
-      const destination = !session ? '/explorar' : requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
-        ? requestedReturn : '/feed';
+    if (pathname.startsWith("/recuerdo/")) {
+      const requestedReturn = new URLSearchParams(window.location.search).get("returnTo");
+      const destination = !session
+        ? "/explorar"
+        : requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
+          ? requestedReturn
+          : "/feed";
       // La sincronización de la época escribe la URL; navegar después evita que
       // history.replaceState restaure la ruta de detalle sobre el router.push.
       changePeriod(next, () => queueMicrotask(() => router.push(destination)));
@@ -102,12 +125,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       return;
     }
     if (destination === "stories") {
-      if (window.innerWidth < 900) { setMusicOpen(false); setFactsOpen(false); }
+      if (window.innerWidth < 900) {
+        setMusicOpen(false);
+        setFactsOpen(false);
+      }
       setPanelOpen(!panelOpen);
       return;
     }
     if (destination === "facts") {
-      if (window.innerWidth < 900) { setMusicOpen(false); setPanelOpen(false); }
+      if (window.innerWidth < 900) {
+        setMusicOpen(false);
+        setPanelOpen(false);
+      }
       setFactsOpen(!factsOpen);
       return;
     }
@@ -131,16 +160,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <EraTimeline
         period={period}
         onChange={handlePeriodChange}
-        action={session ? (
-          <button
-            aria-label="Recordar"
-            className="primary-button time-add-memory"
-            onClick={handleRecordar}
-          >
-            <Plus size={16} />
-            <span>Recordar</span>
-          </button>
-        ) : null}
+        action={
+          session ? (
+            <button
+              aria-label="Recordar"
+              className="primary-button time-add-memory"
+              onClick={handleRecordar}
+            >
+              <Plus size={16} />
+              <span>Recordar</span>
+            </button>
+          ) : null
+        }
       />
 
       <div className="mobile-appbar">
@@ -150,27 +181,32 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {currentView === "map"
               ? "Explorar"
               : currentView === "feed"
-              ? "Feed"
-              : currentView === "chat"
-              ? "Chat"
-              : currentView === "game"
-              ? "Juego de décadas"
-              : "Mi perfil"}
+                ? "Feed"
+                : currentView === "chat"
+                  ? "Chat"
+                  : currentView === "game"
+                    ? "Juego de décadas"
+                    : "Mi perfil"}
           </strong>
         </div>
-        {session && <button
-          className="mobile-add-button"
-          aria-label="Sumar mi recuerdo"
-          onClick={handleRecordar}
-        >
-          <Plus size={23} />
-        </button>}
+        {session && (
+          <button
+            className="mobile-add-button"
+            aria-label="Sumar mi recuerdo"
+            onClick={handleRecordar}
+          >
+            <Plus size={23} />
+          </button>
+        )}
       </div>
 
       <button
         ref={mobileOptionsTrigger}
         className="mobile-era-button mobile-map-options"
-        onClick={() => { if (!session && firstMemoryId && !requireAccount()) return; mobileOptions.current?.showModal(); }}
+        onClick={() => {
+          if (!session && firstMemoryId && !requireAccount()) return;
+          mobileOptions.current?.showModal();
+        }}
         aria-label="Abrir opciones de exploración"
         title="Opciones de exploración"
       >
@@ -222,8 +258,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 {destination === "stories"
                   ? "Recuerdos"
                   : destination === "facts"
-                  ? "Efemérides"
-                  : "Música"}
+                    ? "Efemérides"
+                    : "Música"}
               </span>
             </button>
           ))}
@@ -317,12 +353,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
 
       {currentView === "map" && (
-        <ExpoGameButton decade={period.decade} onClick={() => {
-          setPanelOpen(false);
-          setFactsOpen(false);
-          setMusicOpen(false);
-          router.push("/juego");
-        }} />
+        <ExpoGameButton
+          decade={period.decade}
+          onClick={() => {
+            setPanelOpen(false);
+            setFactsOpen(false);
+            setMusicOpen(false);
+            router.push("/juego");
+          }}
+        />
       )}
 
       {hideGuestContent ? null : children}
@@ -349,11 +388,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <CircleCheck size={24} aria-hidden="true" />
           )}
           <span>{notice}</span>
-          <button
-            className="icon-button"
-            aria-label="Cerrar aviso"
-            onClick={() => setNotice(null)}
-          >
+          <button className="icon-button" aria-label="Cerrar aviso" onClick={() => setNotice(null)}>
             <X size={20} />
           </button>
         </div>

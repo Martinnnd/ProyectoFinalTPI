@@ -1,6 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo, useRef, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import { flushSync } from "react-dom";
 import type { Decade, Period } from "../types";
 import { eraThemes } from "../themes";
@@ -8,7 +16,11 @@ import { eraThemes } from "../themes";
 export type ChangePeriodFn = {
   (next: Period, afterChange?: () => void): void;
   (decade: Decade, year?: number | null, afterChange?: () => void): void;
-  (periodOrDecade: Period | Decade, yearOrAfterChange?: number | null | (() => void), afterChange?: () => void): void;
+  (
+    periodOrDecade: Period | Decade,
+    yearOrAfterChange?: number | null | (() => void),
+    afterChange?: () => void,
+  ): void;
 };
 
 interface EraContextType {
@@ -43,18 +55,41 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       const params = new URLSearchParams(window.location.search);
       const eraParam = params.get("era");
       let initialDecade: Decade | null = null;
-      if (eraParam === "1970" || eraParam === "1980" || eraParam === "1990" || eraParam === "2000" || eraParam === "2010" || eraParam === "2020") {
+      if (
+        eraParam === "1970" ||
+        eraParam === "1980" ||
+        eraParam === "1990" ||
+        eraParam === "2000" ||
+        eraParam === "2010" ||
+        eraParam === "2020"
+      ) {
         initialDecade = Number(eraParam) as Decade;
       } else {
         const savedEra = window.localStorage.getItem(ERA_STORAGE_KEY);
-        if (savedEra === "1970" || savedEra === "1980" || savedEra === "1990" || savedEra === "2000" || savedEra === "2010" || savedEra === "2020") {
+        if (
+          savedEra === "1970" ||
+          savedEra === "1980" ||
+          savedEra === "1990" ||
+          savedEra === "2000" ||
+          savedEra === "2010" ||
+          savedEra === "2020"
+        ) {
           initialDecade = Number(savedEra) as Decade;
         }
       }
 
       const decade = initialDecade ?? DEFAULT_PERIOD.decade;
       const year = Number(params.get("year") ?? window.localStorage.getItem("nostalgia_year"));
-      setPeriod({ decade, year: Number.isInteger(year) && year >= decade && year < decade + 10 && year <= new Date().getFullYear() ? year : null });
+      setPeriod({
+        decade,
+        year:
+          Number.isInteger(year) &&
+          year >= decade &&
+          year < decade + 10 &&
+          year <= new Date().getFullYear()
+            ? year
+            : null,
+      });
     } catch {
       // Ignorar si el almacenamiento local está restringido
     }
@@ -68,7 +103,7 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
     url.searchParams.set("era", String(period.decade));
     if (period.year === null) url.searchParams.delete("year");
     else url.searchParams.set("year", String(period.year));
-    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
     try {
       window.localStorage.setItem(ERA_STORAGE_KEY, String(period.decade));
       if (period.year === null) window.localStorage.removeItem("nostalgia_year");
@@ -78,15 +113,22 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
     }
   }, [hydrated, period.decade, period.year]);
 
-  const eraTransition = useRef<{ finished: Promise<void>; skipTransition: () => void } | null>(null);
+  const eraTransition = useRef<{ finished: Promise<void>; skipTransition: () => void } | null>(
+    null,
+  );
   const periodChangeRevision = useRef(0);
-  useEffect(() => () => { eraTransition.current?.skipTransition(); }, []);
+  useEffect(
+    () => () => {
+      eraTransition.current?.skipTransition();
+    },
+    [],
+  );
 
   const changePeriod: ChangePeriodFn = useCallback(
     (
       periodOrDecade: Period | Decade,
       yearOrAfterChange?: number | null | (() => void),
-      afterChange?: () => void
+      afterChange?: () => void,
     ) => {
       const revision = ++periodChangeRevision.current;
       eraTransition.current?.skipTransition();
@@ -125,7 +167,10 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       }
 
       const doc = document as unknown as {
-        startViewTransition?: (cb: () => void) => { finished: Promise<void>; skipTransition: () => void };
+        startViewTransition?: (cb: () => void) => {
+          finished: Promise<void>;
+          skipTransition: () => void;
+        };
         documentElement: HTMLElement;
         querySelector: (selector: string) => HTMLElement | null;
       };
@@ -135,12 +180,14 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
         doc.documentElement.classList.add("switching-era");
         const transition = doc.startViewTransition(() => flushSync(update));
         eraTransition.current = transition;
-        void transition.finished.catch(() => {}).finally(() => {
-          if (eraTransition.current === transition) {
-            doc.documentElement.classList.remove("switching-era");
-            eraTransition.current = null;
-          }
-        });
+        void transition.finished
+          .catch(() => {})
+          .finally(() => {
+            if (eraTransition.current === transition) {
+              doc.documentElement.classList.remove("switching-era");
+              eraTransition.current = null;
+            }
+          });
       } else {
         flushSync(update);
         doc.querySelector(".app")?.animate([{ opacity: 0.35 }, { opacity: 1 }], {
@@ -149,7 +196,7 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [period]
+    [period],
   );
 
   const theme = useMemo(() => eraThemes[period.decade], [period.decade]);
@@ -167,7 +214,7 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       panelOpen,
       setPanelOpen,
     }),
-    [period, changePeriod, theme, musicOpen, factsOpen, panelOpen]
+    [period, changePeriod, theme, musicOpen, factsOpen, panelOpen],
   );
 
   return <EraContext.Provider value={value}>{children}</EraContext.Provider>;

@@ -1,10 +1,4 @@
-export const commentReactions = [
-  "like",
-  "love",
-  "laugh",
-  "surprise",
-  "sad",
-] as const;
+export const commentReactions = ["like", "love", "laugh", "surprise", "sad"] as const;
 
 export type CommentReaction = (typeof commentReactions)[number];
 

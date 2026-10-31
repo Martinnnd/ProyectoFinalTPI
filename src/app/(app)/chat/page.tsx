@@ -16,7 +16,9 @@ function ChatContent() {
   const { session, status } = useAuth();
   const { period } = useEra();
 
-  const [chatWith, setChatWith] = useState<{ userId: number; username: string; ts: number } | null>(null);
+  const [chatWith, setChatWith] = useState<{ userId: number; username: string; ts: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (status === "loading") return;

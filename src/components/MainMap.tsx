@@ -2,11 +2,14 @@ import { lazy, Suspense, useEffect, useRef, useState, type ComponentProps } from
 import { createPortal } from "react-dom";
 import MemoryMap, { type Point } from "./MemoryMap";
 import PlaceSearch from "./PlaceSearch";
-import MomentExplorer from './MomentExplorer';
-import type { Memory } from '../types';
+import MomentExplorer from "./MomentExplorer";
+import type { Memory } from "../types";
 const MapboxMap = lazy(() => import("./MapboxMap"));
 export type MapProps = ComponentProps<typeof MemoryMap>;
-export default function MainMap({onUserLocation, ...props}: MapProps & {onUserLocation?: (point: Point | null) => void}) {
+export default function MainMap({
+  onUserLocation,
+  ...props
+}: MapProps & { onUserLocation?: (point: Point | null) => void }) {
   const token =
     process.env.NEXT_PUBLIC_MAP_MODE === "2d"
       ? undefined
@@ -20,7 +23,8 @@ export default function MainMap({onUserLocation, ...props}: MapProps & {onUserLo
   const [searchSlot, setSearchSlot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    const placeSearch = () => setSearchSlot(window.innerWidth >= 900 ? document.getElementById("place-search-slot") : null);
+    const placeSearch = () =>
+      setSearchSlot(window.innerWidth >= 900 ? document.getElementById("place-search-slot") : null);
     placeSearch();
     window.addEventListener("resize", placeSearch);
     return () => window.removeEventListener("resize", placeSearch);
@@ -57,7 +61,9 @@ export default function MainMap({onUserLocation, ...props}: MapProps & {onUserLo
         maximumAge: 300000,
       },
     );
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [onUserLocation]);
 
   const mapProps = {
@@ -75,14 +81,33 @@ export default function MainMap({onUserLocation, ...props}: MapProps & {onUserLo
   };
 
   const useFallback = !token?.startsWith("pk.") || fallback;
-  const panelHost = journey ? document.querySelector('.app') : null;
+  const panelHost = journey ? document.querySelector(".app") : null;
 
   return (
     <div className="main-map-shell">
-      {journey && panelHost && props.active !== false && !props.picking && createPortal(<MomentExplorer key={journey.id} id={journey.id} origin={journey.origin} selectedId={props.selected?.id}
-        onSelect={memory => { setSearchTarget(null); (props.onSelectRelated ?? props.onSelect)(memory); }}
-        onMoment={id => setJourney(current => current ? { ...current, id } : null)}
-        onClose={() => { setJourney(null); if (momentTrigger.current?.isConnected) momentTrigger.current.focus({ preventScroll: true }); }} />, panelHost)}
+      {journey &&
+        panelHost &&
+        props.active !== false &&
+        !props.picking &&
+        createPortal(
+          <MomentExplorer
+            key={journey.id}
+            id={journey.id}
+            origin={journey.origin}
+            selectedId={props.selected?.id}
+            onSelect={(memory) => {
+              setSearchTarget(null);
+              (props.onSelectRelated ?? props.onSelect)(memory);
+            }}
+            onMoment={(id) => setJourney((current) => (current ? { ...current, id } : null))}
+            onClose={() => {
+              setJourney(null);
+              if (momentTrigger.current?.isConnected)
+                momentTrigger.current.focus({ preventScroll: true });
+            }}
+          />,
+          panelHost,
+        )}
       {useFallback ? (
         <>
           <MemoryMap {...mapProps} />
@@ -90,11 +115,7 @@ export default function MainMap({onUserLocation, ...props}: MapProps & {onUserLo
             {fallback
               ? "Mapbox no pudo cargar. Seguís explorando con el mapa 2D."
               : "Vista 2D · Mapbox pendiente de configuración."}
-            {fallback && (
-              <button onClick={() => setFallback(false)}>
-                Reintentar Mapbox
-              </button>
-            )}
+            {fallback && <button onClick={() => setFallback(false)}>Reintentar Mapbox</button>}
           </div>
         </>
       ) : (
@@ -115,15 +136,14 @@ export default function MainMap({onUserLocation, ...props}: MapProps & {onUserLo
         </Suspense>
       )}
 
-      {searchSlot ? createPortal(<PlaceSearch
-        target={searchTarget}
-        onChoose={setSearchTarget}
-        onCreate={props.onPick}
-      />, searchSlot) : <PlaceSearch
-        target={searchTarget}
-        onChoose={setSearchTarget}
-        onCreate={props.onPick}
-      />}
+      {searchSlot ? (
+        createPortal(
+          <PlaceSearch target={searchTarget} onChoose={setSearchTarget} onCreate={props.onPick} />,
+          searchSlot,
+        )
+      ) : (
+        <PlaceSearch target={searchTarget} onChoose={setSearchTarget} onCreate={props.onPick} />
+      )}
     </div>
   );
 }

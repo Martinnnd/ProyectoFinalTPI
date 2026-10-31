@@ -3,57 +3,66 @@ import type { EraContent } from "../contracts";
 export const content = {
   introduction: {
     label: "Los noventa",
-    description:
-      "Videoclubes, pilas de repuesto y encuentros sin mensajes de aviso.",
+    description: "Videoclubes, pilas de repuesto y encuentros sin mensajes de aviso.",
   },
   memories: [
-{
-    "id": "grunge-90-1", hashtags: ["cassettes", "grunge"],
-    "groupId": "grunge-90",
-    "title": "El cassette de Nirvana que no volvía nunca",
-    "year": 1993,
-    "author": "Nico",
-    "place": "Plaza Sarmiento, San Justo, Buenos Aires",
-    "image": "https://deadaheadrecords.com/wp-content/uploads/2022/09/nirvana-nevermind-cassette-tape-used.jpg",
-    "lat": -34.676,
-    "lng": -58.56,
-    "description": "Llevé un cassette de Nirvana para prestárselo a un compañero después del colegio. Terminó recorriendo medio curso: cada semana alguien distinto decía que lo tenía en su casa. Cuando volvió, la cajita estaba rajada y la etiqueta tenía nombres escritos con birome. Lo puse en el walkman camino a la plaza y sonaba igual de gastado que siempre. En este grupo quiero encontrar a los que también armaban cadenas de préstamos.",
-    "category": "Música",
-    "source": "demo"
-},
-{
-    "id": "grunge-90-2", hashtags: ["cassettes", "grunge"],
-    "groupId": "grunge-90",
-    "title": "Pearl Jam en el cuarto de mi amigo",
-    "year": 1995,
-    "author": "Vero",
-    "place": "Ramos Mejía, Buenos Aires",
-    "image": "https://img.ricardostatic.ch/images/d324e2b5-9720-42ca-9ae4-a33d35328ab6/t_1000x750/cd-pearl-jam",
-    "lat": -34.644,
-    "lng": -58.565,
-    "description": "Mi amigo había conseguido un disco de Pearl Jam y nos invitó a escucharlo después de merendar. Bajamos la persiana, corrimos los cuadernos y subimos el volumen hasta que su mamá golpeó la puerta. Nos turnábamos para mirar el librito y adivinar las letras. Volví a casa con una copia en cassette y una lista de canciones anotada en la mochila. Cada vez que las escucho vuelvo a ese cuarto lleno de pósters.",
-    "category": "Música",
-    "source": "demo"
-},
-{
-    "id": "grunge-90-3", hashtags: ["grunge", "recuerdosdelbarrio"],
-    "groupId": "grunge-90",
-    "title": "Nuestra banda ensayaba en un garaje",
-    "year": 1997,
-    "author": "Marcos",
-    "place": "Morón, Buenos Aires",
-    "image": "https://tse2.mm.bing.net/th/id/OIP.RX5OoYTN9cO_0mWEo9iIFQHaEk?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
-    "lat": -34.65,
-    "lng": -58.619,
-    "description": "Teníamos una guitarra prestada, una batería bastante incompleta y muchas ganas de tocar temas de Soundgarden y Nirvana. El garaje quedaba tan chico que el cantante casi no podía moverse. Grabábamos los ensayos con un equipo apoyado sobre una caja y después nos reíamos de lo mal que se escuchaba. Nunca salimos de ese barrio, pero los sábados de ensayo eran el mejor momento de la semana.",
-    "category": "Música",
-    "source": "demo"
-},
+    {
+      id: "grunge-90-1",
+      hashtags: ["cassettes", "grunge"],
+      groupId: "grunge-90",
+      title: "El cassette de Nirvana que no volvía nunca",
+      year: 1993,
+      author: "Nico",
+      place: "Plaza Sarmiento, San Justo, Buenos Aires",
+      image:
+        "https://deadaheadrecords.com/wp-content/uploads/2022/09/nirvana-nevermind-cassette-tape-used.jpg",
+      lat: -34.676,
+      lng: -58.56,
+      description:
+        "Llevé un cassette de Nirvana para prestárselo a un compañero después del colegio. Terminó recorriendo medio curso: cada semana alguien distinto decía que lo tenía en su casa. Cuando volvió, la cajita estaba rajada y la etiqueta tenía nombres escritos con birome. Lo puse en el walkman camino a la plaza y sonaba igual de gastado que siempre. En este grupo quiero encontrar a los que también armaban cadenas de préstamos.",
+      category: "Música",
+      source: "demo",
+    },
+    {
+      id: "grunge-90-2",
+      hashtags: ["cassettes", "grunge"],
+      groupId: "grunge-90",
+      title: "Pearl Jam en el cuarto de mi amigo",
+      year: 1995,
+      author: "Vero",
+      place: "Ramos Mejía, Buenos Aires",
+      image:
+        "https://img.ricardostatic.ch/images/d324e2b5-9720-42ca-9ae4-a33d35328ab6/t_1000x750/cd-pearl-jam",
+      lat: -34.644,
+      lng: -58.565,
+      description:
+        "Mi amigo había conseguido un disco de Pearl Jam y nos invitó a escucharlo después de merendar. Bajamos la persiana, corrimos los cuadernos y subimos el volumen hasta que su mamá golpeó la puerta. Nos turnábamos para mirar el librito y adivinar las letras. Volví a casa con una copia en cassette y una lista de canciones anotada en la mochila. Cada vez que las escucho vuelvo a ese cuarto lleno de pósters.",
+      category: "Música",
+      source: "demo",
+    },
+    {
+      id: "grunge-90-3",
+      hashtags: ["grunge", "recuerdosdelbarrio"],
+      groupId: "grunge-90",
+      title: "Nuestra banda ensayaba en un garaje",
+      year: 1997,
+      author: "Marcos",
+      place: "Morón, Buenos Aires",
+      image:
+        "https://tse2.mm.bing.net/th/id/OIP.RX5OoYTN9cO_0mWEo9iIFQHaEk?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+      lat: -34.65,
+      lng: -58.619,
+      description:
+        "Teníamos una guitarra prestada, una batería bastante incompleta y muchas ganas de tocar temas de Soundgarden y Nirvana. El garaje quedaba tan chico que el cantante casi no podía moverse. Grabábamos los ensayos con un equipo apoyado sobre una caja y después nos reíamos de lo mal que se escuchaba. Nunca salimos de ese barrio, pero los sábados de ensayo eran el mejor momento de la semana.",
+      category: "Música",
+      source: "demo",
+    },
     {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,
       lng: -58.4355,
-      id: "demo-7", hashtags: ["recuerdosdelbarrio"],
+      id: "demo-7",
+      hashtags: ["recuerdosdelbarrio"],
       title: "La ronda de mate del Parque Centenario",
       year: 1997,
       category: "Personales",
@@ -65,7 +74,7 @@ export const content = {
     },
     {
       place: "Universidad Nacional de La Matanza, San Justo",
-      lat: -34.67077213671422, 
+      lat: -34.67077213671422,
       lng: -58.562816626446505,
       id: "demo-33",
       title: "Primer dia en la Universidad",
@@ -73,19 +82,22 @@ export const content = {
       category: "Personales",
       author: "Fernando",
       image: "https://i.postimg.cc/QdMKq3ZV/0f7ca658-ec73-40e1-98fa-39d9e501e3da.png",
-        description: "Todavía me acuerdo de aquel 15 de abril de 1991, cuando empecé a estudiar en la Universidad Nacional de La Matanza. Llegué con una mezcla de nervios, entusiasmo y muchas expectativas sobre lo que vendría. Con el tiempo conocí compañeros que se volvieron grandes amigos y viví experiencias que marcaron una etapa importante de mi vida. Cada pasillo, cada clase y cada charla después de cursar forman parte de esos recuerdos que todavía conservo con mucho cariño. Fue el comienzo de un camino que me ayudó a crecer y que recuerdo como uno de los momentos más importantes de mi juventud.",
+      description:
+        "Todavía me acuerdo de aquel 15 de abril de 1991, cuando empecé a estudiar en la Universidad Nacional de La Matanza. Llegué con una mezcla de nervios, entusiasmo y muchas expectativas sobre lo que vendría. Con el tiempo conocí compañeros que se volvieron grandes amigos y viví experiencias que marcaron una etapa importante de mi vida. Cada pasillo, cada clase y cada charla después de cursar forman parte de esos recuerdos que todavía conservo con mucho cariño. Fue el comienzo de un camino que me ayudó a crecer y que recuerdo como uno de los momentos más importantes de mi juventud.",
       source: "demo",
     },
     {
       place: "Monumento Nacional a la Bandera, Rosario",
       lat: -32.9475,
       lng: -60.6304,
-      id: "demo-8", hashtags: ["cassettes", "rocknacional"],
+      id: "demo-8",
+      hashtags: ["cassettes", "rocknacional"],
       title: "Una cinta y las escalinatas del Monumento",
       year: 1993,
       category: "Música",
       author: "Fede",
-      image: "https://tse1.mm.bing.net/th/id/OIP.Mii6dAY850cL2zGTAUCSfAHaFj?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+      image:
+        "https://tse1.mm.bing.net/th/id/OIP.Mii6dAY850cL2zGTAUCSfAHaFj?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
       description:
         "Con mi amigo Martín terminamos la secundaria y nos regalamos un cassette grabado por cada uno. Nos juntamos a intercambiarlos en las escalinatas del Monumento a la Bandera, mirando hacia el Paraná. El suyo empezaba con rock nacional y tenía una lista escrita con birome azul. Escuchamos un lado entero compartiendo auriculares, mientras comíamos bizcochitos. En la etiqueta del mío puso “Rosario, diciembre del 93”. Lo conservé aunque después dejé de tener dónde escucharlo.",
       source: "demo",
@@ -159,7 +171,11 @@ export const content = {
   facts: [
     {
       id: "toystory",
-      media: {"url": "/facts/toystory.jpg", "caption": "Imagen promocional · The Walt Disney Company", "source": "https://thewaltdisneycompany.com/news/toy-story-pixar-history/"},
+      media: {
+        url: "/facts/toystory.jpg",
+        caption: "Imagen promocional · The Walt Disney Company",
+        source: "https://thewaltdisneycompany.com/news/toy-story-pixar-history/",
+      },
       year: 1995,
       kind: "Cine",
       title: "Los juguetes cobraron vida",
@@ -172,7 +188,11 @@ export const content = {
     },
     {
       id: "web",
-      media: {"url": "/facts/web.jpg", "caption": "El navegador World Wide Web en una computadora NeXT · CERN", "source": "https://home.cern/science/computing/the-birth-of-the-web/"},
+      media: {
+        url: "/facts/web.jpg",
+        caption: "El navegador World Wide Web en una computadora NeXT · CERN",
+        source: "https://home.cern/science/computing/the-birth-of-the-web/",
+      },
       year: 1993,
       kind: "Tecnología",
       title: "La Web se abrió al mundo",
@@ -185,7 +205,11 @@ export const content = {
     },
     {
       id: "dangerous",
-      media: {"url": "/facts/dangerous.jpg", "caption": "Portada del álbum · Michael Jackson · sitio oficial", "source": "https://www.michaeljackson.com/albums/dangerous/"},
+      media: {
+        url: "/facts/dangerous.jpg",
+        caption: "Portada del álbum · Michael Jackson · sitio oficial",
+        source: "https://www.michaeljackson.com/albums/dangerous/",
+      },
       year: 1991,
       kind: "Música",
       title: "Michael Jackson lanzó Dangerous",
@@ -198,40 +222,40 @@ export const content = {
     },
   ],
   music: [
-  {
-    "title": "Black or White",
-    "artist": "Michael Jackson",
-    "year": 1991,
-    "spotifyId": "6bsCZtBsAvu4u2ueA7saDo",
-    "reference": "https://open.spotify.com/track/6bsCZtBsAvu4u2ueA7saDo"
-  },
-  {
-    "title": "De música ligera",
-    "artist": "Soda Stereo",
-    "year": 1990,
-    "spotifyId": "5jVvwEH4nsTrDf2pU3IW2i",
-    "reference": "https://open.spotify.com/track/5jVvwEH4nsTrDf2pU3IW2i"
-  },
-  {
-    "title": "Wonderwall",
-    "artist": "Oasis",
-    "year": 1995,
-    "spotifyId": "1qPbGZqppFwLwcBC1JQ6Vr",
-    "reference": "https://open.spotify.com/track/1qPbGZqppFwLwcBC1JQ6Vr"
-  },
-  {
-    "title": "Smells Like Teen Spirit",
-    "artist": "Nirvana",
-    "year": 1991,
-    "spotifyId": "7MYHci3U9oUSwipkN31dsZ",
-    "reference": "https://open.spotify.com/track/7MYHci3U9oUSwipkN31dsZ"
-  },
-  {
-    "title": "I Want It That Way",
-    "artist": "Backstreet Boys",
-    "year": 1999,
-    "spotifyId": "7x6ZiOAwR4DAUF8zvTugmX",
-    "reference": "https://open.spotify.com/track/7x6ZiOAwR4DAUF8zvTugmX"
-  }
-],
+    {
+      title: "Black or White",
+      artist: "Michael Jackson",
+      year: 1991,
+      spotifyId: "6bsCZtBsAvu4u2ueA7saDo",
+      reference: "https://open.spotify.com/track/6bsCZtBsAvu4u2ueA7saDo",
+    },
+    {
+      title: "De música ligera",
+      artist: "Soda Stereo",
+      year: 1990,
+      spotifyId: "5jVvwEH4nsTrDf2pU3IW2i",
+      reference: "https://open.spotify.com/track/5jVvwEH4nsTrDf2pU3IW2i",
+    },
+    {
+      title: "Wonderwall",
+      artist: "Oasis",
+      year: 1995,
+      spotifyId: "1qPbGZqppFwLwcBC1JQ6Vr",
+      reference: "https://open.spotify.com/track/1qPbGZqppFwLwcBC1JQ6Vr",
+    },
+    {
+      title: "Smells Like Teen Spirit",
+      artist: "Nirvana",
+      year: 1991,
+      spotifyId: "7MYHci3U9oUSwipkN31dsZ",
+      reference: "https://open.spotify.com/track/7MYHci3U9oUSwipkN31dsZ",
+    },
+    {
+      title: "I Want It That Way",
+      artist: "Backstreet Boys",
+      year: 1999,
+      spotifyId: "7x6ZiOAwR4DAUF8zvTugmX",
+      reference: "https://open.spotify.com/track/7x6ZiOAwR4DAUF8zvTugmX",
+    },
+  ],
 } satisfies EraContent;

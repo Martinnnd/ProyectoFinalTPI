@@ -37,7 +37,13 @@ export default function RepostDialog({
       onKeyDown={(e) => e.stopPropagation()}
     >
       <header className="dialog-heading">
-        <span><Quote size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }}/> Citar recuerdo</span>
+        <span>
+          <Quote
+            size={16}
+            style={{ display: "inline", verticalAlign: "middle", marginRight: "4px" }}
+          />{" "}
+          Citar recuerdo
+        </span>
         <button
           type="button"
           className="icon-button"
@@ -48,11 +54,13 @@ export default function RepostDialog({
           <X size={16} />
         </button>
       </header>
-      
+
       <form onSubmit={handleSubmit}>
-        <div style={{ padding: '0 1rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label htmlFor="repost-desc">¿Qué querés agregar sobre <strong>"{memoryTitle}"</strong>?</label>
+        <div style={{ padding: "0 1rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <label htmlFor="repost-desc">
+              ¿Qué querés agregar sobre <strong>"{memoryTitle}"</strong>?
+            </label>
             <textarea
               id="repost-desc"
               value={descripcion}
@@ -65,7 +73,7 @@ export default function RepostDialog({
             />
           </div>
         </div>
-        
+
         <footer className="dialog-actions">
           <button
             type="button"
@@ -89,4 +97,3 @@ export default function RepostDialog({
 }
 
 export { RepostDialog as CitarDialog };
-

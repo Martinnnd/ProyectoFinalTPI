@@ -9,12 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  loginRequest,
-  logoutRequest,
-  refreshSessionRequest,
-  registerRequest,
-} from "./authApi";
+import { loginRequest, logoutRequest, refreshSessionRequest, registerRequest } from "./authApi";
 import {
   AUTH_CHANGE_EVENT,
   beginAuthInit,
@@ -24,12 +19,7 @@ import {
   storeSession,
   tokenExpiresAt,
 } from "./authStorage";
-import type {
-  AuthSession,
-  AuthStatus,
-  LoginCredentials,
-  RegisterCredentials,
-} from "./authTypes";
+import type { AuthSession, AuthStatus, LoginCredentials, RegisterCredentials } from "./authTypes";
 
 type AuthContextValue = {
   session: AuthSession | null;
@@ -89,9 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!expiresAt) return;
     const delay = Math.max(0, expiresAt - Date.now() - 60_000);
     const timeout = window.setTimeout(() => {
-      refreshSessionRequest()
-        .then(storeSession)
-        .catch(clearStoredSession);
+      refreshSessionRequest().then(storeSession).catch(clearStoredSession);
     }, delay);
     return () => window.clearTimeout(timeout);
   }, [session]);

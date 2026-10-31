@@ -1,6 +1,6 @@
-import PinMemoryPreview from './PinMemoryPreview';
-import { createPortal } from 'react-dom';
-import { MapPin } from 'lucide-react';
+import PinMemoryPreview from "./PinMemoryPreview";
+import { createPortal } from "react-dom";
+import { MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -31,9 +31,11 @@ type Camera = {
 // intro already played. A module binding survives the remount, a ref does not.
 let introSeen = false;
 let savedCamera: Camera | null = null;
-const responsiveOverview = () => ({ ...overview, zoom: window.innerWidth < 900 ? 0.8 : overview.zoom });
-const duration = () =>
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1000;
+const responsiveOverview = () => ({
+  ...overview,
+  zoom: window.innerWidth < 900 ? 0.8 : overview.zoom,
+});
+const duration = () => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1000);
 type Options = {
   light: string;
   theme: string;
@@ -60,8 +62,7 @@ function configure(map: mapboxgl.Map, options: Options) {
   map.setConfigProperty("basemap", "lightPreset", options.light);
   map.setConfigProperty("basemap", "showPlaceLabels", options.labels);
   map.setConfigProperty("basemap", "showPointOfInterestLabels", options.poi);
-  if (!options.satellite)
-    map.setConfigProperty("basemap", "theme", options.theme);
+  if (!options.satellite) map.setConfigProperty("basemap", "theme", options.theme);
 }
 
 export default function MapboxMap(
@@ -85,7 +86,7 @@ export default function MapboxMap(
     light: period.decade === 2020 ? "night" : "day",
   }));
   useEffect(() => {
-    setOptions(current => ({ ...current, light: period.decade === 2020 ? "night" : "day" }));
+    setOptions((current) => ({ ...current, light: period.decade === 2020 ? "night" : "day" }));
   }, [period.decade]);
   const optionsRef = useRef(options);
   optionsRef.current = options;
@@ -124,12 +125,18 @@ export default function MapboxMap(
     const reportBounds = () => {
       const b = map.getBounds();
       if (!b) return;
-      const west = b.getWest(), east = b.getEast();
-      const normalize = (value: number) => ((value + 180) % 360 + 360) % 360 - 180;
-      latest.current.onBoundsChange?.({ minLatitud: Math.max(-90,b.getSouth()), maxLatitud: Math.min(90,b.getNorth()), minLongitud: east-west >= 360 ? -180 : normalize(west), maxLongitud: east-west >= 360 ? 180 : normalize(east) });
+      const west = b.getWest(),
+        east = b.getEast();
+      const normalize = (value: number) => ((((value + 180) % 360) + 360) % 360) - 180;
+      latest.current.onBoundsChange?.({
+        minLatitud: Math.max(-90, b.getSouth()),
+        maxLatitud: Math.min(90, b.getNorth()),
+        minLongitud: east - west >= 360 ? -180 : normalize(west),
+        maxLongitud: east - west >= 360 ? 180 : normalize(east),
+      });
     };
-    map.on('load', reportBounds);
-    map.on('moveend', reportBounds);
+    map.on("load", reportBounds);
+    map.on("moveend", reportBounds);
     let loaded = false;
     const timeout = window.setTimeout(() => {
       if (!loaded) setError("El mapa está tardando en cargar. Podés reintentar o usar el mapa 2D.");
@@ -139,16 +146,18 @@ export default function MapboxMap(
       configure(map, optionsRef.current);
     });
     map.on("webglcontextlost", () => latest.current.onFallback());
-    
+
     let resourceFailed = false;
     map.on("error", (event) => {
       resourceFailed = true;
       const status = (event.error as Error & { status?: number }).status;
-      setError(status === 401 || status === 403
-        ? "Mapbox rechazó el acceso al mapa. Revisá el token y sus dominios permitidos."
-        : status === 429
-          ? "Mapbox alcanzó su límite de solicitudes. Esperá un momento antes de reintentar."
-          : "No se pudieron cargar algunos recursos del mapa. Reintentá la carga; si persiste, revisá la conexión o los bloqueadores del navegador.");
+      setError(
+        status === 401 || status === 403
+          ? "Mapbox rechazó el acceso al mapa. Revisá el token y sus dominios permitidos."
+          : status === 429
+            ? "Mapbox alcanzó su límite de solicitudes. Esperá un momento antes de reintentar."
+            : "No se pudieron cargar algunos recursos del mapa. Reintentá la carga; si persiste, revisá la conexión o los bloqueadores del navegador.",
+      );
     });
     map.on("idle", () => {
       // An idle map may still contain failed tiles. Only clear a slow-load
@@ -208,7 +217,9 @@ export default function MapboxMap(
       }
     };
     canvas.addEventListener("keydown", key);
-    const observer = new ResizeObserver(() => { if (container.current?.clientWidth) map.resize(); });
+    const observer = new ResizeObserver(() => {
+      if (container.current?.clientWidth) map.resize();
+    });
     observer.observe(container.current);
     return () => {
       clearTimeout(timeout);
@@ -279,18 +290,16 @@ export default function MapboxMap(
           bearing: -20,
         }
       : {
-        center: [-64.4, -38.4] as [number, number],
-        zoom: 4,
-        pitch: 0,
-        bearing: 0,
-      };
+          center: [-64.4, -38.4] as [number, number],
+          zoom: 4,
+          pitch: 0,
+          bearing: 0,
+        };
 
     introSeen = true;
     initialLocationApplied.current = true;
 
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (reduce) {
       map.jumpTo(target);
@@ -310,15 +319,14 @@ export default function MapboxMap(
   useEffect(() => {
     const map = instance.current;
     if (!map || !ready) return;
-    const visiblePins = props.selected && !props.memories.some(memory => memory.id === props.selected!.id)
-      ? [...props.memories, props.selected] : props.memories;
+    const visiblePins =
+      props.selected && !props.memories.some((memory) => memory.id === props.selected!.id)
+        ? [...props.memories, props.selected]
+        : props.memories;
     const markers = visiblePins.map((memory) => {
       const button = document.createElement("button");
       button.className = "mapbox-memory-pin";
-      button.setAttribute(
-        "aria-label",
-        `${memory.title}, ${memory.year}, ${memory.category}`,
-      );
+      button.setAttribute("aria-label", `${memory.title}, ${memory.year}, ${memory.category}`);
       button.title = `${memory.title} · ${memory.year}`;
       const symbol = document.createElement("span");
       const category = memory.category
@@ -327,11 +335,14 @@ export default function MapboxMap(
         .replace(/[\u0300-\u036f]/g, "");
       symbol.className = `memory-marker marker-${category} ${props.selected?.id === memory.id ? "selected" : ""}`;
       if (memory.groupId) {
-        symbol.classList.add('community-marker');
-        const icon = document.createElement('img');
-        icon.src = '/groups/community-pin.svg'; icon.alt = ''; icon.width = 36; icon.height = 44;
+        symbol.classList.add("community-marker");
+        const icon = document.createElement("img");
+        icon.src = "/groups/community-pin.svg";
+        icon.alt = "";
+        icon.width = 36;
+        icon.height = 44;
         symbol.append(icon);
-        button.setAttribute('aria-label', `${memory.title}, ${memory.year}, grupos en común`);
+        button.setAttribute("aria-label", `${memory.title}, ${memory.year}, grupos en común`);
         button.title = `${memory.title} · Grupos en común`;
       } else symbol.textContent = symbols[memory.category];
       button.append(symbol);
@@ -354,47 +365,80 @@ export default function MapboxMap(
           .addTo(map),
       );
     return () => markers.forEach((marker) => marker.remove());
-  }, [props.memories, props.selected?.id, props.selected?.lat, props.selected?.lng, props.draft, ready]);
+  }, [
+    props.memories,
+    props.selected?.id,
+    props.selected?.lat,
+    props.selected?.lng,
+    props.draft,
+    ready,
+  ]);
   useEffect(() => {
     if (!ready || props.active === false) return;
-    if (!props.selected) { focusedPin.current = null; return; }
+    if (!props.selected) {
+      focusedPin.current = null;
+      return;
+    }
     const locationKey = `${props.selected.id}:${props.selected.lat}:${props.selected.lng}`;
     if (focusedPin.current === locationKey) return;
     focusedPin.current = locationKey;
-    const mobile = matchMedia('(max-width: 899px)').matches;
+    const mobile = matchMedia("(max-width: 899px)").matches;
     const mapSize = instance.current?.getContainer();
     if (props.selected)
       instance.current?.flyTo({
         center: [props.selected.lng, props.selected.lat],
         zoom: mobile ? 12 : Math.max(instance.current.getZoom(), 14),
-        offset: mobile && mapSize ? [-mapSize.clientWidth * .24, -mapSize.clientHeight * .07] : [0, 0],
+        offset:
+          mobile && mapSize ? [-mapSize.clientWidth * 0.24, -mapSize.clientHeight * 0.07] : [0, 0],
         duration: duration(),
       });
   }, [props.selected?.id, props.selected?.lat, props.selected?.lng, props.active, ready]);
   useEffect(() => {
-    const map=instance.current;
-    const memory=props.selected;
-    if(!map || !ready || !memory || props.picking || props.searchTarget)return;
-    const content=document.createElement('div');
+    const map = instance.current;
+    const memory = props.selected;
+    if (!map || !ready || !memory || props.picking || props.searchTarget) return;
+    const content = document.createElement("div");
     setPreviewContent(content);
-    const preview=new mapboxgl.Popup({className:'pin-message-preview',anchor:'left',offset:25,maxWidth:'230px',closeButton:false,closeOnClick:false,focusAfterOpen:false})
-      .setLngLat([memory.lng,memory.lat]).setDOMContent(content).addTo(map);
+    const preview = new mapboxgl.Popup({
+      className: "pin-message-preview",
+      anchor: "left",
+      offset: 25,
+      maxWidth: "230px",
+      closeButton: false,
+      closeOnClick: false,
+      focusAfterOpen: false,
+    })
+      .setLngLat([memory.lng, memory.lat])
+      .setDOMContent(content)
+      .addTo(map);
     previewPopup.current = preview;
-    return ()=>{setPreviewContent(null);preview.remove();};
+    return () => {
+      setPreviewContent(null);
+      preview.remove();
+    };
   }, [props.selected, props.picking, props.searchTarget, ready]);
   useEffect(() => {
     const map = instance.current;
     const target = props.searchTarget;
     if (!map || !ready || !target) return;
-    map.flyTo({ center: [target.lng, target.lat], zoom: 16, pitch: 0, bearing: 0, duration: duration() });
+    map.flyTo({
+      center: [target.lng, target.lat],
+      zoom: 16,
+      pitch: 0,
+      bearing: 0,
+      duration: duration(),
+    });
     const marker = new mapboxgl.Marker({ color: "#e35a38", draggable: true })
-      .setLngLat([target.lng, target.lat]).addTo(map);
+      .setLngLat([target.lng, target.lat])
+      .addTo(map);
     marker.getElement().setAttribute("aria-label", "Ubicación encontrada. Arrastrá para ajustar");
     marker.on("dragend", () => {
       const point = marker.getLngLat().wrap();
       latest.current.onSearchMove?.({ ...target, lat: point.lat, lng: point.lng });
     });
-    return () => { marker.remove(); };
+    return () => {
+      marker.remove();
+    };
   }, [props.searchTarget, ready]);
   function satellite(value: boolean) {
     const next = { ...options, satellite: value };
@@ -411,21 +455,36 @@ export default function MapboxMap(
       className="map-section mapbox-section"
       aria-label="Globo Mapbox de recuerdos de Argentina"
     >
-      {previewContent && props.selected && createPortal(<PinMemoryPreview key={props.selected.id} memory={props.selected} onSelect={memory => (latest.current.onSelectRelated ?? latest.current.onSelect)(memory)} onOpen={props.onOpen} onMoment={props.onMoment ? id => latest.current.onMoment?.(id, props.selected!) : undefined} onClose={() => { if (latest.current.onClosePreview) latest.current.onClosePreview(); else { previewPopup.current?.remove(); setPreviewContent(null); } }} />, previewContent)}
+      {previewContent &&
+        props.selected &&
+        createPortal(
+          <PinMemoryPreview
+            key={props.selected.id}
+            memory={props.selected}
+            onSelect={(memory) =>
+              (latest.current.onSelectRelated ?? latest.current.onSelect)(memory)
+            }
+            onOpen={props.onOpen}
+            onMoment={
+              props.onMoment ? (id) => latest.current.onMoment?.(id, props.selected!) : undefined
+            }
+            onClose={() => {
+              if (latest.current.onClosePreview) latest.current.onClosePreview();
+              else {
+                previewPopup.current?.remove();
+                setPreviewContent(null);
+              }
+            }}
+          />,
+          previewContent,
+        )}
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
-      
+
       {controls && (
-        <aside
-          id="mapbox-settings"
-          className="mapbox-settings"
-          aria-label="Estilo del mapa"
-        >
+        <aside id="mapbox-settings" className="mapbox-settings" aria-label="Estilo del mapa">
           <header>
             <strong>Estilo del mapa</strong>
-            <button
-              aria-label="Cerrar estilo del mapa"
-              onClick={() => setControls(false)}
-            >
+            <button aria-label="Cerrar estilo del mapa" onClick={() => setControls(false)}>
               ×
             </button>
           </header>
@@ -433,9 +492,7 @@ export default function MapboxMap(
             Iluminación
             <select
               value={options.light}
-              onChange={(e) =>
-                setOptions({ ...options, light: e.target.value })
-              }
+              onChange={(e) => setOptions({ ...options, light: e.target.value })}
             >
               <option value="dawn">Amanecer</option>
               <option value="day">Día</option>
@@ -448,9 +505,7 @@ export default function MapboxMap(
             <select
               disabled={options.satellite}
               value={options.theme}
-              onChange={(e) =>
-                setOptions({ ...options, theme: e.target.value })
-              }
+              onChange={(e) => setOptions({ ...options, theme: e.target.value })}
             >
               <option value="default">Original</option>
               <option value="faded">Suave</option>
@@ -469,9 +524,7 @@ export default function MapboxMap(
             <input
               type="checkbox"
               checked={options.labels}
-              onChange={(e) =>
-                setOptions({ ...options, labels: e.target.checked })
-              }
+              onChange={(e) => setOptions({ ...options, labels: e.target.checked })}
             />{" "}
             Nombres de lugares
           </label>
@@ -479,9 +532,7 @@ export default function MapboxMap(
             <input
               type="checkbox"
               checked={options.poi}
-              onChange={(e) =>
-                setOptions({ ...options, poi: e.target.checked })
-              }
+              onChange={(e) => setOptions({ ...options, poi: e.target.checked })}
             />{" "}
             Puntos de interés
           </label>
@@ -497,7 +548,7 @@ export default function MapboxMap(
       {error && (
         <div className="mapbox-status" role="alert">
           {error}
-          <button onClick={() => setReload(value => value + 1)}>Reintentar mapa</button>
+          <button onClick={() => setReload((value) => value + 1)}>Reintentar mapa</button>
           <button onClick={props.onFallback}>Usar mapa 2D</button>
           <button onClick={() => setError(null)}>Cerrar aviso</button>
         </div>

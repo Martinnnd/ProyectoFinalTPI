@@ -3,7 +3,7 @@
 import { use } from "react";
 import dynamic from "next/dynamic";
 import { LoaderCircle } from "lucide-react";
-import { decodeProfileUsername } from '../../../../profileRoute';
+import { decodeProfileUsername } from "../../../../profileRoute";
 
 const ProfileView = dynamic(() => import("../../../../components/profile/ProfileView"), {
   ssr: false,

@@ -3,49 +3,51 @@ import type { EraContent } from "../contracts";
 export const content = {
   introduction: {
     label: "Los dos mil",
-    description:
-      "Fotos digitales, zumbidos y canciones que entraban en el bolsillo.",
+    description: "Fotos digitales, zumbidos y canciones que entraban en el bolsillo.",
   },
   memories: [
-{
-    "id": "cine-2000-1",
-    "groupId": "cine-2000",
-    "title": "La fila para ver El retorno del rey",
-    "year": 2004,
-    "author": "Pablo",
-    "place": "Abasto, Buenos Aires",
-    "lat": -34.6035,
-    "lng": -58.4108,
-    "description": "Fuimos con mis amigos a ver El retorno del rey y llegamos mucho antes para conseguir lugar juntos. En la fila discutimos nuestras escenas favoritas de las películas anteriores, cuidando de no contar nada a quienes no las habían visto. Salimos hablando todos a la vez y terminamos comiendo una pizza mientras repasábamos el final. Guardé la entrada dentro de un libro; todavía tiene una mancha del vaso de gaseosa.",
-    "category": "Cine",
-    "source": "demo"
-},
-{
-    "id": "cine-2000-2",
-    "groupId": "cine-2000",
-    "title": "Harry Potter y una salida después del colegio",
-    "year": 2005,
-    "author": "Carla",
-    "place": "Cine de San Justo, Buenos Aires",
-    "lat": -34.682,
-    "lng": -58.557,
-    "description": "Habíamos organizado toda la semana la salida para ver Harry Potter y el cáliz de fuego. Uno compró las entradas, otro juntó la plata y yo llevé una cámara digital para la foto antes de entrar. Compartimos un balde de pochoclos que se terminó demasiado rápido. A la salida discutimos las diferencias con el libro hasta perder el colectivo. La película era la excusa perfecta para estar juntos un rato más.",
-    "category": "Cine",
-    "source": "demo"
-},
-{
-    "id": "cine-2000-3",
-    "groupId": "cine-2000",
-    "title": "Shrek en DVD y el sillón lleno",
-    "year": 2002,
-    "author": "Luciano",
-    "place": "Villa Luzuriaga, La Matanza, Buenos Aires",
-    "lat": -34.657,
-    "lng": -58.584,
-    "description": "Alquilamos Shrek en DVD para una noche de películas en casa. Éramos tantos que hubo que traer sillas de la cocina y dejar a dos en el piso. Antes de empezar nos entretuvimos recorriendo los menús, algo que todavía nos parecía una novedad. Terminamos repitiendo los chistes durante semanas y prometiendo otra función para el sábado siguiente. Me acuerdo más de las risas del living que de cualquier otra cosa de esa noche.",
-    "category": "Cine",
-    "source": "demo"
-},
+    {
+      id: "cine-2000-1",
+      groupId: "cine-2000",
+      title: "La fila para ver El retorno del rey",
+      year: 2004,
+      author: "Pablo",
+      place: "Abasto, Buenos Aires",
+      lat: -34.6035,
+      lng: -58.4108,
+      description:
+        "Fuimos con mis amigos a ver El retorno del rey y llegamos mucho antes para conseguir lugar juntos. En la fila discutimos nuestras escenas favoritas de las películas anteriores, cuidando de no contar nada a quienes no las habían visto. Salimos hablando todos a la vez y terminamos comiendo una pizza mientras repasábamos el final. Guardé la entrada dentro de un libro; todavía tiene una mancha del vaso de gaseosa.",
+      category: "Cine",
+      source: "demo",
+    },
+    {
+      id: "cine-2000-2",
+      groupId: "cine-2000",
+      title: "Harry Potter y una salida después del colegio",
+      year: 2005,
+      author: "Carla",
+      place: "Cine de San Justo, Buenos Aires",
+      lat: -34.682,
+      lng: -58.557,
+      description:
+        "Habíamos organizado toda la semana la salida para ver Harry Potter y el cáliz de fuego. Uno compró las entradas, otro juntó la plata y yo llevé una cámara digital para la foto antes de entrar. Compartimos un balde de pochoclos que se terminó demasiado rápido. A la salida discutimos las diferencias con el libro hasta perder el colectivo. La película era la excusa perfecta para estar juntos un rato más.",
+      category: "Cine",
+      source: "demo",
+    },
+    {
+      id: "cine-2000-3",
+      groupId: "cine-2000",
+      title: "Shrek en DVD y el sillón lleno",
+      year: 2002,
+      author: "Luciano",
+      place: "Villa Luzuriaga, La Matanza, Buenos Aires",
+      lat: -34.657,
+      lng: -58.584,
+      description:
+        "Alquilamos Shrek en DVD para una noche de películas en casa. Éramos tantos que hubo que traer sillas de la cocina y dejar a dos en el piso. Antes de empezar nos entretuvimos recorriendo los menús, algo que todavía nos parecía una novedad. Terminamos repitiendo los chistes durante semanas y prometiendo otra función para el sábado siguiente. Me acuerdo más de las risas del living que de cualquier otra cosa de esa noche.",
+      category: "Cine",
+      source: "demo",
+    },
     {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,
@@ -62,7 +64,7 @@ export const content = {
     },
     {
       place: "Avenida General Paz y Crovara, Buenos Aires",
-      lat: -34.673563442734945, 
+      lat: -34.673563442734945,
       lng: -58.5034528673788,
       id: "demo-34",
       title: "Chicago campeón B Nacional",
@@ -83,7 +85,8 @@ export const content = {
       year: 2005,
       category: "Música",
       author: "Agus",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3GEJYv0JMgPY0DBqGcrZxIh-xW6JtHZ4uIuUi3L9U-BgzePheBjJleVlQ&s=10",
+      image:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3GEJYv0JMgPY0DBqGcrZxIh-xW6JtHZ4uIuUi3L9U-BgzePheBjJleVlQ&s=10",
       description:
         "Después de mi primera entrevista de trabajo fui con mi novia al Monumento a la Bandera. Nos sentamos en la parte baja de las escalinatas, mirando el Paraná. En mi MP3 de 128 MB entraban pocas canciones, así que las conocíamos de memoria. Compartimos los auriculares y una gaseosa tibia mientras le contaba todas las cosas que creía haber contestado mal. A la semana me llamaron. Para festejar volvimos al mismo lugar.",
       source: "demo",
@@ -97,7 +100,8 @@ export const content = {
       year: 2004,
       category: "Lugares",
       author: "Flor",
-      image: "https://upload.wikimedia.org/wikipedia/commons/b/bf/Plaza_San_Mart%C3%ADn_C%C3%B3rdoba_2011-03-06.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original",
+      image:
+        "https://upload.wikimedia.org/wikipedia/commons/b/bf/Plaza_San_Mart%C3%ADn_C%C3%B3rdoba_2011-03-06.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original",
       description:
         "Mis amigas y yo quedamos en la Plaza San Martín de Córdoba para intercambiar las fotos de una salida del colegio. Llevé las copias impresas en un sobre de laboratorio; algunas tenían los dedos tapando el lente. Nos repartimos las mejores junto a la Catedral y prometimos escanear las otras. Esa noche la conversación siguió por Messenger: cada una se puso una foto distinta y nos mandamos zumbidos hasta que nos mandaron a dormir.",
       source: "demo",
@@ -111,7 +115,8 @@ export const content = {
       year: 2009,
       category: "Acontecimientos",
       author: "Juan",
-      image: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWn9bl_UQY-Raa2UYVIC1xJkykrqXqxRFmmr6O7yfKzjQL6Y3wg_mC7pMyTvNmpkFIgSodBffPei509n5RnigPMdE5ZFyBYV3jU61DpgjFjmhhNXx-ZHHiaM07dOiNNrITwFL-U=s1360-w1360-h1020-rw",
+      image:
+        "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWn9bl_UQY-Raa2UYVIC1xJkykrqXqxRFmmr6O7yfKzjQL6Y3wg_mC7pMyTvNmpkFIgSodBffPei509n5RnigPMdE5ZFyBYV3jU61DpgjFjmhhNXx-ZHHiaM07dOiNNrITwFL-U=s1360-w1360-h1020-rw",
       description:
         "Armamos un grupo para reencontrarnos cinco años después de terminar el colegio. Elegimos el lago del Parque General San Martín, en Mendoza, porque todos sabíamos llegar. Cada uno llevó algo para el picnic; yo aparecí con el álbum de la fiesta de egresados. Nos pasamos las fotos de mano en mano y repetimos una, en el mismo orden en que estábamos en el colegio. Esta vez entramos todos en el encuadre.",
       source: "demo",
@@ -125,7 +130,7 @@ export const content = {
       year: 2002,
       category: "Cine",
       author: "Vero",
-      image: "https://pbs.twimg.com/media/Fkg5KUrWYAA8pcZ?format=jpg&name=medium",  
+      image: "https://pbs.twimg.com/media/Fkg5KUrWYAA8pcZ?format=jpg&name=medium",
       description:
         "Salimos del departamento con la sombrilla y llegamos hasta Plaza Colón, en Mar del Plata, antes de que empezara a llover. Nos refugiamos con mis primos y decidimos volver a buscar una película para la tarde. Terminamos viendo Shrek, que habíamos conseguido en video, sentados en colchones en el living. Afuera seguía lloviendo; adentro repartíamos pochoclos en tazas porque no había suficientes bowls. Fue el día de vacaciones que más recordamos.",
       source: "demo",
@@ -160,7 +165,11 @@ export const content = {
   facts: [
     {
       id: "shrek",
-      media: {"url": "/facts/shrek.jpg", "caption": "Shrek · imagen promocional", "source": "https://www.dreamworks.com/movies/shrek/"},
+      media: {
+        url: "/facts/shrek.jpg",
+        caption: "Shrek · imagen promocional",
+        source: "https://www.dreamworks.com/movies/shrek/",
+      },
       year: 2001,
       kind: "Cine",
       title: "Un ogro se robó la película",
@@ -173,7 +182,12 @@ export const content = {
     },
     {
       id: "athens",
-      media: {"url": "/facts/athens.jpg", "caption": "Manu Ginóbili con la selección argentina · FIBA", "source": "https://www.fiba.basketball/en/news/remembering-ginobilis-top-10-argentina-games-ahead-of-hall-of-fame-enshrinement"},
+      media: {
+        url: "/facts/athens.jpg",
+        caption: "Manu Ginóbili con la selección argentina · FIBA",
+        source:
+          "https://www.fiba.basketball/en/news/remembering-ginobilis-top-10-argentina-games-ahead-of-hall-of-fame-enshrinement",
+      },
       year: 2004,
       kind: "Deportes",
       title: "Una generación bañada en oro",
@@ -187,7 +201,11 @@ export const content = {
     },
     {
       id: "hybrid",
-      media: {"url": "/facts/hybrid.jpg", "caption": "Portada del álbum · Spotify · créditos del álbum", "source": "https://open.spotify.com/track/60a0Rd6pjrkxjPbaKzXjfq"},
+      media: {
+        url: "/facts/hybrid.jpg",
+        caption: "Portada del álbum · Spotify · créditos del álbum",
+        source: "https://open.spotify.com/track/60a0Rd6pjrkxjPbaKzXjfq",
+      },
       year: 2000,
       kind: "Música",
       title: "El comienzo de Linkin Park",
@@ -200,40 +218,40 @@ export const content = {
     },
   ],
   music: [
-  {
-    "title": "In the End",
-    "artist": "Linkin Park",
-    "year": 2000,
-    "spotifyId": "60a0Rd6pjrkxjPbaKzXjfq",
-    "reference": "https://open.spotify.com/track/60a0Rd6pjrkxjPbaKzXjfq"
-  },
-  {
-    "title": "Clocks",
-    "artist": "Coldplay",
-    "year": 2002,
-    "spotifyId": "0BCPKOYdS2jbQ8iyB56Zns",
-    "reference": "https://open.spotify.com/track/0BCPKOYdS2jbQ8iyB56Zns"
-  },
-  {
-    "title": "Mr. Brightside",
-    "artist": "The Killers",
-    "year": 2004,
-    "spotifyId": "003vvx7Niy0yvhvHt4a68B",
-    "reference": "https://open.spotify.com/track/003vvx7Niy0yvhvHt4a68B"
-  },
-  {
-    "title": "Hips Don't Lie",
-    "artist": "Shakira · Wyclef Jean",
-    "year": 2006,
-    "spotifyId": "3ZFTkvIE7kyPt6Nu3PEa7V",
-    "reference": "https://open.spotify.com/track/3ZFTkvIE7kyPt6Nu3PEa7V"
-  },
-  {
-    "title": "Viva La Vida",
-    "artist": "Coldplay",
-    "year": 2008,
-    "spotifyId": "1mea3bSkSGXuIRvnydlB5b",
-    "reference": "https://open.spotify.com/track/1mea3bSkSGXuIRvnydlB5b"
-  }
-],
+    {
+      title: "In the End",
+      artist: "Linkin Park",
+      year: 2000,
+      spotifyId: "60a0Rd6pjrkxjPbaKzXjfq",
+      reference: "https://open.spotify.com/track/60a0Rd6pjrkxjPbaKzXjfq",
+    },
+    {
+      title: "Clocks",
+      artist: "Coldplay",
+      year: 2002,
+      spotifyId: "0BCPKOYdS2jbQ8iyB56Zns",
+      reference: "https://open.spotify.com/track/0BCPKOYdS2jbQ8iyB56Zns",
+    },
+    {
+      title: "Mr. Brightside",
+      artist: "The Killers",
+      year: 2004,
+      spotifyId: "003vvx7Niy0yvhvHt4a68B",
+      reference: "https://open.spotify.com/track/003vvx7Niy0yvhvHt4a68B",
+    },
+    {
+      title: "Hips Don't Lie",
+      artist: "Shakira · Wyclef Jean",
+      year: 2006,
+      spotifyId: "3ZFTkvIE7kyPt6Nu3PEa7V",
+      reference: "https://open.spotify.com/track/3ZFTkvIE7kyPt6Nu3PEa7V",
+    },
+    {
+      title: "Viva La Vida",
+      artist: "Coldplay",
+      year: 2008,
+      spotifyId: "1mea3bSkSGXuIRvnydlB5b",
+      reference: "https://open.spotify.com/track/1mea3bSkSGXuIRvnydlB5b",
+    },
+  ],
 } satisfies EraContent;

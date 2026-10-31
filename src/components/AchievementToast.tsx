@@ -25,10 +25,7 @@ export default function AchievementToast({
   useEffect(() => {
     const hide = window.setTimeout(() => {
       setLeaving(true);
-      exitTimer.current = window.setTimeout(
-        () => dismissRef.current(),
-        EXIT_MS,
-      );
+      exitTimer.current = window.setTimeout(() => dismissRef.current(), EXIT_MS);
     }, VISIBLE_MS);
     return () => {
       window.clearTimeout(hide);
@@ -44,9 +41,7 @@ export default function AchievementToast({
     <div
       className={`achievement-toast${achievement.id === "21" ? " is-nostalgia-milestone" : ""}${leaving ? " is-leaving" : ""}`}
       role="status"
-      style={
-        { "--achievement-lifetime": `${VISIBLE_MS}ms` } as React.CSSProperties
-      }
+      style={{ "--achievement-lifetime": `${VISIBLE_MS}ms` } as React.CSSProperties}
     >
       <img
         className="achievement-toast-badge"
@@ -60,11 +55,7 @@ export default function AchievementToast({
         <strong>{achievement.name}</strong>
         <small>{achievement.description}</small>
       </div>
-      <button
-        className="icon-button"
-        aria-label="Cerrar aviso de insignia"
-        onClick={leave}
-      >
+      <button className="icon-button" aria-label="Cerrar aviso de insignia" onClick={leave}>
         <X size={16} />
       </button>
       <span className="achievement-toast-timer" />

@@ -28,11 +28,13 @@ import {
 import type { Point } from "../MemoryMap";
 import { availableDecades } from "../../eras/registry";
 import { useRatings } from "../../context/RatingsContext";
-import useFeedPrefetch from '../../hooks/useFeedPrefetch';
+import useFeedPrefetch from "../../hooks/useFeedPrefetch";
 
 function ExploreContent() {
   const [mobileCategorySlot, setMobileCategorySlot] = useState<HTMLElement | null>(null);
-  useEffect(() => { setMobileCategorySlot(document.getElementById("mobile-category-slot")); }, []);
+  useEffect(() => {
+    setMobileCategorySlot(document.getElementById("mobile-category-slot"));
+  }, []);
   const router = useRouter();
   const searchParams = useSearchParams();
   const recuerdoParam = searchParams.get("recuerdo");
@@ -52,7 +54,12 @@ function ExploreContent() {
   } = useEra();
 
   const { session, status } = useAuth();
-  const { canViewMemory, ready: guestAccessReady, firstMemoryId, requireAccount } = useGuestAccess();
+  const {
+    canViewMemory,
+    ready: guestAccessReady,
+    firstMemoryId,
+    requireAccount,
+  } = useGuestAccess();
   const { setNotice } = useRatings();
 
   const [category, setCategory] = useState<Category | "Todas">("Todas");
@@ -60,7 +67,7 @@ function ExploreContent() {
   const reportBounds = useCallback(
     (next: MapBounds) =>
       setBounds((current) => (JSON.stringify(current) === JSON.stringify(next) ? current : next)),
-    []
+    [],
   );
 
   const [remotePins, setRemotePins] = useState<Memory[]>([]);
@@ -133,7 +140,9 @@ function ExploreContent() {
             setMapDataReady(true);
           }
         })
-        .catch(() => { if (!controller.signal.aborted) setMapDataReady(true); });
+        .catch(() => {
+          if (!controller.signal.aborted) setMapDataReady(true);
+        });
     }, 300);
     return () => {
       clearTimeout(timer);
@@ -149,7 +158,9 @@ function ExploreContent() {
     }
     if (status === "loading") return;
     if (!guestAccessReady || !canViewMemory(selectedId)) return;
-    const pin = [selectedSeed.current, remoteSelected, ...remotePins].find((m) => m?.id === selectedId);
+    const pin = [selectedSeed.current, remoteSelected, ...remotePins].find(
+      (m) => m?.id === selectedId,
+    );
     const controller = new AbortController();
 
     getPublication(pin ?? selectedId, true, controller.signal)
@@ -174,8 +185,8 @@ function ExploreContent() {
     remoteSelected?.id === selectedId
       ? remoteSelected
       : selectedSeed.current?.id === selectedId
-      ? selectedSeed.current
-      : memories.find((m) => m.id === selectedId) ?? null;
+        ? selectedSeed.current
+        : (memories.find((m) => m.id === selectedId) ?? null);
 
   function select(memory: Memory) {
     if (!canViewMemory(memory.id)) return;
@@ -274,12 +285,24 @@ function ExploreContent() {
 
   return (
     <>
-      {mobileCategorySlot && createPortal(
-        <label className="mobile-category">Categoría
-          <select value={category} onChange={event => { setCategory(event.target.value as Category | "Todas"); setSelectedId(null); }}>
-            {(["Todas", ...categories] as const).map(value => <option key={value}>{value}</option>)}
-          </select>
-        </label>, mobileCategorySlot)}
+      {mobileCategorySlot &&
+        createPortal(
+          <label className="mobile-category">
+            Categoría
+            <select
+              value={category}
+              onChange={(event) => {
+                setCategory(event.target.value as Category | "Todas");
+                setSelectedId(null);
+              }}
+            >
+              {(["Todas", ...categories] as const).map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          </label>,
+          mobileCategorySlot,
+        )}
       <a className="skip-link" href="#explore">
         Saltar al mapa
       </a>
@@ -340,7 +363,11 @@ function ExploreContent() {
         <div className="stories-drawer stories-index">
           <div className="drawer-heading">
             <span className="eyebrow">{theme.storiesTitle}</span>
-            <button className="icon-button" aria-label="Cerrar historias" onClick={() => setPanelOpen(false)}>
+            <button
+              className="icon-button"
+              aria-label="Cerrar historias"
+              onClick={() => setPanelOpen(false)}
+            >
               <X size={19} />
             </button>
           </div>
@@ -349,7 +376,11 @@ function ExploreContent() {
       )}
 
       {factsOpen && !picking && !draft && (
-        <EraFacts key={`${period.decade}-${period.year}`} period={period} onClose={() => setFactsOpen(false)} />
+        <EraFacts
+          key={`${period.decade}-${period.year}`}
+          period={period}
+          onClose={() => setFactsOpen(false)}
+        />
       )}
 
       {draft && (

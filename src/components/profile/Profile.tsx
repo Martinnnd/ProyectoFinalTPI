@@ -1,7 +1,14 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { userTiers } from "../../data";
-import type { Achievement, DescribedTier, Memory, Period, TierProgress, UserCategory } from "../../types";
+import type {
+  Achievement,
+  DescribedTier,
+  Memory,
+  Period,
+  TierProgress,
+  UserCategory,
+} from "../../types";
 import type { FollowedUser } from "../../seguimientosApi";
 import { LoaderCircle } from "lucide-react";
 import ProfileDialogs from "./ProfileDialogs";
@@ -13,12 +20,48 @@ import type { ProfilePresentation } from "./profileTypes";
 import { getPublicacionesGuardadasUsuario } from "../../userApi";
 
 const presentations: Record<Period["decade"], ProfilePresentation> = {
-  1970: { title: "Historias con nombre propio", label: "Suplemento personal", collection: "Mis recuerdos", map: "Lugares de una vida", footer: "Cada vida merece ser contada" },
-  1980: { title: "Archivo de videoclub", label: "Colección personal · VHS", collection: "Mis cintas", map: "Locaciones", footer: "Rebobiná. Volvé a esos días." },
-  1990: { title: "Archivo personal — Nostalgiar 95", label: "Mi PC / Personas / Archivo personal", collection: "Recuerdos", map: "Mapa de lugares", footer: "Archivo de recuerdos" },
-  2000: { title: "Mi espacio — Nostalgiar Messenger", label: "Un espacio para volver a conectar", collection: "Álbum de recuerdos", map: "Mis lugares", footer: "Historias que nos conectan" },
-  2010: { title: "Mi diario fotográfico", label: "Momentos que quedaron en el carrete", collection: "Mi álbum", map: "Mis lugares", footer: "Una imagen puede traerlo todo de vuelta" },
-  2020: { title: "Mi espacio", label: "Momentos para volver a vivir", collection: "Mis recuerdos", map: "Mis lugares", footer: "Cada historia encuentra su lugar" },
+  1970: {
+    title: "Historias con nombre propio",
+    label: "Suplemento personal",
+    collection: "Mis recuerdos",
+    map: "Lugares de una vida",
+    footer: "Cada vida merece ser contada",
+  },
+  1980: {
+    title: "Archivo de videoclub",
+    label: "Colección personal · VHS",
+    collection: "Mis cintas",
+    map: "Locaciones",
+    footer: "Rebobiná. Volvé a esos días.",
+  },
+  1990: {
+    title: "Archivo personal — Nostalgiar 95",
+    label: "Mi PC / Personas / Archivo personal",
+    collection: "Recuerdos",
+    map: "Mapa de lugares",
+    footer: "Archivo de recuerdos",
+  },
+  2000: {
+    title: "Mi espacio — Nostalgiar Messenger",
+    label: "Un espacio para volver a conectar",
+    collection: "Álbum de recuerdos",
+    map: "Mis lugares",
+    footer: "Historias que nos conectan",
+  },
+  2010: {
+    title: "Mi diario fotográfico",
+    label: "Momentos que quedaron en el carrete",
+    collection: "Mi álbum",
+    map: "Mis lugares",
+    footer: "Una imagen puede traerlo todo de vuelta",
+  },
+  2020: {
+    title: "Mi espacio",
+    label: "Momentos para volver a vivir",
+    collection: "Mis recuerdos",
+    map: "Mis lugares",
+    footer: "Cada historia encuentra su lugar",
+  },
 };
 
 export default function Profile({
@@ -109,9 +152,10 @@ export default function Profile({
 
   const userCategory = (reputation ?? "Errante") as UserCategory;
   const tiers = useMemo<DescribedTier[]>(() => {
-    const current = userTiers.findIndex(tier => tier.name === userCategory);
+    const current = userTiers.findIndex((tier) => tier.name === userCategory);
     return userTiers.map((tier, index) => ({
-      ...tier, state: index === current ? 'current' : index < current ? 'reached' : 'locked',
+      ...tier,
+      state: index === current ? "current" : index < current ? "reached" : "locked",
     }));
   }, [userCategory]);
 
@@ -157,13 +201,16 @@ export default function Profile({
   function closeMap(after?: () => void) {
     if (mapClosing) return;
     setMapClosing(true);
-    mapCloseTimer.current = setTimeout(() => {
-      mapDialog.current?.close();
-      setMapOpened(false);
-      setMapClosing(false);
-      mapReturnFocus.current?.focus({ preventScroll: true });
-      after?.();
-    }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 320);
+    mapCloseTimer.current = setTimeout(
+      () => {
+        mapDialog.current?.close();
+        setMapOpened(false);
+        setMapClosing(false);
+        mapReturnFocus.current?.focus({ preventScroll: true });
+        after?.();
+      },
+      matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 320,
+    );
   }
 
   function openCatalogue() {
@@ -187,7 +234,12 @@ export default function Profile({
   }
 
   return (
-    <main id="explore" className="personal-profile" data-visitor={!isOwnProfile} aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}>
+    <main
+      id="explore"
+      className="personal-profile"
+      data-visitor={!isOwnProfile}
+      aria-label={author ? `Perfil de ${author}` : `Perfil de ${username}`}
+    >
       <div className="profile-main">
         <ProfileHeader
           userId={userId}
@@ -244,9 +296,14 @@ export default function Profile({
           onClose={closeMap}
         />
         {currentTab === "saved" && loadingSaved ? (
-          <div className="personal-empty profile-loading" style={{ padding: "40px", textAlign: "center" }}>
+          <div
+            className="personal-empty profile-loading"
+            style={{ padding: "40px", textAlign: "center" }}
+          >
             <LoaderCircle className="animate-spin" size={24} style={{ margin: "0 auto" }} />
-            <p style={{ marginTop: "12px", color: "var(--muted)" }}>Cargando recuerdos guardados...</p>
+            <p style={{ marginTop: "12px", color: "var(--muted)" }}>
+              Cargando recuerdos guardados...
+            </p>
           </div>
         ) : (
           <ProfilePosts
@@ -260,7 +317,10 @@ export default function Profile({
             onEdit={onEdit}
             onDelete={onDelete}
             onOpen={onOpen}
-            onSelectOnMap={(memory) => { onSelect(memory); openMap(); }}
+            onSelectOnMap={(memory) => {
+              onSelect(memory);
+              openMap();
+            }}
             onAdd={onAdd}
           />
         )}
@@ -274,7 +334,14 @@ export default function Profile({
           onCloseTiers={closeTiers}
         />
       </div>
-      {community && <aside className="profile-groups" aria-label="Mis grupos"><details className="profile-groups-disclosure"><summary>Mis grupos y comunidades</summary>{community}</details></aside>}
+      {community && (
+        <aside className="profile-groups" aria-label="Mis grupos">
+          <details className="profile-groups-disclosure">
+            <summary>Mis grupos y comunidades</summary>
+            {community}
+          </details>
+        </aside>
+      )}
     </main>
   );
 }

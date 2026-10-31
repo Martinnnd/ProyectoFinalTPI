@@ -1,48 +1,113 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from "@playwright/test";
 
-test('feed distribuye autor y acciones en el alto de la foto derecha', async ({ page }, testInfo) => {
-  const publication = { id: 118, titulo: 'Un recuerdo para compartir', descripcionBreve: 'Una tarde en la plaza con mi familia, después de mucho tiempo sin vernos. Volvimos a conversar y recordar las historias del barrio.', fecha: '1991-04-15T00:00:00Z', categoria: 6, urlMultimedia: 'https://fixtures.nostalgiar.test/recuerdo.jpg', tipoMultimedia: 0, autor: { id: 1, username: 'Ana' }, lugar: { nombre: 'La plaza del barrio', latitud: -34.67, longitud: -58.56 } };
-  await page.route('https://fixtures.nostalgiar.test/recuerdo.jpg', route => route.fulfill({ path: 'public/facts/bttf.jpg', contentType: 'image/jpeg' }));
-  await page.route('**/api/**', async route => {
+test("feed distribuye autor y acciones en el alto de la foto derecha", async ({
+  page,
+}, testInfo) => {
+  const publication = {
+    id: 118,
+    titulo: "Un recuerdo para compartir",
+    descripcionBreve:
+      "Una tarde en la plaza con mi familia, después de mucho tiempo sin vernos. Volvimos a conversar y recordar las historias del barrio.",
+    fecha: "1991-04-15T00:00:00Z",
+    categoria: 6,
+    urlMultimedia: "https://fixtures.nostalgiar.test/recuerdo.jpg",
+    tipoMultimedia: 0,
+    autor: { id: 1, username: "Ana" },
+    lugar: { nombre: "La plaza del barrio", latitud: -34.67, longitud: -58.56 },
+  };
+  await page.route("https://fixtures.nostalgiar.test/recuerdo.jpg", (route) =>
+    route.fulfill({ path: "public/facts/bttf.jpg", contentType: "image/jpeg" }),
+  );
+  await page.route("**/api/**", async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
-    const headers = { 'access-control-allow-origin': request.headers().origin ?? 'http://localhost:3001', 'access-control-allow-credentials': 'true', 'access-control-allow-headers': 'content-type, authorization, x-nostalgiar-request', 'access-control-allow-methods': 'GET, POST, OPTIONS' };
-    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
-    if (path === '/api/auth/refresh') return route.fulfill({ headers, json: { token: 'test', usuarioId: 1, username: 'Ana', email: 'ana@example.com', esAdmin: false } });
-    if (path.endsWith('/mapa')) return route.fulfill({ headers, json: { pines: [], hayMas: false } });
-    if (path.startsWith('/api/feed/')) return route.fulfill({ headers, json: { items: [publication], siguienteCursor: null, hayMas: false } });
-    if (path === '/api/publicaciones/118') return route.fulfill({ headers, json: publication });
-    if (path.endsWith('/comentarios')) return route.fulfill({ headers, json: { items: [], siguienteCursor: null, hayMas: false } });
-    if (path.endsWith('/relaciones')) return route.fulfill({ headers, json: { publicacionId: 118, radioMetros: 200, dia: { items: [], siguienteCursor: null, hayMas: false }, lugar: { items: [], siguienteCursor: null, hayMas: false } } });
-    if (path.endsWith('/momentos')) return route.fulfill({ headers, json: { publicacionId: 118, versionRelaciones: 1, permitirMomentosAutomaticos: true, puedeCorregir: false, momentos: [] } });
-    if (path.endsWith('/analisis')) return route.fulfill({ headers, json: { publicacionId: 118, versionContenido: 1, estado: 'sinMomento' } });
+    const headers = {
+      "access-control-allow-origin": request.headers().origin ?? "http://localhost:3001",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "content-type, authorization, x-nostalgiar-request",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+    };
+    if (request.method() === "OPTIONS") return route.fulfill({ status: 204, headers });
+    if (path === "/api/auth/refresh")
+      return route.fulfill({
+        headers,
+        json: {
+          token: "test",
+          usuarioId: 1,
+          username: "Ana",
+          email: "ana@example.com",
+          esAdmin: false,
+        },
+      });
+    if (path.endsWith("/mapa"))
+      return route.fulfill({ headers, json: { pines: [], hayMas: false } });
+    if (path.startsWith("/api/feed/"))
+      return route.fulfill({
+        headers,
+        json: { items: [publication], siguienteCursor: null, hayMas: false },
+      });
+    if (path === "/api/publicaciones/118") return route.fulfill({ headers, json: publication });
+    if (path.endsWith("/comentarios"))
+      return route.fulfill({ headers, json: { items: [], siguienteCursor: null, hayMas: false } });
+    if (path.endsWith("/relaciones"))
+      return route.fulfill({
+        headers,
+        json: {
+          publicacionId: 118,
+          radioMetros: 200,
+          dia: { items: [], siguienteCursor: null, hayMas: false },
+          lugar: { items: [], siguienteCursor: null, hayMas: false },
+        },
+      });
+    if (path.endsWith("/momentos"))
+      return route.fulfill({
+        headers,
+        json: {
+          publicacionId: 118,
+          versionRelaciones: 1,
+          permitirMomentosAutomaticos: true,
+          puedeCorregir: false,
+          momentos: [],
+        },
+      });
+    if (path.endsWith("/analisis"))
+      return route.fulfill({
+        headers,
+        json: { publicacionId: 118, versionContenido: 1, estado: "sinMomento" },
+      });
     return route.fulfill({ headers, json: [] });
   });
-  await page.goto('/explorar?era=1990');
-  await page.getByRole('button', { name: 'Feed', exact: true }).click();
-  const post = page.locator('.feed-post').filter({ hasText: publication.titulo });
-  const composition = post.locator('.post-composition');
-  const photo = post.locator('.post-photo-open');
+  await page.goto("/explorar?era=1990");
+  await page.getByRole("button", { name: "Feed", exact: true }).click();
+  const post = page.locator(".feed-post").filter({ hasText: publication.titulo });
+  const composition = post.locator(".post-composition");
+  const photo = post.locator(".post-photo-open");
   await expect(photo).toBeVisible();
   const photoBounds = (await photo.boundingBox())!;
-  const headerBounds = (await post.locator('.post-details > header').boundingBox())!;
-  const footerBounds = (await post.locator('.post-details > footer').boundingBox())!;
-  const menuBounds = (await post.getByLabel('Opciones de publicación').boundingBox())!;
+  const headerBounds = (await post.locator(".post-details > header").boundingBox())!;
+  const footerBounds = (await post.locator(".post-details > footer").boundingBox())!;
+  const menuBounds = (await post.getByLabel("Opciones de publicación").boundingBox())!;
   const compositionBounds = (await composition.boundingBox())!;
   expect(Math.abs(headerBounds.y - photoBounds.y)).toBeLessThan(2);
-  expect(Math.abs(footerBounds.y + footerBounds.height - photoBounds.y - photoBounds.height)).toBeLessThan(2);
+  expect(
+    Math.abs(footerBounds.y + footerBounds.height - photoBounds.y - photoBounds.height),
+  ).toBeLessThan(2);
   expect(Math.abs(photoBounds.width - compositionBounds.width / 2)).toBeLessThan(2);
   expect(menuBounds.x + menuBounds.width).toBeLessThan(photoBounds.x);
-  await post.getByLabel('Opciones de publicación').click();
-  await expect(post.getByRole('button', { name: 'Editar', exact: true })).toBeVisible();
-  await post.getByLabel('Opciones de publicación').click();
-  await post.screenshot({ path: testInfo.outputPath('feed-dos-mitades.png') });
+  await post.getByLabel("Opciones de publicación").click();
+  await expect(post.getByRole("button", { name: "Editar", exact: true })).toBeVisible();
+  await post.getByLabel("Opciones de publicación").click();
+  await post.screenshot({ path: testInfo.outputPath("feed-dos-mitades.png") });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(photo).toBeHidden();
-  await expect(post.locator('.post-content .post-image')).toBeVisible();
-  await expect(post.getByRole('button', { name: 'Me gusta: Un recuerdo para compartir' })).toBeVisible();
+  await expect(post.locator(".post-content .post-image")).toBeVisible();
+  await expect(
+    post.getByRole("button", { name: "Me gusta: Un recuerdo para compartir" }),
+  ).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 720 });
   await photo.click();
-  await expect(post.locator('.post-content.is-open .post-image')).toBeVisible();
-  await expect(post.getByRole('button', { name: 'Me gusta: Un recuerdo para compartir' })).toBeVisible();
+  await expect(post.locator(".post-content.is-open .post-image")).toBeVisible();
+  await expect(
+    post.getByRole("button", { name: "Me gusta: Un recuerdo para compartir" }),
+  ).toBeVisible();
 });

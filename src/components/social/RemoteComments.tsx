@@ -77,21 +77,23 @@ export default function RemoteComments({
   async function loadReplies(commentId: string) {
     const parent = comments.find((comment) => comment.id === commentId);
     const page = await getCommentReplies(memoryId, commentId, parent?.repliesCursor);
-    setComments((current) => mergeComments(
-      current.map((comment) => comment.id === commentId
-        ? { ...comment, repliesCursor: page.cursor }
-        : comment),
-      page.items,
-    ));
+    setComments((current) =>
+      mergeComments(
+        current.map((comment) =>
+          comment.id === commentId ? { ...comment, repliesCursor: page.cursor } : comment,
+        ),
+        page.items,
+      ),
+    );
   }
 
   async function addComment(_: string, text: string, parentId?: string) {
     const comment = await createComment(memoryId, text, parentId);
     setComments((current) => {
       const updated = parentId
-        ? current.map((item) => item.id === parentId
-          ? { ...item, replyCount: item.replyCount + 1 }
-          : item)
+        ? current.map((item) =>
+            item.id === parentId ? { ...item, replyCount: item.replyCount + 1 } : item,
+          )
         : current;
       return parentId
         ? mergeComments(updated, [comment])
@@ -102,12 +104,13 @@ export default function RemoteComments({
 
   async function reactToComment(_: string, commentId: string, reaction: CommentReaction) {
     const current = comments.find((comment) => comment.id === commentId);
-    const updated = current?.viewerReaction === reaction
-      ? await removeCommentReaction(memoryId, commentId)
-      : await setCommentReaction(memoryId, commentId, reaction);
-    setComments((items) => items.map((item) => item.id === commentId
-      ? { ...item, ...updated }
-      : item));
+    const updated =
+      current?.viewerReaction === reaction
+        ? await removeCommentReaction(memoryId, commentId)
+        : await setCommentReaction(memoryId, commentId, reaction);
+    setComments((items) =>
+      items.map((item) => (item.id === commentId ? { ...item, ...updated } : item)),
+    );
   }
 
   async function remove(commentId: string) {
@@ -117,21 +120,25 @@ export default function RemoteComments({
       const withoutLeaf = target?.replyCount === 0;
       const next = withoutLeaf
         ? current.filter((comment) => comment.id !== commentId)
-        : current.map((comment) => comment.id === commentId
-          ? {
-              ...comment,
-              deleted: true,
-              canDelete: false,
-              author: undefined,
-              text: undefined,
-              reactions: {},
-              viewerReaction: undefined,
-            }
-          : comment);
+        : current.map((comment) =>
+            comment.id === commentId
+              ? {
+                  ...comment,
+                  deleted: true,
+                  canDelete: false,
+                  author: undefined,
+                  text: undefined,
+                  reactions: {},
+                  viewerReaction: undefined,
+                }
+              : comment,
+          );
       if (withoutLeaf && target?.parentId) {
-        return next.map((comment) => comment.id === target.parentId
-          ? { ...comment, replyCount: Math.max(0, comment.replyCount - 1) }
-          : comment);
+        return next.map((comment) =>
+          comment.id === target.parentId
+            ? { ...comment, replyCount: Math.max(0, comment.replyCount - 1) }
+            : comment,
+        );
       }
       return next;
     });
@@ -144,7 +151,10 @@ export default function RemoteComments({
       {error && (
         <p role="alert">
           {error}{" "}
-          <button type="button" onClick={() => cursor ? void more() : setRetry((value) => value + 1)}>
+          <button
+            type="button"
+            onClick={() => (cursor ? void more() : setRetry((value) => value + 1))}
+          >
             Reintentar
           </button>
         </p>

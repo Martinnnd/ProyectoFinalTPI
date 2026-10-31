@@ -40,7 +40,9 @@ export default function MainAppLayout({ children }: { children: React.ReactNode 
     <EraProvider>
       <RatingsProvider>
         <FollowProvider>
-          <GuestAccessProvider><AppShell>{children}</AppShell></GuestAccessProvider>
+          <GuestAccessProvider>
+            <AppShell>{children}</AppShell>
+          </GuestAccessProvider>
         </FollowProvider>
       </RatingsProvider>
     </EraProvider>

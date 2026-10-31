@@ -31,27 +31,47 @@ export function MemoryArtwork({
     </div>
   );
 }
-export default function SidePanel({ memories, selected, onSelect }: {
+export default function SidePanel({
+  memories,
+  selected,
+  onSelect,
+}: {
   memories: Memory[];
   selected: Memory | null;
   onSelect: (memory: Memory) => void;
 }) {
-  return <aside className="side-panel" aria-label="Recuerdos de la época" id="stories">
-    <div className="stories-content">
-      {selected?.source === 'backend' && selected.description && <section aria-label="Resumen de la publicación" className="memory-list">
-        <h3>{selected.title}</h3>
-        <small>{selected.author} · {selected.year}</small>
-        <p>{selected.description}</p>
-        <button onClick={() => onSelect(selected)}>Ver publicación →</button>
-      </section>}
-      <div className="list-heading"><h3>Elegí un recuerdo</h3><span>{memories.length}</span></div>
-      <p className="stories-hint">Abrí el título para leerlo en el feed.</p>
-      <div className="memory-list">
-        {memories.map(memory => <button key={memory.id} aria-current={selected?.id === memory.id ? 'true' : undefined} onClick={() => onSelect(memory)}>
-          <strong>{memory.title}</strong><ArrowUpRight size={16} aria-hidden="true" />
-        </button>)}
-        {!memories.length && <p className="muted">No hay recuerdos para este filtro.</p>}
+  return (
+    <aside className="side-panel" aria-label="Recuerdos de la época" id="stories">
+      <div className="stories-content">
+        {selected?.source === "backend" && selected.description && (
+          <section aria-label="Resumen de la publicación" className="memory-list">
+            <h3>{selected.title}</h3>
+            <small>
+              {selected.author} · {selected.year}
+            </small>
+            <p>{selected.description}</p>
+            <button onClick={() => onSelect(selected)}>Ver publicación →</button>
+          </section>
+        )}
+        <div className="list-heading">
+          <h3>Elegí un recuerdo</h3>
+          <span>{memories.length}</span>
+        </div>
+        <p className="stories-hint">Abrí el título para leerlo en el feed.</p>
+        <div className="memory-list">
+          {memories.map((memory) => (
+            <button
+              key={memory.id}
+              aria-current={selected?.id === memory.id ? "true" : undefined}
+              onClick={() => onSelect(memory)}
+            >
+              <strong>{memory.title}</strong>
+              <ArrowUpRight size={16} aria-hidden="true" />
+            </button>
+          ))}
+          {!memories.length && <p className="muted">No hay recuerdos para este filtro.</p>}
+        </div>
       </div>
-    </div>
-  </aside>;
+    </aside>
+  );
 }

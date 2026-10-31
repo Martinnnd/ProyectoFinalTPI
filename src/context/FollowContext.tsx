@@ -4,13 +4,23 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { useRouter } from "next/navigation";
 import { useAuth } from "../components/auth/AuthProvider";
 import { useRatings } from "./RatingsContext";
-import { dejarDeSeguir, getSeguidores, getSeguidos, seguir, type FollowedUser } from "../seguimientosApi";
+import {
+  dejarDeSeguir,
+  getSeguidores,
+  getSeguidos,
+  seguir,
+  type FollowedUser,
+} from "../seguimientosApi";
 
 interface FollowContextType {
   followingUsers: FollowedUser[];
   followers: FollowedUser[];
   followingRevision: number;
-  toggleFollow: (author: string, authorId?: number, currentlyFollowing?: boolean) => Promise<boolean>;
+  toggleFollow: (
+    author: string,
+    authorId?: number,
+    currentlyFollowing?: boolean,
+  ) => Promise<boolean>;
   isFollowing: (userIdOrUsername: number | string) => boolean;
   refreshFollows: () => void;
 }
@@ -60,7 +70,7 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
       }
       return followingUsers.some((u) => u.username.toLowerCase() === target.toLowerCase());
     },
-    [followingUsers]
+    [followingUsers],
   );
 
   const toggleFollow = useCallback(
@@ -73,7 +83,9 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
-      let targetId = authorId ?? followingUsers.find((u) => u.username.toLowerCase() === author.toLowerCase())?.id;
+      let targetId =
+        authorId ??
+        followingUsers.find((u) => u.username.toLowerCase() === author.toLowerCase())?.id;
       if (!targetId) {
         try {
           const { getUserByUsername } = await import("../chat/chatApi");
@@ -100,19 +112,25 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
       const wasFollowing =
         currentlyFollowing !== undefined
           ? currentlyFollowing
-          : followingUsers.some((u) => u.id === targetId || u.username.toLowerCase() === author.toLowerCase());
+          : followingUsers.some(
+              (u) => u.id === targetId || u.username.toLowerCase() === author.toLowerCase(),
+            );
 
       try {
         if (wasFollowing) {
           await dejarDeSeguir(currentUserId, targetId);
           setFollowingUsers((curr) =>
-            curr.filter((u) => u.id !== targetId && u.username.toLowerCase() !== author.toLowerCase())
+            curr.filter(
+              (u) => u.id !== targetId && u.username.toLowerCase() !== author.toLowerCase(),
+            ),
           );
           setNotice(`Dejaste de seguir a ${author}.`);
         } else {
           await seguir(currentUserId, targetId);
           setFollowingUsers((curr) => [
-            ...curr.filter((u) => u.id !== targetId && u.username.toLowerCase() !== author.toLowerCase()),
+            ...curr.filter(
+              (u) => u.id !== targetId && u.username.toLowerCase() !== author.toLowerCase(),
+            ),
             { id: targetId, username: author },
           ]);
           setNotice(`Ahora seguís a ${author}.`);
@@ -126,7 +144,7 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
         pendingFollows.current.delete(targetId);
       }
     },
-    [currentUserId, followingUsers, router, setNotice]
+    [currentUserId, followingUsers, router, setNotice],
   );
 
   return (

@@ -10,7 +10,7 @@
     "check": "tsc --noEmit && node scripts/check-architecture.mjs",
     "lint": "eslint .",
     "format": "prettier --write",
-    "format:check": "prettier --check eslint.config.mjs .prettierrc.json package.json",
+    "format:check": "prettier --check src scripts tests *.{ts,tsx,js,mjs,css,json}",
     "format:check:all": "prettier --check .",
     "test": "vitest run",
     "test:era": "vitest run",

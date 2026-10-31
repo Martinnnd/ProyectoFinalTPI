@@ -56,9 +56,7 @@ export interface Period {
 export type UserCategory = "Errante" | "Nostálgico" | "Aedo" | "Mnemosine";
 /** Each tier is unlocked by a different kind of evidence, not only by a count. */
 export type TierRule =
-  | { kind: "memories"; min: number }
-  | { kind: "points"; min: number }
-  | { kind: "subscription" };
+  { kind: "memories"; min: number } | { kind: "points"; min: number } | { kind: "subscription" };
 export interface TierProgress {
   memories: number;
   /** Highest nostalgia points reached by a single memory. */
@@ -92,11 +90,7 @@ export const symbols: Record<Category, string> = {
   Acontecimientos: "★",
   Personales: "♡",
 };
-export function filterMemories(
-  memories: Memory[],
-  period: Period,
-  category: Category | "Todas",
-) {
+export function filterMemories(memories: Memory[], period: Period, category: Category | "Todas") {
   return memories.filter(
     (m) =>
       m.year >= period.decade &&

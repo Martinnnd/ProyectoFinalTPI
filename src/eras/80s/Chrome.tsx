@@ -19,8 +19,10 @@ export default function Chrome({ period, count, ...activities }: ChromeProps) {
           CINTA {label}
         </span>
       </div>
-      <ActivityDock {...activities} title="SELECT SCREEN"/>
-      <div className="vhs-status"><div id="chat-taskbar-slot" /></div>
+      <ActivityDock {...activities} title="SELECT SCREEN" />
+      <div className="vhs-status">
+        <div id="chat-taskbar-slot" />
+      </div>
     </div>
   );
 }

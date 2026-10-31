@@ -40,9 +40,7 @@ export function getNotificationText(notification: NotificationDto): string {
  * All routing decisions are centralized here; Notification.tsx only executes them.
  */
 export type NotificationNavigation =
-  | { kind: "push"; path: string }
-  | { kind: "openChat" }
-  | { kind: "none" };
+  { kind: "push"; path: string } | { kind: "openChat" } | { kind: "none" };
 
 export function getNotificationNavigation(notification: NotificationDto): NotificationNavigation {
   const { type, publicationId, senderUsername } = notification;

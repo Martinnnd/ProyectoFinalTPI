@@ -64,7 +64,7 @@ npm run format -- src/components/NombreDelArchivo.tsx
 npm run format:check:all
 ```
 
-ESLint revisa el proyecto completo. Algunas reglas de React y TypeScript muestran avisos mientras se corrige el código existente por partes; no bloquean el comando. `format:check` comprueba los archivos nuevos de configuración. Para dar formato a un archivo concreto, pasá su ruta a `npm run format --`. `format:check:all` muestra la deuda de formato de todo el repositorio; no se aplica un cambio masivo automáticamente.
+ESLint revisa el proyecto completo. Algunas reglas de React y TypeScript muestran avisos mientras se corrige el código existente por partes; no bloquean el comando. `format:check` comprueba el código de `src`, `scripts`, `tests` y la configuración de la raíz. Para dar formato a un archivo concreto, pasá su ruta a `npm run format --`. `format:check:all` también comprueba la documentación.
 
 ```sh
 npm run check

@@ -1,4 +1,5 @@
-.weekly-trends, .hashtag-thread {
+.weekly-trends,
+.hashtag-thread {
   margin-top: 18px;
   padding: 18px;
   border: 1px solid var(--line);
@@ -6,69 +7,281 @@
   background: var(--surface);
   overflow-wrap: anywhere;
 }
-.hashtag-search { margin-bottom: 20px; }
-.hashtag-search label { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 13px; font-weight: 700; }
-.hashtag-search input { box-sizing: border-box; width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; }
-.hashtag-search-results { margin-top: 8px; }
-.hashtag-search-results p { margin: 0; color: var(--muted); font-size: 12px; }
-.hashtag-search-results ul { list-style: none; padding: 0; margin: 0; }
-.hashtag-search-results li + li { border-top: 1px solid var(--line); }
-.hashtag-search-results button { width: 100%; display: flex; justify-content: space-between; gap: 8px; padding: 10px 4px; border: 0; background: transparent; color: var(--accent); text-align: left; cursor: pointer; }
-.hashtag-search-results button:hover, .hashtag-search-results button:focus-visible { background: var(--soft); }
-.hashtag-search-results small { color: var(--muted); }
-.trends-heading, .thread-heading {
+.hashtag-search {
+  margin-bottom: 20px;
+}
+.hashtag-search label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.hashtag-search input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+.hashtag-search-results {
+  margin-top: 8px;
+}
+.hashtag-search-results p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.hashtag-search-results ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.hashtag-search-results li + li {
+  border-top: 1px solid var(--line);
+}
+.hashtag-search-results button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  text-align: left;
+  cursor: pointer;
+}
+.hashtag-search-results button:hover,
+.hashtag-search-results button:focus-visible {
+  background: var(--soft);
+}
+.hashtag-search-results small {
+  color: var(--muted);
+}
+.trends-heading,
+.thread-heading {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-.trends-heading > svg { color: var(--accent); flex-shrink: 0; }
-.trends-heading h3, .thread-heading h3 { margin: 0; font-family: var(--font-display); }
-.trends-heading h3 { font-size: 18px; }
-.trends-heading p, .thread-heading p { margin: 5px 0 0; font-size: 12px; color: var(--muted); }
-.trends-heading > div, .thread-heading > div { min-width: 0; }
-.trends-period { margin-left: auto; flex-shrink: 0; font-size: 10px; color: var(--muted); }
-.trends-context, .trends-empty { color: var(--muted); font-size: 12px; line-height: 1.6; }
-.trends-list, .thread-messages { list-style: none; padding: 0; margin: 0; }
-.trends-list li + li { border-top: 1px solid var(--line); }
+.trends-heading > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.trends-heading h3,
+.thread-heading h3 {
+  margin: 0;
+  font-family: var(--font-display);
+}
+.trends-heading h3 {
+  font-size: 18px;
+}
+.trends-heading p,
+.thread-heading p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.trends-heading > div,
+.thread-heading > div {
+  min-width: 0;
+}
+.trends-period {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--muted);
+}
+.trends-context,
+.trends-empty {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.trends-list,
+.thread-messages {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.trends-list li + li {
+  border-top: 1px solid var(--line);
+}
 .trends-list button {
-  width: 100%; display: flex; align-items: center; gap: 12px;
-  padding: 12px 4px; border: 0; text-align: left; color: var(--ink); background: transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border: 0;
+  text-align: left;
+  color: var(--ink);
+  background: transparent;
 }
-.trends-list button:hover { background: var(--soft); }
-.trend-rank { font-size: 12px; color: var(--muted); }
-.trend-copy { flex: 1; min-width: 0; }
-.trend-copy strong { display: block; color: var(--accent); font-size: 14px; }
-.trend-copy small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
-.post-hashtags { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0 12px; }
+.trends-list button:hover {
+  background: var(--soft);
+}
+.trend-rank {
+  font-size: 12px;
+  color: var(--muted);
+}
+.trend-copy {
+  flex: 1;
+  min-width: 0;
+}
+.trend-copy strong {
+  display: block;
+  color: var(--accent);
+  font-size: 14px;
+}
+.trend-copy small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+.post-hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 8px 0 12px;
+}
 .post-hashtags button {
-  max-width: 100%; overflow-wrap: anywhere; padding: 6px 10px;
-  border: 1px solid var(--line); border-radius: var(--radius);
-  background: var(--soft); color: var(--accent); font: inherit; font-size: 12px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--soft);
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
 }
-.post-hashtags button:hover { text-decoration: underline; }
-.hashtag-thread .feed-back { margin: 0 0 18px; }
-.thread-symbol { font: bold 36px var(--font-display); color: var(--accent); }
-.thread-heading small { color: var(--muted); font-size: 10px; letter-spacing: 1px; }
-.thread-heading h3 { font-size: 24px; margin-top: 4px; }
-.hashtag-thread > p { font-size: 13px; line-height: 1.6; }
-.hashtag-thread .primary-button { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
-.thread-conversation { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 15px; }
-.thread-conversation summary { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: bold; }
-.thread-messages li { margin-top: 12px; padding: 12px; background: var(--soft); border-radius: var(--radius); }
-.thread-messages strong { font-size: 12px; }
-.thread-messages small, .thread-messages time { font-size: 10px; color: var(--muted); }
-.thread-messages p { margin: 7px 0 0; white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
-.thread-composer { display: grid; gap: 9px; margin-top: 16px; }
-.thread-composer label { font-size: 13px; font-weight: bold; }
-.thread-composer textarea { box-sizing: border-box; width: 100%; min-width: 0; padding: 10px; resize: vertical; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; }
-.thread-composer small { color: var(--muted); font-size: 11px; }
-.thread-composer button { justify-self: start; }
-.thread-composer button:disabled { opacity: .6; cursor: not-allowed; }
-.thread-composer [role="status"] { font-size: 12px; color: var(--accent); margin: 0; }
-.thread-posts-title { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 0; font-size: 14px; }
+.post-hashtags button:hover {
+  text-decoration: underline;
+}
+.hashtag-thread .feed-back {
+  margin: 0 0 18px;
+}
+.thread-symbol {
+  font: bold 36px var(--font-display);
+  color: var(--accent);
+}
+.thread-heading small {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.thread-heading h3 {
+  font-size: 24px;
+  margin-top: 4px;
+}
+.hashtag-thread > p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.hashtag-thread .primary-button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.thread-conversation {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 15px;
+}
+.thread-conversation summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+}
+.thread-messages li {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--soft);
+  border-radius: var(--radius);
+}
+.thread-messages strong {
+  font-size: 12px;
+}
+.thread-messages small,
+.thread-messages time {
+  font-size: 10px;
+  color: var(--muted);
+}
+.thread-messages p {
+  margin: 7px 0 0;
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.thread-composer {
+  display: grid;
+  gap: 9px;
+  margin-top: 16px;
+}
+.thread-composer label {
+  font-size: 13px;
+  font-weight: bold;
+}
+.thread-composer textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+.thread-composer small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.thread-composer button {
+  justify-self: start;
+}
+.thread-composer button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.thread-composer [role="status"] {
+  font-size: 12px;
+  color: var(--accent);
+  margin: 0;
+}
+.thread-posts-title {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-bottom: 0;
+  font-size: 14px;
+}
 @media (max-width: 600px) {
-  .weekly-trends, .hashtag-thread { padding: 14px; }
-  .trends-heading { flex-wrap: wrap; gap: 8px; }
-  .trends-period { width: 100%; margin-left: 28px; }
-  .thread-heading h3 { font-size: 21px; }
+  .weekly-trends,
+  .hashtag-thread {
+    padding: 14px;
+  }
+  .trends-heading {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .trends-period {
+    width: 100%;
+    margin-left: 28px;
+  }
+  .thread-heading h3 {
+    font-size: 21px;
+  }
 }

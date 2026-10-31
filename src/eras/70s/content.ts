@@ -6,51 +6,58 @@ export const content = {
     description: "Revistas, discos de vinilo y viajes con el mapa desplegado.",
   },
   memories: [
-{
-    "id": "vinilos-70-1", hashtags: ["vinilos", "rocknacional"],
-    "groupId": "vinilos-70",
-    "title": "El vinilo que escuchábamos de principio a fin",
-    "year": 1973,
-    "author": "Miguel",
-    "place": "Caballito, Buenos Aires",
-    "lat": -34.618,
-    "lng": -58.441,
-    "image": "https://http2.mlstatic.com/D_NQ_NP_954569-MLA110576128820_052026-O.webp",
-    "description": "Nos juntábamos en el living de un amigo con un disco de Sui Generis. Antes de apoyar la púa, alguien pedía silencio y otro acomodaba los almohadones en el piso. Leíamos la funda mientras sonaba el lado A y discutíamos quién daba vuelta el disco. No teníamos una colección grande: por eso conocíamos hasta los pequeños ruidos de cada vinilo. ¿Qué disco escuchaban sin saltarse un tema?",
-    "category": "Música",
-    "source": "demo"
-},
-{
-    "id": "vinilos-70-2", hashtags: ["vinilos", "rocknacional"],
-    "groupId": "vinilos-70",
-    "title": "La bolsa de discos de la avenida Corrientes",
-    "year": 1976,
-    "author": "Susana",
-    "place": "Avenida Corrientes y Callao, Buenos Aires",
-    "lat": -34.6045,
-    "lng": -58.392,
-    "description": "Salimos a recorrer disquerías con unas monedas juntadas durante el mes. Mi hermano buscaba rock y yo miraba las portadas como si fueran cuadros. Volvimos con un disco usado y la promesa de prestarlo el fin de semana. En el colectivo llevé la bolsa contra el pecho para que no se doblara la funda. Al llegar a casa despejamos la mesa y armamos nuestra pequeña ceremonia alrededor del tocadiscos.",
-    "category": "Música",
-    "source": "demo"
-},
-{
-    "id": "vinilos-70-3", hashtags: ["vinilos"],
-    "groupId": "vinilos-70",
-    "title": "Un domingo para intercambiar vinilos",
-    "year": 1978,
-    "author": "Héctor",
-    "place": "Plaza San Martín, Ramos Mejía, Buenos Aires",
-    "lat": -34.644,
-    "lng": -58.565,
-    "description": "Nos encontramos en la plaza con los discos envueltos en papel. Cada uno había escrito su nombre en una esquina de la funda para acordarnos de devolverlos. Cambié uno de mis favoritos por un álbum que no había escuchado nunca. Esa tarde fui directo al equipo de música y me quedé siguiendo las letras hasta que oscureció. Todavía recuerdo la emoción de descubrir canciones gracias a los amigos.",
-    "category": "Música",
-    "source": "demo"
-},
+    {
+      id: "vinilos-70-1",
+      hashtags: ["vinilos", "rocknacional"],
+      groupId: "vinilos-70",
+      title: "El vinilo que escuchábamos de principio a fin",
+      year: 1973,
+      author: "Miguel",
+      place: "Caballito, Buenos Aires",
+      lat: -34.618,
+      lng: -58.441,
+      image: "https://http2.mlstatic.com/D_NQ_NP_954569-MLA110576128820_052026-O.webp",
+      description:
+        "Nos juntábamos en el living de un amigo con un disco de Sui Generis. Antes de apoyar la púa, alguien pedía silencio y otro acomodaba los almohadones en el piso. Leíamos la funda mientras sonaba el lado A y discutíamos quién daba vuelta el disco. No teníamos una colección grande: por eso conocíamos hasta los pequeños ruidos de cada vinilo. ¿Qué disco escuchaban sin saltarse un tema?",
+      category: "Música",
+      source: "demo",
+    },
+    {
+      id: "vinilos-70-2",
+      hashtags: ["vinilos", "rocknacional"],
+      groupId: "vinilos-70",
+      title: "La bolsa de discos de la avenida Corrientes",
+      year: 1976,
+      author: "Susana",
+      place: "Avenida Corrientes y Callao, Buenos Aires",
+      lat: -34.6045,
+      lng: -58.392,
+      description:
+        "Salimos a recorrer disquerías con unas monedas juntadas durante el mes. Mi hermano buscaba rock y yo miraba las portadas como si fueran cuadros. Volvimos con un disco usado y la promesa de prestarlo el fin de semana. En el colectivo llevé la bolsa contra el pecho para que no se doblara la funda. Al llegar a casa despejamos la mesa y armamos nuestra pequeña ceremonia alrededor del tocadiscos.",
+      category: "Música",
+      source: "demo",
+    },
+    {
+      id: "vinilos-70-3",
+      hashtags: ["vinilos"],
+      groupId: "vinilos-70",
+      title: "Un domingo para intercambiar vinilos",
+      year: 1978,
+      author: "Héctor",
+      place: "Plaza San Martín, Ramos Mejía, Buenos Aires",
+      lat: -34.644,
+      lng: -58.565,
+      description:
+        "Nos encontramos en la plaza con los discos envueltos en papel. Cada uno había escrito su nombre en una esquina de la funda para acordarnos de devolverlos. Cambié uno de mis favoritos por un álbum que no había escuchado nunca. Esa tarde fui directo al equipo de música y me quedé siguiendo las letras hasta que oscureció. Todavía recuerdo la emoción de descubrir canciones gracias a los amigos.",
+      category: "Música",
+      source: "demo",
+    },
     {
       place: "Parque Centenario, Caballito, Buenos Aires",
       lat: -34.6065,
       lng: -58.4355,
-      id: "demo-21", hashtags: ["recuerdosdelbarrio"],
+      id: "demo-21",
+      hashtags: ["recuerdosdelbarrio"],
       title: "El mapa abierto junto al lago",
       year: 1972,
       category: "Lugares",
@@ -141,7 +148,11 @@ export const content = {
   facts: [
     {
       id: "starwars",
-      media: {"url": "/facts/starwars.jpg", "caption": "Imagen promocional · Star Wars · sitio oficial", "source": "https://www.starwars.com/films/star-wars-episode-iv-a-new-hope"},
+      media: {
+        url: "/facts/starwars.jpg",
+        caption: "Imagen promocional · Star Wars · sitio oficial",
+        source: "https://www.starwars.com/films/star-wars-episode-iv-a-new-hope",
+      },
       year: 1977,
       kind: "Cine",
       title: "Una galaxia llegó a las salas",
@@ -154,7 +165,11 @@ export const content = {
     },
     {
       id: "voyager",
-      media: {"url": "/facts/voyager.jpg", "caption": "Ilustración de la misión Voyager · NASA", "source": "https://science.nasa.gov/mission/voyager/fact-sheet/"},
+      media: {
+        url: "/facts/voyager.jpg",
+        caption: "Ilustración de la misión Voyager · NASA",
+        source: "https://science.nasa.gov/mission/voyager/fact-sheet/",
+      },
       year: 1977,
       kind: "Tecnología",
       title: "Dos viajeras rumbo a los planetas",
@@ -167,7 +182,11 @@ export const content = {
     },
     {
       id: "arrival",
-      media: {"url": "/facts/arrival.jpg", "caption": "Portada del álbum · ABBA · sitio oficial", "source": "https://abbasite.com/articles/in-focus-arrival-the-making-of-a-classic-pop-album/"},
+      media: {
+        url: "/facts/arrival.jpg",
+        caption: "Portada del álbum · ABBA · sitio oficial",
+        source: "https://abbasite.com/articles/in-focus-arrival-the-making-of-a-classic-pop-album/",
+      },
       year: 1976,
       kind: "Música",
       title: "ABBA invitó a todos a bailar",
@@ -175,46 +194,45 @@ export const content = {
         "Arrival apareció en Suecia en octubre de 1976. El álbum incluye Dancing Queen y Knowing Me, Knowing You, canciones que quedaron asociadas al sonido pop de los setenta.",
       dateLabel: "Publicación del álbum · 1976",
       scope: "Cultura internacional",
-      source:
-        "https://abbasite.com/articles/in-focus-arrival-the-making-of-a-classic-pop-album/",
+      source: "https://abbasite.com/articles/in-focus-arrival-the-making-of-a-classic-pop-album/",
       sourceName: "ABBA · sitio oficial",
     },
   ],
   music: [
-  {
-    "title": "Dancing Queen",
-    "artist": "ABBA",
-    "year": 1976,
-    "spotifyId": "01topnfXJFjW4iQMVAXAo8",
-    "reference": "https://open.spotify.com/track/01topnfXJFjW4iQMVAXAo8"
-  },
-  {
-    "title": "Bohemian Rhapsody",
-    "artist": "Queen",
-    "year": 1975,
-    "spotifyId": "1yslmgUcM2AOkOPS4sl3QV",
-    "reference": "https://open.spotify.com/track/1yslmgUcM2AOkOPS4sl3QV"
-  },
-  {
-    "title": "September",
-    "artist": "Earth, Wind & Fire",
-    "year": 1978,
-    "spotifyId": "0yrCNC1tKhMlmtvl3sKXp3",
-    "reference": "https://open.spotify.com/track/0yrCNC1tKhMlmtvl3sKXp3"
-  },
-  {
-    "title": "Stayin' Alive",
-    "artist": "Bee Gees",
-    "year": 1977,
-    "spotifyId": "2xSXw1EqGSAKc1e4TPaQvV",
-    "reference": "https://open.spotify.com/track/2xSXw1EqGSAKc1e4TPaQvV"
-  },
-  {
-    "title": "Hotel California",
-    "artist": "Eagles",
-    "year": 1976,
-    "spotifyId": "4Vn7TykT27PIygBiZjTR2s",
-    "reference": "https://open.spotify.com/track/4Vn7TykT27PIygBiZjTR2s"
-  }
-],
+    {
+      title: "Dancing Queen",
+      artist: "ABBA",
+      year: 1976,
+      spotifyId: "01topnfXJFjW4iQMVAXAo8",
+      reference: "https://open.spotify.com/track/01topnfXJFjW4iQMVAXAo8",
+    },
+    {
+      title: "Bohemian Rhapsody",
+      artist: "Queen",
+      year: 1975,
+      spotifyId: "1yslmgUcM2AOkOPS4sl3QV",
+      reference: "https://open.spotify.com/track/1yslmgUcM2AOkOPS4sl3QV",
+    },
+    {
+      title: "September",
+      artist: "Earth, Wind & Fire",
+      year: 1978,
+      spotifyId: "0yrCNC1tKhMlmtvl3sKXp3",
+      reference: "https://open.spotify.com/track/0yrCNC1tKhMlmtvl3sKXp3",
+    },
+    {
+      title: "Stayin' Alive",
+      artist: "Bee Gees",
+      year: 1977,
+      spotifyId: "2xSXw1EqGSAKc1e4TPaQvV",
+      reference: "https://open.spotify.com/track/2xSXw1EqGSAKc1e4TPaQvV",
+    },
+    {
+      title: "Hotel California",
+      artist: "Eagles",
+      year: 1976,
+      spotifyId: "4Vn7TykT27PIygBiZjTR2s",
+      reference: "https://open.spotify.com/track/4Vn7TykT27PIygBiZjTR2s",
+    },
+  ],
 } satisfies EraContent;

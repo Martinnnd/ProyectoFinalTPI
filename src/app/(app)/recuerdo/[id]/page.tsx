@@ -21,9 +21,8 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedReturn = searchParams.get("returnTo");
-  const returnTo = requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
-    ? requestedReturn
-    : "/feed";
+  const returnTo =
+    requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn) ? requestedReturn : "/feed";
   const backLabel = returnTo === "/feed" ? "Volver al feed" : "Volver al perfil";
   const { id } = resolvedParams;
 
@@ -73,8 +72,12 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
     if (!memory?.groupId) return;
     const controller = new AbortController();
     getGroup(memory.groupId, controller.signal)
-      .then((group) => { if (!controller.signal.aborted) setGroupName(group.name); })
-      .catch(() => { if (!controller.signal.aborted) setGroupName(null); });
+      .then((group) => {
+        if (!controller.signal.aborted) setGroupName(group.name);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setGroupName(null);
+      });
     return () => controller.abort();
   }, [memory?.groupId]);
 
@@ -86,14 +89,14 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         router.push(`/perfil/${targetMemory.author}`);
       }
     },
-    [router, session]
+    [router, session],
   );
 
   const handleMap = useCallback(
     (targetMemory: Memory) => {
       router.push(`/explorar?recuerdo=${targetMemory.id}`);
     },
-    [router]
+    [router],
   );
 
   const handleSelect = useCallback(
@@ -104,7 +107,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         router.push(`/recuerdo/${selectedMemory.id}?returnTo=${encodeURIComponent(returnTo)}`);
       }
     },
-    [id, router, returnTo]
+    [id, router, returnTo],
   );
 
   const confirmDelete = useCallback(
@@ -114,7 +117,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
       router.push(returnTo);
       return null;
     },
-    [router, setNotice, returnTo]
+    [router, setNotice, returnTo],
   );
 
   const saveEdit = useCallback(
@@ -124,7 +127,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
       setNotice("Recuerdo modificado.");
       return null;
     },
-    [setNotice]
+    [setNotice],
   );
 
   if (loading) {
@@ -138,7 +141,11 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
 
   if (error || !memory) {
     return (
-      <div className="feed-load-error" role="alert" style={{ padding: "60px 0", textAlign: "center" }}>
+      <div
+        className="feed-load-error"
+        role="alert"
+        style={{ padding: "60px 0", textAlign: "center" }}
+      >
         <p>{error ?? "No se encontró el recuerdo solicitado."}</p>
         <button type="button" className="secondary-button" onClick={() => router.push(returnTo)}>
           {backLabel}

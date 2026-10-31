@@ -76,7 +76,7 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
         pending.current.delete(requestKey);
       }
     },
-    [currentUserId, router]
+    [currentUserId, router],
   );
 
   return (

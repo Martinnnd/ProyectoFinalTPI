@@ -1,6 +1,16 @@
 import { createPortal } from "react-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowUpRight, Check, ChevronUp, MessageCircle, Minus, Send, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Check,
+  ChevronUp,
+  MessageCircle,
+  Minus,
+  Send,
+  Trash2,
+  X,
+} from "lucide-react";
 import type { Decade } from "../types";
 import { useAuth } from "./auth/AuthProvider";
 import type { ChatMessageDto, ConversationSummaryDto } from "../chat/types";
@@ -73,39 +83,53 @@ export default function Chat({
   const trigger = useRef<HTMLButtonElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const activeConversationRef = useRef<ActiveConversation | null>(null);
-  useEffect(() => { activeConversationRef.current = activeConversation; }, [activeConversation]);
+  useEffect(() => {
+    activeConversationRef.current = activeConversation;
+  }, [activeConversation]);
 
   const handleMessageReceived = useCallback((message: ChatMessageDto) => {
     if (activeConversationRef.current?.userId === message.senderId) {
-      setMessages(previous => [...previous, message]);
+      setMessages((previous) => [...previous, message]);
     }
-    setConversations(previous => {
-      const index = previous.findIndex(conversation => conversation.otherUserId === message.senderId);
+    setConversations((previous) => {
+      const index = previous.findIndex(
+        (conversation) => conversation.otherUserId === message.senderId,
+      );
       const updatedConversation: ConversationSummaryDto = {
         otherUserId: message.senderId,
         otherUsername: message.senderUsername,
         lastMessage: message.content,
         lastMessageAt: message.sentAt,
       };
-      if (index >= 0) { const nextConversations = [...previous]; nextConversations[index] = updatedConversation; return nextConversations; }
+      if (index >= 0) {
+        const nextConversations = [...previous];
+        nextConversations[index] = updatedConversation;
+        return nextConversations;
+      }
       return [updatedConversation, ...previous];
     });
   }, []);
 
   const handleMessageSent = useCallback((message: ChatMessageDto) => {
     if (activeConversationRef.current?.userId === message.recipientId) {
-      setMessages(previous => [...previous, message]);
+      setMessages((previous) => [...previous, message]);
     }
     const recipientUsername = activeConversationRef.current?.username ?? "";
-    setConversations(previous => {
-      const index = previous.findIndex(conversation => conversation.otherUserId === message.recipientId);
+    setConversations((previous) => {
+      const index = previous.findIndex(
+        (conversation) => conversation.otherUserId === message.recipientId,
+      );
       const updatedConversation: ConversationSummaryDto = {
         otherUserId: message.recipientId,
         otherUsername: recipientUsername,
         lastMessage: message.content,
         lastMessageAt: message.sentAt,
       };
-      if (index >= 0) { const nextConversations = [...previous]; nextConversations[index] = updatedConversation; return nextConversations; }
+      if (index >= 0) {
+        const nextConversations = [...previous];
+        nextConversations[index] = updatedConversation;
+        return nextConversations;
+      }
       return [updatedConversation, ...previous];
     });
   }, []);
@@ -118,14 +142,26 @@ export default function Chat({
 
   // --- Load conversations after sign-in ---
   useEffect(() => {
-    if (!session) { setConversations([]); setError(null); return; }
+    if (!session) {
+      setConversations([]);
+      setError(null);
+      return;
+    }
     let cancelled = false;
     setLoadingConversations(true);
     getConversations()
-      .then(data => { if (!cancelled) setConversations(data); })
-      .catch(error => { if (!cancelled) console.error("[Chat] Error loading conversations:", error); })
-      .finally(() => { if (!cancelled) setLoadingConversations(false); });
-    return () => { cancelled = true; };
+      .then((data) => {
+        if (!cancelled) setConversations(data);
+      })
+      .catch((error) => {
+        if (!cancelled) console.error("[Chat] Error loading conversations:", error);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingConversations(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [session?.usuarioId]);
 
   // --- Open a conversation from another user's profile ---
@@ -134,7 +170,7 @@ export default function Chat({
     setActiveConversation({ userId: chatWith.userId, username: chatWith.username });
     setOpen(true);
     setError(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatWith?.ts]);
 
   // --- Load history when selecting a conversation ---
@@ -146,10 +182,18 @@ export default function Chat({
     setMessages([]);
     setError(null);
     getHistory(activeConversation.userId)
-      .then(history => { if (!cancelled) setMessages(history); })
-      .catch(error => { if (!cancelled) setError(`No se pudo cargar el historial: ${error.message}`); })
-      .finally(() => { if (!cancelled) setLoadingMessages(false); });
-    return () => { cancelled = true; };
+      .then((history) => {
+        if (!cancelled) setMessages(history);
+      })
+      .catch((error) => {
+        if (!cancelled) setError(`No se pudo cargar el historial: ${error.message}`);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingMessages(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [activeConversation?.userId, connected]);
 
   // --- Auto-scroll to the latest message ---
@@ -157,15 +201,22 @@ export default function Chat({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  function close() { setOpen(false); trigger.current?.focus(); }
+  function close() {
+    setOpen(false);
+    trigger.current?.focus();
+  }
   useEffect(() => {
     if (!open) return;
-    const handleEscape = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [open]);
 
-  useEffect(() => { setActiveConversation(null); }, [decade]);
+  useEffect(() => {
+    setActiveConversation(null);
+  }, [decade]);
 
   async function handleSend() {
     if (!activeConversation || !messageText.trim() || !connected || sending) return;
@@ -190,12 +241,15 @@ export default function Chat({
     setError(null);
     try {
       await deleteConversation(activeConversation.userId);
-      setConversations(previous => previous.filter(conversation => conversation.otherUserId !== activeConversation.userId));
+      setConversations((previous) =>
+        previous.filter((conversation) => conversation.otherUserId !== activeConversation.userId),
+      );
       setActiveConversation(null);
       setMessages([]);
       setConfirmingDelete(false);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "No se pudo eliminar la conversación.";
+      const errorMessage =
+        error instanceof Error ? error.message : "No se pudo eliminar la conversación.";
       setError(errorMessage);
       setConfirmingDelete(false);
     } finally {
@@ -222,11 +276,17 @@ export default function Chat({
           No tenés conversaciones activas. Visitá el perfil de otro usuario para iniciar un chat.
         </p>
       )}
-      {conversations.map(conversation => (
+      {conversations.map((conversation) => (
         <button
           key={conversation.otherUserId}
           className={`chat-contact ${activeConversation?.userId === conversation.otherUserId ? "is-selected" : ""}`}
-          onClick={() => { setActiveConversation({ userId: conversation.otherUserId, username: conversation.otherUsername }); setError(null); }}
+          onClick={() => {
+            setActiveConversation({
+              userId: conversation.otherUserId,
+              username: conversation.otherUsername,
+            });
+            setError(null);
+          }}
           aria-pressed={activeConversation?.userId === conversation.otherUserId}
         >
           <span className="chat-avatar">
@@ -249,7 +309,10 @@ export default function Chat({
         <button
           className="icon-button"
           aria-label="Volver a conversaciones"
-          onClick={() => { setActiveConversation(null); setError(null); }}
+          onClick={() => {
+            setActiveConversation(null);
+            setError(null);
+          }}
         >
           <ArrowLeft size={18} />
         </button>
@@ -295,18 +358,22 @@ export default function Chat({
       </header>
 
       <div className="chat-messages">
-        {loadingMessages && (
-          <span className="chat-date">Cargando historial…</span>
-        )}
+        {loadingMessages && <span className="chat-date">Cargando historial…</span>}
         {!loadingMessages && messages.length === 0 && (
           <span className="chat-date">Empezá la conversación diciendo ¡Hola!</span>
         )}
-        {messages.map(message => (
-          <p key={message.id} className={`chat-bubble ${message.senderId === session?.usuarioId ? "own" : ""}`}>
+        {messages.map((message) => (
+          <p
+            key={message.id}
+            className={`chat-bubble ${message.senderId === session?.usuarioId ? "own" : ""}`}
+          >
             {message.content}
             <br />
             <small className="chat-message-time">
-              {new Date(message.sentAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+              {new Date(message.sentAt).toLocaleTimeString("es-AR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </small>
           </p>
         ))}
@@ -323,11 +390,23 @@ export default function Chat({
         <input
           type="text"
           value={messageText}
-          onChange={e => setMessageText(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+          onChange={(e) => setMessageText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
           placeholder="Escribí un mensaje…"
           disabled={!connected || sending}
-          style={{ flex: 1, border: "none", background: "transparent", outline: "none", color: "var(--ink)", fontSize: "13px" }}
+          style={{
+            flex: 1,
+            border: "none",
+            background: "transparent",
+            outline: "none",
+            color: "var(--ink)",
+            fontSize: "13px",
+          }}
           aria-label="Escribir mensaje"
         />
         <button
@@ -357,8 +436,16 @@ export default function Chat({
         <strong>{title}</strong>
         {!fullPage && (
           <>
-            <button className="icon-button" onClick={onOpenPage} aria-label="Abrir apartado de chat"><ArrowUpRight size={18} /></button>
-            <button className="icon-button" onClick={close} aria-label="Minimizar mensajes"><Minus size={18} /></button>
+            <button
+              className="icon-button"
+              onClick={onOpenPage}
+              aria-label="Abrir apartado de chat"
+            >
+              <ArrowUpRight size={18} />
+            </button>
+            <button className="icon-button" onClick={close} aria-label="Minimizar mensajes">
+              <Minus size={18} />
+            </button>
           </>
         )}
       </header>
@@ -378,7 +465,11 @@ export default function Chat({
   }
 
   const popup = open && (
-    <section id="chat-popup" className={`chat-window chat-popup${dockSlot ? " taskbar-chat-popup" : ""}`} aria-label="Mensajes">
+    <section
+      id="chat-popup"
+      className={`chat-window chat-popup${dockSlot ? " taskbar-chat-popup" : ""}`}
+      aria-label="Mensajes"
+    >
       {panel}
     </section>
   );
@@ -386,14 +477,24 @@ export default function Chat({
   const dock = (
     <div className="chat-dock">
       {!dockSlot && popup}
-      <button ref={trigger} className="chat-launcher" aria-expanded={open} aria-controls="chat-popup" onClick={() => setOpen(value => !value)}>
+      <button
+        ref={trigger}
+        className="chat-launcher"
+        aria-expanded={open}
+        aria-controls="chat-popup"
+        onClick={() => setOpen((value) => !value)}
+      >
         {connected && <span className="chat-online-dot" role="img" aria-label="Conectado" />}
         <MessageCircle size={21} />
         <strong>Mensajes</strong>
         {conversations.length > 0 && <span className="chat-count">{conversations.length}</span>}
         {conversations.length > 0 && (
           <span className="chat-faces" aria-hidden="true">
-            {conversations.slice(0, 3).map(conversation => <i key={conversation.otherUserId}>{conversation.otherUsername.slice(0, 1).toUpperCase()}</i>)}
+            {conversations.slice(0, 3).map((conversation) => (
+              <i key={conversation.otherUserId}>
+                {conversation.otherUsername.slice(0, 1).toUpperCase()}
+              </i>
+            ))}
           </span>
         )}
         {open ? <X size={14} /> : <ChevronUp size={14} />}
@@ -401,7 +502,12 @@ export default function Chat({
     </div>
   );
 
-  return dockSlot
-    ? <>{createPortal(dock, dockSlot)}{createPortal(popup, dockSlot.closest(".app") ?? dockSlot)}</>
-    : dock;
+  return dockSlot ? (
+    <>
+      {createPortal(dock, dockSlot)}
+      {createPortal(popup, dockSlot.closest(".app") ?? dockSlot)}
+    </>
+  ) : (
+    dock
+  );
 }

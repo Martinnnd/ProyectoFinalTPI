@@ -2,11 +2,7 @@ import { API_BASE_URL } from "../../apiConfig";
 import { rememberLoginAchievements } from "../../loginAchievements";
 import type { AchievementState } from "../../profileApi";
 import { toAuthError } from "./authErrors";
-import type {
-  AuthSession,
-  LoginCredentials,
-  RegisterCredentials,
-} from "./authTypes";
+import type { AuthSession, LoginCredentials, RegisterCredentials } from "./authTypes";
 
 const authHeaders = {
   "Content-Type": "application/json",
@@ -24,13 +20,12 @@ async function authRequest(path: string, body?: object): Promise<AuthSession> {
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new Error(
-      "No pudimos conectar con el servidor. Comprobá que el backend esté encendido.",
-    );
+    throw new Error("No pudimos conectar con el servidor. Comprobá que el backend esté encendido.");
   }
 
   if (!response.ok) throw await toAuthError(response);
-  const { logrosNuevos, ...session }: AuthSession & { logrosNuevos?: AchievementState[] } = await response.json();
+  const { logrosNuevos, ...session }: AuthSession & { logrosNuevos?: AchievementState[] } =
+    await response.json();
   rememberLoginAchievements(session.usuarioId, logrosNuevos);
   return session;
 }
@@ -47,7 +42,7 @@ export function registerRequest({
   return authRequest("registro", {
     username,
     email,
-    "contraseña": contrasena,
+    contraseña: contrasena,
   });
 }
 

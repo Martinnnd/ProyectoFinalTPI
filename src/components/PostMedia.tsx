@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import type { Memory } from '../types';
-import { youtubeId, safeMediaUrl, normalizeAttachment } from '../media';
-import RetroMediaPlaceholder from './RetroMediaPlaceholder';
+import { useState } from "react";
+import type { Memory } from "../types";
+import { youtubeId, safeMediaUrl, normalizeAttachment } from "../media";
+import RetroMediaPlaceholder from "./RetroMediaPlaceholder";
 
-export function PostMusic({ music }: { music: Memory['music'] }) {
+export function PostMusic({ music }: { music: Memory["music"] }) {
   const [open, setOpen] = useState(false);
   if (!music || !/^[A-Za-z0-9]{22}$/.test(music.spotifyId)) return null;
   return (
@@ -14,7 +14,7 @@ export function PostMusic({ music }: { music: Memory['music'] }) {
           <strong>{music.title}</strong>
           <small>{music.artist} · Spotify</small>
         </span>
-        <span>{open ? 'Cerrar' : 'Escuchar'}</span>
+        <span>{open ? "Cerrar" : "Escuchar"}</span>
       </button>
       {open && (
         <iframe
@@ -37,7 +37,8 @@ export default function PostMedia({
   showFallbackWhenEmpty?: boolean;
 }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const stored = memory.media ?? (memory.image ? { kind: 'image' as const, url: memory.image } : undefined);
+  const stored =
+    memory.media ?? (memory.image ? { kind: "image" as const, url: memory.image } : undefined);
   const media = stored ? normalizeAttachment(stored) : undefined;
 
   if (!media) {
@@ -54,7 +55,7 @@ export default function PostMedia({
     return null;
   }
 
-  if (media.kind === 'youtube') {
+  if (media.kind === "youtube") {
     const id = youtubeId(media.url);
     return id ? (
       <div className="post-attachment post-attachment-youtube">
@@ -93,7 +94,7 @@ export default function PostMedia({
 
   return (
     <div className="post-attachment">
-      {media.kind === 'video' ? (
+      {media.kind === "video" ? (
         <video
           src={media.url}
           controls

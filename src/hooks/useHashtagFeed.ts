@@ -5,7 +5,10 @@ import type { FeedPage } from "../feedApi";
 const emptyPage: FeedPage = { items: [], siguienteCursor: null, hayMas: false };
 
 export default function useHashtagFeed(tag: string | null, active: boolean) {
-  const [result, setResult] = useState<{ tag: string | null; page: FeedPage }>({ tag: null, page: emptyPage });
+  const [result, setResult] = useState<{ tag: string | null; page: FeedPage }>({
+    tag: null,
+    page: emptyPage,
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const request = useRef<AbortController | null>(null);
@@ -23,12 +26,22 @@ export default function useHashtagFeed(tag: string | null, active: boolean) {
     setLoading(true);
     setError("");
     getHashtagPosts(tag, undefined, controller.signal)
-      .then(page => { if (!controller.signal.aborted) setResult({ tag, page }); })
-      .catch(cause => { if (!controller.signal.aborted) setError((cause as Error).message); })
+      .then((page) => {
+        if (!controller.signal.aborted) setResult({ tag, page });
+      })
+      .catch((cause) => {
+        if (!controller.signal.aborted) setError((cause as Error).message);
+      })
       .finally(() => {
-        if (!controller.signal.aborted) { busy.current = false; setLoading(false); }
+        if (!controller.signal.aborted) {
+          busy.current = false;
+          setLoading(false);
+        }
       });
-    return () => { controller.abort(); busy.current = false; };
+    return () => {
+      controller.abort();
+      busy.current = false;
+    };
   }, [tag, active, revision]);
 
   const page = result.tag === tag ? result.page : emptyPage;
@@ -41,20 +54,34 @@ export default function useHashtagFeed(tag: string | null, active: boolean) {
     setLoading(true);
     setError("");
     getHashtagPosts(tag, currentCursor, controller.signal)
-      .then(next => {
+      .then((next) => {
         if (controller.signal.aborted) return;
         if (next.hayMas && next.siguienteCursor === currentCursor)
           throw new Error("No pudimos continuar la lista de recuerdos. Volvé a intentar.");
-        setResult(previous => previous.tag === tag ? {
-          tag, page: {
-            ...next,
-            items: [...new Map([...previous.page.items, ...next.items].map(item => [item.id, item])).values()],
-          },
-        } : previous);
+        setResult((previous) =>
+          previous.tag === tag
+            ? {
+                tag,
+                page: {
+                  ...next,
+                  items: [
+                    ...new Map(
+                      [...previous.page.items, ...next.items].map((item) => [item.id, item]),
+                    ).values(),
+                  ],
+                },
+              }
+            : previous,
+        );
       })
-      .catch(cause => { if (!controller.signal.aborted) setError((cause as Error).message); })
+      .catch((cause) => {
+        if (!controller.signal.aborted) setError((cause as Error).message);
+      })
       .finally(() => {
-        if (!controller.signal.aborted) { busy.current = false; setLoading(false); }
+        if (!controller.signal.aborted) {
+          busy.current = false;
+          setLoading(false);
+        }
       });
   }, [active, tag, page.hayMas, page.siguienteCursor]);
 
@@ -64,6 +91,6 @@ export default function useHashtagFeed(tag: string | null, active: boolean) {
     loading: active && !!tag && (result.tag !== tag || loading),
     error,
     more,
-    reload: () => setRevision(value => value + 1),
+    reload: () => setRevision((value) => value + 1),
   };
 }

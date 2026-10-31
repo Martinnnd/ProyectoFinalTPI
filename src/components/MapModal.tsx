@@ -65,7 +65,7 @@ export default function MapModal({
           memories={memories}
           selected={selected}
           onSelect={onSelect}
-            onOpen={onOpen}
+          onOpen={onOpen}
           picking={false}
           onPick={() => {}}
           draft={null}

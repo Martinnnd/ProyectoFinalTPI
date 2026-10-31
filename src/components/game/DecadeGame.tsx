@@ -73,11 +73,13 @@ export default function DecadeGame() {
             {won ? <Trophy aria-hidden="true" /> : <RotateCcw aria-hidden="true" />}
           </div>
           <p className={styles.eyebrow}>Partida terminada</p>
-          <h1 id="game-result-title">
-            {won ? "¡Ganaste!" : "Estuviste cerca"}
-          </h1>
+          <h1 id="game-result-title">{won ? "¡Ganaste!" : "Estuviste cerca"}</h1>
           <p className={styles.finalScore}>
-            Acertaste <strong>{score} de {GAME_LENGTH}</strong> fotografías.
+            Acertaste{" "}
+            <strong>
+              {score} de {GAME_LENGTH}
+            </strong>{" "}
+            fotografías.
           </p>
           <p className={styles.resultMessage}>
             {won
@@ -101,7 +103,10 @@ export default function DecadeGame() {
             <p className={styles.eyebrow}>Desafío temporal</p>
             <h1 id="game-title">¿De qué década es esta foto?</h1>
           </div>
-          <div className={styles.progress} aria-label={`Pregunta ${currentIndex + 1} de ${GAME_LENGTH}`}>
+          <div
+            className={styles.progress}
+            aria-label={`Pregunta ${currentIndex + 1} de ${GAME_LENGTH}`}
+          >
             <strong>{currentIndex + 1}</strong>
             <span>/ {GAME_LENGTH}</span>
           </div>
@@ -128,7 +133,8 @@ export default function DecadeGame() {
               <ImageOff size={40} aria-hidden="true" />
               <strong>Falta cargar esta fotografía</strong>
               <span>
-                Agregá <code>{currentQuestion.decade}.jpg</code> en <code>public/juego-decadas</code>.
+                Agregá <code>{currentQuestion.decade}.jpg</code> en{" "}
+                <code>public/juego-decadas</code>.
               </span>
               <button type="button" onClick={nextQuestion}>
                 Omitir esta foto

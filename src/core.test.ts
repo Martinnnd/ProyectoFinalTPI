@@ -8,55 +8,41 @@ describe("Exploración temporal", () => {
   it("ofrece escenas por década en lugares distintos", () => {
     for (const decade of [1970, 1980, 1990, 2000] as const) {
       const memories = filterMemories(
-        initialMemories.filter(m => !m.groupId),
+        initialMemories.filter((m) => !m.groupId),
         { decade, year: null },
         "Todas",
       );
       expect(memories.length).toBeGreaterThanOrEqual(7);
-      expect(new Set(memories.map((m) => m.place)).size).toBe(
-        memories.length,
-      );
+      expect(new Set(memories.map((m) => m.place)).size).toBe(memories.length);
       expect(memories.every((m) => m.source === "demo")).toBe(true);
-      expect(
-        memories.every(
-          (m) => m.year >= decade && m.year < decade + 10,
-        ),
-      ).toBe(true);
+      expect(memories.every((m) => m.year >= decade && m.year < decade + 10)).toBe(true);
     }
   });
   it("combina año y categoría, incluyendo estados vacíos", () => {
     expect(
+      filterMemories(initialMemories, { decade: 1990, year: 1997 }, "Personales"),
+    ).toHaveLength(1);
+    expect(
       filterMemories(
-        initialMemories,
+        initialMemories.filter((m) => !m.groupId),
         { decade: 1990, year: 1997 },
-        "Personales",
+        "Música",
       ),
-    ).toHaveLength(1);
-    expect(
-      filterMemories(initialMemories.filter(m => !m.groupId), { decade: 1990, year: 1997 }, "Música"),
     ).toEqual([]);
-    expect(
-      filterMemories(initialMemories, { decade: 1980, year: null }, "Cine"),
-    ).toHaveLength(1);
+    expect(filterMemories(initialMemories, { decade: 1980, year: null }, "Cine")).toHaveLength(1);
   });
 });
 describe("Contenido de época", () => {
   it("separa datos culturales verificados de los pines y respeta década y año", () => {
-    expect(
-      factsForPeriod({ decade: 1990, year: 1995 }).map((f) => f.id),
-    ).toEqual(["toystory"]);
+    expect(factsForPeriod({ decade: 1990, year: 1995 }).map((f) => f.id)).toEqual(["toystory"]);
     expect(factsForPeriod({ decade: 1980, year: 1980 })).toEqual([]);
     for (const decade of [1970, 1980, 1990, 2000, 2010, 2020] as const) {
       expect(factsForPeriod({ decade, year: null })).toHaveLength(3);
-      expect(
-        musicByDecade[decade].every(
-          (t) => t.year >= decade && t.year < decade + 10,
-        ),
-      ).toBe(true);
+      expect(musicByDecade[decade].every((t) => t.year >= decade && t.year < decade + 10)).toBe(
+        true,
+      );
     }
-    expect(
-      eraFacts.every((f) => f.source.startsWith("https://") && !("lat" in f)),
-    ).toBe(true);
+    expect(eraFacts.every((f) => f.source.startsWith("https://") && !("lat" in f))).toBe(true);
   });
   it("ofrece enlaces reales de Spotify y relatos con lugares específicos", () => {
     expect(musicByDecade[1980][0].artist).toBe("Guns N' Roses");
@@ -67,11 +53,9 @@ describe("Contenido de época", () => {
         if (track.audioSrc) expect(track.reference).toBe(track.audioSrc);
         else expect(track.reference).toBe(`https://open.spotify.com/track/${track.spotifyId}`);
     }
-    expect(
-      initialMemories.every(
-        (m) => m.description.length > 300 && m.place.includes(","),
-      ),
-    ).toBe(true);
+    expect(initialMemories.every((m) => m.description.length > 300 && m.place.includes(","))).toBe(
+      true,
+    );
   });
 });
 describe("Categoría del visitante", () => {
@@ -92,22 +76,19 @@ describe("Categoría del visitante", () => {
     expect(resolveUserCategory(progress({ subscribed: true }))).toBe("Mnemosine");
   });
   it("marca en el diálogo la categoría actual y las que faltan", () => {
-    expect(
-      describeTiers(progress({ memories: 3 })).map((tier) => tier.state),
-    ).toEqual(["reached", "current", "locked", "locked"]);
+    expect(describeTiers(progress({ memories: 3 })).map((tier) => tier.state)).toEqual([
+      "reached",
+      "current",
+      "locked",
+      "locked",
+    ]);
   });
 });
 describe("Persistencia resistente a errores", () => {
   it("recupera solo recuerdos locales válidos y elimina duplicados", () => {
     const result = loadMemories({
       getItem: () =>
-        JSON.stringify([
-          local,
-          local,
-          { ...local, year: 1969 },
-          initialMemories[0],
-          null,
-        ]),
+        JSON.stringify([local, local, { ...local, year: 1969 }, initialMemories[0], null]),
     });
     expect(result.memories).toEqual([local]);
     expect(result.warning).not.toBe("");
@@ -160,7 +141,8 @@ describe("Persistencia resistente a errores", () => {
 
 describe("Autoría de recuerdos y reposts", () => {
   it("identifica recuerdos propios y devuelve 'Vos' para el usuario en sesión", async () => {
-    const { isOwnMemory, getMemoryAuthorDisplay, guardarSesion, cerrarSesion } = await import("./api");
+    const { isOwnMemory, getMemoryAuthorDisplay, guardarSesion, cerrarSesion } =
+      await import("./api");
     cerrarSesion();
     expect(isOwnMemory({ author: "Vos" })).toBe(true);
     expect(isOwnMemory({ author: "Susana" })).toBe(false);
@@ -191,4 +173,3 @@ describe("Autoría de recuerdos y reposts", () => {
     cerrarSesion();
   });
 });
-

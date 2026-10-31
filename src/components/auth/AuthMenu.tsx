@@ -47,47 +47,51 @@ export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthM
         onClick={() => setOpen((current) => !current)}
         title={`Sesión: ${session.username}`}
       >
-        {session.fotoPerfilUrl
-          ? <img className={styles.avatar} src={session.fotoPerfilUrl} alt="" />
-          : <UserRound />}
+        {session.fotoPerfilUrl ? (
+          <img className={styles.avatar} src={session.fotoPerfilUrl} alt="" />
+        ) : (
+          <UserRound />
+        )}
         <span className={styles.username}>{session.username}</span>
       </button>
       {open && (
         <>
           <div className={styles.backdrop} aria-hidden="true" onClick={() => setOpen(false)} />
           <div className={styles.menu} role="menu">
-          <strong>{session.username}</strong>
-          <span>{session.email}</span>
-          {logoutError && <span role="alert">{logoutError}</span>}
+            <strong>{session.username}</strong>
+            <span>{session.email}</span>
+            {logoutError && <span role="alert">{logoutError}</span>}
             <div className={styles.menuActions}>
-            <button
-            type="button"
-            role="menuitem"
-            aria-current={profileActive ? "page" : undefined}
-            className={styles.profileAction}
-            onClick={() => {
-              onOpenProfile();
-              setOpen(false);
-            }}
-          >
-            <UserRound size={16} /> Perfil
-            </button>
-            <button
-            type="button"
-            role="menuitem"
-            className={styles.logoutAction}
-            onClick={async () => {
-              setLogoutError("");
-              try {
-                await logout();
-                setOpen(false);
-              } catch (error) {
-                setLogoutError(error instanceof Error ? error.message : "No pudimos cerrar la sesión.");
-              }
-            }}
-          >
-            <LogOut size={16} /> Cerrar sesión
-            </button>
+              <button
+                type="button"
+                role="menuitem"
+                aria-current={profileActive ? "page" : undefined}
+                className={styles.profileAction}
+                onClick={() => {
+                  onOpenProfile();
+                  setOpen(false);
+                }}
+              >
+                <UserRound size={16} /> Perfil
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className={styles.logoutAction}
+                onClick={async () => {
+                  setLogoutError("");
+                  try {
+                    await logout();
+                    setOpen(false);
+                  } catch (error) {
+                    setLogoutError(
+                      error instanceof Error ? error.message : "No pudimos cerrar la sesión.",
+                    );
+                  }
+                }}
+              >
+                <LogOut size={16} /> Cerrar sesión
+              </button>
             </div>
           </div>
         </>

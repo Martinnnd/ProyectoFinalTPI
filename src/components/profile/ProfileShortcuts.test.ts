@@ -24,7 +24,7 @@ describe("ProfileShortcuts - Sección de guardados en el perfil", () => {
         onOpenCollection: () => {},
         onOpenSaved: () => {},
         onOpenMap: () => {},
-      })
+      }),
     );
 
     expect(html).toContain("Recuerdos guardados");
@@ -43,11 +43,10 @@ describe("ProfileShortcuts - Sección de guardados en el perfil", () => {
         onOpenCollection: () => {},
         onOpenSaved: () => {}, // Incluso si se pasa callback
         onOpenMap: () => {},
-      })
+      }),
     );
 
     expect(html).not.toContain("Recuerdos guardados");
     expect(html).not.toContain("Sus guardados");
   });
 });
-

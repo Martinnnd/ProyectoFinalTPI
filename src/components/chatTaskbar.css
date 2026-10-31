@@ -1,20 +1,121 @@
-.chat-online-dot { flex:none; width:7px; height:7px; border-radius:50%; background:#74d653; box-shadow:0 0 4px #67d65288; }
-.app > .taskbar-chat-popup { position:absolute; right:8px; bottom:48px; margin:0; z-index:700; max-height:calc(100dvh - 150px); overflow:auto; }
-@media(min-width:900px) {
-  .app #chat-taskbar-slot { position:relative; padding:0; margin-left:auto; }
-  .app #chat-taskbar-slot .chat-dock { position:relative; inset:auto; }
-  .app #chat-taskbar-slot .chat-launcher { height:28px; min-height:0; min-width:174px; padding:3px 12px; gap:9px; border:1px solid #ffffff35; border-radius:4px; box-shadow:inset 0 1px #ffffff18,0 1px 2px #0002; background:linear-gradient(#ffffff12,#0000000d); color:inherit; font:12px var(--font-body); text-shadow:none; transition:background 160ms ease,box-shadow 160ms ease; }
-  .app #chat-taskbar-slot .chat-launcher strong { font-weight:600; letter-spacing:.15px; }
-  .app #chat-taskbar-slot .chat-launcher > svg { width:16px; height:16px; stroke-width:1.7; }
-  .app #chat-taskbar-slot .chat-launcher > svg:last-child { margin-left:auto; width:12px; opacity:.7; }
-  .app #chat-taskbar-slot .chat-online-dot { width:6px; height:6px; background:#83dfa2; box-shadow:0 0 0 2px #83dfa21c; }
-  .app #chat-taskbar-slot .chat-faces { display:none; }
-  .app #chat-taskbar-slot .chat-count { display:grid; place-items:center; min-width:18px; height:18px; padding:0 4px; border:1px solid #ffffff30; border-radius:6px; background:#ffffff20; color:inherit; font:600 10px/1 Arial,sans-serif; }
-  .app #chat-taskbar-slot .chat-popup { position:absolute; right:0; bottom:calc(100% + 8px); margin:0; max-height:calc(100dvh - 150px); overflow:auto; text-align:left; letter-spacing:normal; }
-  .app #chat-taskbar-slot .chat-launcher:hover { background:#ffffff25; box-shadow:inset 0 1px #ffffff35,0 0 8px #ffffff10; }
-  .app #chat-taskbar-slot .chat-launcher[aria-expanded="true"] { background:#00000020; box-shadow:inset 0 1px 3px #0003; }
-  .app .system-tray#chat-taskbar-slot { background:transparent; border:0; box-shadow:none; margin-right:5px; }
-  .app .system-taskbar,.app .vhs-status { overflow:visible; z-index:680; }
-  .app .vhs-status { pointer-events:none; }
-  .app #chat-taskbar-slot { pointer-events:auto; }
+.chat-online-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #74d653;
+  box-shadow: 0 0 4px #67d65288;
+}
+.app > .taskbar-chat-popup {
+  position: absolute;
+  right: 8px;
+  bottom: 48px;
+  margin: 0;
+  z-index: 700;
+  max-height: calc(100dvh - 150px);
+  overflow: auto;
+}
+@media (min-width: 900px) {
+  .app #chat-taskbar-slot {
+    position: relative;
+    padding: 0;
+    margin-left: auto;
+  }
+  .app #chat-taskbar-slot .chat-dock {
+    position: relative;
+    inset: auto;
+  }
+  .app #chat-taskbar-slot .chat-launcher {
+    height: 28px;
+    min-height: 0;
+    min-width: 174px;
+    padding: 3px 12px;
+    gap: 9px;
+    border: 1px solid #ffffff35;
+    border-radius: 4px;
+    box-shadow:
+      inset 0 1px #ffffff18,
+      0 1px 2px #0002;
+    background: linear-gradient(#ffffff12, #0000000d);
+    color: inherit;
+    font: 12px var(--font-body);
+    text-shadow: none;
+    transition:
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+  .app #chat-taskbar-slot .chat-launcher strong {
+    font-weight: 600;
+    letter-spacing: 0.15px;
+  }
+  .app #chat-taskbar-slot .chat-launcher > svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.7;
+  }
+  .app #chat-taskbar-slot .chat-launcher > svg:last-child {
+    margin-left: auto;
+    width: 12px;
+    opacity: 0.7;
+  }
+  .app #chat-taskbar-slot .chat-online-dot {
+    width: 6px;
+    height: 6px;
+    background: #83dfa2;
+    box-shadow: 0 0 0 2px #83dfa21c;
+  }
+  .app #chat-taskbar-slot .chat-faces {
+    display: none;
+  }
+  .app #chat-taskbar-slot .chat-count {
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border: 1px solid #ffffff30;
+    border-radius: 6px;
+    background: #ffffff20;
+    color: inherit;
+    font:
+      600 10px/1 Arial,
+      sans-serif;
+  }
+  .app #chat-taskbar-slot .chat-popup {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    margin: 0;
+    max-height: calc(100dvh - 150px);
+    overflow: auto;
+    text-align: left;
+    letter-spacing: normal;
+  }
+  .app #chat-taskbar-slot .chat-launcher:hover {
+    background: #ffffff25;
+    box-shadow:
+      inset 0 1px #ffffff35,
+      0 0 8px #ffffff10;
+  }
+  .app #chat-taskbar-slot .chat-launcher[aria-expanded="true"] {
+    background: #00000020;
+    box-shadow: inset 0 1px 3px #0003;
+  }
+  .app .system-tray#chat-taskbar-slot {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    margin-right: 5px;
+  }
+  .app .system-taskbar,
+  .app .vhs-status {
+    overflow: visible;
+    z-index: 680;
+  }
+  .app .vhs-status {
+    pointer-events: none;
+  }
+  .app #chat-taskbar-slot {
+    pointer-events: auto;
+  }
 }

@@ -68,9 +68,12 @@ export default function PostActions({
     return () => document.removeEventListener("click", handleClickOutside);
   }, [repostOpen]);
 
-  const shareUrl = typeof window !== "undefined"
-    ? (memoryId ? `${window.location.origin}/recuerdo/${memoryId}` : window.location.href)
-    : `/recuerdo/${memoryId ?? ""}`;
+  const shareUrl =
+    typeof window !== "undefined"
+      ? memoryId
+        ? `${window.location.origin}/recuerdo/${memoryId}`
+        : window.location.href
+      : `/recuerdo/${memoryId ?? ""}`;
   const shareText = `Mirá este recuerdo${memoryYear ? ` de ${memoryYear}` : ""} en Nostalgiar: "${memoryTitle}"`;
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
@@ -87,11 +90,17 @@ export default function PostActions({
         <button
           type="button"
           className={`repost-button${reposted ? " is-reposted" : ""}`}
-          aria-label={reposted && directUnrepost ? `Deshacer repost: ${memoryTitle}` : reposted ? `Opciones de repost (reposteado): ${memoryTitle}` : `Opciones de repost: ${memoryTitle}`}
+          aria-label={
+            reposted && directUnrepost
+              ? `Deshacer repost: ${memoryTitle}`
+              : reposted
+                ? `Opciones de repost (reposteado): ${memoryTitle}`
+                : `Opciones de repost: ${memoryTitle}`
+          }
           aria-expanded={reposted && directUnrepost ? undefined : repostOpen}
           aria-pressed={reposted}
           disabled={removingRepost}
-          style={reposted ? { color: '#10b981', fontWeight: 600 } : undefined}
+          style={reposted ? { color: "#10b981", fontWeight: 600 } : undefined}
           onClick={async (event) => {
             event.stopPropagation();
             setShareOpen(false);
@@ -110,7 +119,10 @@ export default function PostActions({
             setRepostOpen((open) => !open);
           }}
         >
-          <Repeat2 size={17} style={reposted ? { stroke: '#10b981', strokeWidth: 2.5 } : undefined} />
+          <Repeat2
+            size={17}
+            style={reposted ? { stroke: "#10b981", strokeWidth: 2.5 } : undefined}
+          />
           {Boolean(repostCount && repostCount > 0) && <span>{repostCount} </span>}
           {reposted ? "Reposteado" : "Repostear"}
         </button>
@@ -134,7 +146,7 @@ export default function PostActions({
                 }
               }}
             >
-              <Repeat2 size={15} style={reposted ? { stroke: '#ef4444' } : { stroke: '#10b981' }} />
+              <Repeat2 size={15} style={reposted ? { stroke: "#ef4444" } : { stroke: "#10b981" }} />
               {reposted ? "Deshacer repost" : "Repostear"}
             </button>
             <button
@@ -151,11 +163,7 @@ export default function PostActions({
           </div>
         )}
       </div>
-      <button
-        aria-label={`Guardar: ${memoryTitle}`}
-        aria-pressed={saved}
-        onClick={onSave}
-      >
+      <button aria-label={`Guardar: ${memoryTitle}`} aria-pressed={saved} onClick={onSave}>
         <Bookmark size={17} fill={saved ? "currentColor" : "none"} />
         {saved ? "Guardado" : "Guardar"}
       </button>
@@ -180,13 +188,28 @@ export default function PostActions({
             onClick={(event) => event.stopPropagation()}
           >
             <span>Compartir recuerdo</span>
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={() => setShareOpen(false)}>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setShareOpen(false)}
+            >
               <Send size={15} /> WhatsApp
             </a>
-            <a href={facebookUrl} target="_blank" rel="noopener noreferrer" onClick={() => setShareOpen(false)}>
+            <a
+              href={facebookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setShareOpen(false)}
+            >
               <Link2 size={15} /> Facebook
             </a>
-            <a href={twitterUrl} target="_blank" rel="noopener noreferrer" onClick={() => setShareOpen(false)}>
+            <a
+              href={twitterUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setShareOpen(false)}
+            >
               <span aria-hidden="true">𝕏</span> X
             </a>
             <button

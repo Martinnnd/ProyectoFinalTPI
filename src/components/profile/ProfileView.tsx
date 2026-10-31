@@ -15,7 +15,13 @@ import { useFollow } from "../../context/FollowContext";
 import { useRatings } from "../../context/RatingsContext";
 import { eliminarPublicacion } from "../../api";
 import { getPublicacionesUsuario } from "../../userApi";
-import { changeOwnProfilePhoto, changeOwnUsername, getUserProfile, toAchievement, type UserProfile } from "../../profileApi";
+import {
+  changeOwnProfilePhoto,
+  changeOwnUsername,
+  getUserProfile,
+  toAchievement,
+  type UserProfile,
+} from "../../profileApi";
 import { ACHIEVEMENTS_UPDATED } from "../../achievementEvents";
 import {
   getGroups,
@@ -28,7 +34,12 @@ import type { CommunityGroup, Decade, Memory, TierProgress } from "../../types";
 
 export default function ProfileView(props: { targetUsername?: string }) {
   const { session } = useAuth();
-  return <ProfileContent key={`${session?.usuarioId ?? 'guest'}:${props.targetUsername ?? 'own'}`} {...props} />;
+  return (
+    <ProfileContent
+      key={`${session?.usuarioId ?? "guest"}:${props.targetUsername ?? "own"}`}
+      {...props}
+    />
+  );
 }
 
 function ProfileContent({ targetUsername }: { targetUsername?: string }) {
@@ -41,12 +52,14 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
 
   const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
-  const isOwnProfile = !targetUsername || targetUsername === session?.username ||
+  const isOwnProfile =
+    !targetUsername ||
+    targetUsername === session?.username ||
     (profileUser !== null && profileUser.id === session?.usuarioId);
   const usernameToFetch = isOwnProfile ? session?.usuarioId : targetUsername;
   const [revision, setRevision] = useState(0);
   useEffect(() => {
-    const refresh = () => setRevision(value => value + 1);
+    const refresh = () => setRevision((value) => value + 1);
     window.addEventListener(ACHIEVEMENTS_UPDATED, refresh);
     return () => window.removeEventListener(ACHIEVEMENTS_UPDATED, refresh);
   }, []);
@@ -88,7 +101,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     setLoading(true);
     setError(null);
 
-    getUserProfile(usernameToFetch, controller.signal, revision ? 'no-store' : 'default')
+    getUserProfile(usernameToFetch, controller.signal, revision ? "no-store" : "default")
       .then(async (perfil) => {
         if (controller.signal.aborted) return;
         setProfileUser(perfil);
@@ -118,7 +131,11 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
 
   if (error || !profileUser) {
     return (
-      <div className="feed-load-error" role="alert" style={{ padding: "60px 0", textAlign: "center" }}>
+      <div
+        className="feed-load-error"
+        role="alert"
+        style={{ padding: "60px 0", textAlign: "center" }}
+      >
         <p>{error ?? "No se encontró el perfil de usuario."}</p>
         <button type="button" className="secondary-button" onClick={() => router.push("/feed")}>
           Volver al feed
@@ -133,8 +150,8 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
         followingUsers.some(
           (u) =>
             u.id === profileUser.id ||
-            u.username.toLowerCase() === profileUser.username.toLowerCase()
-        )
+            u.username.toLowerCase() === profileUser.username.toLowerCase(),
+        ),
       )
     : false;
 
@@ -142,7 +159,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     memories: Math.max(profileUser.cantidadPublicaciones ?? 0, profileMemories.length),
     points: Math.max(
       profileUser.puntosNostalgia ?? 0,
-      profileMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0)
+      profileMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0),
     ),
     subscribed: false,
   };
@@ -159,10 +176,10 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
               loSigo: !currentlyFollowing,
               cantidadSeguidores: Math.max(
                 0,
-                curr.cantidadSeguidores + (currentlyFollowing ? -1 : 1)
+                curr.cantidadSeguidores + (currentlyFollowing ? -1 : 1),
               ),
             }
-          : curr
+          : curr,
       );
     }
   };
@@ -178,7 +195,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
             ...prev,
             cantidadPublicaciones: Math.max(0, (prev.cantidadPublicaciones ?? 1) - 1),
           }
-        : prev
+        : prev,
     );
     setNotice("Recuerdo eliminado.");
     return null;
@@ -186,7 +203,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
 
   const saveEdit = (updatedDraft: Memory) => {
     setProfileMemories((prev) =>
-      prev.map((m) => (m.id === updatedDraft.id ? { ...m, ...updatedDraft } : m))
+      prev.map((m) => (m.id === updatedDraft.id ? { ...m, ...updatedDraft } : m)),
     );
     setEditing(null);
     setNotice("Recuerdo modificado.");
@@ -224,12 +241,12 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
   const handleLeaveGroup = async (groupId: string): Promise<string | null> => {
     try {
       await leaveGroup(groupId);
-      setGroups(curr => curr.map(g => g.id === groupId ? { ...g, isMember: false } : g));
-      setScope('groups');
-      setNotice('Saliste del grupo.');
+      setGroups((curr) => curr.map((g) => (g.id === groupId ? { ...g, isMember: false } : g)));
+      setScope("groups");
+      setNotice("Saliste del grupo.");
       return null;
     } catch (error) {
-      return error instanceof Error ? error.message : 'No se pudo salir del grupo.';
+      return error instanceof Error ? error.message : "No se pudo salir del grupo.";
     }
   };
 
@@ -309,12 +326,12 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
         <ProfileEditDialog
           profile={profileUser}
           onClose={() => setEditingProfile(false)}
-          onChangeUsername={async username => {
+          onChangeUsername={async (username) => {
             const updated = await changeOwnUsername(username);
             setProfileUser(updated);
             return updated;
           }}
-          onChangePhoto={async file => {
+          onChangePhoto={async (file) => {
             const updated = await changeOwnProfilePhoto(file);
             setProfileUser(updated);
             return updated;

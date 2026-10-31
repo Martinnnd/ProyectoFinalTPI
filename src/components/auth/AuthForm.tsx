@@ -87,7 +87,9 @@ export default function AuthForm({
         <span>Nostalgiar</span>
       </Link>
 
-      <p className={styles.eyebrow}>{isRegister ? "EMPEZÁ A RECORDAR" : "QUÉ BUENO VOLVER A VERTE"}</p>
+      <p className={styles.eyebrow}>
+        {isRegister ? "EMPEZÁ A RECORDAR" : "QUÉ BUENO VOLVER A VERTE"}
+      </p>
       <h1 id="auth-title">{isRegister ? "Creá tu cuenta" : "Iniciá sesión"}</h1>
       <p className={styles.intro}>
         {isRegister
@@ -95,7 +97,11 @@ export default function AuthForm({
           : "Entrá para compartir recuerdos y continuar tus conversaciones."}
       </p>
 
-      {error && <div className={styles.errorBanner} role="alert">{error}</div>}
+      {error && (
+        <div className={styles.errorBanner} role="alert">
+          {error}
+        </div>
+      )}
 
       <form className={styles.form} onSubmit={submit} noValidate>
         {isRegister && (
@@ -182,7 +188,9 @@ export default function AuthForm({
                 required
               />
             </span>
-            {fieldErrors.confirmation && <small id="confirmation-error">{fieldErrors.confirmation}</small>}
+            {fieldErrors.confirmation && (
+              <small id="confirmation-error">{fieldErrors.confirmation}</small>
+            )}
           </label>
         )}
 
@@ -198,7 +206,9 @@ export default function AuthForm({
           {isRegister ? "Iniciá sesión" : "Registrate"}
         </Link>
       </p>
-      <Link className={styles.back} href="/">← Volver al inicio</Link>
+      <Link className={styles.back} href="/">
+        ← Volver al inicio
+      </Link>
     </section>
   );
 }

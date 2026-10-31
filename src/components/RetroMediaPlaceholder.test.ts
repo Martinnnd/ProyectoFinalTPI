@@ -11,7 +11,7 @@ describe("RetroMediaPlaceholder", () => {
         title: "Tarde de vinilos",
         category: "Música",
         failed: false,
-      })
+      }),
     );
     expect(html).toContain("RECUERDO SIN ADJUNTO");
     expect(html).toContain("1985");
@@ -25,7 +25,7 @@ describe("RetroMediaPlaceholder", () => {
       createElement(RetroMediaPlaceholder, {
         year: 1994,
         failed: true,
-      })
+      }),
     );
     expect(html).toContain("SEÑAL PERDIDA · ARCHIVO NO DISPONIBLE");
     expect(html).toContain("is-failed");
@@ -37,7 +37,7 @@ describe("RetroMediaPlaceholder", () => {
       createElement(RetroMediaPlaceholder, {
         compact: true,
         year: 1978,
-      })
+      }),
     );
     expect(html).toContain("is-compact");
   });

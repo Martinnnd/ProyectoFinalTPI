@@ -18,11 +18,19 @@ export default function LandingFooter() {
           <span className={styles.footerBrandName}>Nostalgiar</span>
           <p>Un día. Un momento. Un lugar.</p>
           <div className={styles.socialLinks} aria-label="Redes sociales">
-            <a href="https://www.instagram.com/nostalgi_ar/" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://www.instagram.com/nostalgi_ar/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Instagram size={17} aria-hidden="true" />
               <span>Instagram</span>
             </a>
-            <a href="https://www.tiktok.com/@nostalgi_ar?_r=1&_t=ZS-9Aw2DjgW7i3" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://www.tiktok.com/@nostalgi_ar?_r=1&_t=ZS-9Aw2DjgW7i3"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Music2 size={17} aria-hidden="true" />
               <span>TikTok</span>
             </a>

@@ -75,7 +75,9 @@ export default function CommentItem({
       await onLoadReplies(comment.id);
       setRepliesExpanded(true);
     } catch (reason) {
-      setActionError(reason instanceof Error ? reason.message : "No se pudieron cargar las respuestas.");
+      setActionError(
+        reason instanceof Error ? reason.message : "No se pudieron cargar las respuestas.",
+      );
     } finally {
       setRepliesLoading(false);
     }
@@ -87,7 +89,9 @@ export default function CommentItem({
     try {
       await onLoadReplies(comment.id);
     } catch (reason) {
-      setActionError(reason instanceof Error ? reason.message : "No se pudieron cargar más respuestas.");
+      setActionError(
+        reason instanceof Error ? reason.message : "No se pudieron cargar más respuestas.",
+      );
     } finally {
       setRepliesLoading(false);
     }
@@ -96,17 +100,26 @@ export default function CommentItem({
   return (
     <article className={`comment-item${comment.deleted ? " is-deleted" : ""}`}>
       <header>
-        <button type="button" className="comment-collapse-button"
+        <button
+          type="button"
+          className="comment-collapse-button"
           aria-label={expanded ? "Contraer comentario" : "Expandir comentario"}
-          aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>
+          aria-expanded={expanded}
+          onClick={() => setExpanded((value) => !value)}
+        >
           {expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
         </button>
         {comment.deleted ? (
           <em className="comment-deleted-label">Comentario eliminado</em>
         ) : (
           <>
-            <span className="comment-avatar" aria-hidden="true">{comment.author?.slice(0, 1)}</span>
-            <div><strong>{comment.author}</strong><time dateTime={comment.createdAt}>{time}</time></div>
+            <span className="comment-avatar" aria-hidden="true">
+              {comment.author?.slice(0, 1)}
+            </span>
+            <div>
+              <strong>{comment.author}</strong>
+              <time dateTime={comment.createdAt}>{time}</time>
+            </div>
           </>
         )}
       </header>
@@ -118,101 +131,180 @@ export default function CommentItem({
               <div className="comment-reaction-summary" aria-label="Reacciones del comentario">
                 {commentReactions.map((reaction) => {
                   const count = comment.reactions[reaction] ?? 0;
-                  return count ? <span key={reaction}>{reactionEmoji[reaction]} {count}</span> : null;
+                  return count ? (
+                    <span key={reaction}>
+                      {reactionEmoji[reaction]} {count}
+                    </span>
+                  ) : null;
                 })}
               </div>
               {interactive && (
                 <div className="comment-reaction-controls" ref={controls}>
-                  <button type="button" className="comment-reply-button" aria-expanded={replyOpen}
-                    onClick={() => setReplyOpen((value) => !value)}>Responder</button>
-                  <button type="button" className="comment-react-button" aria-label="Reaccionar al comentario"
-                    aria-haspopup="true" aria-expanded={pickerOpen}
-                    onClick={() => setPickerOpen((value) => !value)}>
+                  <button
+                    type="button"
+                    className="comment-reply-button"
+                    aria-expanded={replyOpen}
+                    onClick={() => setReplyOpen((value) => !value)}
+                  >
+                    Responder
+                  </button>
+                  <button
+                    type="button"
+                    className="comment-react-button"
+                    aria-label="Reaccionar al comentario"
+                    aria-haspopup="true"
+                    aria-expanded={pickerOpen}
+                    onClick={() => setPickerOpen((value) => !value)}
+                  >
                     <SmilePlus size={15} /> Reaccionar
                   </button>
                   {comment.canDelete && (
-                    <button type="button" className="comment-delete-button" disabled={deleting}
+                    <button
+                      type="button"
+                      className="comment-delete-button"
+                      disabled={deleting}
                       onClick={async () => {
-                        if (!window.confirm("¿Querés eliminar este comentario? Las respuestas se conservarán.")) return;
+                        if (
+                          !window.confirm(
+                            "¿Querés eliminar este comentario? Las respuestas se conservarán.",
+                          )
+                        )
+                          return;
                         setDeleting(true);
                         setActionError("");
                         try {
                           await onDelete(comment.id);
                         } catch (reason) {
-                          setActionError(reason instanceof Error ? reason.message : "No se pudo eliminar el comentario.");
+                          setActionError(
+                            reason instanceof Error
+                              ? reason.message
+                              : "No se pudo eliminar el comentario.",
+                          );
                         } finally {
                           setDeleting(false);
                         }
-                      }}>
+                      }}
+                    >
                       <Trash2 size={14} /> {deleting ? "Eliminando…" : "Eliminar"}
                     </button>
                   )}
                   {pickerOpen && (
-                    <ReactionPicker selected={comment.viewerReaction} onSelect={async (reaction) => {
-                      setActionError("");
-                      try {
-                        await onReaction(comment.id, reaction);
-                        setPickerOpen(false);
-                      } catch (reason) {
-                        setActionError(reason instanceof Error ? reason.message : "No se pudo guardar la reacción.");
-                      }
-                    }} />
+                    <ReactionPicker
+                      selected={comment.viewerReaction}
+                      onSelect={async (reaction) => {
+                        setActionError("");
+                        try {
+                          await onReaction(comment.id, reaction);
+                          setPickerOpen(false);
+                        } catch (reason) {
+                          setActionError(
+                            reason instanceof Error
+                              ? reason.message
+                              : "No se pudo guardar la reacción.",
+                          );
+                        }
+                      }}
+                    />
                   )}
                 </div>
               )}
             </div>
           )}
-          {actionError && <p className="comment-action-error" role="alert">{actionError}</p>}
+          {actionError && (
+            <p className="comment-action-error" role="alert">
+              {actionError}
+            </p>
+          )}
           {interactive && !comment.deleted && replyOpen && (
-            <form className="comment-reply-form" onSubmit={async (event) => {
-              event.preventDefault();
-              if (!replyDraft.trim() || replySending) return;
-              setReplySending(true);
-              setActionError("");
-              try {
-                await onReply(comment.id, replyDraft);
-                setReplyDraft("");
-                setReplyOpen(false);
-                setRepliesExpanded(true);
-              } catch (reason) {
-                setActionError(reason instanceof Error ? reason.message : "No se pudo publicar la respuesta.");
-              } finally {
-                setReplySending(false);
-              }
-            }}>
-              <label className="sr-only" htmlFor={`reply-${comment.id}`}>Responder a {comment.author}</label>
-              <textarea id={`reply-${comment.id}`} value={replyDraft} maxLength={1000} required
-                disabled={replySending} onChange={(event) => setReplyDraft(event.target.value)}
-                placeholder={`Responder a ${comment.author}…`} />
-              <button className="primary-button" type="submit" disabled={replySending || !replyDraft.trim()}>
+            <form
+              className="comment-reply-form"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                if (!replyDraft.trim() || replySending) return;
+                setReplySending(true);
+                setActionError("");
+                try {
+                  await onReply(comment.id, replyDraft);
+                  setReplyDraft("");
+                  setReplyOpen(false);
+                  setRepliesExpanded(true);
+                } catch (reason) {
+                  setActionError(
+                    reason instanceof Error ? reason.message : "No se pudo publicar la respuesta.",
+                  );
+                } finally {
+                  setReplySending(false);
+                }
+              }}
+            >
+              <label className="sr-only" htmlFor={`reply-${comment.id}`}>
+                Responder a {comment.author}
+              </label>
+              <textarea
+                id={`reply-${comment.id}`}
+                value={replyDraft}
+                maxLength={1000}
+                required
+                disabled={replySending}
+                onChange={(event) => setReplyDraft(event.target.value)}
+                placeholder={`Responder a ${comment.author}…`}
+              />
+              <button
+                className="primary-button"
+                type="submit"
+                disabled={replySending || !replyDraft.trim()}
+              >
                 {replySending ? "Enviando…" : "Responder"}
               </button>
             </form>
           )}
           {comment.replyCount > 0 && !repliesExpanded && (
-            <button type="button" className="comment-load-replies" disabled={repliesLoading}
-              onClick={() => void showReplies()}>
-              {repliesLoading ? "Cargando…" : `Ver ${comment.replyCount} ${comment.replyCount === 1 ? "respuesta" : "respuestas"}`}
+            <button
+              type="button"
+              className="comment-load-replies"
+              disabled={repliesLoading}
+              onClick={() => void showReplies()}
+            >
+              {repliesLoading
+                ? "Cargando…"
+                : `Ver ${comment.replyCount} ${comment.replyCount === 1 ? "respuesta" : "respuestas"}`}
             </button>
           )}
           {repliesExpanded && replies.length > 0 && (
             <div className={`comment-replies${depth >= 2 ? " is-depth-capped" : ""}`}>
               {replies.map((reply) => (
-                <CommentItem key={reply.id} comment={reply} comments={comments} interactive={interactive}
-                  onReply={onReply} onReaction={onReaction} onLoadReplies={onLoadReplies}
-                  onDelete={onDelete} depth={depth + 1} />
+                <CommentItem
+                  key={reply.id}
+                  comment={reply}
+                  comments={comments}
+                  interactive={interactive}
+                  onReply={onReply}
+                  onReaction={onReaction}
+                  onLoadReplies={onLoadReplies}
+                  onDelete={onDelete}
+                  depth={depth + 1}
+                />
               ))}
             </div>
           )}
           {repliesExpanded && comment.repliesCursor && (
-            <button type="button" className="comment-load-replies" disabled={repliesLoading}
-              onClick={() => void loadMoreReplies()}>
+            <button
+              type="button"
+              className="comment-load-replies"
+              disabled={repliesLoading}
+              onClick={() => void loadMoreReplies()}
+            >
               {repliesLoading ? "Cargando…" : `Ver ${Math.min(3, remainingReplies)} respuestas más`}
             </button>
           )}
           {repliesExpanded && replies.length > 0 && (
-            <button type="button" className="comment-hide-replies"
-              onClick={() => setRepliesExpanded(false)}>Ocultar respuestas</button>
+            <button
+              type="button"
+              className="comment-hide-replies"
+              onClick={() => setRepliesExpanded(false)}
+            >
+              Ocultar respuestas
+            </button>
           )}
         </>
       )}

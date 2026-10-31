@@ -32,13 +32,12 @@ export async function buscarUsuarios(
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     throw new Error(
-      problem?.detail ||
-        problem?.title ||
-        `No se pudieron buscar usuarios (${response.status}).`,
+      problem?.detail || problem?.title || `No se pudieron buscar usuarios (${response.status}).`,
     );
   }
   const users: unknown = await response.json();
-  if (!Array.isArray(users)) throw new Error("La búsqueda de usuarios devolvió una respuesta inválida.");
+  if (!Array.isArray(users))
+    throw new Error("La búsqueda de usuarios devolvió una respuesta inválida.");
   return users.map((user) => {
     const value = user as Partial<UsuarioBusqueda>;
     if (!Number.isSafeInteger(value.id) || !value.username) {
@@ -71,10 +70,9 @@ export async function getPublicacionesUsuario(
   usuarioId: number,
   signal?: AbortSignal,
 ): Promise<Memory[]> {
-  const response = await apiFetch(
-    `${API_BASE_URL}/api/publicaciones/usuario/${usuarioId}`,
-    { signal },
-  );
+  const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/usuario/${usuarioId}`, {
+    signal,
+  });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     throw new Error(
@@ -136,4 +134,3 @@ export async function getPublicacionesGuardadasUsuario(
     }),
   );
 }
-

@@ -1,5 +1,10 @@
 import { useState, useCallback } from "react";
-import { likePublication, unlikePublication, savePublication, unsavePublication } from "../publicationsApi";
+import {
+  likePublication,
+  unlikePublication,
+  savePublication,
+  unsavePublication,
+} from "../publicationsApi";
 
 export default function useMemoryInteractions() {
   const [likes, setLikes] = useState<Record<string, boolean>>({});
@@ -35,22 +40,16 @@ export default function useMemoryInteractions() {
     [repostCounts],
   );
 
-  const updateRepostCount = useCallback(
-    (memoryId: string, count: number) => {
-      setRepostCounts((prev) => ({ ...prev, [memoryId]: count }));
-    },
-    [],
-  );
+  const updateRepostCount = useCallback((memoryId: string, count: number) => {
+    setRepostCounts((prev) => ({ ...prev, [memoryId]: count }));
+  }, []);
 
-  const incrementRepostCount = useCallback(
-    (memoryId: string, delta: number, initialCount = 0) => {
-      setRepostCounts((prev) => {
-        const current = prev[memoryId] ?? initialCount;
-        return { ...prev, [memoryId]: Math.max(0, current + delta) };
-      });
-    },
-    [],
-  );
+  const incrementRepostCount = useCallback((memoryId: string, delta: number, initialCount = 0) => {
+    setRepostCounts((prev) => {
+      const current = prev[memoryId] ?? initialCount;
+      return { ...prev, [memoryId]: Math.max(0, current + delta) };
+    });
+  }, []);
 
   const toggleLike = useCallback(
     async (memoryId: string, initialLiked = false, initialCount = 0) => {
@@ -64,9 +63,7 @@ export default function useMemoryInteractions() {
       setLikeCounts((prev) => ({ ...prev, [memoryId]: nextCount }));
 
       try {
-        const res = nextLiked
-          ? await likePublication(memoryId)
-          : await unlikePublication(memoryId);
+        const res = nextLiked ? await likePublication(memoryId) : await unlikePublication(memoryId);
 
         setLikes((prev) => ({ ...prev, [memoryId]: res.dioLike }));
         setLikeCounts((prev) => ({ ...prev, [memoryId]: res.cantidadLikes }));
@@ -89,9 +86,7 @@ export default function useMemoryInteractions() {
       setSaves((prev) => ({ ...prev, [memoryId]: nextSaved }));
 
       try {
-        const res = nextSaved
-          ? await savePublication(memoryId)
-          : await unsavePublication(memoryId);
+        const res = nextSaved ? await savePublication(memoryId) : await unsavePublication(memoryId);
 
         setSaves((prev) => ({ ...prev, [memoryId]: res.guardada }));
       } catch (err) {
