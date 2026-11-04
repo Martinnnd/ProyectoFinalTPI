@@ -55,6 +55,18 @@ describe("getNotificationText", () => {
     const text = getNotificationText(makeNotification({ type: "chatMessage" }));
     expect(text).toContain("chat");
   });
+
+  it("returns correct text for userTagged with senderUsername", () => {
+    const text = getNotificationText(
+      makeNotification({ type: "userTagged", senderUsername: "juan" }),
+    );
+    expect(text).toBe("@juan te etiquetó en un recuerdo");
+  });
+
+  it("returns generic text for userTagged without senderUsername", () => {
+    const text = getNotificationText(makeNotification({ type: "userTagged" }));
+    expect(text).toBe("Te etiquetaron en un recuerdo");
+  });
 });
 
 // ─── getNotificationNavigation ────────────────────────────────────────────────
@@ -110,6 +122,18 @@ describe("getNotificationNavigation", () => {
     const nav = getNotificationNavigation(makeNotification({ type: "chatMessage" }));
     expect(nav).toEqual({ kind: "openChat" });
   });
+
+  it("returns push to /recuerdo/:id for userTagged with publicationId", () => {
+    const nav = getNotificationNavigation(
+      makeNotification({ type: "userTagged", publicationId: 77 }),
+    );
+    expect(nav).toEqual({ kind: "push", path: "/recuerdo/77" });
+  });
+
+  it("returns none for userTagged without publicationId", () => {
+    const nav = getNotificationNavigation(makeNotification({ type: "userTagged" }));
+    expect(nav).toEqual({ kind: "none" });
+  });
 });
 
 // ─── isNotificationFeatureImplemented ────────────────────────────────────────
@@ -120,6 +144,7 @@ describe("isNotificationFeatureImplemented", () => {
     expect(isNotificationFeatureImplemented("publicationComment")).toBe(true);
     expect(isNotificationFeatureImplemented("publicationRating")).toBe(true);
     expect(isNotificationFeatureImplemented("chatMessage")).toBe(true);
+    expect(isNotificationFeatureImplemented("userTagged")).toBe(true);
   });
 
   it("returns false for types with pending backend", () => {

@@ -10,7 +10,9 @@ import MemoryEditForm from "./MemoryEditForm";
 import type { ComponentProps } from "react";
 const GOOGLE_PHOTOS_AVAILABLE = false;
 import { useEffect, useRef, useState } from "react";
-import { X, Save, Loader2, Upload, Images, Link } from "lucide-react";
+import { X, Save, Loader2, Upload, Images, Link, Users, UserPlus } from "lucide-react";
+import { buscarUsuarios, type UsuarioBusqueda } from "../userApi";
+import { useOptionalAuth } from "./auth/AuthProvider";
 import { categories, type Memory, type Decade, type CommunityGroup } from "../types";
 import type { Point } from "./MemoryMap";
 function MemoryCreationForm({
@@ -32,6 +34,8 @@ function MemoryCreationForm({
   onSave: (m: Memory) => string | null | Promise<string | null | void> | void;
 }) {
   const dirty = useRef(false);
+  const auth = useOptionalAuth();
+  const session = auth?.session;
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   function requestClose() {
     if (saving) return;
@@ -77,6 +81,58 @@ function MemoryCreationForm({
       });
     return () => controller.abort();
   }, []);
+  const [taggedUsers, setTaggedUsers] = useState<UsuarioBusqueda[]>(() => {
+    const list = initial?.taggedUsers ? [...initial.taggedUsers] : [];
+    return list.filter((u) => {
+      if (session?.usuarioId && u.id === session.usuarioId) return false;
+      if (session?.username && u.username.toLowerCase() === session.username.toLowerCase()) return false;
+      return true;
+    });
+  });
+  const [tagQuery, setTagQuery] = useState("");
+  const [tagResults, setTagResults] = useState<UsuarioBusqueda[]>([]);
+  const [tagSearching, setTagSearching] = useState(false);
+
+  useEffect(() => {
+    const q = tagQuery.trim();
+    if (q.length < 2) {
+      setTagResults([]);
+      setTagSearching(false);
+      return;
+    }
+
+    const currentUserId = session?.usuarioId;
+    const currentUsername = session?.username?.toLowerCase();
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      setTagSearching(true);
+      buscarUsuarios(q, controller.signal)
+        .then((users) => {
+          if (!controller.signal.aborted) {
+            setTagResults(
+              users.filter((u) => {
+                if (currentUserId && u.id === currentUserId) return false;
+                if (currentUsername && u.username.toLowerCase() === currentUsername) return false;
+                if (taggedUsers.some((t) => t.id === u.id)) return false;
+                return true;
+              }),
+            );
+          }
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) setTagResults([]);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setTagSearching(false);
+        });
+    }, 250);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [tagQuery, taggedUsers, session]);
   const detectedHashtags = extractHashtags(description);
   const [mediaKind, setMediaKind] = useState<"image" | "video" | "youtube">(
     initial?.media?.kind ?? (youtubeId(initial?.image ?? "") ? "youtube" : "image"),
@@ -247,6 +303,13 @@ function MemoryCreationForm({
         description,
         groupId: selectedGroupId || undefined,
         hashtags: hashtags.tags,
+        taggedUsers: taggedUsers
+          .filter((u) => {
+            if (session?.usuarioId && u.id === session.usuarioId) return false;
+            if (session?.username && u.username.toLowerCase() === session.username.toLowerCase()) return false;
+            return true;
+          })
+          .map((u) => ({ id: u.id, username: u.username })),
         createdAt: initial?.createdAt ?? (initial ? undefined : new Date().toISOString()),
         author: "Vos",
         source: "local",
@@ -577,6 +640,64 @@ function MemoryCreationForm({
                     ? "Elegí uno de los grupos a los que pertenecés o publicá para todos."
                     : "Todavía no te uniste a ningún grupo. Tu recuerdo se publicará para todos."}
             </small>
+          </div>
+          <div className="memory-tag-users-section">
+            <label htmlFor="tag-user-input" className="tag-users-label">
+              <Users size={15} /> ¿Quiénes estuvieron ahí?
+            </label>
+            <div className="tag-users-input-wrapper">
+              <input
+                id="tag-user-input"
+                type="text"
+                value={tagQuery}
+                placeholder="Buscá amigos por @username..."
+                onChange={(e) => setTagQuery(e.target.value)}
+                autoComplete="off"
+              />
+              {tagSearching && <Loader2 size={14} className="tag-search-spinner spin" />}
+            </div>
+
+            {tagResults.length > 0 && (
+              <ul className="tag-users-dropdown" role="listbox">
+                {tagResults.map((u) => (
+                  <li key={u.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (session?.usuarioId && u.id === session.usuarioId) return;
+                        if (session?.username && u.username.toLowerCase() === session.username.toLowerCase()) return;
+                        setTaggedUsers((prev) => (prev.some((p) => p.id === u.id) ? prev : [...prev, u]));
+                        setTagQuery("");
+                        setTagResults([]);
+                        dirty.current = true;
+                      }}
+                    >
+                      <UserPlus size={14} /> @{u.username}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {taggedUsers.length > 0 && (
+              <div className="tagged-users-chips" aria-label="Amigos etiquetados">
+                {taggedUsers.map((u) => (
+                  <span key={u.id} className="tagged-chip">
+                    @{u.username}
+                    <button
+                      type="button"
+                      aria-label={`Quitar @${u.username}`}
+                      onClick={() => {
+                        setTaggedUsers((prev) => prev.filter((item) => item.id !== u.id));
+                        dirty.current = true;
+                      }}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <div data-form-step="2" hidden={step !== 2}>

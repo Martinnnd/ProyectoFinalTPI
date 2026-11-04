@@ -17,7 +17,7 @@ import ProfileMapDialog from "./ProfileMapDialog";
 import ProfilePosts from "./ProfilePosts";
 import ProfileShortcuts from "./ProfileShortcuts";
 import type { ProfilePresentation } from "./profileTypes";
-import { getPublicacionesGuardadasUsuario } from "../../userApi";
+import { getPublicacionesGuardadasUsuario, getPublicacionesEtiquetadasUsuario } from "../../userApi";
 
 const presentations: Record<Period["decade"], ProfilePresentation> = {
   1970: {
@@ -140,10 +140,13 @@ export default function Profile({
   const [mapClosing, setMapClosing] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [tiersOpen, setTiersOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"posts" | "saved">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "saved" | "tagged">("posts");
   const [savedMemories, setSavedMemories] = useState<Memory[]>([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [savedLoaded, setSavedLoaded] = useState(false);
+  const [taggedMemories, setTaggedMemories] = useState<Memory[]>([]);
+  const [loadingTagged, setLoadingTagged] = useState(false);
+  const [taggedLoaded, setTaggedLoaded] = useState(false);
 
   const presentation = presentations[period.decade];
   const unlocked = catalogue.filter((achievement) => achievement.unlocked);
@@ -165,14 +168,17 @@ export default function Profile({
     setActiveTab("posts");
     setSavedMemories([]);
     setSavedLoaded(false);
+    setTaggedMemories([]);
+    setTaggedLoaded(false);
   }, [userId, author]);
 
-  const currentTab = isOwnProfile ? activeTab : "posts";
+  const currentTab = !isOwnProfile && activeTab === "saved" ? "posts" : activeTab;
 
   async function handleOpenSaved() {
     if (!isOwnProfile || !userId) return;
     setActiveTab("saved");
     album.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    if (savedLoaded) return;
     setLoadingSaved(true);
     try {
       const mems = await getPublicacionesGuardadasUsuario(userId);
@@ -182,6 +188,23 @@ export default function Profile({
       console.error("Error al cargar guardados:", err);
     } finally {
       setLoadingSaved(false);
+    }
+  }
+
+  async function handleOpenTagged() {
+    if (!userId) return;
+    setActiveTab("tagged");
+    album.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    if (taggedLoaded) return;
+    setLoadingTagged(true);
+    try {
+      const mems = await getPublicacionesEtiquetadasUsuario(userId);
+      setTaggedMemories(mems);
+      setTaggedLoaded(true);
+    } catch (err) {
+      console.error("Error al cargar recuerdos etiquetados:", err);
+    } finally {
+      setLoadingTagged(false);
     }
   }
 
@@ -275,10 +298,12 @@ export default function Profile({
           presentation={presentation}
           memoryCount={allMemories.length}
           savedCount={savedLoaded ? savedMemories.length : undefined}
+          taggedCount={taggedLoaded ? taggedMemories.length : undefined}
           activeTab={currentTab}
           mapOpened={mapOpened}
           onOpenCollection={handleOpenCollection}
           onOpenSaved={isOwnProfile && userId ? handleOpenSaved : undefined}
+          onOpenTagged={userId ? handleOpenTagged : undefined}
           onOpenMap={openMap}
         />
         <ProfileMapDialog
@@ -305,14 +330,31 @@ export default function Profile({
               Cargando recuerdos guardados...
             </p>
           </div>
+        ) : currentTab === "tagged" && loadingTagged ? (
+          <div
+            className="personal-empty profile-loading"
+            style={{ padding: "40px", textAlign: "center" }}
+          >
+            <LoaderCircle className="animate-spin" size={24} style={{ margin: "0 auto" }} />
+            <p style={{ marginTop: "12px", color: "var(--muted)" }}>
+              Cargando recuerdos donde {author ? `aparece ${author}` : "aparecés"}...
+            </p>
+          </div>
         ) : (
           <ProfilePosts
             ref={album}
             author={author}
             username={username}
-            memories={currentTab === "saved" ? savedMemories : allMemories}
+            memories={
+              currentTab === "tagged"
+                ? taggedMemories
+                : currentTab === "saved"
+                  ? savedMemories
+                  : allMemories
+            }
             selected={selected}
             isSavedTab={currentTab === "saved"}
+            isTaggedTab={currentTab === "tagged"}
             repostedPublicationIds={repostedPublicationIds}
             onEdit={onEdit}
             onDelete={onDelete}

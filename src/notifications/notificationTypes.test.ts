@@ -32,6 +32,7 @@ describe("parseNotification", () => {
       ["AscensoCategoria", "categoryPromotion"],
       ["MensajesCorreo", "emailMessages"],
       ["MensajeChat", "chatMessage"],
+      ["EtiquetadoEnPublicacion", "userTagged"],
     ];
 
     for (const [backendType, expectedType] of cases) {

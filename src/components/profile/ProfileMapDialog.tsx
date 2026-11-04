@@ -1,4 +1,4 @@
-import { Link2, MapPin, Send, Share2, X } from "lucide-react";
+import { Link2, MapPin, Send, Share2, UsersRound, X } from "lucide-react";
 import { useState, type RefObject } from "react";
 import type { Memory, Period } from "../../types";
 import MemoryMap from "../MemoryMap";
@@ -263,6 +263,18 @@ export default function ProfileMapDialog({
                   <MapPin size={14} />
                   {selected.place}
                 </p>
+                {!!selected.taggedUsers?.length && (
+                  <div className="post-tagged-users" aria-label="Usuarios etiquetados" style={{ margin: "8px 0" }}>
+                    <span className="tagged-label">
+                      <UsersRound size={14} aria-hidden="true" /> Estuvieron ahí:
+                    </span>
+                    {selected.taggedUsers.map((user) => (
+                      <span key={user.id} className="tagged-user-badge">
+                        @{user.username}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <p>{selected.description}</p>
                 <PostMedia key={`media-${selected.id}`} memory={selected} />
               </article>

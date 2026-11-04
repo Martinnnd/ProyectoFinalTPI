@@ -5,7 +5,7 @@ import MemoryForm from "./MemoryForm";
 import type { Memory } from "../types";
 
 describe("Edición de publicaciones", () => {
-  it("ofrece únicamente título y descripción, sin los pasos de creación", () => {
+  it("ofrece título, descripción y etiquetado de personas, sin los pasos de creación", () => {
     const initial: Memory = {
       id: "42",
       title: "Mi recuerdo",
@@ -29,9 +29,11 @@ describe("Edición de publicaciones", () => {
         onSave: () => {},
       }),
     );
-    expect(html.match(/<(?:input|textarea|select)\b/g)).toHaveLength(2);
+    expect(html.match(/<(?:input|textarea|select)\b/g)).toHaveLength(3);
     expect(html).toContain('name="title"');
     expect(html).toContain('name="description"');
+    expect(html).toContain('id="tag-user-input"');
+    expect(html).toContain("¿Quiénes estuvieron ahí?");
     expect(html).toContain("Guardar cambios");
     expect(html).not.toContain("memory-form-progress");
   });

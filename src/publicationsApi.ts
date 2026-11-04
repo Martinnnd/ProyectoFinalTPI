@@ -34,6 +34,7 @@ export type Publication = {
   publicacionOriginalId?: number | null;
   publicacionOriginal?: Publication;
   reposteadoPor?: { usuarioId: number; username: string; fecha?: string };
+  usuariosEtiquetados?: { id: number; username: string }[];
 };
 
 export async function publicationRequest<T>(path: string, options?: RequestInit): Promise<T> {
@@ -178,6 +179,7 @@ export function toMemory(data: Publication, pin: Memory): Memory {
       url && (video || youtubeId(url))
         ? { kind: youtubeId(url) ? "youtube" : "video", url }
         : undefined,
+    taggedUsers: data.usuariosEtiquetados?.map((u) => ({ id: u.id, username: u.username })),
   };
 }
 export async function getPublication(
@@ -274,6 +276,32 @@ export async function savePublication(id: number | string): Promise<SaveState> {
 
 export async function unsavePublication(id: number | string): Promise<SaveState> {
   return publicationRequest<SaveState>(`/${id}/guardar`, {
+    method: "DELETE",
+  });
+}
+
+export async function tagUsersInPublication(
+  publicacionId: number | string,
+  usuariosIds: number[],
+): Promise<{ publicacionId: number; cantidadEtiquetasNuevas: number }> {
+  return publicationRequest(`/${publicacionId}/etiquetas`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ usuariosIds }),
+  });
+}
+
+export async function getTaggedUsers(
+  publicacionId: number | string,
+): Promise<{ id: number; username: string }[]> {
+  return publicationRequest(`/${publicacionId}/etiquetas`);
+}
+
+export async function untagUserInPublication(
+  publicacionId: number | string,
+  usuarioId: number,
+): Promise<void> {
+  return publicationRequest(`/${publicacionId}/etiquetas/${usuarioId}`, {
     method: "DELETE",
   });
 }
