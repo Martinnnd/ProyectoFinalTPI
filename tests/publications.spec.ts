@@ -830,6 +830,7 @@ test("pines, resumen, detalle y comentarios del backend", async ({ page }) => {
 
 for (const count of [4, 5, 6]) {
   test(`el anillo se cierra con ${count} recuerdos relacionados`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: count === 5 ? 480 : 1280, height: 800 });
     const empty = { items: [], siguienteCursor: null, hayMas: false };
     const publication = (id: number) => ({
       id,
@@ -908,5 +909,34 @@ for (const count of [4, 5, 6]) {
       expect(back.some((card) => card.x > front.x)).toBe(true);
     }
     await carousel.screenshot({ path: testInfo.outputPath("anillo.png") });
+    const track = carousel.getByRole("group", { name: "Recuerdos de este lugar" });
+    const positions = () =>
+      carousel.locator("[data-active]").evaluateAll((elements) =>
+        elements.map((element) => {
+          const { x, y } = element.getBoundingClientRect();
+          const parent = element.parentElement!.getBoundingClientRect();
+          return { x: x - parent.x, y: y - parent.y };
+        }),
+      );
+    const beforeOpeningPositions = await positions();
+    let release!: () => void;
+    const loading = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route("**/api/publicaciones/26", async (route) => {
+      await loading;
+      await route.fulfill({ status: 503, body: "No disponible" });
+    });
+    const beforeOpening = await track.boundingBox();
+    await carousel.getByRole("button", { name: "Ver en el mapa: Recuerdo 26", exact: true }).click();
+    try {
+      await expect(carousel.getByRole("status")).toHaveText("Abriendo recuerdo…");
+      const duringOpening = (await track.boundingBox())!;
+      expect(duringOpening.width).toBe(beforeOpening!.width);
+      expect(duringOpening.height).toBe(beforeOpening!.height);
+      expect(await positions()).toEqual(beforeOpeningPositions);
+    } finally {
+      release();
+    }
   });
 }
