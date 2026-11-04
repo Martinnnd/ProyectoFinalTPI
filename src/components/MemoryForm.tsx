@@ -12,7 +12,7 @@ const GOOGLE_PHOTOS_AVAILABLE = false;
 import { useEffect, useRef, useState } from "react";
 import { X, Save, Loader2, Upload, Images, Link, Users, UserPlus } from "lucide-react";
 import { buscarUsuarios, type UsuarioBusqueda } from "../userApi";
-import { useAuth } from "./auth/AuthProvider";
+import { useOptionalAuth } from "./auth/AuthProvider";
 import { categories, type Memory, type Decade, type CommunityGroup } from "../types";
 import type { Point } from "./MemoryMap";
 function MemoryCreationForm({
@@ -34,7 +34,8 @@ function MemoryCreationForm({
   onSave: (m: Memory) => string | null | Promise<string | null | void> | void;
 }) {
   const dirty = useRef(false);
-  const { session } = useAuth();
+  const auth = useOptionalAuth();
+  const session = auth?.session;
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   function requestClose() {
     if (saving) return;
