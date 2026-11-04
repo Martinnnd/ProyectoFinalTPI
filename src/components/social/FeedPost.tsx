@@ -350,6 +350,27 @@ export default function FeedPost({
                     ))}
                   </div>
                 )}
+                {!!targetQuoted.taggedUsers?.length && (
+                  <div className="post-tagged-users" aria-label="Usuarios etiquetados">
+                    <span className="tagged-label">
+                      <UsersRound size={16} aria-hidden="true" /> Estuvieron ahí:
+                    </span>
+                    {targetQuoted.taggedUsers.map((user) => (
+                      <button
+                        key={user.id}
+                        type="button"
+                        className="tagged-user-badge"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onProfile({ ...targetQuoted, author: user.username, authorId: user.id });
+                        }}
+                        title={`Ver perfil de @${user.username}`}
+                      >
+                        @{user.username}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <button
                   className="post-place"
                   onClick={(e) => {

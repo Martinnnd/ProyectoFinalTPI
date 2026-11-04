@@ -263,6 +263,19 @@ function ExploreContent() {
       }
       if (res && res.id) {
         memory = { ...memory, id: res.id.toString(), source: "backend" };
+        if (memory.taggedUsers && memory.taggedUsers.length > 0) {
+          try {
+            const { tagUsersInPublication } = await import("../../publicationsApi");
+            const userIdsToTag = memory.taggedUsers
+              .filter((u) => (session?.usuarioId ? u.id !== session.usuarioId : true))
+              .map((u) => u.id);
+            if (userIdsToTag.length > 0) {
+              await tagUsersInPublication(res.id, userIdsToTag);
+            }
+          } catch {
+            // El recuerdo se guardó con éxito en el mapa aunque las etiquetas no se hayan podido sincronizar
+          }
+        }
       }
       setRemotePins((curr) => [memory, ...curr.filter((m) => m.id !== memory.id)]);
       setMapRevision((r) => r + 1);

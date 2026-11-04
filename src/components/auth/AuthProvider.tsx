@@ -21,7 +21,7 @@ import {
 } from "./authStorage";
 import type { AuthSession, AuthStatus, LoginCredentials, RegisterCredentials } from "./authTypes";
 
-type AuthContextValue = {
+export type AuthContextValue = {
   session: AuthSession | null;
   status: AuthStatus;
   isAuthenticated: boolean;
@@ -41,64 +41,72 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    let active = true;
-    window.localStorage.removeItem("nostalgia_auth");
+    let cancelled = false;
 
-    refreshSessionRequest()
-      .then((next) => {
-        if (!active) return;
-        storeSession(next);
-        setSession(next);
+    async function init() {
+      const stored = getStoredSession();
+      if (stored) {
+        setSession(stored);
         setStatus("authenticated");
-      })
-      .catch(() => {
-        if (!active) return;
+        completeAuthInit();
+        return;
+      }
+
+      try {
+        const refreshed = await refreshSessionRequest();
+        if (cancelled) return;
+        storeSession(refreshed);
+        setSession(refreshed);
+        setStatus("authenticated");
+      } catch {
+        if (cancelled) return;
         clearStoredSession();
         setSession(null);
         setStatus("anonymous");
-      })
-      .finally(() => {
+      } finally {
         completeAuthInit();
-      });
+      }
+    }
 
-    const syncSession = () => {
-      const next = getStoredSession();
-      setSession(next);
-      setStatus(next ? "authenticated" : "anonymous");
-    };
-    window.addEventListener(AUTH_CHANGE_EVENT, syncSession);
+    void init();
+
+    function syncFromStorage() {
+      const current = getStoredSession();
+      setSession(current);
+      setStatus(current ? "authenticated" : "anonymous");
+    }
+
+    window.addEventListener(AUTH_CHANGE_EVENT, syncFromStorage);
     return () => {
-      active = false;
-      window.removeEventListener(AUTH_CHANGE_EVENT, syncSession);
+      cancelled = true;
+      window.removeEventListener(AUTH_CHANGE_EVENT, syncFromStorage);
     };
   }, []);
 
-  useEffect(() => {
-    if (!session) return;
-    const expiresAt = tokenExpiresAt(session.token);
-    if (!expiresAt) return;
-    const delay = Math.max(0, expiresAt - Date.now() - 60_000);
-    const timeout = window.setTimeout(() => {
-      refreshSessionRequest().then(storeSession).catch(clearStoredSession);
-    }, delay);
-    return () => window.clearTimeout(timeout);
-  }, [session]);
-
   const login = useCallback(async (credentials: LoginCredentials) => {
-    const next = await loginRequest(credentials);
-    storeSession(next);
-    return next;
+    const nextSession = await loginRequest(credentials);
+    storeSession(nextSession);
+    setSession(nextSession);
+    setStatus("authenticated");
+    return nextSession;
   }, []);
 
   const register = useCallback(async (credentials: RegisterCredentials) => {
-    const next = await registerRequest(credentials);
-    storeSession(next);
-    return next;
+    const nextSession = await registerRequest(credentials);
+    storeSession(nextSession);
+    setSession(nextSession);
+    setStatus("authenticated");
+    return nextSession;
   }, []);
 
   const logout = useCallback(async () => {
-    await logoutRequest();
-    clearStoredSession();
+    try {
+      await logoutRequest();
+    } finally {
+      clearStoredSession();
+      setSession(null);
+      setStatus("anonymous");
+    }
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -114,6 +122,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useOptionalAuth(): AuthContextValue | null {
+  return useContext(AuthContext);
 }
 
 export function useAuth(): AuthContextValue {

@@ -1,4 +1,4 @@
-import { Bookmark, Grid3x3, MapPin } from "lucide-react";
+import { Bookmark, Grid3x3, MapPin, Users } from "lucide-react";
 import type { ProfilePresentation } from "./profileTypes";
 
 export default function ProfileShortcuts({
@@ -6,20 +6,24 @@ export default function ProfileShortcuts({
   presentation,
   memoryCount,
   savedCount,
+  taggedCount,
   activeTab = "posts",
   mapOpened,
   onOpenCollection,
   onOpenSaved,
+  onOpenTagged,
   onOpenMap,
 }: {
   author?: string;
   presentation: ProfilePresentation;
   memoryCount: number;
   savedCount?: number;
-  activeTab?: "posts" | "saved";
+  taggedCount?: number;
+  activeTab?: "posts" | "saved" | "tagged";
   mapOpened: boolean;
   onOpenCollection: () => void;
   onOpenSaved?: () => void;
+  onOpenTagged?: () => void;
   onOpenMap: () => void;
 }) {
   return (
@@ -44,6 +48,18 @@ export default function ProfileShortcuts({
           <Bookmark size={16} />
           Recuerdos guardados
           {savedCount !== undefined && <span>{savedCount}</span>}
+        </button>
+      )}
+      {onOpenTagged && (
+        <button
+          type="button"
+          onClick={onOpenTagged}
+          aria-pressed={activeTab === "tagged"}
+          className={activeTab === "tagged" ? "active" : undefined}
+        >
+          <Users size={16} />
+          {author ? "Donde aparece" : "Donde aparezco"}
+          {taggedCount !== undefined && <span>{taggedCount}</span>}
         </button>
       )}
       <button type="button" onClick={onOpenMap} aria-haspopup="dialog" aria-expanded={mapOpened}>

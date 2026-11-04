@@ -492,6 +492,49 @@
   flex-shrink: 0;
 }
 
+.post-tagged-users {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 12px;
+  padding: 8px 12px;
+  background: var(--surface-soft, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-sm, 8px);
+  font-size: 13.5px;
+}
+
+.post-tagged-users .tagged-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.post-tagged-users .tagged-user-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface, rgba(255, 255, 255, 0.08));
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.post-tagged-users .tagged-user-badge:hover {
+  background: var(--accent);
+  color: var(--accent-contrast, #ffffff);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
 .post-ratings {
   display: flex;
   align-items: center;
