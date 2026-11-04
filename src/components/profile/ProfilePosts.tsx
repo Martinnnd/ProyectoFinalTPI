@@ -18,6 +18,7 @@ const ProfilePosts = forwardRef<
     selected: Memory | null;
     repostedPublicationIds: string[];
     isSavedTab?: boolean;
+    isTaggedTab?: boolean;
     onEdit: (memory: Memory) => void;
     onDelete: (memory: Memory) => void;
     onOpen?: (memory: Memory) => void;
@@ -32,6 +33,7 @@ const ProfilePosts = forwardRef<
     selected,
     repostedPublicationIds,
     isSavedTab = false,
+    isTaggedTab = false,
     onEdit,
     onDelete,
     onOpen,
@@ -73,7 +75,15 @@ const ProfilePosts = forwardRef<
       ref={ref}
       className="personal-album profile-posts"
       aria-label={
-        isSavedTab ? "Mis recuerdos guardados" : author ? `Recuerdos de ${author}` : "Mis recuerdos"
+        isTaggedTab
+          ? author
+            ? `Recuerdos donde aparece ${author}`
+            : "Recuerdos donde aparezco"
+          : isSavedTab
+            ? "Mis recuerdos guardados"
+            : author
+              ? `Recuerdos de ${author}`
+              : "Mis recuerdos"
       }
     >
       {sortedMemories.length ? (
@@ -156,7 +166,10 @@ const ProfilePosts = forwardRef<
                 onDelete={onDelete}
                 onEdit={onEdit}
                 onProfile={(m) => {
-                  if (m.author && m.author !== username) {
+                  if (!m.author) return;
+                  if (session && m.author.toLowerCase() === session.username?.toLowerCase()) {
+                    router.push("/perfil");
+                  } else {
                     router.push(`/perfil/${m.author}`);
                   }
                 }}
@@ -274,20 +287,28 @@ const ProfilePosts = forwardRef<
       ) : (
         <div className="personal-empty">
           <h3>
-            {isSavedTab
-              ? "Todavía no guardaste ningún recuerdo"
-              : author
-                ? "Todavía no hay recuerdos publicados"
-                : "Tu primer recuerdo merece un lugar"}
+            {isTaggedTab
+              ? author
+                ? `Todavía no hay recuerdos donde aparezca ${author}`
+                : "Todavía no te etiquetaron en ningún recuerdo"
+              : isSavedTab
+                ? "Todavía no guardaste ningún recuerdo"
+                : author
+                  ? "Todavía no hay recuerdos publicados"
+                  : "Tu primer recuerdo merece un lugar"}
           </h3>
           <p>
-            {isSavedTab
-              ? "Podés guardar recuerdos desde el feed o explorando para volver a verlos cuando quieras."
-              : author
-                ? "Sus publicaciones aparecerán acá."
-                : "Contá tu historia: cada recuerdo que publiques aparecerá acá, uno debajo del otro."}
+            {isTaggedTab
+              ? author
+                ? `Cuando otros usuarios etiqueten a ${author} en sus recuerdos ("Estuvieron ahí"), se mostrarán acá.`
+                : 'Cuando tus amigos te etiqueten en sus recuerdos ("Estuvieron ahí"), van a aparecer acá.'
+              : isSavedTab
+                ? "Podés guardar recuerdos desde el feed o explorando para volver a verlos cuando quieras."
+                : author
+                  ? "Sus publicaciones aparecerán acá."
+                  : "Contá tu historia: cada recuerdo que publiques aparecerá acá, uno debajo del otro."}
           </p>
-          {!author && !isSavedTab && (
+          {!author && !isSavedTab && !isTaggedTab && (
             <button className="primary-button" onClick={onAdd}>
               Crear un recuerdo
             </button>

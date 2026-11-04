@@ -28,6 +28,11 @@ export function getNotificationText(notification: NotificationDto): string {
     case "chatMessage":
       return "Recibiste mensajes en el chat";
 
+    case "userTagged":
+      return senderUsername
+        ? `@${senderUsername} te etiquetó en un recuerdo`
+        : "Te etiquetaron en un recuerdo";
+
     default: {
       const exhaustiveCheck: never = type;
       return "Nueva notificación";
@@ -68,6 +73,11 @@ export function getNotificationNavigation(notification: NotificationDto): Notifi
     case "chatMessage":
       return { kind: "openChat" };
 
+    case "userTagged":
+      return publicationId != null
+        ? { kind: "push", path: `/recuerdo/${publicationId}` }
+        : { kind: "none" };
+
     default: {
       const exhaustiveCheck: never = type;
       return { kind: "none" };
@@ -82,6 +92,7 @@ export function isNotificationFeatureImplemented(type: NotificationType): boolea
     case "publicationComment":
     case "publicationRating":
     case "chatMessage":
+    case "userTagged":
       return true;
     case "categoryPromotion":
     case "emailMessages":

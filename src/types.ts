@@ -48,6 +48,7 @@ export interface Memory {
     comment?: string;
   };
   quotedMemory?: Memory;
+  taggedUsers?: { id: number; username: string }[];
 }
 export interface Period {
   decade: Decade;
