@@ -2,7 +2,17 @@
 
 import { createPortal } from "react-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bell, MessageCircle, Minus, User, Star, Trophy, Mail, UsersRound } from "lucide-react";
+import {
+  Bell,
+  MessageCircle,
+  Minus,
+  User,
+  Star,
+  Trophy,
+  Mail,
+  UsersRound,
+  ShieldAlert,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./auth/AuthProvider";
 import { useFollow } from "../context/FollowContext";
@@ -30,6 +40,8 @@ function NotificationIcon({ type }: { type: NotificationType }) {
       return <Mail {...props} />;
     case "chatMessage":
       return <MessageCircle {...props} />;
+    case "administrative":
+      return <ShieldAlert {...props} />;
     case "userTagged":
       return <UsersRound {...props} />;
     default:

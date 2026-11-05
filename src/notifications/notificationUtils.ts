@@ -28,6 +28,9 @@ export function getNotificationText(notification: NotificationDto): string {
     case "chatMessage":
       return "Recibiste mensajes en el chat";
 
+    case "administrative":
+      return "Uno de tus contenidos fue dado de baja por no cumplir los estándares de la comunidad";
+
     case "userTagged":
       return senderUsername
         ? `@${senderUsername} te etiquetó en un recuerdo`
@@ -73,6 +76,11 @@ export function getNotificationNavigation(notification: NotificationDto): Notifi
     case "chatMessage":
       return { kind: "openChat" };
 
+    case "administrative":
+      return publicationId != null
+        ? { kind: "push", path: `/explorar?view=feed&post=${publicationId}` }
+        : { kind: "none" };
+
     case "userTagged":
       return publicationId != null
         ? { kind: "push", path: `/recuerdo/${publicationId}` }
@@ -92,6 +100,7 @@ export function isNotificationFeatureImplemented(type: NotificationType): boolea
     case "publicationComment":
     case "publicationRating":
     case "chatMessage":
+    case "administrative":
     case "userTagged":
       return true;
     case "categoryPromotion":

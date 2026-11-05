@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogIn, LogOut, UserRound } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut, UserRound } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import styles from "./AuthMenu.module.css";
 
@@ -62,6 +62,19 @@ export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthM
             <span>{session.email}</span>
             {logoutError && <span role="alert">{logoutError}</span>}
             <div className={styles.menuActions}>
+              {session.esAdmin && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={styles.adminAction}
+                  onClick={() => {
+                    router.push("/admin");
+                    setOpen(false);
+                  }}
+                >
+                  <LayoutDashboard size={16} /> Panel admin
+                </button>
+              )}
               <button
                 type="button"
                 role="menuitem"

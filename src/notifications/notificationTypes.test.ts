@@ -32,6 +32,7 @@ describe("parseNotification", () => {
       ["AscensoCategoria", "categoryPromotion"],
       ["MensajesCorreo", "emailMessages"],
       ["MensajeChat", "chatMessage"],
+      ["Administrativa", "administrative"],
       ["EtiquetadoEnPublicacion", "userTagged"],
     ];
 
@@ -44,6 +45,12 @@ describe("parseNotification", () => {
       });
       expect(result.type).toBe(expectedType);
     }
+  });
+
+  it("maps the numeric administrative notification value", () => {
+    expect(
+      parseNotification({ id: 9, tipo: 6, leida: false, fechaCreacion: "2024-01-01" }).type,
+    ).toBe("administrative");
   });
 
   it("parses a notification without optional fields", () => {
