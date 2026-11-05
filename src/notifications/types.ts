@@ -5,6 +5,7 @@ export type NotificationType =
   | "categoryPromotion"
   | "emailMessages"
   | "chatMessage"
+  | "administrative"
   | "userTagged";
 
 export interface NotificationDto {
@@ -24,6 +25,7 @@ const notificationTypeByApiValue: Record<string | number, NotificationType> = {
   AscensoCategoria: "categoryPromotion",
   MensajesCorreo: "emailMessages",
   MensajeChat: "chatMessage",
+  Administrativa: "administrative",
   EtiquetadoEnPublicacion: "userTagged",
   0: "newFollower",
   1: "publicationComment",
@@ -31,7 +33,7 @@ const notificationTypeByApiValue: Record<string | number, NotificationType> = {
   3: "categoryPromotion",
   4: "emailMessages",
   5: "chatMessage",
-  6: "userTagged",
+  6: "administrative",
 };
 
 const apiField = {

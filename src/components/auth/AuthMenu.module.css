@@ -67,6 +67,16 @@
   background: var(--soft) !important;
 }
 
+.menu .adminAction {
+  margin: 10px 0 6px;
+  color: #f8f2e8 !important;
+  background: #32654f !important;
+}
+
+.menu .adminAction + .profileAction {
+  margin-top: 0;
+}
+
 .menu .profileAction[aria-current="page"] {
   color: var(--accent) !important;
 }
@@ -158,6 +168,9 @@
     height: 18px;
   }
   .menu .profileAction {
+    margin: 0;
+  }
+  .menu .adminAction {
     margin: 0;
   }
   .menu .logoutAction {

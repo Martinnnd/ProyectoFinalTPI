@@ -56,6 +56,12 @@ describe("getNotificationText", () => {
     expect(text).toContain("chat");
   });
 
+  it("explains an administrative moderation action", () => {
+    expect(getNotificationText(makeNotification({ type: "administrative" }))).toContain(
+      "dado de baja",
+    );
+  });
+
   it("returns correct text for userTagged with senderUsername", () => {
     const text = getNotificationText(
       makeNotification({ type: "userTagged", senderUsername: "juan" }),
@@ -123,6 +129,12 @@ describe("getNotificationNavigation", () => {
     expect(nav).toEqual({ kind: "openChat" });
   });
 
+  it("opens the moderated publication for administrative notifications", () => {
+    expect(
+      getNotificationNavigation(makeNotification({ type: "administrative", publicationId: 88 })),
+    ).toEqual({ kind: "push", path: "/explorar?view=feed&post=88" });
+  });
+
   it("returns push to /recuerdo/:id for userTagged with publicationId", () => {
     const nav = getNotificationNavigation(
       makeNotification({ type: "userTagged", publicationId: 77 }),
@@ -144,6 +156,7 @@ describe("isNotificationFeatureImplemented", () => {
     expect(isNotificationFeatureImplemented("publicationComment")).toBe(true);
     expect(isNotificationFeatureImplemented("publicationRating")).toBe(true);
     expect(isNotificationFeatureImplemented("chatMessage")).toBe(true);
+    expect(isNotificationFeatureImplemented("administrative")).toBe(true);
     expect(isNotificationFeatureImplemented("userTagged")).toBe(true);
   });
 
