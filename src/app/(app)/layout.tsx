@@ -27,6 +27,7 @@ import "../../components/auth/guestAccess.css";
 import { EraProvider } from "../../context/EraContext";
 import { FollowProvider } from "../../context/FollowContext";
 import { RatingsProvider } from "../../context/RatingsContext";
+import { NoticeProvider } from "../../context/NoticeProvider";
 import AppShell from "../../components/layout/AppShell";
 import { GuestAccessProvider } from "../../components/auth/GuestAccessProvider";
 
@@ -38,13 +39,15 @@ export const metadata: Metadata = {
 export default function MainAppLayout({ children }: { children: React.ReactNode }) {
   return (
     <EraProvider>
-      <RatingsProvider>
-        <FollowProvider>
-          <GuestAccessProvider>
-            <AppShell>{children}</AppShell>
-          </GuestAccessProvider>
-        </FollowProvider>
-      </RatingsProvider>
+      <NoticeProvider>
+        <RatingsProvider>
+          <FollowProvider>
+            <GuestAccessProvider>
+              <AppShell>{children}</AppShell>
+            </GuestAccessProvider>
+          </FollowProvider>
+        </RatingsProvider>
+      </NoticeProvider>
     </EraProvider>
   );
 }

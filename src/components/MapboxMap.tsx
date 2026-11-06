@@ -6,7 +6,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { symbols } from "../types";
 import type { MapProps } from "./MainMap";
-import { useEra } from "../context/EraContext";
+import { useEraState } from "../context/EraContext";
 
 const overview = {
   center: [-60, -24] as [number, number],
@@ -73,7 +73,7 @@ export default function MapboxMap(
     locationResolved: boolean;
   },
 ) {
-  const { period } = useEra();
+  const period = useEraState((state) => state.period);
   const container = useRef<HTMLDivElement>(null);
   const instance = useRef<mapboxgl.Map | null>(null);
   const styleReady = useRef(false);

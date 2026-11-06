@@ -12,6 +12,7 @@ import { useEra } from "../../../context/EraContext";
 import { useAuth } from "../../../components/auth/AuthProvider";
 import { useFollow } from "../../../context/FollowContext";
 import { useRatings } from "../../../context/RatingsContext";
+import { useNotice } from "../../../context/NoticeProvider";
 import { eliminarPublicacion } from "../../../api";
 import { getPublication } from "../../../publicationsApi";
 import { filterCommunity } from "../../../groups";
@@ -54,7 +55,8 @@ function FeedPageContent() {
   const { period, changePeriod } = useEra();
   const { session } = useAuth();
   const { followingUsers, followers, followingRevision, toggleFollow } = useFollow();
-  const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
+  const { ratings, pointsMap, rateMemory } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
 
   const [feedItems, setFeedItems] = useState<Memory[]>([]);
   const [selected, setSelected] = useState<Memory | null>(null);

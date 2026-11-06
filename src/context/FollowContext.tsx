@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../components/auth/AuthProvider";
-import { useRatings } from "./RatingsContext";
+import { useNotice } from "./NoticeProvider";
 import {
   dejarDeSeguir,
   getSeguidores,
@@ -30,7 +30,7 @@ const FollowContext = createContext<FollowContextType | undefined>(undefined);
 export function FollowProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { session } = useAuth();
-  const { setNotice } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
   const currentUserId = session?.usuarioId;
 
   const [followingUsers, setFollowingUsers] = useState<FollowedUser[]>([]);

@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Chat from "../../../components/Chat";
 import { useAuth } from "../../../components/auth/AuthProvider";
-import { useEra } from "../../../context/EraContext";
+import { useEraState } from "../../../context/EraContext";
 import { getUserByUsername } from "../../../chat/chatApi";
 import { LoaderCircle } from "lucide-react";
 
@@ -14,7 +14,7 @@ function ChatContent() {
   const conParam = searchParams.get("con");
 
   const { session, status } = useAuth();
-  const { period } = useEra();
+  const period = useEraState((state) => state.period);
 
   const [chatWith, setChatWith] = useState<{ userId: number; username: string; ts: number } | null>(
     null,

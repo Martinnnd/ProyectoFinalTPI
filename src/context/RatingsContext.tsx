@@ -5,13 +5,12 @@ import { useAuth } from "../components/auth/AuthProvider";
 import { useRouter } from "next/navigation";
 import { ratePublication } from "../publicationsApi";
 import { type NostalgiaRatings } from "../nostalgiaRatings";
+import { useNotice } from "./NoticeProvider";
 
 interface RatingsContextType {
   ratings: NostalgiaRatings;
   pointsMap: Record<string, number>;
   rateMemory: (postId: string, score: number, canRate?: boolean) => Promise<void>;
-  notice: string | null;
-  setNotice: (msg: string | null) => void;
 }
 
 const RatingsContext = createContext<RatingsContextType | undefined>(undefined);
@@ -26,19 +25,12 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
 
   const [ratings, setRatings] = useState<NostalgiaRatings>({});
   const [pointsMap, setPointsMap] = useState<Record<string, number>>({});
-  const [notice, setNotice] = useState<string | null>(null);
+  const setNotice = useNotice((state) => state.setNotice);
 
   useEffect(() => {
     setRatings({});
     setPointsMap({});
-    setNotice(null);
   }, [currentUserId]);
-
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(null), 3500);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
 
   const rateMemory = useCallback(
     async (postId: string, score: number, canRate: boolean = true) => {
@@ -76,11 +68,11 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
         pending.current.delete(requestKey);
       }
     },
-    [currentUserId, router],
+    [currentUserId, router, setNotice],
   );
 
   return (
-    <RatingsContext.Provider value={{ ratings, pointsMap, rateMemory, notice, setNotice }}>
+    <RatingsContext.Provider value={{ ratings, pointsMap, rateMemory }}>
       {children}
     </RatingsContext.Provider>
   );

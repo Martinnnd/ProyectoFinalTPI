@@ -13,6 +13,7 @@ import { useEra } from "../../../../context/EraContext";
 import { useAuth } from "../../../../components/auth/AuthProvider";
 import { useFollow } from "../../../../context/FollowContext";
 import { useRatings } from "../../../../context/RatingsContext";
+import { useNotice } from "../../../../context/NoticeProvider";
 import type { Decade, Memory } from "../../../../types";
 import type { FeedTab } from "../../../../socialTypes";
 
@@ -31,7 +32,8 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   currentEra.current = { period, changePeriod };
   const { session, status } = useAuth();
   const { followingUsers, followers, toggleFollow, followingRevision } = useFollow();
-  const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
+  const { ratings, pointsMap, rateMemory } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
 
   const [memory, setMemory] = useState<Memory | null>(null);
   const [groupName, setGroupName] = useState<string | null>(null);

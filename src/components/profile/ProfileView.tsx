@@ -10,9 +10,9 @@ import MemoryForm from "../MemoryForm";
 import CommunityControls from "../CommunityControls";
 import GroupInfoModal from "../GroupInfoModal";
 import { useAuth } from "../auth/AuthProvider";
-import { useEra } from "../../context/EraContext";
+import { useEraState } from "../../context/EraContext";
 import { useFollow } from "../../context/FollowContext";
-import { useRatings } from "../../context/RatingsContext";
+import { useNotice } from "../../context/NoticeProvider";
 import { eliminarPublicacion } from "../../api";
 import { getPublicacionesUsuario } from "../../userApi";
 import {
@@ -46,9 +46,9 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const { session, status } = useAuth();
-  const { period } = useEra();
+  const period = useEraState((state) => state.period);
   const { followingUsers, followers, toggleFollow } = useFollow();
-  const { setNotice } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
 
   const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);

@@ -27,7 +27,7 @@ import {
 } from "../../publicationsApi";
 import type { Point } from "../MemoryMap";
 import { availableDecades } from "../../eras/registry";
-import { useRatings } from "../../context/RatingsContext";
+import { useNotice } from "../../context/NoticeProvider";
 import useFeedPrefetch from "../../hooks/useFeedPrefetch";
 
 function ExploreContent() {
@@ -60,7 +60,7 @@ function ExploreContent() {
     firstMemoryId,
     requireAccount,
   } = useGuestAccess();
-  const { setNotice } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
 
   const [category, setCategory] = useState<Category | "Todas">("Todas");
   const [bounds, setBounds] = useState<MapBounds | null>(null);

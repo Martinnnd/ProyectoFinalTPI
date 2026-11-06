@@ -20,7 +20,7 @@ import EraChrome, { EraIcon } from "../EraChrome";
 import Player from "../Player";
 import UserSearch from "../UserSearch";
 import AuthMenu from "../auth/AuthMenu";
-import { useRatings } from "../../context/RatingsContext";
+import { useNotice } from "../../context/NoticeProvider";
 import AchievementToast from "../AchievementToast";
 import useAchievementNotifications from "../../hooks/useAchievementNotifications";
 import Notification from "../Notification";
@@ -45,7 +45,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   } = useEra();
 
   const { followingUsers, toggleFollow } = useFollow();
-  const { notice, setNotice } = useRatings();
+  const notice = useNotice((state) => state.notice);
+  const setNotice = useNotice((state) => state.setNotice);
   const achievementNotice = useAchievementNotifications(session?.usuarioId ?? null, session?.token);
 
   const mobileOptions = useRef<HTMLDialogElement>(null);

@@ -12,7 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { ArrowRight, LockKeyhole, X } from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import { useEra } from "../../context/EraContext";
+import { useEraState } from "../../context/EraContext";
 
 const STORAGE_KEY = "nostalgiar_guest_first_memory_v1";
 
@@ -28,7 +28,7 @@ const GuestAccessContext = createContext<GuestAccess | null>(null);
 export function GuestAccessProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { status } = useAuth();
-  const { period } = useEra();
+  const period = useEraState((state) => state.period);
   const dialog = useRef<HTMLDialogElement>(null);
   const firstId = useRef<string | null>(null);
   const [firstMemoryId, setFirstMemoryId] = useState<string | null>(null);

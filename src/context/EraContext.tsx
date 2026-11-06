@@ -10,8 +10,10 @@ import React, {
   useCallback,
 } from "react";
 import { flushSync } from "react-dom";
+import { useStore } from "zustand";
 import type { Decade, Period } from "../types";
 import { eraThemes } from "../themes";
+import { createEraStore, type EraState } from "./eraStore";
 
 export type ChangePeriodFn = {
   (next: Period, afterChange?: () => void): void;
@@ -39,15 +41,16 @@ interface EraContextType {
 const DEFAULT_PERIOD: Period = { decade: 1980, year: null };
 const ERA_STORAGE_KEY = "nostalgia_era";
 
-const EraContext = createContext<EraContextType | undefined>(undefined);
+type EraStore = ReturnType<typeof createEraStore>;
+const EraContext = createContext<{ store: EraStore; changePeriod: ChangePeriodFn } | null>(null);
 
 export function EraProvider({ children }: { children: React.ReactNode }) {
-  const [period, setPeriod] = useState<Period>(DEFAULT_PERIOD);
+  const storeRef = useRef<EraStore | null>(null);
+  if (!storeRef.current) storeRef.current = createEraStore();
+  const store = storeRef.current;
+  const period = useStore(store, (state) => state.period);
+  const setPeriod = useStore(store, (state) => state.setPeriod);
   const [hydrated, setHydrated] = useState(false);
-
-  const [musicOpen, setMusicOpen] = useState(false);
-  const [factsOpen, setFactsOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
 
   // Sincronizar en el cliente post-hidratación para evitar hydration mismatch con SSR
   useEffect(() => {
@@ -94,7 +97,7 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       // Ignorar si el almacenamiento local está restringido
     }
     setHydrated(true);
-  }, []);
+  }, [setPeriod]);
 
   // Persistir en localStorage cada vez que cambia la década (omitir primer ciclo para no sobreescribir)
   useEffect(() => {
@@ -199,31 +202,40 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
     [period],
   );
 
-  const theme = useMemo(() => eraThemes[period.decade], [period.decade]);
-
-  const value = useMemo(
-    () => ({
-      period,
-      setPeriod,
-      changePeriod,
-      theme,
-      musicOpen,
-      setMusicOpen,
-      factsOpen,
-      setFactsOpen,
-      panelOpen,
-      setPanelOpen,
-    }),
-    [period, changePeriod, theme, musicOpen, factsOpen, panelOpen],
-  );
-
+  const value = useMemo(() => ({ store, changePeriod }), [store, changePeriod]);
   return <EraContext.Provider value={value}>{children}</EraContext.Provider>;
 }
 
-export function useEra() {
+export function useEraState<T>(selector: (state: EraState) => T): T {
   const context = useContext(EraContext);
   if (!context) {
     throw new Error("useEra must be used within an EraProvider");
   }
-  return context;
+  return useStore(context.store, selector);
+}
+
+export function useEra(): EraContextType {
+  const context = useContext(EraContext);
+  if (!context) throw new Error("useEra must be used within an EraProvider");
+  const period = useStore(context.store, (state) => state.period);
+  const setPeriod = useStore(context.store, (state) => state.setPeriod);
+  const musicOpen = useStore(context.store, (state) => state.musicOpen);
+  const setMusicOpen = useStore(context.store, (state) => state.setMusicOpen);
+  const factsOpen = useStore(context.store, (state) => state.factsOpen);
+  const setFactsOpen = useStore(context.store, (state) => state.setFactsOpen);
+  const panelOpen = useStore(context.store, (state) => state.panelOpen);
+  const setPanelOpen = useStore(context.store, (state) => state.setPanelOpen);
+  const theme = useMemo(() => eraThemes[period.decade], [period.decade]);
+  return {
+    period,
+    setPeriod,
+    changePeriod: context.changePeriod,
+    theme,
+    musicOpen,
+    setMusicOpen,
+    factsOpen,
+    setFactsOpen,
+    panelOpen,
+    setPanelOpen,
+  };
 }

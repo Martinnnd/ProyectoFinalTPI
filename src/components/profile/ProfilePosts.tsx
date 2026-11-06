@@ -5,6 +5,7 @@ import FeedPost from "../social/FeedPost";
 import RepostDialog from "../social/RepostDialog";
 import useMemoryInteractions from "../../hooks/useMemoryInteractions";
 import { useRatings } from "../../context/RatingsContext";
+import { useNotice } from "../../context/NoticeProvider";
 import { useFollow } from "../../context/FollowContext";
 import { useAuth } from "../auth/AuthProvider";
 import { repostearPublicacion, quitarRepost, citarPublicacion, isOwnMemory } from "../../api";
@@ -44,7 +45,8 @@ const ProfilePosts = forwardRef<
 ) {
   const router = useRouter();
   const { session } = useAuth();
-  const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
+  const { ratings, pointsMap, rateMemory } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
   const { followingUsers, toggleFollow } = useFollow();
   const interactions = useMemoryInteractions();
 
