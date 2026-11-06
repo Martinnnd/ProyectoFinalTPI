@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "../components/auth/AuthProvider";
+import { NoticeProvider } from "../context/NoticeProvider";
 
 export const metadata: Metadata = {
   title: "Nostalgiar",
@@ -18,7 +19,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <NoticeProvider>{children}</NoticeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -10,7 +10,8 @@ import {
   type AdminUser,
 } from "./adminApi";
 import Pagination from "./Pagination";
-import AdminActionDialog, { AdminToast } from "./AdminActionDialog";
+import AdminActionDialog from "./AdminActionDialog";
+import { useNotice } from "../context/NoticeProvider";
 import styles from "./admin.module.css";
 
 const userTypes = ["Personal", "Marca", "Moderador", "Otro"];
@@ -34,7 +35,7 @@ export default function UsersPanel({ currentUserId }: { currentUserId: number })
     user: AdminUser;
   } | null>(null);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const showToast = useNotice((state) => state.showToast);
 
   const load = useCallback(
     (signal?: AbortSignal) => {
@@ -89,9 +90,9 @@ export default function UsersPanel({ currentUserId }: { currentUserId: number })
     try {
       await action();
       await load();
-      setNotice(success);
+      showToast(success, "success");
     } catch (reason) {
-      setError((reason as Error).message);
+      showToast((reason as Error).message, "error");
     } finally {
       setPending(null);
     }
@@ -268,7 +269,6 @@ export default function UsersPanel({ currentUserId }: { currentUserId: number })
           onConfirm={() => remove(action.user)}
         />
       )}
-      {notice && <AdminToast message={notice} onClose={() => setNotice("")} />}
     </div>
   );
 }

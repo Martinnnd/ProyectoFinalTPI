@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { X, Save, Loader2, Upload, Images, Link, Users, UserPlus } from "lucide-react";
 import { buscarUsuarios, type UsuarioBusqueda } from "../userApi";
 import { useOptionalAuth } from "./auth/AuthProvider";
+import { useNotice } from "../context/NoticeProvider";
 import { categories, type Memory, type Decade, type CommunityGroup } from "../types";
 import type { Point } from "./MemoryMap";
 function MemoryCreationForm({
@@ -35,6 +36,7 @@ function MemoryCreationForm({
 }) {
   const dirty = useRef(false);
   const auth = useOptionalAuth();
+  const showToast = useNotice((state) => state.showToast);
   const session = auth?.session;
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   function requestClose() {
@@ -317,9 +319,9 @@ function MemoryCreationForm({
         lng: point.lng,
       });
 
-      if (typeof result === "string") setError(result);
+      if (typeof result === "string") showToast(result, "error");
     } catch {
-      setError("No se pudo guardar el recuerdo. Tus datos siguen acá; intentá de nuevo.");
+      showToast("No se pudo guardar el recuerdo. Tus datos siguen acá; intentá de nuevo.", "error");
     } finally {
       setSaving(false);
     }

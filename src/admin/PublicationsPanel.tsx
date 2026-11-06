@@ -12,7 +12,8 @@ import {
   type AdminPublication,
 } from "./adminApi";
 import Pagination from "./Pagination";
-import AdminActionDialog, { AdminToast } from "./AdminActionDialog";
+import AdminActionDialog from "./AdminActionDialog";
+import { useNotice } from "../context/NoticeProvider";
 import styles from "./admin.module.css";
 
 const emptyPage: AdminPage<AdminPublication> = {
@@ -37,7 +38,7 @@ export default function PublicationsPanel() {
   } | null>(null);
   const [pending, setPending] = useState<number | null>(null);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const showToast = useNotice((state) => state.showToast);
 
   const load = useCallback(
     (signal?: AbortSignal) => {
@@ -95,9 +96,9 @@ export default function PublicationsPanel() {
     try {
       await action();
       await load();
-      setNotice(success);
+      showToast(success, "success");
     } catch (reason) {
-      setError((reason as Error).message);
+      showToast((reason as Error).message, "error");
     } finally {
       setPending(null);
     }
@@ -271,7 +272,6 @@ export default function PublicationsPanel() {
           onConfirm={() => remove(action.item)}
         />
       )}
-      {notice && <AdminToast message={notice} onClose={() => setNotice("")} />}
     </div>
   );
 }

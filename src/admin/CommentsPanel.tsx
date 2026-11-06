@@ -3,7 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { MessageSquareText, Search, Trash2 } from "lucide-react";
 import { deleteAdminComment, getPublicationComments, type AdminComment } from "./adminApi";
-import AdminActionDialog, { AdminToast } from "./AdminActionDialog";
+import AdminActionDialog from "./AdminActionDialog";
+import { useNotice } from "../context/NoticeProvider";
 import styles from "./admin.module.css";
 
 export default function CommentsPanel() {
@@ -13,7 +14,7 @@ export default function CommentsPanel() {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<AdminComment | null>(null);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const showToast = useNotice((state) => state.showToast);
 
   async function search(event: FormEvent) {
     event.preventDefault();
@@ -44,9 +45,9 @@ export default function CommentsPanel() {
     try {
       await deleteAdminComment(comment.id);
       await load(activeId!);
-      setNotice("El comentario fue eliminado y su autor fue notificado.");
+      showToast("El comentario fue eliminado y su autor fue notificado.", "success");
     } catch (reason) {
-      setError((reason as Error).message);
+      showToast((reason as Error).message, "error");
       setLoading(false);
     }
   }
@@ -135,7 +136,6 @@ export default function CommentsPanel() {
           onConfirm={() => remove(selected)}
         />
       )}
-      {notice && <AdminToast message={notice} onClose={() => setNotice("")} />}
     </div>
   );
 }

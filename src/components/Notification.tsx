@@ -23,6 +23,7 @@ import {
   markAllNotificationsAsRead,
 } from "../notifications/notificationApi";
 import { useNotificationConnection } from "../notifications/useNotificationConnection";
+import { useNotice } from "../context/NoticeProvider";
 import { getNotificationText, getNotificationNavigation } from "../notifications/notificationUtils";
 
 function NotificationIcon({ type }: { type: NotificationType }) {
@@ -70,6 +71,7 @@ export default function Notification({
   onOpenChat: () => void;
 }) {
   const { session } = useAuth();
+  const showToast = useNotice((state) => state.showToast);
   const { isFollowing, toggleFollow } = useFollow();
   const [pendingFollows, setPendingFollows] = useState<Set<string>>(new Set());
   const followRequests = useRef(new Set<string>());
@@ -109,7 +111,7 @@ export default function Notification({
         if (!cancelled) setNotifications(data);
       })
       .catch((requestError) => {
-        if (!cancelled) console.error("[Notifications] Error loading:", requestError);
+        if (!cancelled) showToast(requestError instanceof Error ? requestError.message : "No se pudieron cargar las notificaciones.", "error");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -139,7 +141,7 @@ export default function Notification({
         previous.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)),
       );
       markNotificationAsRead(notification.id).catch((requestError) => {
-        console.error("[Notifications] Error marking as read:", requestError);
+        showToast(requestError instanceof Error ? requestError.message : "No se pudo marcar la notificación como leída.", "error");
         setNotifications((previous) =>
           previous.map((item) => (item.id === notification.id ? { ...item, isRead: false } : item)),
         );
@@ -168,7 +170,7 @@ export default function Notification({
         requestError instanceof Error
           ? requestError.message
           : "No se pudieron marcar las notificaciones.";
-      setError(message);
+      showToast(message, "error");
       getNotifications()
         .then(setNotifications)
         .catch(() => {

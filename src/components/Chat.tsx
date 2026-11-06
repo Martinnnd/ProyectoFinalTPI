@@ -16,6 +16,7 @@ import { useAuth } from "./auth/AuthProvider";
 import type { ChatMessageDto, ConversationSummaryDto } from "../chat/types";
 import { deleteConversation, getConversations } from "../chat/chatApi";
 import { useChatConnection } from "../chat/useChatConnection";
+import { useNotice } from "../context/NoticeProvider";
 
 const conversationTitlesByDecade: Record<Decade, string> = {
   1970: "Canal 70 | En contacto",
@@ -55,6 +56,7 @@ export default function Chat({
   chatWith?: { userId: number; username: string; ts: number } | null;
 }) {
   const { session } = useAuth();
+  const showToast = useNotice((state) => state.showToast);
 
   // --- Portal to the taskbar slot (era integration) ---
   const [dockSlot, setDockSlot] = useState<HTMLElement | null>(null);
@@ -154,7 +156,7 @@ export default function Chat({
         if (!cancelled) setConversations(data);
       })
       .catch((error) => {
-        if (!cancelled) console.error("[Chat] Error loading conversations:", error);
+        if (!cancelled) showToast(error instanceof Error ? error.message : "No se pudieron cargar las conversaciones.", "error");
       })
       .finally(() => {
         if (!cancelled) setLoadingConversations(false);
@@ -186,7 +188,7 @@ export default function Chat({
         if (!cancelled) setMessages(history);
       })
       .catch((error) => {
-        if (!cancelled) setError(`No se pudo cargar el historial: ${error.message}`);
+        if (!cancelled) showToast(`No se pudo cargar el historial: ${error.message}`, "error");
       })
       .finally(() => {
         if (!cancelled) setLoadingMessages(false);
@@ -228,7 +230,7 @@ export default function Chat({
       await sendMessage(activeConversation.userId, content);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "No se pudo enviar el mensaje.";
-      setError(errorMessage);
+      showToast(errorMessage, "error");
       setMessageText(content);
     } finally {
       setSending(false);
@@ -250,7 +252,7 @@ export default function Chat({
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "No se pudo eliminar la conversación.";
-      setError(errorMessage);
+      showToast(errorMessage, "error");
       setConfirmingDelete(false);
     } finally {
       setDeleting(false);

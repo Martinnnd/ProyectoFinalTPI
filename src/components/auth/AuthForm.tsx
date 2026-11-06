@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, LockKeyhole, Mail, User } from "lucide-react";
 import { AuthError } from "./authErrors";
 import { useAuth } from "./AuthProvider";
+import { useNotice } from "../../context/NoticeProvider";
 import styles from "./auth.module.css";
 
 type Mode = "login" | "registro";
@@ -20,6 +21,7 @@ export default function AuthForm({
 }) {
   const router = useRouter();
   const { login, register } = useAuth();
+  const showToast = useNotice((state) => state.showToast);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -70,10 +72,11 @@ export default function AuthForm({
       router.replace(returnTo);
     } catch (cause) {
       if (cause instanceof AuthError) {
-        setError(cause.message);
+        if (cause.status >= 500) showToast(cause.message, "error");
+        else setError(cause.message);
         setFieldErrors(cause.fields);
       } else {
-        setError(cause instanceof Error ? cause.message : "Ocurrió un error inesperado.");
+        showToast(cause instanceof Error ? cause.message : "Ocurrió un error inesperado.", "error");
       }
     } finally {
       setSubmitting(false);

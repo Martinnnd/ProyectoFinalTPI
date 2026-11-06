@@ -57,6 +57,7 @@ function FeedPageContent() {
   const { followingUsers, followers, followingRevision, toggleFollow } = useFollow();
   const { ratings, pointsMap, rateMemory } = useRatings();
   const setNotice = useNotice((state) => state.setNotice);
+  const showToast = useNotice((state) => state.showToast);
 
   const [feedItems, setFeedItems] = useState<Memory[]>([]);
   const [selected, setSelected] = useState<Memory | null>(null);
@@ -95,11 +96,11 @@ function FeedPageContent() {
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
-          setNotice(err instanceof Error ? err.message : "No se pudieron cargar los grupos.");
+          showToast(err instanceof Error ? err.message : "No se pudieron cargar los grupos.", "error");
         }
       });
     return () => controller.abort();
-  }, [session, setNotice]);
+  }, [session, showToast]);
 
   const selectedGroupDecade = groups.find((g) => g.id === scope)?.decade;
   useEffect(() => {
@@ -125,13 +126,14 @@ function FeedPageContent() {
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
-          setNotice(
+          showToast(
             err instanceof Error ? err.message : "No se pudieron cargar los recuerdos del grupo.",
+            "error",
           );
         }
       });
     return () => controller.abort();
-  }, [groups, scope, setNotice]);
+  }, [groups, scope, showToast]);
 
   // Soporte para popstate (navegador atrás / adelante)
   useEffect(() => {

@@ -8,7 +8,6 @@ import {
   Newspaper,
   MessageCircle,
   SlidersHorizontal,
-  CircleCheck,
   Music2,
 } from "lucide-react";
 import { useEra } from "../../context/EraContext";
@@ -20,7 +19,7 @@ import EraChrome, { EraIcon } from "../EraChrome";
 import Player from "../Player";
 import UserSearch from "../UserSearch";
 import AuthMenu from "../auth/AuthMenu";
-import { useNotice } from "../../context/NoticeProvider";
+import ToastViewport from "./ToastViewport";
 import AchievementToast from "../AchievementToast";
 import useAchievementNotifications from "../../hooks/useAchievementNotifications";
 import Notification from "../Notification";
@@ -45,8 +44,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   } = useEra();
 
   const { followingUsers, toggleFollow } = useFollow();
-  const notice = useNotice((state) => state.notice);
-  const setNotice = useNotice((state) => state.setNotice);
   const achievementNotice = useAchievementNotifications(session?.usuarioId ?? null, session?.token);
 
   const mobileOptions = useRef<HTMLDialogElement>(null);
@@ -379,21 +376,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         }}
       />
 
-      {notice && (
-        <div
-          className={`toast${notice === "¡Recuerdo guardado! Ya tiene su lugar en el mapa." ? " memory-saved-notice" : ""}`}
-          role="status"
-          aria-atomic="true"
-        >
-          {notice === "¡Recuerdo guardado! Ya tiene su lugar en el mapa." && (
-            <CircleCheck size={24} aria-hidden="true" />
-          )}
-          <span>{notice}</span>
-          <button className="icon-button" aria-label="Cerrar aviso" onClick={() => setNotice(null)}>
-            <X size={20} />
-          </button>
-        </div>
-      )}
+      <ToastViewport />
 
       {achievementNotice.achievement && (
         <AchievementToast

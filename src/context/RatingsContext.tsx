@@ -25,7 +25,7 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
 
   const [ratings, setRatings] = useState<NostalgiaRatings>({});
   const [pointsMap, setPointsMap] = useState<Record<string, number>>({});
-  const setNotice = useNotice((state) => state.setNotice);
+  const showToast = useNotice((state) => state.showToast);
 
   useEffect(() => {
     setRatings({});
@@ -39,7 +39,7 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       if (!canRate) {
-        setNotice("Disponible desde la categoría Nostálgico.");
+        showToast("Disponible desde la categoría Nostálgico.", "warning");
         return;
       }
       const requestKey = `${currentUserId}:${postId}`;
@@ -63,12 +63,12 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         if (currentAccount.current === currentUserId)
-          setNotice(error instanceof Error ? error.message : "No se pudo registrar la puntuación.");
+          showToast(error instanceof Error ? error.message : "No se pudo registrar la puntuación.", "error");
       } finally {
         pending.current.delete(requestKey);
       }
     },
-    [currentUserId, router, setNotice],
+    [currentUserId, router, showToast],
   );
 
   return (

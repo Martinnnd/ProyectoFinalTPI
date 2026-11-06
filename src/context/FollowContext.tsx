@@ -30,7 +30,7 @@ const FollowContext = createContext<FollowContextType | undefined>(undefined);
 export function FollowProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { session } = useAuth();
-  const setNotice = useNotice((state) => state.setNotice);
+  const showToast = useNotice((state) => state.showToast);
   const currentUserId = session?.usuarioId;
 
   const [followingUsers, setFollowingUsers] = useState<FollowedUser[]>([]);
@@ -79,7 +79,7 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== "undefined") {
           router.push(`/auth/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
         }
-        setNotice("Debés iniciar sesión para seguir a otros usuarios.");
+        showToast("Debés iniciar sesión para seguir a otros usuarios.", "warning");
         return false;
       }
 
@@ -97,12 +97,12 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!targetId) {
-        setNotice(`No se puede seguir a ${author}: falta su identificador de usuario.`);
+        showToast(`No se puede seguir a ${author}: falta su identificador de usuario.`, "error");
         return false;
       }
 
       if (targetId === currentUserId) {
-        setNotice("No podés seguirte a vos mismo.");
+        showToast("No podés seguirte a vos mismo.", "warning");
         return false;
       }
 
@@ -124,7 +124,7 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
               (u) => u.id !== targetId && u.username.toLowerCase() !== author.toLowerCase(),
             ),
           );
-          setNotice(`Dejaste de seguir a ${author}.`);
+          showToast(`Dejaste de seguir a ${author}.`, "success");
         } else {
           await seguir(currentUserId, targetId);
           setFollowingUsers((curr) => [
@@ -133,18 +133,18 @@ export function FollowProvider({ children }: { children: React.ReactNode }) {
             ),
             { id: targetId, username: author },
           ]);
-          setNotice(`Ahora seguís a ${author}.`);
+          showToast(`Ahora seguís a ${author}.`, "success");
         }
         setFollowingRevision((r) => r + 1);
         return true;
       } catch (error) {
-        setNotice(error instanceof Error ? error.message : "No se pudo actualizar el seguimiento.");
+        showToast(error instanceof Error ? error.message : "No se pudo actualizar el seguimiento.", "error");
         return false;
       } finally {
         pendingFollows.current.delete(targetId);
       }
     },
-    [currentUserId, followingUsers, router, setNotice],
+    [currentUserId, followingUsers, router, showToast],
   );
 
   return (

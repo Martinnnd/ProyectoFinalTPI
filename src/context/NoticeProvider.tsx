@@ -12,19 +12,12 @@ export function NoticeProvider({ children }: { children: ReactNode }) {
   const storeRef = useRef<NoticeStore | null>(null);
   if (!storeRef.current) storeRef.current = createNoticeStore();
   const store = storeRef.current;
-  const notice = useStore(store, (state) => state.notice);
   const { session } = useAuth();
   const currentUserId = session?.usuarioId;
 
   useEffect(() => {
-    store.getState().setNotice(null);
+    store.getState().clearToasts();
   }, [currentUserId, store]);
-
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => store.getState().setNotice(null), 3500);
-    return () => window.clearTimeout(timer);
-  }, [notice, store]);
 
   return <NoticeContext.Provider value={store}>{children}</NoticeContext.Provider>;
 }

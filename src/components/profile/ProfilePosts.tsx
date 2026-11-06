@@ -47,6 +47,7 @@ const ProfilePosts = forwardRef<
   const { session } = useAuth();
   const { ratings, pointsMap, rateMemory } = useRatings();
   const setNotice = useNotice((state) => state.setNotice);
+  const showToast = useNotice((state) => state.showToast);
   const { followingUsers, toggleFollow } = useFollow();
   const interactions = useMemoryInteractions();
 
@@ -212,6 +213,7 @@ const ProfilePosts = forwardRef<
                     setNotice("Recuerdo reposteado.");
                   } catch (err) {
                     console.error("Error al repostear:", err);
+                    showToast("No se pudo repostear el recuerdo. Intentá de nuevo.", "error");
                   }
                 }}
                 onUnrepost={async () => {
@@ -228,7 +230,7 @@ const ProfilePosts = forwardRef<
                     setNotice("Repost eliminado.");
                   } catch (err) {
                     console.error("Error al quitar repost:", err);
-                    setNotice("No se pudo quitar el repost. Intentá de nuevo.");
+                    showToast("No se pudo quitar el repost. Intentá de nuevo.", "error");
                   }
                 }}
                 onQuote={() => {
@@ -256,7 +258,7 @@ const ProfilePosts = forwardRef<
                         interactions.incrementRepostCount(targetKey, -1, memory.repostCount ?? 0);
                       }
                       setNotice("Repost eliminado.");
-                    });
+                    }).catch(() => showToast("No se pudo quitar el repost. Intentá de nuevo.", "error"));
                   } else {
                     repostearPublicacion(targetKey).then((res) => {
                       setReposts((curr) => [...new Set([...curr, memory.id, rootId])]);
@@ -266,7 +268,7 @@ const ProfilePosts = forwardRef<
                         interactions.incrementRepostCount(targetKey, 1, memory.repostCount ?? 0);
                       }
                       setNotice("Recuerdo reposteado.");
-                    });
+                    }).catch(() => showToast("No se pudo repostear el recuerdo. Intentá de nuevo.", "error"));
                   }
                 }}
                 onSave={() => {
@@ -327,6 +329,7 @@ const ProfilePosts = forwardRef<
               setNotice("Cita publicada.");
             } catch (err) {
               console.error("Error al citar:", err);
+              showToast("No se pudo publicar la cita. Intentá de nuevo.", "error");
             } finally {
               setRepostMemory(null);
             }

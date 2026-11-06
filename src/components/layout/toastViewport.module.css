@@ -1,0 +1,99 @@
+.viewport {
+  position: fixed;
+  z-index: 1400;
+  left: 50%;
+  bottom: 24px;
+  width: min(560px, calc(100vw - 28px));
+  display: grid;
+  gap: 9px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  --toast-accent: #80d5d0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #49616b);
+  border-left: 4px solid var(--toast-accent);
+  border-radius: var(--radius, 12px);
+  background: var(--ink, #19313d);
+  color: var(--surface, #fff);
+  box-shadow: var(--shadow, 0 10px 28px #0004);
+  font-size: 13px;
+  line-height: 1.4;
+  pointer-events: auto;
+  animation: toastEnter 180ms ease-out both;
+}
+
+.toast > svg {
+  flex: none;
+  color: var(--toast-accent);
+}
+
+.toast span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.toast button {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.toast button:hover,
+.toast button:focus-visible {
+  background: #ffffff20;
+}
+
+.error {
+  --toast-accent: #ff7d75;
+}
+
+.success,
+.savedMemory {
+  --toast-accent: #68dfab;
+}
+
+.warning {
+  --toast-accent: #ffd17c;
+}
+
+.savedMemory {
+  padding: 16px;
+  font-weight: 650;
+}
+
+@keyframes toastEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 899px) {
+  :global(.app) .viewport {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
