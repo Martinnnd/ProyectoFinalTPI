@@ -2,16 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import { FeedError, getFeed, registrarImpresionesFeed, type RemoteFeed } from "../feedApi";
 import { getStoredSession } from "../components/auth/authStorage";
 import { feedCache } from "../sessionQueryCache";
-import type { Memory } from "../types";
 import { getInitialFeed, type FeedSnapshot as Snapshot } from "../feedCache";
+import { mergeFeedItems } from "../feedItems";
+
+const emptySnapshot: Snapshot = { items: [], cursor: null, hayMas: false, consumed: [] };
 
 export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) {
   const userId = getStoredSession()?.usuarioId;
   const key = `${userId ?? "guest"}:${feed}`;
   const cached = active ? feedCache.get<Snapshot>(key) : undefined;
-  const [items, setItems] = useState<Memory[]>(cached?.items ?? []);
-  const [cursor, setCursor] = useState<string | null>(cached?.cursor ?? null);
-  const [hayMas, setHayMas] = useState(cached?.hayMas ?? false);
+  const [result, setResult] = useState<{ key: string; snapshot: Snapshot }>(() => ({
+    key,
+    snapshot: cached ? { ...cached, items: mergeFeedItems(cached.items) } : emptySnapshot,
+  }));
+  // A tab change must not expose the previous feed's items or pagination cursor.
+  const snapshot = result.key === key ? result.snapshot : (cached ?? emptySnapshot);
+  const { items, cursor, hayMas } = snapshot;
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -23,20 +29,23 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
   const forceRefresh = useRef(false);
   const currentItems = useRef(items);
   currentItems.current = items;
+  const currentKey = useRef(key);
+  currentKey.current = key;
   async function load(more: boolean, controller: AbortController) {
-    if (!feed) return;
+    if (!feed || currentKey.current !== key) return;
     busy.current = true;
     setLoading(true);
     setError("");
     const deadline = new AbortController();
     const timeout = window.setTimeout(() => deadline.abort(), 20000);
+    const isCurrentRequest = () => !controller.signal.aborted && currentKey.current === key;
     try {
       const signal = AbortSignal.any([controller.signal, deadline.signal]);
       const first = more ? null : await getInitialFeed(feed, signal);
       const page = first
         ? { items: first.items, siguienteCursor: first.cursor, hayMas: first.hayMas }
         : await getFeed(feed, cursor ?? undefined, signal);
-      if (controller.signal.aborted) return;
+      if (!isCurrentRequest()) return;
       if (
         more &&
         page.hayMas &&
@@ -51,31 +60,20 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
           console.warn("No se pudieron registrar las impresiones del feed.", err);
         });
       }
-      const next = more
-        ? [
-            ...new Map(
-              [...currentItems.current, ...page.items].map((item) => [item.id, item]),
-            ).values(),
-          ]
-        : page.items;
+      const next = mergeFeedItems(more ? [...currentItems.current, ...page.items] : page.items);
       currentItems.current = next;
-      feedCache.set<Snapshot>(
-        key,
-        {
-          items: next,
-          cursor: page.siguienteCursor,
-          hayMas: page.hayMas,
-          consumed: [...loadedCursors.current],
-          impressionsRegistered: true,
-        },
-        Infinity,
-      );
-      setItems(next);
-      setCursor(page.siguienteCursor);
-      setHayMas(page.hayMas);
+      const nextSnapshot: Snapshot = {
+        items: next,
+        cursor: page.siguienteCursor,
+        hayMas: page.hayMas,
+        consumed: [...loadedCursors.current],
+        impressionsRegistered: true,
+      };
+      feedCache.set(key, nextSnapshot, Infinity);
+      setResult({ key, snapshot: nextSnapshot });
       setExpired(false);
     } catch (err) {
-      if (controller.signal.aborted) return;
+      if (!isCurrentRequest()) return;
       if (deadline.signal.aborted) {
         setError("El servidor está tardando demasiado en cargar los recuerdos. Volvé a intentar.");
         return;
@@ -88,12 +86,15 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
           : (err as Error).message,
       );
       if (gone) {
-        setCursor(null);
-        setHayMas(false);
+        setResult((previous) =>
+          previous.key === key
+            ? { key, snapshot: { ...previous.snapshot, cursor: null, hayMas: false } }
+            : previous,
+        );
       }
     } finally {
       window.clearTimeout(timeout);
-      if (!controller.signal.aborted) {
+      if (isCurrentRequest()) {
         busy.current = false;
         setLoading(false);
         setRefreshing(false);
@@ -119,18 +120,15 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
         snapshot.impressionsRegistered = true;
         void registrarImpresionesFeed(snapshot.items.map((item) => item.id)).catch(() => {});
       }
-      currentItems.current = snapshot.items;
-      setItems(snapshot.items);
-      setCursor(snapshot.cursor);
-      setHayMas(snapshot.hayMas);
+      const restored = { ...snapshot, items: mergeFeedItems(snapshot.items) };
+      currentItems.current = restored.items;
+      setResult({ key, snapshot: restored });
       loadedCursors.current = new Set(snapshot.consumed);
     } else {
       loadedCursors.current.clear();
       if (!refreshing) {
         currentItems.current = [];
-        setItems([]);
-        setCursor(null);
-        setHayMas(false);
+        setResult({ key, snapshot: emptySnapshot });
       }
       void load(false, controller);
     }
@@ -140,7 +138,16 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
     };
   }, [feed, active, revision, key]);
   function more() {
-    if (busy.current || !cursor || !hayMas || expired || !active) return;
+    if (
+      currentKey.current !== key ||
+      result.key !== key ||
+      busy.current ||
+      !cursor ||
+      !hayMas ||
+      expired ||
+      !active
+    )
+      return;
     const controller = new AbortController();
     request.current = controller;
     void load(true, controller);
@@ -148,7 +155,7 @@ export default function useRemoteFeed(feed: RemoteFeed | null, active: boolean) 
   useEffect(() => () => request.current?.abort(), [feed, active, revision, key]);
   return {
     items,
-    loading,
+    loading: active && !!feed && (result.key !== key || loading),
     refreshing,
     error,
     expired,
