@@ -97,8 +97,10 @@ describe("API de comentarios", () => {
     vi.stubGlobal("fetch", fetch);
     await setCommentReaction("25", "8", "love");
     await removeCommentReaction("25", "8");
-    expect(fetch.mock.calls[0][0]).toContain("/25/comentarios/8/reaccion");
+    expect(fetch.mock.calls[0][0]).toContain("/api/comentarios/8/reaccion?publicacionId=25");
     expect(fetch.mock.calls[0][1].method).toBe("PUT");
+    expect(fetch.mock.calls[1][0]).toContain("/api/comentarios/8/reaccion?publicacionId=25");
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ tipo: "love" });
     expect(fetch.mock.calls[1][1].method).toBe("DELETE");
   });
 
@@ -109,7 +111,7 @@ describe("API de comentarios", () => {
     expect(page.items[0]).toMatchObject({ id: "9", parentId: "8" });
     expect(page.cursor).toBe("cursor-2");
     expect(fetch.mock.calls[0][0]).toContain(
-      "/25/comentarios/8/respuestas?limite=3&cursor=cursor-1",
+      "/api/comentarios/respuestas/8?publicacionId=25&limite=3&cursor=cursor-1",
     );
   });
 
@@ -118,7 +120,7 @@ describe("API de comentarios", () => {
     const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetch);
     await deleteComment("25", "8");
-    expect(fetch.mock.calls[0][0]).toContain("/25/comentarios/8");
+    expect(fetch.mock.calls[0][0]).toContain("/api/comentarios/8?publicacionId=25");
     expect(fetch.mock.calls[0][1].method).toBe("DELETE");
     expect(fetch.mock.calls[0][1].body).toBeUndefined();
   });
