@@ -1,6 +1,7 @@
 import { API_BASE_URL, getSesion } from "./api";
 import { apiFetch } from "./components/auth/apiClient";
 import { toMemory, type Publication } from "./publicationsApi";
+import { mergeFeedItems } from "./feedItems";
 import type { Memory } from "./types";
 
 export type RemoteFeed = "para-vos" | "seguidos";
@@ -47,19 +48,21 @@ export async function getFeed(
       : page.items;
   return {
     ...page,
-    items: discoveries.map((item) =>
-      toMemory(item, {
-        id: String(item.id),
-        title: "",
-        description: "",
-        author: "",
-        place: "",
-        year: 1990,
-        category: "Personales",
-        lat: 0,
-        lng: 0,
-        source: "backend",
-      }),
+    items: mergeFeedItems(
+      discoveries.map((item) =>
+        toMemory(item, {
+          id: String(item.id),
+          title: "",
+          description: "",
+          author: "",
+          place: "",
+          year: 1990,
+          category: "Personales",
+          lat: 0,
+          lng: 0,
+          source: "backend",
+        }),
+      ),
     ),
   };
 }

@@ -21,6 +21,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { publicationId } from "../../publicationsApi";
 import { LoaderCircle, RefreshCw } from "lucide-react";
 import { feedCache } from "../../sessionQueryCache";
+import { getFeedItemKey, mergeFeedItems } from "../../feedItems";
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -298,7 +299,7 @@ export default function SocialFeed({
     tab === "groups"
       ? allMemories.filter((memory) => !!memory.groupId && groupIds.includes(memory.groupId))
       : allMemories;
-  const posts = hashtag ? hashtagFeed.items : browsingGroups ? [] : tabPosts;
+  const posts = mergeFeedItems(hashtag ? hashtagFeed.items : browsingGroups ? [] : tabPosts);
   useEffect(() => {
     if (
       !active ||
@@ -627,7 +628,7 @@ export default function SocialFeed({
                     </button>
                   ) : undefined
                 }
-                key={memory.id}
+                key={`${tab}:${getFeedItemKey(memory)}`}
                 memory={effectiveMemory}
                 active={active}
                 quotedMemory={quotedMemory}

@@ -25,7 +25,7 @@ export async function getHashtagPosts(
     items: Publication[];
     siguienteCursor: string | null;
     hayMas: boolean;
-  }>(`/hashtags/${encodeURIComponent(tag)}/publicaciones?${query}`, { signal, cache: "no-store" });
+  }>(`/hashtags/${encodeURIComponent(tag)}?${query}`, { signal, cache: "no-store" });
   return {
     ...page,
     items: page.items.map((item) =>
@@ -46,7 +46,7 @@ export async function getHashtagPosts(
 }
 
 export async function getWeeklyHashtags(signal?: AbortSignal): Promise<WeeklyTrend[]> {
-  const items = await publicationRequest<HashtagResponse[]>("/hashtags/tendencias?limite=5", {
+  const items = await publicationRequest<HashtagResponse[]>("/tendencias/hashtags?limite=5", {
     signal,
     cache: "no-store",
   });
@@ -55,7 +55,7 @@ export async function getWeeklyHashtags(signal?: AbortSignal): Promise<WeeklyTre
 
 export async function searchHashtags(query: string, signal?: AbortSignal): Promise<WeeklyTrend[]> {
   const params = new URLSearchParams({ q: query, limite: "10" });
-  const items = await publicationRequest<HashtagResponse[]>(`/hashtags/buscar?${params}`, {
+  const items = await publicationRequest<HashtagResponse[]>(`/buscar/hashtags?${params}`, {
     signal,
     cache: "no-store",
   });

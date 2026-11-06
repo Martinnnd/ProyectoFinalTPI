@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { API_BASE_URL, guardarSesion, cerrarSesion } from "./api";
 import { FeedError, getFeed } from "./feedApi";
+import { getFeedItemKey } from "./feedItems";
 
 beforeEach(() =>
   guardarSesion({
@@ -40,6 +41,26 @@ const item = {
   autor: { id: 2, username: "Ana" },
   lugar: { nombre: "Mi barrio", latitud: -34, longitud: -58 },
 };
+it("Seguidos diferencia el original y sus reposts y elimina solo entradas exactamente repetidas", async () => {
+  const firstRepost = { ...item, reposteadoPor: { usuarioId: 3, username: "Sofi" } };
+  const secondRepost = { ...item, reposteadoPor: { usuarioId: 4, username: "Leo" } };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({
+        items: [item, firstRepost, secondRepost, firstRepost],
+        siguienteCursor: "continuar",
+        hayMas: true,
+      })),
+    ),
+  );
+
+  const page = await getFeed("seguidos");
+  expect(page.items.map((memory) => memory.id)).toEqual(["25", "25", "25"]);
+  expect(page.items.map((memory) => memory.authorId)).toEqual([2, 3, 4]);
+  expect(new Set(page.items.map(getFeedItemKey)).size).toBe(3);
+  expect(page.siguienteCursor).toBe("continuar");
+});
 it("excluye publicaciones propias de Para vos por ID y conserva el cursor del servidor", async () => {
   const fetch = vi.fn().mockImplementation(
     async () =>
