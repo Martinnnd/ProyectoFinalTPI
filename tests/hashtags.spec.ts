@@ -18,17 +18,17 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/**", (route) => {
     const url = new URL(route.request().url());
     if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers });
-    if (url.pathname === "/api/publicaciones/hashtags/tendencias")
+    if (url.pathname === "/api/publicaciones/tendencias/hashtags")
       return route.fulfill({
         headers,
         json: [{ hashtag: "amanecer", cantidadPublicaciones: 2, cantidadAutores: 2 }],
       });
-    if (url.pathname === "/api/publicaciones/hashtags/buscar")
+    if (url.pathname === "/api/publicaciones/buscar/hashtags")
       return route.fulfill({
         headers,
         json: [{ hashtag: "amanecer", cantidadPublicaciones: 3, cantidadAutores: 2 }],
       });
-    if (url.pathname === "/api/publicaciones/hashtags/amanecer/publicaciones") {
+    if (url.pathname === "/api/publicaciones/hashtags/amanecer") {
       const next = url.searchParams.has("cursor");
       return route.fulfill({
         headers,

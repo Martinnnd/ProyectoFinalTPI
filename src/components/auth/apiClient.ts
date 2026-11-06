@@ -19,7 +19,7 @@ export async function apiFetch(
   const cacheable =
     typeof window !== "undefined" &&
     method === "GET" &&
-    /^\/api\/(publicaciones|usuario|grupos|momentos)(\/|$)/.test(path) &&
+    /^\/api\/(publicaciones|comentarios|usuario|grupos|momentos)(\/|$)/.test(path) &&
     !/\/publicaciones\/\d+\/(analisis|momentos)$/.test(path) &&
     init.cache !== "reload" &&
     init.cache !== "no-store";
@@ -45,7 +45,7 @@ export async function apiFetch(
   if (response.ok && method !== "GET" && method !== "HEAD" && !path.endsWith("/impresiones")) {
     queryCache.clear();
     if (
-      /^\/api\/publicaciones(?:\/|$)/.test(path) ||
+      /^\/api\/(publicaciones|comentarios)(?:\/|$)/.test(path) ||
       path.startsWith("/api/seguimientos") ||
       path === "/api/usuario/me/username"
     )

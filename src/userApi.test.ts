@@ -149,7 +149,7 @@ describe("userApi", () => {
     const memories = await getPublicacionesGuardadasUsuario(17);
 
     expect(fetch).toHaveBeenCalledOnce();
-    expect(fetch.mock.calls[0][0]).toContain("/api/publicaciones/usuario/17/guardadas");
+    expect(fetch.mock.calls[0][0]).toContain("/api/publicaciones/guardadas/17");
     expect(memories).toHaveLength(1);
     expect(memories[0]).toMatchObject({
       id: "99",

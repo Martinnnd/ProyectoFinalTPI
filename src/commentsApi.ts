@@ -1,3 +1,4 @@
+import { apiRequest } from "./apiRequest";
 import { publicationRequest } from "./publicationsApi";
 import { getSesion } from "./api";
 import type { CommentReaction, MemoryComment } from "./socialTypes";
@@ -58,10 +59,10 @@ export async function getCommentReplies(
   cursor?: string | null,
   signal?: AbortSignal,
 ) {
-  const query = new URLSearchParams({ limite: "3" });
+  const query = new URLSearchParams({ publicacionId: memoryId, limite: "3" });
   if (cursor) query.set("cursor", cursor);
-  const data = await publicationRequest<{ items: RemoteComment[]; siguienteCursor: string | null }>(
-    `/${memoryId}/comentarios/${commentId}/respuestas?${query}`,
+  const data = await apiRequest<{ items: RemoteComment[]; siguienteCursor: string | null }>(
+    `/api/comentarios/respuestas/${commentId}?${query}`,
     { signal },
   );
   return { items: flattenComments(data.items, memoryId), cursor: data.siguienteCursor };
@@ -86,8 +87,8 @@ export async function setCommentReaction(
   reaction: CommentReaction,
 ) {
   if (!getSesion()) throw new Error("Tenés que iniciar sesión para reaccionar.");
-  const data = await publicationRequest<RemoteComment>(
-    `/${memoryId}/comentarios/${commentId}/reaccion`,
+  const data = await apiRequest<RemoteComment>(
+    `/api/comentarios/${commentId}/reaccion?${new URLSearchParams({ publicacionId: memoryId })}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -99,8 +100,8 @@ export async function setCommentReaction(
 
 export async function removeCommentReaction(memoryId: string, commentId: string) {
   if (!getSesion()) throw new Error("Tenés que iniciar sesión para reaccionar.");
-  const data = await publicationRequest<RemoteComment>(
-    `/${memoryId}/comentarios/${commentId}/reaccion`,
+  const data = await apiRequest<RemoteComment>(
+    `/api/comentarios/${commentId}/reaccion?${new URLSearchParams({ publicacionId: memoryId })}`,
     {
       method: "DELETE",
     },
@@ -110,5 +111,8 @@ export async function removeCommentReaction(memoryId: string, commentId: string)
 
 export async function deleteComment(memoryId: string, commentId: string) {
   if (!getSesion()) throw new Error("Tenés que iniciar sesión para eliminar un comentario.");
-  await publicationRequest<void>(`/${memoryId}/comentarios/${commentId}`, { method: "DELETE" });
+  await apiRequest<void>(
+    `/api/comentarios/${commentId}?${new URLSearchParams({ publicacionId: memoryId })}`,
+    { method: "DELETE" },
+  );
 }

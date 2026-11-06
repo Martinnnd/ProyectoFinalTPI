@@ -104,10 +104,9 @@ export async function getPublicacionesGuardadasUsuario(
   usuarioId: number,
   signal?: AbortSignal,
 ): Promise<Memory[]> {
-  const response = await apiFetch(
-    `${API_BASE_URL}/api/publicaciones/usuario/${usuarioId}/guardadas`,
-    { signal },
-  );
+  const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/guardadas/${usuarioId}`, {
+    signal,
+  });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     throw new Error(
