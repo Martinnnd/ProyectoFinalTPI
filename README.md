@@ -41,6 +41,19 @@ Reemplazar TU_TOKEN_PUBLICO por el token propio que empieza con pk. El repositor
 
 En Vercel usar preset **Next.js**, comando npm run build y directorio de salida automático. Configurar NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN para Production y, si corresponde, Preview; redeploy después de cambiarla. No usar el nombre VITE_MAPBOX_ACCESS_TOKEN ni el directorio dist del prototipo. El token público es visible en el bundle por diseño; configurar los dominios permitidos en Mapbox, incluyendo localhost:3001 para pruebas.
 
+### Google AdSense
+
+1. En AdSense, agregá el dominio de producción y creá un bloque de anuncios de display adaptable para cada ubicación que quieras usar. Mantené desactivados los anuncios automáticos del dominio para controlar las ubicaciones. [Configurar anuncios en AdSense](https://support.google.com/adsense/answer/7037624?hl=es)
+2. Configurá `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID` con el identificador que empieza con `ca-pub-`. Usá el ID numérico de cada bloque en las variables correspondientes. Una variable de bloque vacía desactiva esa ubicación.
+
+   | Variable | Ubicación |
+   | --- | --- |
+   | `NEXT_PUBLIC_ADSENSE_FEED_SLOT` | Entre la cuarta y la quinta publicación de la vista general del feed. |
+   | `NEXT_PUBLIC_ADSENSE_MEMORY_SLOT` | Debajo del detalle de un recuerdo fuera de grupos. |
+
+3. Desplegá con el ID de editor y los bloques vacíos si primero necesitás verificar el dominio. La ruta `/ads.txt` se genera con el ID de editor. Compará su contenido con la línea que te da AdSense y completá la revisión del sitio. [Estado de los sitios en AdSense](https://support.google.com/adsense/answer/12170222?hl=es)
+4. Antes de habilitar los bloques, publicá la política de privacidad con las divulgaciones de AdSense y configurá el consentimiento según tu audiencia en **Privacidad y mensajes**. Volvé a compilar y desplegar cuando cambies las variables, ya que Next.js las incorpora en el build. [Políticas de editores de Google](https://support.google.com/adsense/answer/10502938?hl=es) · [Requisitos de consentimiento de Google](https://support.google.com/adsense/answer/13554116?hl=es)
+
 ## Para llevar las funciones a ProyectoFinalTPI
 
 **Empezar por [README-MIGRACION-A-PROYECTOFINALTPI.md](README-MIGRACION-A-PROYECTOFINALTPI.md)**. Incluye:

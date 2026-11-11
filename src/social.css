@@ -13,7 +13,7 @@
   flex-wrap: wrap;
 }
 
-.app:is(.view-feed, .view-profile, .view-chat) .music-card {
+.app:is(.view-feed, .view-profile, .view-chat, .view-game) .music-card {
   width: 265px;
   bottom: 60px;
 }
@@ -141,7 +141,7 @@
     font-size: 5px !important;
   }
 
-  .app:is(.view-feed, .view-profile, .view-chat) .music-card {
+  .app:is(.view-feed, .view-profile, .view-chat, .view-game) .music-card {
     width: auto;
     bottom: 80px;
   }
@@ -152,7 +152,9 @@
 }
 
 @media (min-width: 900px) and (max-height: 800px) {
-  .app:is(.view-feed, .view-profile, .view-chat) .music-card:not(.expanded) .device-illustration {
+  .app:is(.view-feed, .view-profile, .view-chat, .view-game)
+    .music-card:not(.expanded)
+    .device-illustration {
     display: none;
   }
 }

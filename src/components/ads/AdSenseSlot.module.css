@@ -1,0 +1,28 @@
+.slot {
+  width: 100%;
+  min-width: 0;
+}
+
+.slot:has(.ad[data-ad-status="unfilled"]) {
+  display: none;
+}
+
+.ad {
+  display: block;
+  text-decoration: none;
+}
+
+.label {
+  display: none;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.slot:has(.ad[data-ad-status="filled"], .ad[data-ad-status="unfill-optimized"]) {
+  margin-block: 1rem;
+}
+
+.slot:has(.ad[data-ad-status="filled"], .ad[data-ad-status="unfill-optimized"]) .label {
+  display: block;
+}

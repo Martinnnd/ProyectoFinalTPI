@@ -24,6 +24,7 @@ export default function Chrome({ panelOpen, factsOpen, musicOpen, onNavigate }: 
             type="button"
             className={active[destination] ? "task-active" : ""}
             aria-pressed={active[destination]}
+            aria-controls={destination === "music" ? "music-player" : undefined}
             aria-label={label}
             onClick={() => onNavigate(destination)}
           >

@@ -22,6 +22,9 @@ import { publicationId } from "../../publicationsApi";
 import { LoaderCircle, RefreshCw } from "lucide-react";
 import { feedCache } from "../../sessionQueryCache";
 import { getFeedItemKey, mergeFeedItems } from "../../feedItems";
+import AdSenseSlot from "../ads/AdSenseSlot";
+
+const FEED_AD_AFTER = 4;
 
 function toggleId(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id];
@@ -56,6 +59,7 @@ function getTargetToRepost(
 
 export default function SocialFeed({
   backLabel = "Volver al feed",
+  showFeedAd = false,
   initialHashtag,
   active,
   onItems,
@@ -89,6 +93,7 @@ export default function SocialFeed({
   onRepostCreated,
 }: {
   backLabel?: string;
+  showFeedAd?: boolean;
   initialHashtag?: string | null;
   active: boolean;
   onItems: (items: Memory[]) => void;
@@ -300,6 +305,8 @@ export default function SocialFeed({
       ? allMemories.filter((memory) => !!memory.groupId && groupIds.includes(memory.groupId))
       : allMemories;
   const posts = mergeFeedItems(hashtag ? hashtagFeed.items : browsingGroups ? [] : tabPosts);
+  const showInlineAd =
+    active && showFeedAd && !selected && !hashtag && tab === "all" && posts.length > FEED_AD_AFTER;
   useEffect(() => {
     if (
       !active ||
@@ -557,7 +564,7 @@ export default function SocialFeed({
           <div className="feed-group-directory">{community}</div>
         )}
         <div className="feed-posts">
-          {(selected ? [selected] : posts).map((memory, index) => {
+          {(selected ? [selected] : posts).flatMap((memory, index) => {
             const isQuote = Boolean(
               memory.quotedMemory ||
               (memory.repost &&
@@ -594,7 +601,7 @@ export default function SocialFeed({
               viewerRating: effectiveRating,
             };
 
-            return (
+            const post = (
               <FeedPost
                 groupName={memory.groupId ? groupNames[memory.groupId] : undefined}
                 topOverlay={
@@ -685,7 +692,13 @@ export default function SocialFeed({
                 onHashtag={chooseHashtag}
               />
             );
+            return showInlineAd && index === FEED_AD_AFTER - 1
+              ? [post, <AdSenseSlot key="feed-ad" placement="feed" />]
+              : post;
           })}
+          {active && selected && !selected.groupId && (
+            <AdSenseSlot key={`memory-ad:${selected.id}`} placement="memory" />
+          )}
           {!selected &&
             !browsingGroups &&
             !posts.length &&
