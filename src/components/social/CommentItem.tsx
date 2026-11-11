@@ -7,6 +7,9 @@ import {
   type MemoryComment,
 } from "../../socialTypes";
 import ReactionPicker from "./ReactionPicker";
+import { useAuth } from "../auth/AuthProvider";
+import ReportButton from "../../reports/ReportDialog";
+import { reportTarget } from "../../reports/reportTypes";
 
 export default function CommentItem({
   comment,
@@ -27,6 +30,7 @@ export default function CommentItem({
   onDelete: (commentId: string) => void | Promise<void>;
   depth?: number;
 }) {
+  const { session } = useAuth();
   const replies = comments.filter((reply) => reply.parentId === comment.id);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [replyOpen, setReplyOpen] = useState(false);
@@ -158,6 +162,14 @@ export default function CommentItem({
                   >
                     <SmilePlus size={15} /> Reaccionar
                   </button>
+                  {comment.authorId && comment.authorId !== session?.usuarioId && (
+                    <ReportButton
+                      compact
+                      targetType={reportTarget.comment}
+                      targetId={Number(comment.id)}
+                      targetLabel="comentario"
+                    />
+                  )}
                   {comment.canDelete && (
                     <button
                       type="button"

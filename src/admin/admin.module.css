@@ -639,6 +639,28 @@ button:disabled {
   gap: 8px;
   margin-top: 22px;
 }
+.reportEvidence {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid #d8d0c1;
+  border-radius: 10px;
+  background: #f5f0e7;
+}
+.reportEvidence > svg {
+  width: 21px;
+  flex: none;
+  color: var(--admin-green);
+}
+.reportEvidence p {
+  margin: 6px 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.reportEvidence small {
+  color: var(--admin-muted);
+}
 
 .actionDialog {
   width: min(460px, 100%);
@@ -962,7 +984,7 @@ button:disabled {
   }
   .sidebar nav {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 4px;
   }
   .sidebar nav button {

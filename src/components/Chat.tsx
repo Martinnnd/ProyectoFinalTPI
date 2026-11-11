@@ -17,6 +17,8 @@ import type { ChatMessageDto, ConversationSummaryDto } from "../chat/types";
 import { deleteConversation, getConversations } from "../chat/chatApi";
 import { useChatConnection } from "../chat/useChatConnection";
 import { useNotice } from "../context/NoticeProvider";
+import ReportButton from "../reports/ReportDialog";
+import { reportTarget } from "../reports/reportTypes";
 
 const conversationTitlesByDecade: Record<Decade, string> = {
   1970: "Canal 70 | En contacto",
@@ -156,7 +158,11 @@ export default function Chat({
         if (!cancelled) setConversations(data);
       })
       .catch((error) => {
-        if (!cancelled) showToast(error instanceof Error ? error.message : "No se pudieron cargar las conversaciones.", "error");
+        if (!cancelled)
+          showToast(
+            error instanceof Error ? error.message : "No se pudieron cargar las conversaciones.",
+            "error",
+          );
       })
       .finally(() => {
         if (!cancelled) setLoadingConversations(false);
@@ -364,21 +370,31 @@ export default function Chat({
         {!loadingMessages && messages.length === 0 && (
           <span className="chat-date">Empezá la conversación diciendo ¡Hola!</span>
         )}
-        {messages.map((message) => (
-          <p
-            key={message.id}
-            className={`chat-bubble ${message.senderId === session?.usuarioId ? "own" : ""}`}
-          >
-            {message.content}
-            <br />
-            <small className="chat-message-time">
-              {new Date(message.sentAt).toLocaleTimeString("es-AR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </small>
-          </p>
-        ))}
+        {messages.map((message) => {
+          const own = message.senderId === session?.usuarioId;
+          return (
+            <div key={message.id} className={`chat-message-row ${own ? "own" : ""}`}>
+              <p className={`chat-bubble ${own ? "own" : ""}`}>
+                {message.content}
+                <br />
+                <small className="chat-message-time">
+                  {new Date(message.sentAt).toLocaleTimeString("es-AR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </small>
+              </p>
+              {!own && (
+                <ReportButton
+                  compact
+                  targetType={reportTarget.chatMessage}
+                  targetId={message.id}
+                  targetLabel="mensaje"
+                />
+              )}
+            </div>
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 

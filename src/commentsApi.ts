@@ -24,6 +24,7 @@ function toComment(data: RemoteComment, memoryId: string): MemoryComment {
     id: String(data.id),
     memoryId,
     parentId: data.comentarioPadreId ? String(data.comentarioPadreId) : undefined,
+    authorId: data.autor?.id,
     author: data.autor?.username,
     text: data.contenido ?? undefined,
     createdAt: data.fechaCreacion,

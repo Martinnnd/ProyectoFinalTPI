@@ -22,6 +22,7 @@ export interface MemoryComment {
   id: string;
   memoryId: string;
   parentId?: string;
+  authorId?: number;
   author?: string;
   text?: string;
   createdAt: string;

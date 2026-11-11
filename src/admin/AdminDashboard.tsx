@@ -9,6 +9,7 @@ import {
   Heart,
   LayoutDashboard,
   MessageSquareText,
+  Flag,
   ShieldCheck,
   Sparkles,
   Users,
@@ -18,15 +19,18 @@ import { getAdminStatistics, type AdminStatistics } from "./adminApi";
 import CommentsPanel from "./CommentsPanel";
 import PublicationsPanel from "./PublicationsPanel";
 import UsersPanel from "./UsersPanel";
+import ReportsPanel from "./ReportsPanel";
+import ToastViewport from "../components/layout/ToastViewport";
 import styles from "./admin.module.css";
 
-type Section = "overview" | "publications" | "users" | "comments";
+type Section = "overview" | "publications" | "users" | "comments" | "reports";
 
 const sections = [
   { id: "overview" as const, label: "Resumen", icon: LayoutDashboard },
   { id: "publications" as const, label: "Publicaciones", icon: FileText },
   { id: "users" as const, label: "Usuarios", icon: Users },
   { id: "comments" as const, label: "Comentarios", icon: MessageSquareText },
+  { id: "reports" as const, label: "Reportes", icon: Flag },
 ];
 
 export default function AdminDashboard() {
@@ -79,7 +83,9 @@ export default function AdminDashboard() {
         {section === "publications" && <PublicationsPanel />}
         {section === "users" && <UsersPanel currentUserId={session!.usuarioId} />}
         {section === "comments" && <CommentsPanel />}
+        {section === "reports" && <ReportsPanel />}
       </main>
+      <ToastViewport />
     </div>
   );
 }
