@@ -14,6 +14,8 @@ import { useFollow } from "../../context/FollowContext";
 import { getSeguidores, getSeguidos, type FollowedUser } from "../../seguimientosApi";
 import type { Achievement, Period } from "../../types";
 import type { ProfilePresentation } from "./profileTypes";
+import ReportButton from "../../reports/ReportDialog";
+import { reportTarget } from "../../reports/reportTypes";
 
 type FollowList = "followers" | "following";
 
@@ -203,7 +205,7 @@ export default function ProfileHeader({
               </button>
             </div>
           </div>
-          {!isOwnProfile && (onStartChat || onToggleFollow) && (
+          {!isOwnProfile && (onStartChat || onToggleFollow || userId) && (
             <div className="profile-visitor-actions">
               {onStartChat && (
                 <button
@@ -249,6 +251,13 @@ export default function ProfileHeader({
                     {followBusy ? "Actualizando…" : isFollowing ? "Dejar de seguir" : "Seguir"}
                   </span>
                 </button>
+              )}
+              {userId && userId !== session?.usuarioId && (
+                <ReportButton
+                  targetType={reportTarget.profile}
+                  targetId={userId}
+                  targetLabel="perfil"
+                />
               )}
             </div>
           )}

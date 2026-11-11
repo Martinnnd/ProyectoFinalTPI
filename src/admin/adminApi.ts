@@ -95,6 +95,38 @@ export type AdminComment = {
   respuestas?: AdminComment[];
 };
 
+export type AdminReport = {
+  id: number;
+  tipoContenido: 0 | 1 | 2 | 3;
+  contenidoId: number;
+  motivo: number;
+  detalle?: string | null;
+  contenidoSnapshot?: string | null;
+  contextoId?: number | null;
+  contexto?: string | null;
+  estado: 0 | 1 | 2 | 3;
+  fechaCreacion: string;
+  reportanteId: number;
+  reportanteUsername: string;
+  usuarioReportadoId: number;
+  usuarioReportadoUsername: string;
+  cantidadCoincidentes: number;
+  administradorId?: number | null;
+  administradorUsername?: string | null;
+  fechaResolucion?: string | null;
+  accionTomada?: number | null;
+  observacionAdministrativa?: string | null;
+};
+
+export type ReportFilters = {
+  pagina?: number;
+  tamanio?: number;
+  texto?: string;
+  tipoContenido?: number;
+  motivo?: number;
+  estado?: number;
+};
+
 function queryOf(values: Record<string, string | number | boolean | undefined>) {
   const query = new URLSearchParams();
   Object.entries(values).forEach(([key, value]) => {
@@ -183,4 +215,30 @@ export async function getPublicationComments(publicationId: number, signal?: Abo
 
 export function deleteAdminComment(id: number) {
   return adminRequest<void>(`comentarios/${id}`, { method: "DELETE" });
+}
+
+export function getAdminReports(filters: ReportFilters, signal?: AbortSignal) {
+  const query = queryOf(filters);
+  const reportQuery = filters.estado === undefined ? `${query}${query ? "&" : ""}estado=` : query;
+  return adminRequest<AdminPage<AdminReport>>(`reportes?${reportQuery}`, {
+    signal,
+    cache: "no-store",
+  });
+}
+
+export function resolveAdminReport(
+  reporteId: number,
+  accion: number,
+  observacion?: string,
+  diasSuspension?: number,
+) {
+  return adminRequest<void>("reportes", {
+    method: "PATCH",
+    body: JSON.stringify({
+      reporteId,
+      accion,
+      observacion: observacion?.trim() || null,
+      ...(accion === 3 ? { diasSuspension: diasSuspension ?? 7 } : {}),
+    }),
+  });
 }

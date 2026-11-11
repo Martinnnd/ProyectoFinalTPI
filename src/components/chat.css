@@ -238,6 +238,36 @@
   line-height: 1.6;
   margin: 0;
 }
+.chat-message-row {
+  display: flex;
+  max-width: 82%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+.chat-message-row.own {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+.chat-message-row .chat-bubble {
+  max-width: 100%;
+}
+.chat-message-row > button {
+  min-height: 24px;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  opacity: 0;
+}
+.chat-message-row:hover > button,
+.chat-message-row:focus-within > button {
+  opacity: 1;
+}
+@media (hover: none) {
+  .chat-message-row > button {
+    opacity: 1;
+  }
+}
 .chat-bubble.own {
   align-self: flex-end;
   border-radius: 12px 12px 2px 12px;

@@ -11,6 +11,8 @@ import PostRating from "./PostRating";
 import { memoryHashtags } from "../../hashtags";
 import { publicationId } from "../../publicationsApi";
 import FeedRelations from "./FeedRelations";
+import ReportButton from "../../reports/ReportDialog";
+import { reportTarget } from "../../reports/reportTypes";
 
 export default function FeedPost({
   topOverlay,
@@ -204,6 +206,24 @@ export default function FeedPost({
                   >
                     <Trash2 size={15} /> Eliminar
                   </button>
+                </div>
+              </details>
+            )}
+            {!isHeaderAuthorOwn && publicationId(memory) && (
+              <details className="feed-owner-menu">
+                <summary
+                  className="secondary-button"
+                  aria-label="Opciones de publicación"
+                  title="Opciones de publicación"
+                >
+                  <Ellipsis size={20} aria-hidden="true" />
+                </summary>
+                <div className="feed-owner-menu-options">
+                  <ReportButton
+                    targetType={reportTarget.publication}
+                    targetId={Number(publicationId(memory))}
+                    targetLabel="publicación"
+                  />
                 </div>
               </details>
             )}
