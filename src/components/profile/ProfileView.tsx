@@ -65,6 +65,10 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
   }, []);
 
   const [profileMemories, setProfileMemories] = useState<Memory[]>([]);
+  const [memoriesLoading, setMemoriesLoading] = useState(true);
+  const [memoriesError, setMemoriesError] = useState(false);
+  const [memoriesRevision, setMemoriesRevision] = useState(0);
+  const profileIdForMemories = isOwnProfile ? session?.usuarioId : profileUser?.id;
   const [editing, setEditing] = useState<Memory | null>(null);
   const [deleting, setDeleting] = useState<Memory | null>(null);
   const [loading, setLoading] = useState(true);
@@ -102,12 +106,9 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     setError(null);
 
     getUserProfile(usernameToFetch, controller.signal, revision ? "no-store" : "default")
-      .then(async (perfil) => {
+      .then((perfil) => {
         if (controller.signal.aborted) return;
         setProfileUser(perfil);
-        const mems = await getPublicacionesUsuario(perfil.id, controller.signal);
-        if (controller.signal.aborted) return;
-        setProfileMemories(mems);
         setLoading(false);
       })
       .catch((err) => {
@@ -119,6 +120,26 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
 
     return () => controller.abort();
   }, [usernameToFetch, isOwnProfile, session?.usuarioId, status, router, revision]);
+
+  useEffect(() => {
+    if (status === "loading" || !profileIdForMemories) return;
+
+    const controller = new AbortController();
+    setMemoriesLoading(true);
+    setMemoriesError(false);
+    getPublicacionesUsuario(profileIdForMemories, controller.signal)
+      .then((memories) => {
+        if (!controller.signal.aborted) setProfileMemories(memories);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setMemoriesError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setMemoriesLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [profileIdForMemories, status, memoriesRevision]);
 
   if (loading) {
     return (
@@ -302,6 +323,10 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
         onBack={() => router.back()}
         community={communityControls}
         allMemories={profileMemories}
+        memoryCount={tierProgress.memories}
+        memoriesLoading={memoriesLoading}
+        memoriesError={memoriesError}
+        onRetryMemories={() => setMemoriesRevision((value) => value + 1)}
         repostedPublicationIds={[]}
         tierProgress={tierProgress}
         followers={followers}

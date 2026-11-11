@@ -8,7 +8,7 @@ const session = {
   esAdmin: false,
 };
 
-async function mockApi(page: Page) {
+async function mockApi(page: Page, waitForMemories?: Promise<void>) {
   const followBodies: unknown[] = [];
 
   await page.route("**/api/**", async (route) => {
@@ -69,8 +69,10 @@ async function mockApi(page: Page) {
         },
       });
     }
-    if (url.pathname === "/api/publicaciones/usuario/2")
+    if (url.pathname === "/api/publicaciones/usuario/2") {
+      await waitForMemories;
       return route.fulfill({ headers, json: [] });
+    }
     if (url.pathname === "/api/grupos") return route.fulfill({ headers, json: [] });
     if (url.pathname === "/api/publicaciones/mapa")
       return route.fulfill({ headers, json: { pines: [], hayMas: false } });
@@ -132,4 +134,23 @@ test("identifica el perfil propio y cierra con Escape", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(page.getByRole("button", { name: "Buscar usuarios", exact: true })).toBeFocused();
+});
+
+test("muestra el perfil mientras siguen cargando sus publicaciones", async ({ page }) => {
+  let releaseMemories!: () => void;
+  const waitForMemories = new Promise<void>((resolve) => {
+    releaseMemories = resolve;
+  });
+  await mockApi(page, waitForMemories);
+  try {
+    await page.goto("/perfil/lucia");
+    const profile = page.getByRole("main", { name: "Perfil de lucia" });
+    await expect(profile).toBeVisible();
+    await expect(profile.getByText("Cargando publicaciones…")).toBeVisible();
+    releaseMemories();
+    await expect(profile.getByText("Cargando publicaciones…")).toBeHidden();
+    await expect(profile).toBeVisible();
+  } finally {
+    releaseMemories();
+  }
 });

@@ -79,6 +79,10 @@ export default function Profile({
   onBack,
   community,
   allMemories,
+  memoryCount = allMemories.length,
+  memoriesLoading,
+  memoriesError,
+  onRetryMemories,
   repostedPublicationIds,
   tierProgress,
   followers,
@@ -111,6 +115,10 @@ export default function Profile({
   onBack?: () => void;
   community?: ReactNode;
   allMemories: Memory[];
+  memoryCount?: number;
+  memoriesLoading?: boolean;
+  memoriesError?: boolean;
+  onRetryMemories?: () => void;
   repostedPublicationIds: string[];
   tierProgress: TierProgress;
   followers: FollowedUser[];
@@ -271,7 +279,7 @@ export default function Profile({
           fotoPerfilUrl={fotoPerfilUrl}
           presentation={presentation}
           period={period}
-          memoryCount={allMemories.length}
+          memoryCount={memoryCount}
           followers={followers}
           followedUsers={followedUsers}
           followerCount={followerCount}
@@ -296,7 +304,7 @@ export default function Profile({
         <ProfileShortcuts
           author={author}
           presentation={presentation}
-          memoryCount={allMemories.length}
+          memoryCount={memoryCount}
           savedCount={savedLoaded ? savedMemories.length : undefined}
           taggedCount={taggedLoaded ? taggedMemories.length : undefined}
           activeTab={currentTab}
@@ -320,7 +328,19 @@ export default function Profile({
           onDelete={onDelete}
           onClose={closeMap}
         />
-        {currentTab === "saved" && loadingSaved ? (
+        {currentTab === "posts" && memoriesLoading ? (
+          <div className="personal-empty profile-loading" role="status">
+            <LoaderCircle className="animate-spin" size={24} />
+            <p>Cargando publicaciones…</p>
+          </div>
+        ) : currentTab === "posts" && memoriesError ? (
+          <div className="personal-empty" role="alert">
+            <p>No se pudieron cargar las publicaciones.</p>
+            <button type="button" className="secondary-button" onClick={onRetryMemories}>
+              Reintentar
+            </button>
+          </div>
+        ) : currentTab === "saved" && loadingSaved ? (
           <div
             className="personal-empty profile-loading"
             style={{ padding: "40px", textAlign: "center" }}
