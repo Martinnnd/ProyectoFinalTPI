@@ -406,6 +406,7 @@ function FeedPageContent() {
     <>
       <SocialFeed
         key={session?.usuarioId ?? "guest"}
+        showFeedAd={(scope === "all" || scope === "general") && !query.trim()}
         initialHashtag={initialHashtag}
         active={true}
         onItems={setFeedItems}

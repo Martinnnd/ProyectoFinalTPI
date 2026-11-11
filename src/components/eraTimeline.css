@@ -262,6 +262,11 @@
   display: none;
 }
 
+.app.view-game :is(.activity-dock-options, .system-taskbar) button:not([aria-controls="music-player"]),
+.app.view-game .system-taskbar .taskbar-separator {
+  display: none;
+}
+
 /* A quieter instrument scale. Geometry and era-change animations stay shared. */
 .app .time-scale {
   --time-light: var(--accent);

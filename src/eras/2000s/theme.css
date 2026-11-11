@@ -769,19 +769,19 @@
 }
 
 @media (min-width: 900px) and (max-height: 800px) {
-  .app.era-2000:is(.view-feed, .view-profile, .view-chat)
+  .app.era-2000:is(.view-feed, .view-profile, .view-chat, .view-game)
     .device-2000:not(.expanded)
     .music-compact {
     flex-direction: row;
   }
-  .app.era-2000:is(.view-feed, .view-profile, .view-chat)
+  .app.era-2000:is(.view-feed, .view-profile, .view-chat, .view-game)
     .device-2000:not(.expanded)
     .music-buttons {
     width: 75px;
     height: 60px;
     flex-shrink: 0;
   }
-  .app.era-2000:is(.view-feed, .view-profile, .view-chat)
+  .app.era-2000:is(.view-feed, .view-profile, .view-chat, .view-game)
     .device-2000:not(.expanded)
     .listen-button {
     left: 24px;
@@ -789,7 +789,7 @@
     width: 26px;
     height: 26px;
   }
-  .app.era-2000:is(.view-feed, .view-profile, .view-chat)
+  .app.era-2000:is(.view-feed, .view-profile, .view-chat, .view-game)
     .device-2000:not(.expanded)
     .music-buttons::before {
     top: 5px;
@@ -1005,19 +1005,19 @@
   }
 }
 @media (min-width: 900px) and (max-height: 800px) {
-  .app.era-2000:is(.view-feed, .view-profile, .view-chat)
+  .app.era-2000:is(.view-feed, .view-profile, .view-chat, .view-game)
     .device-2000:not(.expanded)
     .music-compact {
     flex-direction: row;
   }
-  .app.era-2000:is(.view-feed, .view-profile, .view-chat)
+  .app.era-2000:is(.view-feed, .view-profile, .view-chat, .view-game)
     .device-2000:not(.expanded)
     .music-buttons {
     width: 75px;
     height: 60px;
     flex-shrink: 0;
   }
-  .app.era-2000:is(.view-feed, .view-profile, .view-chat)
+  .app.era-2000:is(.view-feed, .view-profile, .view-chat, .view-game)
     .device-2000:not(.expanded)
     .listen-button {
     left: 24px;
@@ -1025,7 +1025,7 @@
     width: 26px;
     height: 26px;
   }
-  .app.era-2000:is(.view-feed, .view-profile, .view-chat)
+  .app.era-2000:is(.view-feed, .view-profile, .view-chat, .view-game)
     .device-2000:not(.expanded)
     .music-buttons::before {
     top: 5px;

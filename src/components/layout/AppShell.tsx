@@ -187,7 +187,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     : "Mi perfil"}
           </strong>
         </div>
-        {session && (
+        {session && currentView !== "game" && (
           <button
             className="mobile-add-button"
             aria-label="Sumar mi recuerdo"

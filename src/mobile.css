@@ -10,7 +10,9 @@
 .mobile-appbar {
   display: none;
 }
-.mobile-map-options {
+.mobile-map-options,
+.app.view-game .mobile-map-options,
+.app.view-game .mobile-music-access {
   display: none;
 }
 .mobile-player-heading {
@@ -629,7 +631,7 @@
       inset 0 1px #fff7,
       0 3px 10px #0003;
   }
-  .app.map-app.view-map .mobile-music-access {
+  .app.map-app:is(.view-map, .view-game) .mobile-music-access {
     position: absolute;
     top: calc(var(--mobile-top) + 12px);
     right: 64px;
@@ -644,12 +646,17 @@
       inset 0 1px #fff7,
       0 3px 10px #0003;
   }
-  .app.map-app.view-map .mobile-music-access[aria-pressed="true"] {
+  .app.map-app.view-game .mobile-music-access {
+    top: calc(6px + env(safe-area-inset-top, 0px));
+    right: 12px;
+    z-index: 721;
+  }
+  .app.map-app:is(.view-map, .view-game) .mobile-music-access[aria-pressed="true"] {
     background: var(--accent);
     border-color: var(--accent);
     color: var(--surface);
   }
-  .app.map-app.view-map .mobile-music-access[aria-pressed="true"] svg {
+  .app.map-app:is(.view-map, .view-game) .mobile-music-access[aria-pressed="true"] svg {
     color: inherit;
   }
   .app.map-app.view-map:has(.place-search-panel) :is(.mobile-map-options, .mobile-music-access) {

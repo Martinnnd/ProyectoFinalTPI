@@ -32,6 +32,7 @@ export default function Chrome({ panelOpen, factsOpen, musicOpen, onNavigate }: 
             type="button"
             className={active[destination] ? "task-active" : ""}
             aria-expanded={active[destination]}
+            aria-controls={destination === "music" ? "music-player" : undefined}
             onClick={() => onNavigate(destination)}
           >
             <Icon size={17} /> {label}
