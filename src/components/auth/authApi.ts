@@ -2,14 +2,19 @@ import { API_BASE_URL } from "../../apiConfig";
 import { rememberLoginAchievements } from "../../loginAchievements";
 import type { AchievementState } from "../../profileApi";
 import { toAuthError } from "./authErrors";
-import type { AuthSession, LoginCredentials, RegisterCredentials } from "./authTypes";
+import type {
+  AuthSession,
+  LoginCredentials,
+  RegisterCredentials,
+  ResetPasswordCredentials,
+} from "./authTypes";
 
 const authHeaders = {
   "Content-Type": "application/json",
   "X-Nostalgiar-Request": "1",
 };
 
-async function authRequest(path: string, body?: object): Promise<AuthSession> {
+async function postAuth(path: string, body?: object, signal?: AbortSignal): Promise<Response> {
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}/api/auth/${path}`, {
@@ -17,13 +22,20 @@ async function authRequest(path: string, body?: object): Promise<AuthSession> {
       headers: authHeaders,
       credentials: "include",
       body: body ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.timeout(10_000),
+      signal: signal
+        ? AbortSignal.any([signal, AbortSignal.timeout(10_000)])
+        : AbortSignal.timeout(10_000),
     });
   } catch {
     throw new Error("No pudimos conectar con el servidor. Comprobá que el backend esté encendido.");
   }
 
   if (!response.ok) throw await toAuthError(response);
+  return response;
+}
+
+async function authRequest(path: string, body?: object): Promise<AuthSession> {
+  const response = await postAuth(path, body);
   const { logrosNuevos, ...session }: AuthSession & { logrosNuevos?: AchievementState[] } =
     await response.json();
   rememberLoginAchievements(session.usuarioId, logrosNuevos);
@@ -32,6 +44,17 @@ async function authRequest(path: string, body?: object): Promise<AuthSession> {
 
 export function loginRequest(credentials: LoginCredentials): Promise<AuthSession> {
   return authRequest("login", credentials);
+}
+
+export async function requestPasswordRecovery(email: string, signal?: AbortSignal): Promise<void> {
+  await postAuth("recuperar-contrasena", { email: email.trim().toLowerCase() }, signal);
+}
+
+export async function resetPassword(
+  credentials: ResetPasswordCredentials,
+  signal?: AbortSignal,
+): Promise<void> {
+  await postAuth("restablecer-contrasena", credentials, signal);
 }
 
 export function registerRequest({

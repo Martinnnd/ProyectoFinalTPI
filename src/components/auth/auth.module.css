@@ -184,6 +184,33 @@
 .back:hover {
   color: var(--ink);
 }
+.forgotPassword {
+  justify-self: end;
+  color: var(--ink);
+  font-size: 0.86rem;
+  text-underline-offset: 3px;
+}
+.successBanner {
+  padding: 14px;
+  border: 1px solid rgb(95 67 44 / 32%);
+  border-radius: 12px;
+  background: rgb(247 247 247 / 45%);
+  line-height: 1.55;
+}
+.secondary {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
 .shell :is(a, button):focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;

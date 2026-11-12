@@ -197,6 +197,12 @@ export default function AuthForm({
           </label>
         )}
 
+        {!isRegister && (
+          <Link className={styles.forgotPassword} href="/auth/recuperar">
+            Olvidé mi contraseña
+          </Link>
+        )}
+
         <button className={styles.submit} type="submit" disabled={submitting}>
           {submitting && <Loader2 className={styles.spinner} size={18} aria-hidden="true" />}
           {submitting ? "Procesando…" : isRegister ? "Crear mi cuenta" : "Ingresar"}

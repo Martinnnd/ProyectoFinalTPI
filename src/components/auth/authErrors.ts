@@ -20,6 +20,9 @@ const fieldNames: Record<string, string> = {
   username: "username",
   email: "email",
   contrasena: "contrasena",
+  nuevacontrasena: "nuevaContrasena",
+  confirmacioncontrasena: "confirmacionContrasena",
+  token: "token",
 };
 
 function normalizeField(field: string): string {

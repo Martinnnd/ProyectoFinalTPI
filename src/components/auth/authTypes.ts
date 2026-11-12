@@ -16,4 +16,10 @@ export interface RegisterCredentials extends LoginCredentials {
   username: string;
 }
 
+export interface ResetPasswordCredentials {
+  token: string;
+  nuevaContrasena: string;
+  confirmacionContrasena: string;
+}
+
 export type AuthStatus = "loading" | "authenticated" | "anonymous";
