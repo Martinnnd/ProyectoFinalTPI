@@ -4,6 +4,7 @@ import { toMemory, type Publication } from "./publicationsApi";
 import type { Memory } from "./types";
 
 export interface UsuarioPerfil {
+  fotoPerfilUrl?: string | null;
   id: number;
   username: string;
   nombre?: string;
@@ -31,13 +32,12 @@ export async function buscarUsuarios(
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     throw new Error(
-      problem?.detail ||
-        problem?.title ||
-        `No se pudieron buscar usuarios (${response.status}).`,
+      problem?.detail || problem?.title || `No se pudieron buscar usuarios (${response.status}).`,
     );
   }
   const users: unknown = await response.json();
-  if (!Array.isArray(users)) throw new Error("La búsqueda de usuarios devolvió una respuesta inválida.");
+  if (!Array.isArray(users))
+    throw new Error("La búsqueda de usuarios devolvió una respuesta inválida.");
   return users.map((user) => {
     const value = user as Partial<UsuarioBusqueda>;
     if (!Number.isSafeInteger(value.id) || !value.username) {
@@ -70,10 +70,9 @@ export async function getPublicacionesUsuario(
   usuarioId: number,
   signal?: AbortSignal,
 ): Promise<Memory[]> {
-  const response = await apiFetch(
-    `${API_BASE_URL}/api/publicaciones/usuario/${usuarioId}`,
-    { signal },
-  );
+  const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/usuario/${usuarioId}`, {
+    signal,
+  });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     throw new Error(
@@ -105,10 +104,9 @@ export async function getPublicacionesGuardadasUsuario(
   usuarioId: number,
   signal?: AbortSignal,
 ): Promise<Memory[]> {
-  const response = await apiFetch(
-    `${API_BASE_URL}/api/publicaciones/usuario/${usuarioId}/guardadas`,
-    { signal },
-  );
+  const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/guardadas/${usuarioId}`, {
+    signal,
+  });
   if (!response.ok) {
     const problem = await response.json().catch(() => null);
     throw new Error(
@@ -136,3 +134,37 @@ export async function getPublicacionesGuardadasUsuario(
   );
 }
 
+export async function getPublicacionesEtiquetadasUsuario(
+  usuarioId: number,
+  signal?: AbortSignal,
+): Promise<Memory[]> {
+  const response = await apiFetch(
+    `${API_BASE_URL}/api/publicaciones/usuario/${usuarioId}/etiquetadas`,
+    { signal },
+  );
+  if (!response.ok) {
+    const problem = await response.json().catch(() => null);
+    throw new Error(
+      problem?.detail ||
+        problem?.title ||
+        `No se pudieron cargar los recuerdos donde está etiquetado (${response.status}).`,
+    );
+  }
+  const publications: Publication[] = await response.json();
+  return publications.map((pub) =>
+    toMemory(pub, {
+      id: String(pub.id),
+      title: pub.titulo,
+      description: "",
+      year: new Date(pub.fecha).getUTCFullYear(),
+      category: "Personales",
+      author: pub.autor?.username ?? "",
+      authorId: pub.autor?.id,
+      place: pub.lugar?.nombre ?? "",
+      lat: pub.lugar?.latitud ?? 0,
+      lng: pub.lugar?.longitud ?? 0,
+      source: "backend",
+      groupId: pub.grupo ? String(pub.grupo.id) : undefined,
+    }),
+  );
+}

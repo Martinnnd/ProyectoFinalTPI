@@ -70,5 +70,41 @@
     "url": "https://cdn-p.smehost.net/sites/b216384857054ba4a3f60f1ed1d26488/wp-content/uploads/2025/10/album-cover_dangerous.jpg",
     "caption": "Portada del álbum · Michael Jackson · sitio oficial",
     "source": "https://www.michaeljackson.com/albums/dangerous/"
+  },
+  {
+    "id": "iphone4s",
+    "url": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_4S_(6767371111).jpg",
+    "caption": "iPhone 4S · Scott Swigart · CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_4S_(6767371111).jpg"
+  },
+  {
+    "id": "pokemon",
+    "url": "https://commons.wikimedia.org/wiki/File:Pokemon_GO_players_in_M%C3%A9xico_City.jpg",
+    "caption": "Jugadores de Pokémon GO en Ciudad de México · ProtoplasmaKid · CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Pokemon_GO_players_in_M%C3%A9xico_City.jpg"
+  },
+  {
+    "id": "fonsi",
+    "url": "https://commons.wikimedia.org/wiki/File:Luis_Fonsi_in_concert.jpg",
+    "caption": "Luis Fonsi en concierto · anokarina · CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Luis_Fonsi_in_concert.jpg"
+  },
+  {
+    "id": "pandemic",
+    "url": "https://commons.wikimedia.org/wiki/File:Empty_George_Street,_Brisbane_during_the_the_COVID-19_pandemic,_May_2020.jpg",
+    "caption": "Calle vacía en Brisbane, mayo de 2020 · Kgbo · CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Empty_George_Street,_Brisbane_during_the_the_COVID-19_pandemic,_May_2020.jpg"
+  },
+  {
+    "id": "webb",
+    "url": "https://commons.wikimedia.org/wiki/File:James_Webb_Space_Telescope_Launch_(NHQ202112250010).jpg",
+    "caption": "Lanzamiento del telescopio Webb · Bill Ingalls / NASA · dominio público",
+    "source": "https://commons.wikimedia.org/wiki/File:James_Webb_Space_Telescope_Launch_(NHQ202112250010).jpg"
+  },
+  {
+    "id": "argentina",
+    "url": "https://commons.wikimedia.org/wiki/File:Cartel_luminoso_celebrando_la_victoria_argentina_en_la_Copa_Mundial_de_F%C3%BAtbol_2022,_Buenos_Aires.jpg",
+    "caption": "Festejo por el Mundial en Buenos Aires · Solargentino · CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cartel_luminoso_celebrando_la_victoria_argentina_en_la_Copa_Mundial_de_F%C3%BAtbol_2022,_Buenos_Aires.jpg"
   }
 ]

@@ -47,8 +47,8 @@ export default function RetroMediaPlaceholder({
               {failed
                 ? "La cinta o fotografía original no se pudo sincronizar."
                 : title
-                ? `«${title}»`
-                : "Recuerdo testimonial registrado en el archivo de Nostalgiar"}
+                  ? `«${title}»`
+                  : "Recuerdo testimonial registrado en el archivo de Nostalgiar"}
             </p>
           )}
 

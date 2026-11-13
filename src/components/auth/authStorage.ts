@@ -1,6 +1,6 @@
 import type { AuthSession } from "./authTypes";
-import { clearSessionQueries } from '../../sessionQueryCache';
-import { clearLoginAchievements } from '../../loginAchievements';
+import { clearSessionQueries } from "../../sessionQueryCache";
+import { clearLoginAchievements } from "../../loginAchievements";
 
 export const AUTH_STORAGE_KEY = "nostalgia_auth";
 export const AUTH_CHANGE_EVENT = "nostalgiar:auth-change";
@@ -26,10 +26,7 @@ export function completeAuthInit(): void {
 
 export function waitForAuthInit(): Promise<void> {
   if (!authInitPromise) return Promise.resolve();
-  return Promise.race([
-    authInitPromise,
-    new Promise<void>((resolve) => setTimeout(resolve, 8000)),
-  ]);
+  return Promise.race([authInitPromise, new Promise<void>((resolve) => setTimeout(resolve, 8000))]);
 }
 
 export function tokenExpiresAt(token: string): number | null {

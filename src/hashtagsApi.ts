@@ -14,34 +14,50 @@ const toTrend = (item: HashtagResponse): WeeklyTrend => ({
   authors: item.cantidadAutores,
 });
 
-export async function getHashtagPosts(tag: string, cursor?: string, signal?: AbortSignal): Promise<FeedPage> {
+export async function getHashtagPosts(
+  tag: string,
+  cursor?: string,
+  signal?: AbortSignal,
+): Promise<FeedPage> {
   const query = new URLSearchParams({ limite: "20" });
   if (cursor) query.set("cursor", cursor);
   const page = await publicationRequest<{
     items: Publication[];
     siguienteCursor: string | null;
     hayMas: boolean;
-  }>(`/hashtags/${encodeURIComponent(tag)}/publicaciones?${query}`, { signal, cache: "no-store" });
+  }>(`/hashtags/${encodeURIComponent(tag)}?${query}`, { signal, cache: "no-store" });
   return {
     ...page,
-    items: page.items.map(item => toMemory(item, {
-      id: String(item.id), title: "", description: "", author: "", place: "", year: 1990,
-      category: "Personales", lat: 0, lng: 0, source: "backend",
-    })),
+    items: page.items.map((item) =>
+      toMemory(item, {
+        id: String(item.id),
+        title: "",
+        description: "",
+        author: "",
+        place: "",
+        year: 1990,
+        category: "Personales",
+        lat: 0,
+        lng: 0,
+        source: "backend",
+      }),
+    ),
   };
 }
 
 export async function getWeeklyHashtags(signal?: AbortSignal): Promise<WeeklyTrend[]> {
-  const items = await publicationRequest<HashtagResponse[]>("/hashtags/tendencias?limite=5", {
-    signal, cache: "no-store",
+  const items = await publicationRequest<HashtagResponse[]>("/tendencias/hashtags?limite=5", {
+    signal,
+    cache: "no-store",
   });
   return items.map(toTrend);
 }
 
 export async function searchHashtags(query: string, signal?: AbortSignal): Promise<WeeklyTrend[]> {
   const params = new URLSearchParams({ q: query, limite: "10" });
-  const items = await publicationRequest<HashtagResponse[]>(`/hashtags/buscar?${params}`, {
-    signal, cache: "no-store",
+  const items = await publicationRequest<HashtagResponse[]>(`/buscar/hashtags?${params}`, {
+    signal,
+    cache: "no-store",
   });
   return items.map(toTrend);
 }

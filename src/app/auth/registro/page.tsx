@@ -10,6 +10,7 @@ export default async function RegisterPage({
 }) {
   const params = await searchParams;
   const requested = typeof params.returnTo === "string" ? params.returnTo : "/explorar";
-  const returnTo = requested.startsWith("/") && !requested.startsWith("//") ? requested : "/explorar";
+  const returnTo =
+    requested.startsWith("/") && !requested.startsWith("//") ? requested : "/explorar";
   return <AuthForm mode="registro" returnTo={returnTo} />;
 }

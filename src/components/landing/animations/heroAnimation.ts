@@ -10,11 +10,7 @@ export function animateHero({ mobile }: HeroAnimationOptions) {
       y: -20,
       duration: 0.65,
     })
-    .from(
-      "[data-hero-eyebrow]",
-      { autoAlpha: 0, y: 18, duration: 0.55 },
-      "-=0.3",
-    )
+    .from("[data-hero-eyebrow]", { autoAlpha: 0, y: 18, duration: 0.55 }, "-=0.3")
     .from(
       "[data-hero-title]",
       {
@@ -25,11 +21,7 @@ export function animateHero({ mobile }: HeroAnimationOptions) {
       },
       "-=0.25",
     )
-    .from(
-      "[data-hero-tagline]",
-      { autoAlpha: 0, y: 22, duration: 0.65 },
-      "-=0.42",
-    )
+    .from("[data-hero-tagline]", { autoAlpha: 0, y: 22, duration: 0.65 }, "-=0.42")
     .from(
       mobile ? "[data-hero-actions]" : "[data-hero-actions] > *",
       { autoAlpha: 0, y: 18, duration: 0.5, stagger: mobile ? 0 : 0.11 },

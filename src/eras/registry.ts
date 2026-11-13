@@ -16,9 +16,7 @@ export const eraRegistry: Record<Decade, EraModule> = {
   2010: tens,
   2020: twenties,
 };
-export const availableDecades = Object.keys(eraRegistry).map(
-  Number,
-) as Decade[];
+export const availableDecades = Object.keys(eraRegistry).map(Number) as Decade[];
 
 export function mapEras<T>(select: (era: EraModule) => T): Record<Decade, T> {
   return Object.fromEntries(

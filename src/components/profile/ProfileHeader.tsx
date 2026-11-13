@@ -1,4 +1,12 @@
-import { LoaderCircle, MessageCircle, Pencil, UserMinus, UserPlus, UserRound, X } from "lucide-react";
+import {
+  LoaderCircle,
+  MessageCircle,
+  Pencil,
+  UserMinus,
+  UserPlus,
+  UserRound,
+  X,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../auth/AuthProvider";
@@ -6,6 +14,8 @@ import { useFollow } from "../../context/FollowContext";
 import { getSeguidores, getSeguidos, type FollowedUser } from "../../seguimientosApi";
 import type { Achievement, Period } from "../../types";
 import type { ProfilePresentation } from "./profileTypes";
+import ReportButton from "../../reports/ReportDialog";
+import { reportTarget } from "../../reports/reportTypes";
 
 type FollowList = "followers" | "following";
 
@@ -32,7 +42,7 @@ export default function ProfileHeader({
   onBack,
   onOpenAchievements,
   onOpenTiers,
-  onIniciarChat,
+  onStartChat,
   onNavigateToProfile,
   onToggleFollow,
   onToggleFollowUser,
@@ -60,7 +70,7 @@ export default function ProfileHeader({
   onBack?: () => void;
   onOpenAchievements: () => void;
   onOpenTiers: () => void;
-  onIniciarChat?: (username: string) => void;
+  onStartChat?: (username: string) => void;
   onNavigateToProfile?: (username: string) => void;
   onToggleFollow?: () => void | Promise<void>;
   onToggleFollowUser?: (author: string, authorId: number) => void;
@@ -81,7 +91,9 @@ export default function ProfileHeader({
   const isOwnProfile = !author;
   const displayName = author ?? username;
   const totalFollowers = isOwnProfile ? followers.length : (followerCount ?? followers.length);
-  const totalFollowed = isOwnProfile ? followedUsers.length : (followingCount ?? followedUsers.length);
+  const totalFollowed = isOwnProfile
+    ? followedUsers.length
+    : (followingCount ?? followedUsers.length);
 
   async function openFollowList(list: FollowList) {
     setFollowList(list);
@@ -91,9 +103,10 @@ export default function ProfileHeader({
     if (targetUserId) {
       setLoadingList(true);
       try {
-        const users = list === "followers"
-          ? await getSeguidores(targetUserId)
-          : await getSeguidos(targetUserId);
+        const users =
+          list === "followers"
+            ? await getSeguidores(targetUserId)
+            : await getSeguidos(targetUserId);
         setFetchedUsers(users);
       } catch (err) {
         console.error("Error al cargar lista de seguimiento", err);
@@ -106,9 +119,8 @@ export default function ProfileHeader({
     }
   }
 
-  const visibleUsers = fetchedUsers !== null
-    ? fetchedUsers
-    : (followList === "followers" ? followers : followedUsers);
+  const visibleUsers =
+    fetchedUsers !== null ? fetchedUsers : followList === "followers" ? followers : followedUsers;
 
   return (
     <>
@@ -118,15 +130,27 @@ export default function ProfileHeader({
         </button>
       )}
       <div className="profile-era-bar">
-        <span className="profile-era-mark" aria-hidden="true"><UserRound size={18} /></span>
+        <span className="profile-era-mark" aria-hidden="true">
+          <UserRound size={18} />
+        </span>
         <strong>{presentation.title}</strong>
-        <span className="profile-edition">{period.decade}—{period.decade + 9}</span>
+        <span className="profile-edition">
+          {period.decade}—{period.decade + 9}
+        </span>
       </div>
       <header className="personal-header">
         <div className="profile-portrait">
-          {fotoPerfilUrl && failedPhotoUrl !== fotoPerfilUrl
-            ? <img src={fotoPerfilUrl} alt={`Foto de perfil de ${displayName}`} onError={() => setFailedPhotoUrl(fotoPerfilUrl)} />
-            : <span className="visitor-initial" aria-hidden="true">{displayName.slice(0, 1).toUpperCase()}</span>}
+          {fotoPerfilUrl && failedPhotoUrl !== fotoPerfilUrl ? (
+            <img
+              src={fotoPerfilUrl}
+              alt={`Foto de perfil de ${displayName}`}
+              onError={() => setFailedPhotoUrl(fotoPerfilUrl)}
+            />
+          ) : (
+            <span className="visitor-initial" aria-hidden="true">
+              {displayName.slice(0, 1).toUpperCase()}
+            </span>
+          )}
         </div>
         <div className="personal-identity">
           <div className="personal-identity-text">
@@ -136,7 +160,12 @@ export default function ProfileHeader({
               {userCategory && (
                 <div className="profile-category">
                   {isOwnProfile ? (
-                    <button className="profile-note" onClick={onOpenTiers} aria-haspopup="dialog" aria-expanded={tiersOpen}>
+                    <button
+                      className="profile-note"
+                      onClick={onOpenTiers}
+                      aria-haspopup="dialog"
+                      aria-expanded={tiersOpen}
+                    >
                       {userCategory}
                     </button>
                   ) : (
@@ -145,40 +174,91 @@ export default function ProfileHeader({
                 </div>
               )}
               {isOwnProfile && onEditProfile && (
-                <button type="button" className="profile-edit-trigger secondary-button" onClick={onEditProfile} aria-label="Editar perfil" title="Editar perfil">
+                <button
+                  type="button"
+                  className="profile-edit-trigger secondary-button"
+                  onClick={onEditProfile}
+                  aria-label="Editar perfil"
+                  title="Editar perfil"
+                >
                   <Pencil size={17} />
                 </button>
               )}
             </div>
             <div className="personal-counts">
-              <span><strong>{memoryCount}</strong> Recuerdos</span>
-              <button type="button" aria-haspopup="dialog" onClick={() => openFollowList("followers")}>
+              <span>
+                <strong>{memoryCount}</strong> Recuerdos
+              </span>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                onClick={() => openFollowList("followers")}
+              >
                 <strong>{totalFollowers}</strong> Seguidores
               </button>
-              <button type="button" aria-haspopup="dialog" onClick={() => openFollowList("following")}>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                onClick={() => openFollowList("following")}
+              >
                 <strong>{totalFollowed}</strong> Seguidos
               </button>
             </div>
           </div>
-          {!isOwnProfile && (onIniciarChat || onToggleFollow) && (
+          {!isOwnProfile && (onStartChat || onToggleFollow || userId) && (
             <div className="profile-visitor-actions">
-              {onIniciarChat && <button className="secondary-button" aria-label={`Iniciar chat con ${displayName}`} title="Iniciar chat" onClick={() => onIniciarChat(author!)}>
-                <MessageCircle size={17} /> <span className="profile-action-label">Iniciar chat</span>
-              </button>}
-              {onToggleFollow && <button
-                className={isFollowing ? "secondary-button profile-unfollow-button" : "primary-button profile-follow-button"}
-                aria-label={isFollowing ? `Dejar de seguir a ${displayName}` : `Seguir a ${displayName}`}
-                title={isFollowing ? "Dejar de seguir" : "Seguir"}
-                aria-pressed={isFollowing}
-                disabled={followBusy}
-                onClick={async () => {
-                  setFollowBusy(true);
-                  try { await onToggleFollow(); } finally { setFollowBusy(false); }
-                }}
-              >
-                {followBusy ? <LoaderCircle size={17} className="spin" /> : isFollowing ? <UserMinus size={17} /> : <UserPlus size={17} />}
-                <span className="profile-action-label">{followBusy ? "Actualizando…" : isFollowing ? "Dejar de seguir" : "Seguir"}</span>
-              </button>}
+              {onStartChat && (
+                <button
+                  className="secondary-button"
+                  aria-label={`Iniciar chat con ${displayName}`}
+                  title="Iniciar chat"
+                  onClick={() => onStartChat(author!)}
+                >
+                  <MessageCircle size={17} />{" "}
+                  <span className="profile-action-label">Iniciar chat</span>
+                </button>
+              )}
+              {onToggleFollow && (
+                <button
+                  className={
+                    isFollowing
+                      ? "secondary-button profile-unfollow-button"
+                      : "primary-button profile-follow-button"
+                  }
+                  aria-label={
+                    isFollowing ? `Dejar de seguir a ${displayName}` : `Seguir a ${displayName}`
+                  }
+                  title={isFollowing ? "Dejar de seguir" : "Seguir"}
+                  aria-pressed={isFollowing}
+                  disabled={followBusy}
+                  onClick={async () => {
+                    setFollowBusy(true);
+                    try {
+                      await onToggleFollow();
+                    } finally {
+                      setFollowBusy(false);
+                    }
+                  }}
+                >
+                  {followBusy ? (
+                    <LoaderCircle size={17} className="spin" />
+                  ) : isFollowing ? (
+                    <UserMinus size={17} />
+                  ) : (
+                    <UserPlus size={17} />
+                  )}
+                  <span className="profile-action-label">
+                    {followBusy ? "Actualizando…" : isFollowing ? "Dejar de seguir" : "Seguir"}
+                  </span>
+                </button>
+              )}
+              {userId && userId !== session?.usuarioId && (
+                <ReportButton
+                  targetType={reportTarget.profile}
+                  targetId={userId}
+                  targetLabel="perfil"
+                />
+              )}
             </div>
           )}
           {isOwnProfile && (
@@ -195,13 +275,21 @@ export default function ProfileHeader({
                     Logros
                   </button>
                 </h3>
-                <span className="achievements-count">{unlocked.length}/{achievementCount}</span>
+                <span className="achievements-count">
+                  {unlocked.length}/{achievementCount}
+                </span>
               </div>
               {unlocked.length ? (
                 <ul className="achievement-rail">
                   {unlocked.slice(0, 5).map((achievement) => (
                     <li key={achievement.id}>
-                      <img src={achievement.image} alt={achievement.name} title={achievement.name} width={40} height={40} />
+                      <img
+                        src={achievement.image}
+                        alt={achievement.name}
+                        title={achievement.name}
+                        width={40}
+                        height={40}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -224,10 +312,18 @@ export default function ProfileHeader({
         <header>
           <h2 id="profile-follow-title">
             {isOwnProfile
-              ? (followList === "followers" ? "Seguidores" : "Seguidos")
-              : (followList === "followers" ? `Seguidores de ${displayName}` : `Seguidos por ${displayName}`)}
+              ? followList === "followers"
+                ? "Seguidores"
+                : "Seguidos"
+              : followList === "followers"
+                ? `Seguidores de ${displayName}`
+                : `Seguidos por ${displayName}`}
           </h2>
-          <button className="icon-button" aria-label="Cerrar lista" onClick={() => followDialog.current?.close()}>
+          <button
+            className="icon-button"
+            aria-label="Cerrar lista"
+            onClick={() => followDialog.current?.close()}
+          >
             <X size={20} />
           </button>
         </header>
@@ -242,10 +338,11 @@ export default function ProfileHeader({
               const effectiveMyId = currentUserId ?? session?.usuarioId;
               const isMe =
                 (effectiveMyId && user.id === effectiveMyId) ||
-                (session?.username && user.username.toLowerCase() === session.username.toLowerCase());
+                (session?.username &&
+                  user.username.toLowerCase() === session.username.toLowerCase());
               const followingUser = myFollowingUsers
                 ? myFollowingUsers.some((u) => u.id === user.id)
-                : (checkIsFollowing(user.id) || checkIsFollowing(user.username));
+                : checkIsFollowing(user.id) || checkIsFollowing(user.username);
               const isPending = pendingUserIds.has(user.id);
 
               return (
@@ -271,7 +368,11 @@ export default function ProfileHeader({
                   {!isMe && (
                     <button
                       type="button"
-                      className={followingUser ? "secondary-button profile-item-follow-btn follow-button" : "primary-button profile-item-follow-btn follow-button"}
+                      className={
+                        followingUser
+                          ? "secondary-button profile-item-follow-btn follow-button"
+                          : "primary-button profile-item-follow-btn follow-button"
+                      }
                       aria-pressed={followingUser}
                       disabled={isPending}
                       onClick={async () => {
@@ -301,8 +402,12 @@ export default function ProfileHeader({
         ) : (
           <p>
             {isOwnProfile
-              ? (followList === "followers" ? "Todavía no tenés seguidores." : "Todavía no seguís a nadie.")
-              : (followList === "followers" ? `${displayName} todavía no tiene seguidores.` : `${displayName} todavía no sigue a nadie.`)}
+              ? followList === "followers"
+                ? "Todavía no tenés seguidores."
+                : "Todavía no seguís a nadie."
+              : followList === "followers"
+                ? `${displayName} todavía no tiene seguidores.`
+                : `${displayName} todavía no sigue a nadie.`}
           </p>
         )}
       </dialog>

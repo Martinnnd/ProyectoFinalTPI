@@ -13,7 +13,12 @@ type UserSearchProps = {
   onOpenProfile: (user: UsuarioBusqueda) => void;
 };
 
-export default function UserSearch({ currentUserId, followedUsers, onFollow, onOpenProfile }: UserSearchProps) {
+export default function UserSearch({
+  currentUserId,
+  followedUsers,
+  onFollow,
+  onOpenProfile,
+}: UserSearchProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -43,7 +48,11 @@ export default function UserSearch({ currentUserId, followedUsers, onFollow, onO
         .catch((searchError) => {
           if (!controller.signal.aborted) {
             setResults([]);
-            setError(searchError instanceof Error ? searchError.message : "No pudimos realizar la búsqueda.");
+            setError(
+              searchError instanceof Error
+                ? searchError.message
+                : "No pudimos realizar la búsqueda.",
+            );
           }
         })
         .finally(() => {
@@ -83,95 +92,143 @@ export default function UserSearch({ currentUserId, followedUsers, onFollow, onO
     }
   }
 
-  const status = query.trim().length < 2
-    ? "Escribí al menos 2 caracteres para buscar."
-    : loading
-      ? "Buscando usuarios…"
-      : error
-        ? error
-        : results.length === 0
-          ? "No encontramos usuarios con ese nombre."
-          : `${results.length} ${results.length === 1 ? "usuario encontrado" : "usuarios encontrados"}.`;
+  const status =
+    query.trim().length < 2
+      ? "Escribí al menos 2 caracteres para buscar."
+      : loading
+        ? "Buscando usuarios…"
+        : error
+          ? error
+          : results.length === 0
+            ? "No encontramos usuarios con ese nombre."
+            : `${results.length} ${results.length === 1 ? "usuario encontrado" : "usuarios encontrados"}.`;
 
-  return <>
-    <button
-      ref={trigger}
-      type="button"
-      aria-label="Buscar usuarios"
-      title="Buscar usuarios"
-      aria-haspopup="dialog"
-      aria-expanded={open}
-      onClick={show}
-    >
-      <Search />
-      <span>Buscar</span>
-    </button>
-    <dialog
-      ref={dialog}
-      className={styles.dialog}
-      aria-labelledby="user-search-title"
-      onCancel={(event) => { event.preventDefault(); close(); }}
-      onClose={() => { setOpen(false); trigger.current?.focus(); }}
-      onClick={(event) => { if (event.target === event.currentTarget) close(); }}
-      onKeyDown={(event) => {
-        event.stopPropagation();
-        if (event.key === "Escape") {
+  return (
+    <>
+      <button
+        ref={trigger}
+        type="button"
+        aria-label="Buscar usuarios"
+        title="Buscar usuarios"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={show}
+      >
+        <Search />
+        <span>Buscar</span>
+      </button>
+      <dialog
+        ref={dialog}
+        className={styles.dialog}
+        aria-labelledby="user-search-title"
+        onCancel={(event) => {
           event.preventDefault();
           close();
-        }
-      }}
-    >
-      <div className={styles.panel}>
-        <header className={styles.heading}>
-          <div>
-            <small>PERSONAS</small>
-            <h2 id="user-search-title">Buscar usuarios</h2>
-          </div>
-          <button type="button" className={styles.closeButton} aria-label="Cerrar búsqueda de usuarios" onClick={close}>
-            <X size={20} />
-          </button>
-        </header>
-        <label className={styles.searchField}>
-          <span className="sr-only">Nombre de usuario</span>
-          <Search size={20} aria-hidden="true" />
-          <input
-            ref={input}
-            type="search"
-            value={query}
-            maxLength={50}
-            autoComplete="off"
-            placeholder="Escribí un nombre de usuario"
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
-        <p className={error ? styles.error : styles.status} role={error ? "alert" : "status"}>{status}</p>
-        {results.length > 0 && <ul className={styles.results} aria-label="Resultados de usuarios">
-          {results.map((user) => {
-            const ownUser = user.id === currentUserId;
-            const followed = followedUsers.some((followedUser) => followedUser.id === user.id);
-            const pending = pendingUserId === user.id;
-            return <li key={user.id}>
-              <span className={styles.avatar} aria-hidden="true">{user.username.trim().charAt(0).toLocaleUpperCase()}</span>
-              <strong>{user.username}</strong>
-              <button type="button" className={styles.profileButton} aria-label={`Ver perfil de ${user.username}`} title="Ver perfil" onClick={() => { close(); onOpenProfile(user); }}>
-                <UserRound size={17} aria-hidden="true" /><span>{ownUser ? "Tu perfil" : "Ver perfil"}</span>
-              </button>
-              {!ownUser && <button
-                type="button"
-                className={followed ? styles.unfollowButton : styles.followButton}
-                aria-label={followed ? `Dejar de seguir a ${user.username}` : `Seguir a ${user.username}`}
-                title={followed ? "Dejar de seguir" : "Seguir"}
-                aria-pressed={followed}
-                disabled={pendingUserId !== null}
-                onClick={() => void toggleFollow(user)}
-              >
-                {pending ? <LoaderCircle size={17} aria-hidden="true" /> : followed ? <UserMinus size={17} aria-hidden="true" /> : <UserPlus size={17} aria-hidden="true" />}
-                <span>{pending ? "Actualizando…" : followed ? "Dejar de seguir" : "Seguir"}</span>
-              </button>}
-            </li>;
-          })}
-        </ul>}
-      </div>
-    </dialog>
-  </>;
+        }}
+        onClose={() => {
+          setOpen(false);
+          trigger.current?.focus();
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) close();
+        }}
+        onKeyDown={(event) => {
+          event.stopPropagation();
+          if (event.key === "Escape") {
+            event.preventDefault();
+            close();
+          }
+        }}
+      >
+        <div className={styles.panel}>
+          <header className={styles.heading}>
+            <div>
+              <small>PERSONAS</small>
+              <h2 id="user-search-title">Buscar usuarios</h2>
+            </div>
+            <button
+              type="button"
+              className={styles.closeButton}
+              aria-label="Cerrar búsqueda de usuarios"
+              onClick={close}
+            >
+              <X size={20} />
+            </button>
+          </header>
+          <label className={styles.searchField}>
+            <span className="sr-only">Nombre de usuario</span>
+            <Search size={20} aria-hidden="true" />
+            <input
+              ref={input}
+              type="search"
+              value={query}
+              maxLength={50}
+              autoComplete="off"
+              placeholder="Escribí un nombre de usuario"
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </label>
+          <p className={error ? styles.error : styles.status} role={error ? "alert" : "status"}>
+            {status}
+          </p>
+          {results.length > 0 && (
+            <ul className={styles.results} aria-label="Resultados de usuarios">
+              {results.map((user) => {
+                const ownUser = user.id === currentUserId;
+                const followed = followedUsers.some((followedUser) => followedUser.id === user.id);
+                const pending = pendingUserId === user.id;
+                return (
+                  <li key={user.id}>
+                    <span className={styles.avatar} aria-hidden="true">
+                      {user.username.trim().charAt(0).toLocaleUpperCase()}
+                    </span>
+                    <strong>{user.username}</strong>
+                    <button
+                      type="button"
+                      className={styles.profileButton}
+                      aria-label={`Ver perfil de ${user.username}`}
+                      title="Ver perfil"
+                      onClick={() => {
+                        close();
+                        onOpenProfile(user);
+                      }}
+                    >
+                      <UserRound size={17} aria-hidden="true" />
+                      <span>{ownUser ? "Tu perfil" : "Ver perfil"}</span>
+                    </button>
+                    {!ownUser && (
+                      <button
+                        type="button"
+                        className={followed ? styles.unfollowButton : styles.followButton}
+                        aria-label={
+                          followed
+                            ? `Dejar de seguir a ${user.username}`
+                            : `Seguir a ${user.username}`
+                        }
+                        title={followed ? "Dejar de seguir" : "Seguir"}
+                        aria-pressed={followed}
+                        disabled={pendingUserId !== null}
+                        onClick={() => void toggleFollow(user)}
+                      >
+                        {pending ? (
+                          <LoaderCircle size={17} aria-hidden="true" />
+                        ) : followed ? (
+                          <UserMinus size={17} aria-hidden="true" />
+                        ) : (
+                          <UserPlus size={17} aria-hidden="true" />
+                        )}
+                        <span>
+                          {pending ? "Actualizando…" : followed ? "Dejar de seguir" : "Seguir"}
+                        </span>
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </dialog>
+    </>
+  );
 }

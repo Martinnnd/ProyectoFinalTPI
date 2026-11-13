@@ -10,47 +10,65 @@ import MemoryForm from "../MemoryForm";
 import CommunityControls from "../CommunityControls";
 import GroupInfoModal from "../GroupInfoModal";
 import { useAuth } from "../auth/AuthProvider";
-import { useEra } from "../../context/EraContext";
+import { useEraState } from "../../context/EraContext";
 import { useFollow } from "../../context/FollowContext";
-import { useRatings } from "../../context/RatingsContext";
+import { useNotice } from "../../context/NoticeProvider";
 import { eliminarPublicacion } from "../../api";
 import { getPublicacionesUsuario } from "../../userApi";
-import { changeOwnProfilePhoto, changeOwnUsername, getUserProfile, toAchievement, type UserProfile } from "../../profileApi";
+import {
+  changeOwnProfilePhoto,
+  changeOwnUsername,
+  getUserProfile,
+  toAchievement,
+  type UserProfile,
+} from "../../profileApi";
 import { ACHIEVEMENTS_UPDATED } from "../../achievementEvents";
 import {
   getGroups,
   createGroup,
   joinGroup,
+  leaveGroup,
   type CreateGroupInput,
 } from "../../groupsApi";
 import type { CommunityGroup, Decade, Memory, TierProgress } from "../../types";
 
 export default function ProfileView(props: { targetUsername?: string }) {
   const { session } = useAuth();
-  return <ProfileContent key={`${session?.usuarioId ?? 'guest'}:${props.targetUsername ?? 'own'}`} {...props} />;
+  return (
+    <ProfileContent
+      key={`${session?.usuarioId ?? "guest"}:${props.targetUsername ?? "own"}`}
+      {...props}
+    />
+  );
 }
 
 function ProfileContent({ targetUsername }: { targetUsername?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const { session, status } = useAuth();
-  const { period } = useEra();
+  const period = useEraState((state) => state.period);
   const { followingUsers, followers, toggleFollow } = useFollow();
-  const { setNotice } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
 
   const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
-  const isOwnProfile = !targetUsername || targetUsername === session?.username ||
+  const isOwnProfile =
+    !targetUsername ||
+    targetUsername === session?.username ||
     (profileUser !== null && profileUser.id === session?.usuarioId);
   const usernameToFetch = isOwnProfile ? session?.usuarioId : targetUsername;
   const [revision, setRevision] = useState(0);
   useEffect(() => {
-    const refresh = () => setRevision(value => value + 1);
+    const refresh = () => setRevision((value) => value + 1);
     window.addEventListener(ACHIEVEMENTS_UPDATED, refresh);
     return () => window.removeEventListener(ACHIEVEMENTS_UPDATED, refresh);
   }, []);
 
   const [profileMemories, setProfileMemories] = useState<Memory[]>([]);
+  const [memoriesLoading, setMemoriesLoading] = useState(true);
+  const [memoriesError, setMemoriesError] = useState(false);
+  const [memoriesRevision, setMemoriesRevision] = useState(0);
+  const profileIdForMemories = isOwnProfile ? session?.usuarioId : profileUser?.id;
   const [editing, setEditing] = useState<Memory | null>(null);
   const [deleting, setDeleting] = useState<Memory | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,13 +105,10 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     setLoading(true);
     setError(null);
 
-    getUserProfile(usernameToFetch, controller.signal, revision ? 'no-store' : 'default')
-      .then(async (perfil) => {
+    getUserProfile(usernameToFetch, controller.signal, revision ? "no-store" : "default")
+      .then((perfil) => {
         if (controller.signal.aborted) return;
         setProfileUser(perfil);
-        const mems = await getPublicacionesUsuario(perfil.id, controller.signal);
-        if (controller.signal.aborted) return;
-        setProfileMemories(mems);
         setLoading(false);
       })
       .catch((err) => {
@@ -106,6 +121,26 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     return () => controller.abort();
   }, [usernameToFetch, isOwnProfile, session?.usuarioId, status, router, revision]);
 
+  useEffect(() => {
+    if (status === "loading" || !profileIdForMemories) return;
+
+    const controller = new AbortController();
+    setMemoriesLoading(true);
+    setMemoriesError(false);
+    getPublicacionesUsuario(profileIdForMemories, controller.signal)
+      .then((memories) => {
+        if (!controller.signal.aborted) setProfileMemories(memories);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setMemoriesError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setMemoriesLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [profileIdForMemories, status, memoriesRevision]);
+
   if (loading) {
     return (
       <div className="feed-loading" role="status" style={{ padding: "60px 0" }}>
@@ -117,7 +152,11 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
 
   if (error || !profileUser) {
     return (
-      <div className="feed-load-error" role="alert" style={{ padding: "60px 0", textAlign: "center" }}>
+      <div
+        className="feed-load-error"
+        role="alert"
+        style={{ padding: "60px 0", textAlign: "center" }}
+      >
         <p>{error ?? "No se encontró el perfil de usuario."}</p>
         <button type="button" className="secondary-button" onClick={() => router.push("/feed")}>
           Volver al feed
@@ -132,8 +171,8 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
         followingUsers.some(
           (u) =>
             u.id === profileUser.id ||
-            u.username.toLowerCase() === profileUser.username.toLowerCase()
-        )
+            u.username.toLowerCase() === profileUser.username.toLowerCase(),
+        ),
       )
     : false;
 
@@ -141,7 +180,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     memories: Math.max(profileUser.cantidadPublicaciones ?? 0, profileMemories.length),
     points: Math.max(
       profileUser.puntosNostalgia ?? 0,
-      profileMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0)
+      profileMemories.reduce((max, m) => Math.max(max, m.points ?? 0), 0),
     ),
     subscribed: false,
   };
@@ -158,10 +197,10 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
               loSigo: !currentlyFollowing,
               cantidadSeguidores: Math.max(
                 0,
-                curr.cantidadSeguidores + (currentlyFollowing ? -1 : 1)
+                curr.cantidadSeguidores + (currentlyFollowing ? -1 : 1),
               ),
             }
-          : curr
+          : curr,
       );
     }
   };
@@ -177,7 +216,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
             ...prev,
             cantidadPublicaciones: Math.max(0, (prev.cantidadPublicaciones ?? 1) - 1),
           }
-        : prev
+        : prev,
     );
     setNotice("Recuerdo eliminado.");
     return null;
@@ -185,7 +224,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
 
   const saveEdit = (updatedDraft: Memory) => {
     setProfileMemories((prev) =>
-      prev.map((m) => (m.id === updatedDraft.id ? { ...m, ...updatedDraft } : m))
+      prev.map((m) => (m.id === updatedDraft.id ? { ...m, ...updatedDraft } : m)),
     );
     setEditing(null);
     setNotice("Recuerdo modificado.");
@@ -220,6 +259,18 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     }
   };
 
+  const handleLeaveGroup = async (groupId: string): Promise<string | null> => {
+    try {
+      await leaveGroup(groupId);
+      setGroups((curr) => curr.map((g) => (g.id === groupId ? { ...g, isMember: false } : g)));
+      setScope("groups");
+      setNotice("Saliste del grupo.");
+      return null;
+    } catch (error) {
+      return error instanceof Error ? error.message : "No se pudo salir del grupo.";
+    }
+  };
+
   const handleGroupScope = (value: string) => {
     if (value === "groups" || value === "all") {
       setScope("groups");
@@ -242,6 +293,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
       onScope={handleGroupScope}
       onCreate={handleCreateGroup}
       onJoinGroup={handleJoinGroup}
+      onLeaveGroup={handleLeaveGroup}
       onAddToGroup={(groupId) => {
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));
@@ -271,6 +323,10 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
         onBack={() => router.back()}
         community={communityControls}
         allMemories={profileMemories}
+        memoryCount={tierProgress.memories}
+        memoriesLoading={memoriesLoading}
+        memoriesError={memoriesError}
+        onRetryMemories={() => setMemoriesRevision((value) => value + 1)}
         repostedPublicationIds={[]}
         tierProgress={tierProgress}
         followers={followers}
@@ -286,7 +342,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
           }
           router.push("/explorar?action=recordar");
         }}
-        onIniciarChat={(user) => router.push(`/chat?con=${user}`)}
+        onStartChat={(user) => router.push(`/chat?con=${user}`)}
         onToggleFollow={!isOwnProfile ? handleToggleFollow : undefined}
         onEditProfile={isOwnProfile ? () => setEditingProfile(true) : undefined}
       />
@@ -295,12 +351,12 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
         <ProfileEditDialog
           profile={profileUser}
           onClose={() => setEditingProfile(false)}
-          onChangeUsername={async username => {
+          onChangeUsername={async (username) => {
             const updated = await changeOwnUsername(username);
             setProfileUser(updated);
             return updated;
           }}
-          onChangePhoto={async file => {
+          onChangePhoto={async (file) => {
             const updated = await changeOwnProfilePhoto(file);
             setProfileUser(updated);
             return updated;

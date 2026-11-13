@@ -24,7 +24,7 @@ describe("ProfileShortcuts - Sección de guardados en el perfil", () => {
         onOpenCollection: () => {},
         onOpenSaved: () => {},
         onOpenMap: () => {},
-      })
+      }),
     );
 
     expect(html).toContain("Recuerdos guardados");
@@ -43,11 +43,47 @@ describe("ProfileShortcuts - Sección de guardados en el perfil", () => {
         onOpenCollection: () => {},
         onOpenSaved: () => {}, // Incluso si se pasa callback
         onOpenMap: () => {},
-      })
+      }),
     );
 
     expect(html).not.toContain("Recuerdos guardados");
     expect(html).not.toContain("Sus guardados");
   });
-});
 
+  it("muestra la pestaña 'Donde aparezco' en el perfil propio cuando onOpenTagged está presente", () => {
+    const html = renderToStaticMarkup(
+      createElement(ProfileShortcuts, {
+        presentation: presentationMock,
+        memoryCount: 5,
+        taggedCount: 3,
+        activeTab: "posts",
+        mapOpened: false,
+        onOpenCollection: () => {},
+        onOpenTagged: () => {},
+        onOpenMap: () => {},
+      }),
+    );
+
+    expect(html).toContain("Donde aparezco");
+    expect(html).toContain("3");
+  });
+
+  it("muestra la pestaña 'Donde aparece' en el perfil de otro usuario cuando onOpenTagged está presente", () => {
+    const html = renderToStaticMarkup(
+      createElement(ProfileShortcuts, {
+        author: "OtroUsuario",
+        presentation: presentationMock,
+        memoryCount: 5,
+        taggedCount: 1,
+        activeTab: "posts",
+        mapOpened: false,
+        onOpenCollection: () => {},
+        onOpenTagged: () => {},
+        onOpenMap: () => {},
+      }),
+    );
+
+    expect(html).toContain("Donde aparece");
+    expect(html).toContain("1");
+  });
+});

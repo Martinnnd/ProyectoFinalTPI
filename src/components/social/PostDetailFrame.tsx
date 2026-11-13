@@ -14,15 +14,7 @@ const PostDetailFrame = forwardRef<
     children: ReactNode;
   }
 >(function PostDetailFrame(
-  {
-    decade,
-    backLabel = "Volver al feed",
-    memory,
-    maximized,
-    onClose,
-    onToggleMaximize,
-    children,
-  },
+  { decade, backLabel = "Volver al feed", memory, maximized, onClose, onToggleMaximize, children },
   ref,
 ) {
   const detail = !!memory && (decade === 1990 || decade === 2000);
@@ -30,9 +22,7 @@ const PostDetailFrame = forwardRef<
   return (
     <div
       className={`social-stream${
-        detail
-          ? ` detail-mode transition-${decade === 1990 ? "win95" : "messenger"}`
-          : ""
+        detail ? ` detail-mode transition-${decade === 1990 ? "win95" : "messenger"}` : ""
       }`}
       ref={ref}
     >
@@ -40,11 +30,7 @@ const PostDetailFrame = forwardRef<
         {detail && memory && (
           <>
             <div className="transition-title">
-              <button
-                type="button"
-                className="transition-caption detail-back"
-                onClick={onClose}
-              >
+              <button type="button" className="transition-caption detail-back" onClick={onClose}>
                 <ArrowLeft size={17} aria-hidden="true" />
                 {backLabel}
               </button>
@@ -65,9 +51,7 @@ const PostDetailFrame = forwardRef<
             </div>
           </>
         )}
-        <div className={detail ? "transition-content" : undefined}>
-          {children}
-        </div>
+        <div className={detail ? "transition-content" : undefined}>{children}</div>
         {detail && (
           <div className="transition-status">
             {decade === 1990

@@ -1,10 +1,4 @@
-export const commentReactions = [
-  "like",
-  "love",
-  "laugh",
-  "surprise",
-  "sad",
-] as const;
+export const commentReactions = ["like", "love", "laugh", "surprise", "sad"] as const;
 
 export type CommentReaction = (typeof commentReactions)[number];
 
@@ -28,6 +22,7 @@ export interface MemoryComment {
   id: string;
   memoryId: string;
   parentId?: string;
+  authorId?: number;
   author?: string;
   text?: string;
   createdAt: string;

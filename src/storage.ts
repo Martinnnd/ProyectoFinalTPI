@@ -14,8 +14,12 @@ export function isMemory(value: unknown): value is Memory {
     ) &&
     (m.media === undefined || validMedia(m.media)) &&
     (m.music === undefined || validMusic(m.music)) &&
-    (m.hashtags === undefined || (Array.isArray(m.hashtags) && m.hashtags.length <= MAX_HASHTAGS && m.hashtags.every(isHashtag))) &&
-    (m.createdAt === undefined || (typeof m.createdAt === "string" && Number.isFinite(Date.parse(m.createdAt)))) &&
+    (m.hashtags === undefined ||
+      (Array.isArray(m.hashtags) &&
+        m.hashtags.length <= MAX_HASHTAGS &&
+        m.hashtags.every(isHashtag))) &&
+    (m.createdAt === undefined ||
+      (typeof m.createdAt === "string" && Number.isFinite(Date.parse(m.createdAt)))) &&
     typeof m.year === "number" &&
     Number.isInteger(m.year) &&
     m.year >= 1970 &&
@@ -40,9 +44,7 @@ export function loadMemories(storage: Pick<Storage, "getItem">): {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) throw new Error("invalid");
     const valid = parsed.filter(isMemory);
-    const unique = valid.filter(
-      (m, i) => valid.findIndex((other) => other.id === m.id) === i,
-    );
+    const unique = valid.filter((m, i) => valid.findIndex((other) => other.id === m.id) === i);
     return {
       memories: unique,
       warning:
@@ -53,15 +55,11 @@ export function loadMemories(storage: Pick<Storage, "getItem">): {
   } catch {
     return {
       memories: [],
-      warning:
-        "No pudimos recuperar los recuerdos de este navegador. Podés seguir explorando.",
+      warning: "No pudimos recuperar los recuerdos de este navegador. Podés seguir explorando.",
     };
   }
 }
-export function saveMemories(
-  memories: Memory[],
-  storage: Pick<Storage, "setItem">,
-): boolean {
+export function saveMemories(memories: Memory[], storage: Pick<Storage, "setItem">): boolean {
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(memories));
     return true;
@@ -70,13 +68,27 @@ export function saveMemories(
   }
 }
 
-function validMedia(value:unknown):boolean {
- if(!value||typeof value!=='object')return false;
- const m=value as Record<string,unknown>;
- return typeof m.url==='string' && (m.kind==='youtube'?!!youtubeId(m.url):(m.kind==='image'||m.kind==='video')&&safeMediaUrl(m.url,m.kind));
+function validMedia(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const m = value as Record<string, unknown>;
+  return (
+    typeof m.url === "string" &&
+    (m.kind === "youtube"
+      ? !!youtubeId(m.url)
+      : (m.kind === "image" || m.kind === "video") && safeMediaUrl(m.url, m.kind))
+  );
 }
-function validMusic(value:unknown):boolean {
- if(!value||typeof value!=='object')return false;
- const m=value as Record<string,unknown>;
- return typeof m.spotifyId==='string' && /^[A-Za-z0-9]{22}$/.test(m.spotifyId) && typeof m.title==='string' && m.title.length>0 && m.title.length<=120 && typeof m.artist==='string' && m.artist.length>0 && m.artist.length<=120;
+function validMusic(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const m = value as Record<string, unknown>;
+  return (
+    typeof m.spotifyId === "string" &&
+    /^[A-Za-z0-9]{22}$/.test(m.spotifyId) &&
+    typeof m.title === "string" &&
+    m.title.length > 0 &&
+    m.title.length <= 120 &&
+    typeof m.artist === "string" &&
+    m.artist.length > 0 &&
+    m.artist.length <= 120
+  );
 }

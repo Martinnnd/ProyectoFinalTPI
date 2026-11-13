@@ -4,14 +4,29 @@ on:
   push:
     branches:
       - main
+      - develop
+
   pull_request:
     branches:
       - main
+      - develop
+
+  workflow_dispatch:
+
+# Evita ejecuciones simultáneas innecesarias para la misma rama o PR.
+concurrency:
+  group: frontend-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Permisos mínimos necesarios.
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
     name: Verificar Frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Descargar código

@@ -28,6 +28,14 @@ export function getNotificationText(notification: NotificationDto): string {
     case "chatMessage":
       return "Recibiste mensajes en el chat";
 
+    case "administrative":
+      return "Uno de tus contenidos fue dado de baja por no cumplir los estándares de la comunidad";
+
+    case "userTagged":
+      return senderUsername
+        ? `@${senderUsername} te etiquetó en un recuerdo`
+        : "Te etiquetaron en un recuerdo";
+
     default: {
       const exhaustiveCheck: never = type;
       return "Nueva notificación";
@@ -40,9 +48,7 @@ export function getNotificationText(notification: NotificationDto): string {
  * All routing decisions are centralized here; Notification.tsx only executes them.
  */
 export type NotificationNavigation =
-  | { kind: "push"; path: string }
-  | { kind: "openChat" }
-  | { kind: "none" };
+  { kind: "push"; path: string } | { kind: "openChat" } | { kind: "none" };
 
 export function getNotificationNavigation(notification: NotificationDto): NotificationNavigation {
   const { type, publicationId, senderUsername } = notification;
@@ -50,7 +56,7 @@ export function getNotificationNavigation(notification: NotificationDto): Notifi
   switch (type) {
     case "newFollower":
       return senderUsername
-        ? { kind: "push", path: `/explorar?view=profile&profile=${encodeURIComponent(senderUsername)}` }
+        ? { kind: "push", path: `/perfil/${encodeURIComponent(senderUsername)}` }
         : { kind: "none" };
 
     case "publicationComment":
@@ -70,6 +76,16 @@ export function getNotificationNavigation(notification: NotificationDto): Notifi
     case "chatMessage":
       return { kind: "openChat" };
 
+    case "administrative":
+      return publicationId != null
+        ? { kind: "push", path: `/explorar?view=feed&post=${publicationId}` }
+        : { kind: "none" };
+
+    case "userTagged":
+      return publicationId != null
+        ? { kind: "push", path: `/recuerdo/${publicationId}` }
+        : { kind: "none" };
+
     default: {
       const exhaustiveCheck: never = type;
       return { kind: "none" };
@@ -84,6 +100,8 @@ export function isNotificationFeatureImplemented(type: NotificationType): boolea
     case "publicationComment":
     case "publicationRating":
     case "chatMessage":
+    case "administrative":
+    case "userTagged":
       return true;
     case "categoryPromotion":
     case "emailMessages":

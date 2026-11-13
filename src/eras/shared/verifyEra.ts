@@ -27,30 +27,18 @@ export function verifyEra(decade: Decade, era: EraModule) {
         "--font-display",
       ])
         expect(era.theme.tokens[token as `--${string}`]).toBeTruthy();
-      expect(Object.keys(era.icons).sort()).toEqual([
-        "facts",
-        "map",
-        "music",
-        "stories",
-      ]);
+      expect(Object.keys(era.icons).sort()).toEqual(["facts", "map", "music", "stories"]);
     });
     it("mantiene los años y los identificadores de su contenido", () => {
       expect(era.content.music.length).toBeGreaterThan(0);
-      const records = [
-        ...era.content.memories,
-        ...era.content.facts,
-        ...era.content.music,
-      ];
+      const records = [...era.content.memories, ...era.content.facts, ...era.content.music];
       for (const entry of records) {
         expect(entry.year).toBeGreaterThanOrEqual(decade);
         expect(entry.year).toBeLessThan(decade + 10);
       }
-      const ids = [...era.content.memories, ...era.content.facts].map(
-        (entry) => entry.id,
-      );
+      const ids = [...era.content.memories, ...era.content.facts].map((entry) => entry.id);
       expect(new Set(ids).size).toBe(ids.length);
-      for (const memory of era.content.memories)
-        expect(memory.source).toBe("demo");
+      for (const memory of era.content.memories) expect(memory.source).toBe("demo");
     });
   });
 }

@@ -10,9 +10,12 @@ import {
   Star,
   Trophy,
   Mail,
+  UsersRound,
+  ShieldAlert,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./auth/AuthProvider";
+import { useFollow } from "../context/FollowContext";
 import type { NotificationDto, NotificationType } from "../notifications/types";
 import {
   getNotifications,
@@ -20,18 +23,30 @@ import {
   markAllNotificationsAsRead,
 } from "../notifications/notificationApi";
 import { useNotificationConnection } from "../notifications/useNotificationConnection";
+import { useNotice } from "../context/NoticeProvider";
 import { getNotificationText, getNotificationNavigation } from "../notifications/notificationUtils";
 
 function NotificationIcon({ type }: { type: NotificationType }) {
   const props = { size: 18 };
   switch (type) {
-    case "newFollower": return <User {...props} />;
-    case "publicationComment": return <MessageCircle {...props} />;
-    case "publicationRating": return <Star {...props} />;
-    case "categoryPromotion": return <Trophy {...props} />;
-    case "emailMessages": return <Mail {...props} />;
-    case "chatMessage": return <MessageCircle {...props} />;
-    default: return <Bell {...props} />;
+    case "newFollower":
+      return <User {...props} />;
+    case "publicationComment":
+      return <MessageCircle {...props} />;
+    case "publicationRating":
+      return <Star {...props} />;
+    case "categoryPromotion":
+      return <Trophy {...props} />;
+    case "emailMessages":
+      return <Mail {...props} />;
+    case "chatMessage":
+      return <MessageCircle {...props} />;
+    case "administrative":
+      return <ShieldAlert {...props} />;
+    case "userTagged":
+      return <UsersRound {...props} />;
+    default:
+      return <Bell {...props} />;
   }
 }
 
@@ -56,6 +71,10 @@ export default function Notification({
   onOpenChat: () => void;
 }) {
   const { session } = useAuth();
+  const showToast = useNotice((state) => state.showToast);
+  const { isFollowing, toggleFollow } = useFollow();
+  const [pendingFollows, setPendingFollows] = useState<Set<string>>(new Set());
+  const followRequests = useRef(new Set<string>());
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -92,7 +111,7 @@ export default function Notification({
         if (!cancelled) setNotifications(data);
       })
       .catch((requestError) => {
-        if (!cancelled) console.error("[Notifications] Error loading:", requestError);
+        if (!cancelled) showToast(requestError instanceof Error ? requestError.message : "No se pudieron cargar las notificaciones.", "error");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -119,23 +138,24 @@ export default function Notification({
   async function handleNotificationClick(notification: NotificationDto) {
     if (!notification.isRead) {
       setNotifications((previous) =>
-        previous.map((item) =>
-          item.id === notification.id ? { ...item, isRead: true } : item
-        )
+        previous.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)),
       );
       markNotificationAsRead(notification.id).catch((requestError) => {
-        console.error("[Notifications] Error marking as read:", requestError);
+        showToast(requestError instanceof Error ? requestError.message : "No se pudo marcar la notificación como leída.", "error");
         setNotifications((previous) =>
-          previous.map((item) =>
-            item.id === notification.id ? { ...item, isRead: false } : item
-          )
+          previous.map((item) => (item.id === notification.id ? { ...item, isRead: false } : item)),
         );
       });
     }
 
     const nav = getNotificationNavigation(notification);
-    if (nav.kind === "push") { closePopup(); router.push(nav.path); }
-    else if (nav.kind === "openChat") { closePopup(); onOpenChat(); }
+    if (nav.kind === "push") {
+      closePopup();
+      router.push(nav.path);
+    } else if (nav.kind === "openChat") {
+      closePopup();
+      onOpenChat();
+    }
   }
 
   async function handleMarkAllRead() {
@@ -146,10 +166,11 @@ export default function Notification({
     try {
       await markAllNotificationsAsRead();
     } catch (requestError: unknown) {
-      const message = requestError instanceof Error
-        ? requestError.message
-        : "No se pudieron marcar las notificaciones.";
-      setError(message);
+      const message =
+        requestError instanceof Error
+          ? requestError.message
+          : "No se pudieron marcar las notificaciones.";
+      showToast(message, "error");
       getNotifications()
         .then(setNotifications)
         .catch(() => {
@@ -160,6 +181,25 @@ export default function Notification({
     }
   }
 
+  async function handleFollow(notification: NotificationDto) {
+    const username = notification.senderUsername;
+    if (!username) return;
+    const key = String(notification.senderId ?? username.toLowerCase());
+    if (followRequests.current.has(key)) return;
+    followRequests.current.add(key);
+    setPendingFollows(new Set(followRequests.current));
+    try {
+      await toggleFollow(
+        username,
+        notification.senderId,
+        isFollowing(notification.senderId ?? username),
+      );
+    } finally {
+      followRequests.current.delete(key);
+      setPendingFollows(new Set(followRequests.current));
+    }
+  }
+
   if (hidden) return null;
 
   const unreadCount = notifications.filter((item) => !item.isRead).length;
@@ -167,30 +207,46 @@ export default function Notification({
 
   const notificationList = (
     <div className="notif-list">
-      {loading && (
-        <p className="notif-loading">Cargando notificaciones…</p>
-      )}
+      {loading && <p className="notif-loading">Cargando notificaciones…</p>}
       {!loading && notifications.length === 0 && (
         <p className="notif-empty">No tenés notificaciones nuevas.</p>
       )}
       {notifications.map((item) => (
-        <button
-          key={item.id}
-          className={`notif-item ${item.isRead ? "" : "unread"}`}
-          onClick={() => handleNotificationClick(item)}
-          aria-label={getNotificationText(item)}
-        >
-          <span className="notif-item-icon">
-            <NotificationIcon type={item.type} />
-          </span>
-          <span className="notif-item-body">
-            <p>{getNotificationText(item)}</p>
-            <time dateTime={item.createdAt}>
-              {formatTime(item.createdAt)}
-            </time>
-          </span>
-          {!item.isRead && <span className="notif-unread-dot" aria-label="No leída" />}
-        </button>
+        <div key={item.id} className={`notif-item ${item.isRead ? "" : "unread"}`}>
+          <button
+            className="notif-item-link"
+            onClick={() => handleNotificationClick(item)}
+            aria-label={getNotificationText(item)}
+          >
+            <span className="notif-item-icon">
+              <NotificationIcon type={item.type} />
+            </span>
+            <span className="notif-item-body">
+              <p>{getNotificationText(item)}</p>
+              <time dateTime={item.createdAt}>{formatTime(item.createdAt)}</time>
+            </span>
+            {!item.isRead && <span className="notif-unread-dot" aria-label="No leída" />}
+          </button>
+          {item.type === "newFollower" &&
+            item.senderUsername &&
+            item.senderId !== session?.usuarioId && (
+              <button
+                className="notif-follow-button"
+                aria-label={`${isFollowing(item.senderId ?? item.senderUsername) ? "Dejar de seguir a" : "Seguir a"} @${item.senderUsername}`}
+                aria-pressed={isFollowing(item.senderId ?? item.senderUsername)}
+                disabled={pendingFollows.has(
+                  String(item.senderId ?? item.senderUsername.toLowerCase()),
+                )}
+                onClick={() => void handleFollow(item)}
+              >
+                {pendingFollows.has(String(item.senderId ?? item.senderUsername.toLowerCase()))
+                  ? "Actualizando…"
+                  : isFollowing(item.senderId ?? item.senderUsername)
+                    ? "Dejar de seguir"
+                    : "Seguir"}
+              </button>
+            )}
+        </div>
       ))}
     </div>
   );
@@ -206,11 +262,7 @@ export default function Notification({
       </header>
       {hasUnread && (
         <div className="notif-actions">
-          <button
-            className="notif-mark-all"
-            onClick={handleMarkAllRead}
-            disabled={markingAllRead}
-          >
+          <button className="notif-mark-all" onClick={handleMarkAllRead} disabled={markingAllRead}>
             Marcar todas como leídas
           </button>
         </div>
@@ -221,40 +273,40 @@ export default function Notification({
   );
 
   const popup = open && (
-    <section
-      id="notif-popup"
-      className="notif-popup"
-      aria-label="Notificaciones"
-    >
+    <section id="notif-popup" className="notif-popup" aria-label="Notificaciones">
       {panel}
     </section>
   );
 
   const dock = (
-      <button
-        ref={trigger}
-        className="notif-launcher"
-        title="Notificaciones"
-        aria-expanded={open}
-        aria-controls="notif-popup"
-        onClick={() => setOpen((isOpen) => !isOpen)}
-      >
-        <Bell aria-hidden="true" />
-        <span className="notif-label">Notifi&shy;caciones</span>
-        {hasUnread && (
-          <small className="notif-badge" aria-label={`${unreadCount} notificaciones sin leer`}>
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </small>
-        )}
-      </button>
+    <button
+      ref={trigger}
+      className="notif-launcher"
+      title="Notificaciones"
+      aria-expanded={open}
+      aria-controls="notif-popup"
+      onClick={() => setOpen((isOpen) => !isOpen)}
+    >
+      <Bell aria-hidden="true" />
+      <span className="notif-label">Notifi&shy;caciones</span>
+      {hasUnread && (
+        <small className="notif-badge" aria-label={`${unreadCount} notificaciones sin leer`}>
+          {unreadCount > 99 ? "99+" : unreadCount}
+        </small>
+      )}
+    </button>
   );
 
-  const appRoot = typeof document !== "undefined"
-    ? (document.querySelector(".app") ?? document.body)
-    : null;
+  const appRoot =
+    typeof document !== "undefined" ? (document.querySelector(".app") ?? document.body) : null;
 
   if (appRoot) {
-    return <>{createPortal(popup, appRoot)}{dock}</>;
+    return (
+      <>
+        {createPortal(popup, appRoot)}
+        {dock}
+      </>
+    );
   }
 
   return dock;

@@ -1,11 +1,8 @@
-import { LockKeyhole } from 'lucide-react';
-import { useAccountCategory } from '../../context/AccountCategoryContext';
+import { LockKeyhole } from "lucide-react";
+import { useAccountCategory } from "../../context/AccountCategoryContext";
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
-import type {
-  CommentReaction,
-  MemoryComment,
-} from "../../socialTypes";
+import type { CommentReaction, MemoryComment } from "../../socialTypes";
 import CommentItem from "./CommentItem";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -30,7 +27,7 @@ export default function CommentsSection({
 }) {
   const { isAuthenticated } = useAuth();
   const { hasPermission, requirePermission, loading, error: categoryError } = useAccountCategory();
-  const canComment = hasPermission('Comentar');
+  const canComment = hasPermission("Comentar");
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -52,9 +49,7 @@ export default function CommentsSection({
           aria-expanded={commentsExpanded}
           onClick={() => setCommentsExpanded((expanded) => !expanded)}
         >
-          {commentsExpanded
-            ? "Ocultar comentarios"
-            : `Mostrar comentarios (${comments.length})`}
+          {commentsExpanded ? "Ocultar comentarios" : `Mostrar comentarios (${comments.length})`}
         </button>
       </div>
       {commentsExpanded && (
@@ -69,55 +64,69 @@ export default function CommentsSection({
                   comments={comments}
                   interactive={isAuthenticated}
                   canReply={canComment}
-                  onDeniedReply={() => requirePermission('Comentar')}
-                  onReply={(parentId, text) =>
-                    onAddComment(memoryId, text, parentId)
-                  }
-                  onReaction={(commentId, reaction) =>
-                    onReaction(memoryId, commentId, reaction)
-                  }
+                  onDeniedReply={() => requirePermission("Comentar")}
+                  onReply={(parentId, text) => onAddComment(memoryId, text, parentId)}
+                  onReaction={(commentId, reaction) => onReaction(memoryId, commentId, reaction)}
                   onLoadReplies={onLoadReplies}
                   onDelete={onDeleteComment}
                 />
               ))}
           </div>
-          {isAuthenticated && canComment ? <form
-            onSubmit={async (event) => {
-              event.preventDefault();
-              if (!draft.trim() || sending) return;
-              if (!requirePermission('Comentar')) return;
-              setSending(true);
-              setError("");
-              try {
-                await onAddComment(memoryId, draft);
-                setDraft("");
-              } catch (reason) {
-                setError(reason instanceof Error ? reason.message : "No se pudo publicar el comentario.");
-              } finally {
-                setSending(false);
-              }
-            }}
-          >
-            <label className="sr-only" htmlFor={fieldId}>
-              Comentar el recuerdo
-            </label>
-            <textarea
-              id={fieldId}
-              value={draft}
-              maxLength={1000}
-              required
-              disabled={sending}
-              onChange={(event) => setDraft(event.target.value)}
-              placeholder="Comentá este recuerdo…"
-            />
-            <button className="primary-button" type="submit" disabled={sending || !draft.trim()}>
-              {sending ? "Enviando…" : "Comentar"}
-            </button>
-            {error && <p role="alert">{error}</p>}
-          </form> : isAuthenticated ? <p className="account-permission-note" role="status">
-            <LockKeyhole size={17} aria-hidden="true" />
-            {loading ? 'Consultando tus permisos…' : categoryError || <>Publicá tu primer recuerdo para habilitar comentarios y respuestas. <Link href="/perfil">Ver mi categoría</Link></>}
-          </p> : <p className="comments-auth-required"><Link href="/auth/login?returnTo=/explorar">Iniciá sesión</Link> para comentar o reaccionar.</p>}
+          {isAuthenticated && canComment ? (
+            <form
+              onSubmit={async (event) => {
+                event.preventDefault();
+                if (!draft.trim() || sending) return;
+                if (!requirePermission("Comentar")) return;
+                setSending(true);
+                setError("");
+                try {
+                  await onAddComment(memoryId, draft);
+                  setDraft("");
+                } catch (reason) {
+                  setError(
+                    reason instanceof Error ? reason.message : "No se pudo publicar el comentario.",
+                  );
+                } finally {
+                  setSending(false);
+                }
+              }}
+            >
+              <label className="sr-only" htmlFor={fieldId}>
+                Comentar el recuerdo
+              </label>
+              <textarea
+                id={fieldId}
+                value={draft}
+                maxLength={1000}
+                required
+                disabled={sending}
+                onChange={(event) => setDraft(event.target.value)}
+                placeholder="Comentá este recuerdo…"
+              />
+              <button className="primary-button" type="submit" disabled={sending || !draft.trim()}>
+                {sending ? "Enviando…" : "Comentar"}
+              </button>
+              {error && <p role="alert">{error}</p>}
+            </form>
+          ) : isAuthenticated ? (
+            <p className="account-permission-note" role="status">
+              <LockKeyhole size={17} aria-hidden="true" />
+              {loading
+                ? "Consultando tus permisos…"
+                : categoryError || (
+                    <>
+                      Publicá tu primer recuerdo para habilitar comentarios y respuestas.{" "}
+                      <Link href="/perfil">Ver mi categoría</Link>
+                    </>
+                  )}
+            </p>
+          ) : (
+            <p className="comments-auth-required">
+              <Link href="/auth/login?returnTo=/explorar">Iniciá sesión</Link> para comentar o
+              reaccionar.
+            </p>
+          )}
         </>
       )}
     </section>

@@ -50,7 +50,7 @@ it("adapta la contraseña al contrato actual de registro", async () => {
   expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({
     username: "fran",
     email: "fran@example.com",
-    "contraseña": "password123",
+    contraseña: "password123",
   });
 });
 

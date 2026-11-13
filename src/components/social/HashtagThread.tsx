@@ -1,6 +1,10 @@
 import { ArrowLeft, Plus } from "lucide-react";
 
-export default function HashtagThread({ tag, onBack, onAdd }: {
+export default function HashtagThread({
+  tag,
+  onBack,
+  onAdd,
+}: {
   tag: string;
   onBack: () => void;
   onAdd: () => void;
@@ -11,7 +15,9 @@ export default function HashtagThread({ tag, onBack, onAdd }: {
         <ArrowLeft size={16} /> Volver al feed
       </button>
       <div className="thread-heading">
-        <span className="thread-symbol" aria-hidden="true">#</span>
+        <span className="thread-symbol" aria-hidden="true">
+          #
+        </span>
         <div>
           <small>RECUERDOS DE LA COMUNIDAD</small>
           <h3 id="hashtag-thread-title">#{tag}</h3>

@@ -46,11 +46,9 @@ export default function Timeline({
           }
         >
           <option value="">Toda la década</option>
-          {Array.from({ length: 10 }, (_, i) => period.decade + i).map(
-            (year) => (
-              <option key={year}>{year}</option>
-            ),
-          )}
+          {Array.from({ length: 10 }, (_, i) => period.decade + i).map((year) => (
+            <option key={year}>{year}</option>
+          ))}
         </select>
       </label>
     </section>

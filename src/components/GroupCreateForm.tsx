@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
-import type { Decade } from '../types';
-import type { CreateGroupInput } from '../groupsApi';
+import { useState, type FormEvent } from "react";
+import type { Decade } from "../types";
+import type { CreateGroupInput } from "../groupsApi";
 
 type GroupCreateFormProps = {
   decade: Decade;
@@ -8,21 +8,17 @@ type GroupCreateFormProps = {
   onCreated: () => void;
 };
 
-export default function GroupCreateForm({
-  decade,
-  onCreate,
-  onCreated,
-}: GroupCreateFormProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [error, setError] = useState('');
+export default function GroupCreateForm({ decade, onCreate, onCreated }: GroupCreateFormProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting) return;
 
-    setError('');
+    setError("");
     setSubmitting(true);
     const message = await onCreate({
       name: name.trim(),
@@ -36,8 +32,8 @@ export default function GroupCreateForm({
       return;
     }
 
-    setName('');
-    setDescription('');
+    setName("");
+    setDescription("");
     onCreated();
   }
 
@@ -70,9 +66,13 @@ export default function GroupCreateForm({
         Se creará para {decade}–{decade + 9}. Vas a quedar como creador e integrante.
       </small>
       <button type="submit" disabled={submitting}>
-        {submitting ? 'Creando…' : 'Crear grupo'}
+        {submitting ? "Creando…" : "Crear grupo"}
       </button>
-      {error && <p role="alert" className="community-form-error">{error}</p>}
+      {error && (
+        <p role="alert" className="community-form-error">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

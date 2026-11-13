@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, LockKeyhole, Mail, User } from "lucide-react";
 import { AuthError } from "./authErrors";
 import { useAuth } from "./AuthProvider";
+import { useNotice } from "../../context/NoticeProvider";
 import styles from "./auth.module.css";
 
 type Mode = "login" | "registro";
@@ -20,6 +21,7 @@ export default function AuthForm({
 }) {
   const router = useRouter();
   const { login, register } = useAuth();
+  const showToast = useNotice((state) => state.showToast);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -70,10 +72,11 @@ export default function AuthForm({
       router.replace(returnTo);
     } catch (cause) {
       if (cause instanceof AuthError) {
-        setError(cause.message);
+        if (cause.status >= 500) showToast(cause.message, "error");
+        else setError(cause.message);
         setFieldErrors(cause.fields);
       } else {
-        setError(cause instanceof Error ? cause.message : "Ocurrió un error inesperado.");
+        showToast(cause instanceof Error ? cause.message : "Ocurrió un error inesperado.", "error");
       }
     } finally {
       setSubmitting(false);
@@ -87,7 +90,9 @@ export default function AuthForm({
         <span>Nostalgiar</span>
       </Link>
 
-      <p className={styles.eyebrow}>{isRegister ? "EMPEZÁ A RECORDAR" : "QUÉ BUENO VOLVER A VERTE"}</p>
+      <p className={styles.eyebrow}>
+        {isRegister ? "EMPEZÁ A RECORDAR" : "QUÉ BUENO VOLVER A VERTE"}
+      </p>
       <h1 id="auth-title">{isRegister ? "Creá tu cuenta" : "Iniciá sesión"}</h1>
       <p className={styles.intro}>
         {isRegister
@@ -95,7 +100,11 @@ export default function AuthForm({
           : "Entrá para compartir recuerdos y continuar tus conversaciones."}
       </p>
 
-      {error && <div className={styles.errorBanner} role="alert">{error}</div>}
+      {error && (
+        <div className={styles.errorBanner} role="alert">
+          {error}
+        </div>
+      )}
 
       <form className={styles.form} onSubmit={submit} noValidate>
         {isRegister && (
@@ -182,7 +191,9 @@ export default function AuthForm({
                 required
               />
             </span>
-            {fieldErrors.confirmation && <small id="confirmation-error">{fieldErrors.confirmation}</small>}
+            {fieldErrors.confirmation && (
+              <small id="confirmation-error">{fieldErrors.confirmation}</small>
+            )}
           </label>
         )}
 
@@ -198,7 +209,9 @@ export default function AuthForm({
           {isRegister ? "Iniciá sesión" : "Registrate"}
         </Link>
       </p>
-      <Link className={styles.back} href="/">← Volver al inicio</Link>
+      <Link className={styles.back} href="/">
+        ← Volver al inicio
+      </Link>
     </section>
   );
 }

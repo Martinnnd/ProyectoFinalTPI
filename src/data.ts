@@ -12,17 +12,14 @@ import type {
 // Demo activity is anchored to this visit, so the weekly feature can be explored
 // without changing the historical year. Production timestamps must come from the API.
 const demoActivityTime = new Date().setHours(0, 0, 0, 0);
-export const initialMemories: Memory[] = availableDecades.flatMap(
-  (year) => eraRegistry[year].content.memories,
-).map((memory, index) => ({
-  ...memory,
-  createdAt: new Date(demoActivityTime - (index % 10) * 86_400_000).toISOString(),
-}));
+export const initialMemories: Memory[] = availableDecades
+  .flatMap((year) => eraRegistry[year].content.memories)
+  .map((memory, index) => ({
+    ...memory,
+    createdAt: new Date(demoActivityTime - (index % 10) * 86_400_000).toISOString(),
+  }));
 export const eraContent = Object.fromEntries(
-  availableDecades.map((year) => [
-    year,
-    eraRegistry[year].content.introduction,
-  ]),
+  availableDecades.map((year) => [year, eraRegistry[year].content.introduction]),
 ) as Record<Decade, { label: string; description: string }>;
 
 // The visitor's tier is derived from their progress, never stored, for the
@@ -76,12 +73,9 @@ export function resolveUserCategory(progress: TierProgress): UserCategory {
 // Drives the tiers dialog: everything below the resolved tier was reached on
 // the way up, everything above it is still locked.
 export function describeTiers(progress: TierProgress): DescribedTier[] {
-  const reached = userTiers.findIndex(
-    (tier) => tier.name === resolveUserCategory(progress),
-  );
+  const reached = userTiers.findIndex((tier) => tier.name === resolveUserCategory(progress));
   return userTiers.map((tier, index) => ({
     ...tier,
-    state:
-      index === reached ? "current" : index < reached ? "reached" : "locked",
+    state: index === reached ? "current" : index < reached ? "reached" : "locked",
   }));
 }

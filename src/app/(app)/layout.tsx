@@ -1,5 +1,5 @@
-import { AccountCategoryProvider } from '../../context/AccountCategoryContext';
-import '../../components/account/accountCategory.css';
+import { AccountCategoryProvider } from "../../context/AccountCategoryContext";
+import "../../components/account/accountCategory.css";
 import type { Metadata } from "next";
 import "leaflet/dist/leaflet.css";
 import "../../styles.css";
@@ -24,11 +24,13 @@ import "../../components/chatTaskbar.css";
 import "../../eras/70s/tvViews.css";
 import "../../mobile.css";
 import "../../eras/2020s/theme.css";
+import "../../components/auth/guestAccess.css";
 
 import { EraProvider } from "../../context/EraContext";
 import { FollowProvider } from "../../context/FollowContext";
 import { RatingsProvider } from "../../context/RatingsContext";
 import AppShell from "../../components/layout/AppShell";
+import { GuestAccessProvider } from "../../components/auth/GuestAccessProvider";
 
 export const metadata: Metadata = {
   title: "Nostalgiar",
@@ -39,11 +41,13 @@ export default function MainAppLayout({ children }: { children: React.ReactNode 
   return (
     <EraProvider>
       <AccountCategoryProvider>
-      <RatingsProvider>
-        <FollowProvider>
-          <AppShell>{children}</AppShell>
-        </FollowProvider>
-      </RatingsProvider>
+        <RatingsProvider>
+          <FollowProvider>
+            <GuestAccessProvider>
+              <AppShell>{children}</AppShell>
+            </GuestAccessProvider>
+          </FollowProvider>
+        </RatingsProvider>
       </AccountCategoryProvider>
     </EraProvider>
   );

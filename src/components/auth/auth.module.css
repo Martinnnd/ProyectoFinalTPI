@@ -39,7 +39,10 @@
   text-decoration: none;
 }
 
-.brand img { width: 42px; height: auto; }
+.brand img {
+  width: 42px;
+  height: auto;
+}
 .brand span {
   color: var(--ink);
   font-family: "Nostalgiar Script", Georgia, serif;
@@ -55,11 +58,30 @@
   letter-spacing: 0.16em;
 }
 
-.card h1 { margin: 0; font-size: clamp(2rem, 7vw, 2.8rem); line-height: 1.05; }
-.intro { margin: 12px 0 24px; color: var(--muted); line-height: 1.55; }
-.form { display: grid; gap: 17px; }
-.field { display: grid; gap: 7px; font-size: 0.86rem; font-weight: 700; }
-.field small { color: var(--ink); font-weight: 600; }
+.card h1 {
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 2.8rem);
+  line-height: 1.05;
+}
+.intro {
+  margin: 12px 0 24px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.form {
+  display: grid;
+  gap: 17px;
+}
+.field {
+  display: grid;
+  gap: 7px;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+.field small {
+  color: var(--ink);
+  font-weight: 600;
+}
 
 .inputShell {
   min-height: 48px;
@@ -71,7 +93,9 @@
   border-radius: 12px;
   background: var(--paper);
   color: var(--muted);
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .inputShell:focus-within {
@@ -79,9 +103,27 @@
   box-shadow: 0 0 0 3px rgb(213 198 127 / 45%);
 }
 
-.inputShell:has(input[aria-invalid="true"]) { border-color: var(--ink); box-shadow: inset 3px 0 var(--ink); }
-.inputShell input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); }
-.reveal { display: grid; place-items: center; padding: 5px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.inputShell:has(input[aria-invalid="true"]) {
+  border-color: var(--ink);
+  box-shadow: inset 3px 0 var(--ink);
+}
+.inputShell input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+}
+.reveal {
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
 
 .submit {
   min-height: 50px;
@@ -98,24 +140,80 @@
   cursor: pointer;
 }
 
-.submit:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
-.submit:disabled { cursor: wait; opacity: 0.72; }
-.spinner { animation: spin 800ms linear infinite; }
-.errorBanner { margin-bottom: 18px; padding: 12px 14px; border-left: 3px solid var(--ink); border-radius: 10px; background: rgb(213 198 127 / 25%); color: var(--ink); font-size: 0.9rem; }
-.switchMode { margin: 24px 0 0; text-align: center; color: var(--muted); font-size: 0.9rem; }
-.switchMode a { color: var(--ink); font-weight: 800; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
-.back { display: block; margin-top: 18px; text-align: center; color: var(--muted); font-size: 0.82rem; text-decoration: none; }
-.back:hover { color: var(--ink); }
-.shell :is(a, button):focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.submit:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+.spinner {
+  animation: spin 800ms linear infinite;
+}
+.errorBanner {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--ink);
+  border-radius: 10px;
+  background: rgb(213 198 127 / 25%);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+.switchMode {
+  margin: 24px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.switchMode a {
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.back {
+  display: block;
+  margin-top: 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+.back:hover {
+  color: var(--ink);
+}
+.shell :is(a, button):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 @media (max-width: 520px) {
-  .shell { padding: 0; align-items: stretch; }
-  .card { width: 100%; min-height: 100svh; border: 0; border-radius: 0; padding: 28px 22px; }
+  .shell {
+    padding: 0;
+    align-items: stretch;
+  }
+  .card {
+    width: 100%;
+    min-height: 100svh;
+    border: 0;
+    border-radius: 0;
+    padding: 28px 22px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .submit { transition: none; }
-  .spinner { animation: none; }
+  .submit {
+    transition: none;
+  }
+  .spinner {
+    animation: none;
+  }
 }

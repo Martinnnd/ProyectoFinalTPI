@@ -2,7 +2,6 @@ import ActivityDock from "../shared/ActivityDock";
 import type { ChromeProps } from "../contracts";
 import { theme } from "./theme";
 export default function Chrome({ period, count, ...activities }: ChromeProps) {
-  const label = period.year ?? `${period.decade}–${period.decade + 9}`;
   return (
     <div className="era-chrome">
       <div className="era-shell-top">
@@ -13,14 +12,11 @@ export default function Chrome({ period, count, ...activities }: ChromeProps) {
       </div>
       <div className="era-atmosphere" aria-hidden="true">
         <div className="vhs-horizon" />
-        <span className="vhs-tape">
-          ARGENTINA
-          <br />
-          CINTA {label}
-        </span>
       </div>
-      <ActivityDock {...activities} title="SELECT SCREEN"/>
-      <div className="vhs-status"><div id="chat-taskbar-slot" /></div>
+      <ActivityDock {...activities} title="SELECT SCREEN" />
+      <div className="vhs-status">
+        <div id="chat-taskbar-slot" />
+      </div>
     </div>
   );
 }

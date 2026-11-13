@@ -18,16 +18,8 @@ export function animateMemoryMap({ mobile }: MapAnimationOptions) {
       duration: 0.8,
       ease: "power2.inOut",
     })
-    .from(
-      "[data-memory-map]",
-      { autoAlpha: 0, scale: 0.84, duration: 0.9 },
-      "-=0.42",
-    )
-    .from(
-      "[data-map-ring]",
-      { autoAlpha: 0, scale: 0.55, duration: 0.65, stagger: 0.13 },
-      "-=0.55",
-    )
+    .from("[data-memory-map]", { autoAlpha: 0, scale: 0.84, duration: 0.9 }, "-=0.42")
+    .from("[data-map-ring]", { autoAlpha: 0, scale: 0.55, duration: 0.65, stagger: 0.13 }, "-=0.55")
     .from(
       "[data-map-pin]",
       {
@@ -40,16 +32,8 @@ export function animateMemoryMap({ mobile }: MapAnimationOptions) {
       },
       "-=0.35",
     )
-    .from(
-      "[data-map-message]",
-      { autoAlpha: 0, scale: 0.7, duration: 0.55 },
-      "-=0.35",
-    )
-    .from(
-      "[data-map-copy] > *",
-      { autoAlpha: 0, y: 28, duration: 0.58, stagger: 0.1 },
-      "-=0.65",
-    );
+    .from("[data-map-message]", { autoAlpha: 0, scale: 0.7, duration: 0.55 }, "-=0.35")
+    .from("[data-map-copy] > *", { autoAlpha: 0, y: 28, duration: 0.58, stagger: 0.1 }, "-=0.65");
 
   if (!mobile) {
     gsap.to("[data-map-ring='outer']", {

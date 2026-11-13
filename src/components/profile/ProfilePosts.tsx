@@ -5,38 +5,49 @@ import FeedPost from "../social/FeedPost";
 import RepostDialog from "../social/RepostDialog";
 import useMemoryInteractions from "../../hooks/useMemoryInteractions";
 import { useRatings } from "../../context/RatingsContext";
+import { useNotice } from "../../context/NoticeProvider";
 import { useFollow } from "../../context/FollowContext";
 import { useAuth } from "../auth/AuthProvider";
 import { repostearPublicacion, quitarRepost, citarPublicacion, isOwnMemory } from "../../api";
 
-const ProfilePosts = forwardRef<HTMLElement, {
-  author?: string;
-  username: string;
-  memories: Memory[];
-  selected: Memory | null;
-  repostedPublicationIds: string[];
-  isSavedTab?: boolean;
-  onEdit: (memory: Memory) => void;
-  onDelete: (memory: Memory) => void;
-  onOpen?: (memory: Memory) => void;
-  onSelectOnMap: (memory: Memory) => void;
-  onAdd: () => void;
-}>(function ProfilePosts({
-  author,
-  username,
-  memories,
-  selected,
-  repostedPublicationIds,
-  isSavedTab = false,
-  onEdit,
-  onDelete,
-  onOpen,
-  onSelectOnMap,
-  onAdd,
-}, ref) {
+const ProfilePosts = forwardRef<
+  HTMLElement,
+  {
+    author?: string;
+    username: string;
+    memories: Memory[];
+    selected: Memory | null;
+    repostedPublicationIds: string[];
+    isSavedTab?: boolean;
+    isTaggedTab?: boolean;
+    onEdit: (memory: Memory) => void;
+    onDelete: (memory: Memory) => void;
+    onOpen?: (memory: Memory) => void;
+    onSelectOnMap: (memory: Memory) => void;
+    onAdd: () => void;
+  }
+>(function ProfilePosts(
+  {
+    author,
+    username,
+    memories,
+    selected,
+    repostedPublicationIds,
+    isSavedTab = false,
+    isTaggedTab = false,
+    onEdit,
+    onDelete,
+    onOpen,
+    onSelectOnMap,
+    onAdd,
+  },
+  ref,
+) {
   const router = useRouter();
   const { session } = useAuth();
-  const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
+  const { ratings, pointsMap, rateMemory } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
+  const showToast = useNotice((state) => state.showToast);
   const { followingUsers, toggleFollow } = useFollow();
   const interactions = useMemoryInteractions();
 
@@ -44,38 +55,52 @@ const ProfilePosts = forwardRef<HTMLElement, {
   const [reposts, setReposts] = useState<string[]>(repostedPublicationIds);
   const [removedReposts, setRemovedReposts] = useState<string[]>([]);
 
-  const sortedMemories = memories.filter((memory) => !(
-    memory.repost && !memory.repost.comment && !memory.quotedMemory &&
-    isOwnMemory(memory) && removedReposts.includes(memory.repost.originalId ?? memory.id)
-  )).sort((a, b) => {
-    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    if (timeA !== timeB) return timeB - timeA;
-    return Number(b.id) - Number(a.id);
-  });
+  const sortedMemories = memories
+    .filter(
+      (memory) =>
+        !(
+          memory.repost &&
+          !memory.repost.comment &&
+          !memory.quotedMemory &&
+          isOwnMemory(memory) &&
+          removedReposts.includes(memory.repost.originalId ?? memory.id)
+        ),
+    )
+    .sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (timeA !== timeB) return timeB - timeA;
+      return Number(b.id) - Number(a.id);
+    });
 
   return (
     <section
       ref={ref}
       className="personal-album profile-posts"
       aria-label={
-        isSavedTab
-          ? "Mis recuerdos guardados"
-          : (author ? `Recuerdos de ${author}` : "Mis recuerdos")
+        isTaggedTab
+          ? author
+            ? `Recuerdos donde aparece ${author}`
+            : "Recuerdos donde aparezco"
+          : isSavedTab
+            ? "Mis recuerdos guardados"
+            : author
+              ? `Recuerdos de ${author}`
+              : "Mis recuerdos"
       }
     >
       {sortedMemories.length ? (
         <div className="feed-posts profile-feed-posts">
           {sortedMemories.map((memory) => {
-            const isQuote = Boolean(
-              memory.quotedMemory ||
-              memory.repost?.comment
-            );
+            const isQuote = Boolean(memory.quotedMemory || memory.repost?.comment);
             const isSimpleRepost = Boolean(memory.repost && !isQuote);
-            const rootId = isSimpleRepost && memory.repost?.originalId ? memory.repost.originalId : memory.id;
-            const quotedId = isQuote && memory.repost?.originalId ? memory.repost.originalId : undefined;
+            const rootId =
+              isSimpleRepost && memory.repost?.originalId ? memory.repost.originalId : memory.id;
+            const quotedId =
+              isQuote && memory.repost?.originalId ? memory.repost.originalId : undefined;
             const quotedMemory = quotedId
-              ? memory.quotedMemory || memories.find((m) => m.id === quotedId) || {
+              ? memory.quotedMemory ||
+                memories.find((m) => m.id === quotedId) || {
                   ...memory,
                   id: quotedId,
                   title: memory.title,
@@ -111,14 +136,19 @@ const ProfilePosts = forwardRef<HTMLElement, {
               viewerRating: effectiveRating,
             };
 
-            const targetAuthor = isSimpleRepost && memory.repost?.author ? memory.repost.author : memory.author;
+            const targetAuthor =
+              isSimpleRepost && memory.repost?.author ? memory.repost.author : memory.author;
             const isFollowing = followingUsers.some(
-              (u) => u.username.toLowerCase() === (targetAuthor ?? "").toLowerCase()
+              (u) => u.username.toLowerCase() === (targetAuthor ?? "").toLowerCase(),
             );
 
             return (
               <FeedPost
-                key={memory.repost ? `${memory.id}-repost-${memory.author}-${memory.createdAt ?? ""}` : memory.id}
+                key={
+                  memory.repost
+                    ? `${memory.id}-repost-${memory.author}-${memory.createdAt ?? ""}`
+                    : memory.id
+                }
                 memory={effectiveMemory}
                 active={true}
                 selected={selected?.id === memory.id}
@@ -131,12 +161,18 @@ const ProfilePosts = forwardRef<HTMLElement, {
                 reposted={isReposted}
                 directUnrepost={true}
                 repostCount={interactions.getRepostCount(targetKey, memory.repostCount ?? 0)}
-                saved={interactions.isSaved(targetKey, memory.viewerSaved ?? (isSavedTab ? true : false))}
+                saved={interactions.isSaved(
+                  targetKey,
+                  memory.viewerSaved ?? (isSavedTab ? true : false),
+                )}
                 quotedMemory={quotedMemory}
                 onDelete={onDelete}
                 onEdit={onEdit}
                 onProfile={(m) => {
-                  if (m.author && m.author !== username) {
+                  if (!m.author) return;
+                  if (session && m.author.toLowerCase() === session.username?.toLowerCase()) {
+                    router.push("/perfil");
+                  } else {
                     router.push(`/perfil/${m.author}`);
                   }
                 }}
@@ -151,14 +187,18 @@ const ProfilePosts = forwardRef<HTMLElement, {
                 onRate={(value) => rateMemory(targetKey, value, Boolean(session))}
                 onLike={() => {
                   if (!session) {
-                    router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
+                    router.push(
+                      `/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`,
+                    );
                     return;
                   }
                   interactions.toggleLike(targetKey, memory.viewerLiked, memory.likeCount ?? 0);
                 }}
                 onSimpleRepost={async () => {
                   if (!session) {
-                    router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
+                    router.push(
+                      `/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`,
+                    );
                     return;
                   }
                   try {
@@ -173,6 +213,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                     setNotice("Recuerdo reposteado.");
                   } catch (err) {
                     console.error("Error al repostear:", err);
+                    showToast("No se pudo repostear el recuerdo. Intentá de nuevo.", "error");
                   }
                 }}
                 onUnrepost={async () => {
@@ -189,19 +230,23 @@ const ProfilePosts = forwardRef<HTMLElement, {
                     setNotice("Repost eliminado.");
                   } catch (err) {
                     console.error("Error al quitar repost:", err);
-                    setNotice("No se pudo quitar el repost. Intentá de nuevo.");
+                    showToast("No se pudo quitar el repost. Intentá de nuevo.", "error");
                   }
                 }}
                 onQuote={() => {
                   if (!session) {
-                    router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
+                    router.push(
+                      `/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`,
+                    );
                     return;
                   }
                   setRepostMemory(memory);
                 }}
                 onRepost={() => {
                   if (!session) {
-                    router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
+                    router.push(
+                      `/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`,
+                    );
                     return;
                   }
                   if (isReposted) {
@@ -213,7 +258,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
                         interactions.incrementRepostCount(targetKey, -1, memory.repostCount ?? 0);
                       }
                       setNotice("Repost eliminado.");
-                    });
+                    }).catch(() => showToast("No se pudo quitar el repost. Intentá de nuevo.", "error"));
                   } else {
                     repostearPublicacion(targetKey).then((res) => {
                       setReposts((curr) => [...new Set([...curr, memory.id, rootId])]);
@@ -223,15 +268,20 @@ const ProfilePosts = forwardRef<HTMLElement, {
                         interactions.incrementRepostCount(targetKey, 1, memory.repostCount ?? 0);
                       }
                       setNotice("Recuerdo reposteado.");
-                    });
+                    }).catch(() => showToast("No se pudo repostear el recuerdo. Intentá de nuevo.", "error"));
                   }
                 }}
                 onSave={() => {
                   if (!session) {
-                    router.push(`/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`);
+                    router.push(
+                      `/auth/login?returnTo=${typeof window !== "undefined" ? window.location.pathname : "/perfil"}`,
+                    );
                     return;
                   }
-                  interactions.toggleSave(targetKey, memory.viewerSaved ?? (isSavedTab ? true : false));
+                  interactions.toggleSave(
+                    targetKey,
+                    memory.viewerSaved ?? (isSavedTab ? true : false),
+                  );
                 }}
                 onHashtag={(tag) => router.push(`/feed?tag=${encodeURIComponent(tag)}`)}
               />
@@ -241,16 +291,32 @@ const ProfilePosts = forwardRef<HTMLElement, {
       ) : (
         <div className="personal-empty">
           <h3>
-            {isSavedTab
-              ? "Todavía no guardaste ningún recuerdo"
-              : (author ? "Todavía no hay recuerdos publicados" : "Tu primer recuerdo merece un lugar")}
+            {isTaggedTab
+              ? author
+                ? `Todavía no hay recuerdos donde aparezca ${author}`
+                : "Todavía no te etiquetaron en ningún recuerdo"
+              : isSavedTab
+                ? "Todavía no guardaste ningún recuerdo"
+                : author
+                  ? "Todavía no hay recuerdos publicados"
+                  : "Tu primer recuerdo merece un lugar"}
           </h3>
           <p>
-            {isSavedTab
-              ? "Podés guardar recuerdos desde el feed o explorando para volver a verlos cuando quieras."
-              : (author ? "Sus publicaciones aparecerán acá." : "Contá tu historia: cada recuerdo que publiques aparecerá acá, uno debajo del otro.")}
+            {isTaggedTab
+              ? author
+                ? `Cuando otros usuarios etiqueten a ${author} en sus recuerdos ("Estuvieron ahí"), se mostrarán acá.`
+                : 'Cuando tus amigos te etiqueten en sus recuerdos ("Estuvieron ahí"), van a aparecer acá.'
+              : isSavedTab
+                ? "Podés guardar recuerdos desde el feed o explorando para volver a verlos cuando quieras."
+                : author
+                  ? "Sus publicaciones aparecerán acá."
+                  : "Contá tu historia: cada recuerdo que publiques aparecerá acá, uno debajo del otro."}
           </p>
-          {!author && !isSavedTab && <button className="primary-button" onClick={onAdd}>Crear un recuerdo</button>}
+          {!author && !isSavedTab && !isTaggedTab && (
+            <button className="primary-button" onClick={onAdd}>
+              Crear un recuerdo
+            </button>
+          )}
         </div>
       )}
       {repostMemory && (
@@ -263,6 +329,7 @@ const ProfilePosts = forwardRef<HTMLElement, {
               setNotice("Cita publicada.");
             } catch (err) {
               console.error("Error al citar:", err);
+              showToast("No se pudo publicar la cita. Intentá de nuevo.", "error");
             } finally {
               setRepostMemory(null);
             }

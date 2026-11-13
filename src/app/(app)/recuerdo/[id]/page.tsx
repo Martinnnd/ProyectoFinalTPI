@@ -7,11 +7,13 @@ import SocialFeed from "../../../../components/social/SocialFeed";
 import DeleteMemoryDialog from "../../../../components/DeleteMemoryDialog";
 import MemoryForm from "../../../../components/MemoryForm";
 import { getPublication } from "../../../../publicationsApi";
+import { getGroup } from "../../../../groupsApi";
 import { eliminarPublicacion } from "../../../../api";
 import { useEra } from "../../../../context/EraContext";
 import { useAuth } from "../../../../components/auth/AuthProvider";
 import { useFollow } from "../../../../context/FollowContext";
 import { useRatings } from "../../../../context/RatingsContext";
+import { useNotice } from "../../../../context/NoticeProvider";
 import type { Decade, Memory } from "../../../../types";
 import type { FeedTab } from "../../../../socialTypes";
 
@@ -20,9 +22,8 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedReturn = searchParams.get("returnTo");
-  const returnTo = requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
-    ? requestedReturn
-    : "/feed";
+  const returnTo =
+    requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn) ? requestedReturn : "/feed";
   const backLabel = returnTo === "/feed" ? "Volver al feed" : "Volver al perfil";
   const { id } = resolvedParams;
 
@@ -31,9 +32,11 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   currentEra.current = { period, changePeriod };
   const { session, status } = useAuth();
   const { followingUsers, followers, toggleFollow, followingRevision } = useFollow();
-  const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
+  const { ratings, pointsMap, rateMemory } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
 
   const [memory, setMemory] = useState<Memory | null>(null);
+  const [groupName, setGroupName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Memory | null>(null);
@@ -67,6 +70,19 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
     return () => controller.abort();
   }, [id, status]);
 
+  useEffect(() => {
+    if (!memory?.groupId) return;
+    const controller = new AbortController();
+    getGroup(memory.groupId, controller.signal)
+      .then((group) => {
+        if (!controller.signal.aborted) setGroupName(group.name);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setGroupName(null);
+      });
+    return () => controller.abort();
+  }, [memory?.groupId]);
+
   const handleProfile = useCallback(
     (targetMemory: Memory) => {
       if (session && targetMemory.author === session.username) {
@@ -75,14 +91,14 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         router.push(`/perfil/${targetMemory.author}`);
       }
     },
-    [router, session]
+    [router, session],
   );
 
   const handleMap = useCallback(
     (targetMemory: Memory) => {
       router.push(`/explorar?recuerdo=${targetMemory.id}`);
     },
-    [router]
+    [router],
   );
 
   const handleSelect = useCallback(
@@ -93,7 +109,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         router.push(`/recuerdo/${selectedMemory.id}?returnTo=${encodeURIComponent(returnTo)}`);
       }
     },
-    [id, router, returnTo]
+    [id, router, returnTo],
   );
 
   const confirmDelete = useCallback(
@@ -103,7 +119,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
       router.push(returnTo);
       return null;
     },
-    [router, setNotice, returnTo]
+    [router, setNotice, returnTo],
   );
 
   const saveEdit = useCallback(
@@ -113,7 +129,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
       setNotice("Recuerdo modificado.");
       return null;
     },
-    [setNotice]
+    [setNotice],
   );
 
   if (loading) {
@@ -127,7 +143,11 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
 
   if (error || !memory) {
     return (
-      <div className="feed-load-error" role="alert" style={{ padding: "60px 0", textAlign: "center" }}>
+      <div
+        className="feed-load-error"
+        role="alert"
+        style={{ padding: "60px 0", textAlign: "center" }}
+      >
         <p>{error ?? "No se encontró el recuerdo solicitado."}</p>
         <button type="button" className="secondary-button" onClick={() => router.push(returnTo)}>
           {backLabel}
@@ -158,6 +178,7 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
         onDelete={(m) => setDeleting(m)}
         onProfile={handleProfile}
         groupIds={[]}
+        groupNames={memory.groupId && groupName ? { [memory.groupId]: groupName } : {}}
         suggestedAuthors={[
           ...(effectiveMemory.authorId
             ? [{ name: effectiveMemory.author, id: effectiveMemory.authorId }]

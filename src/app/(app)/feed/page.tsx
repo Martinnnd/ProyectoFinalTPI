@@ -5,12 +5,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SocialFeed from "../../../components/social/SocialFeed";
 import DeleteMemoryDialog from "../../../components/DeleteMemoryDialog";
 import MemoryForm from "../../../components/MemoryForm";
+import GroupHeaderActions from "../../../components/GroupHeaderActions";
 import CommunityControls from "../../../components/CommunityControls";
 import GroupInfoModal from "../../../components/GroupInfoModal";
 import { useEra } from "../../../context/EraContext";
 import { useAuth } from "../../../components/auth/AuthProvider";
 import { useFollow } from "../../../context/FollowContext";
 import { useRatings } from "../../../context/RatingsContext";
+import { useNotice } from "../../../context/NoticeProvider";
 import { eliminarPublicacion } from "../../../api";
 import { getPublication } from "../../../publicationsApi";
 import { filterCommunity } from "../../../groups";
@@ -19,6 +21,7 @@ import {
   getGroupMemories,
   createGroup as createRemoteGroup,
   joinGroup as joinRemoteGroup,
+  leaveGroup as leaveRemoteGroup,
   type CreateGroupInput,
   type GroupMember,
 } from "../../../groupsApi";
@@ -27,9 +30,17 @@ import type { FeedTab } from "../../../socialTypes";
 import { isHashtag, normalizeHashtag } from "../../../hashtags";
 
 export default function FeedPage() {
-  return <Suspense fallback={<div className="feed-loading" role="status">Cargando feed…</div>}>
-    <FeedPageContent />
-  </Suspense>;
+  return (
+    <Suspense
+      fallback={
+        <div className="feed-loading" role="status">
+          Cargando feed…
+        </div>
+      }
+    >
+      <FeedPageContent />
+    </Suspense>
+  );
 }
 
 function FeedPageContent() {
@@ -37,25 +48,34 @@ function FeedPageContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const returnQuery = searchParams.get("returnTo")?.split("?")[1] ?? "";
-  const requestedTag = normalizeHashtag(searchParams.get("tag") ?? new URLSearchParams(returnQuery).get("tag") ?? "");
+  const requestedTag = normalizeHashtag(
+    searchParams.get("tag") ?? new URLSearchParams(returnQuery).get("tag") ?? "",
+  );
   const initialHashtag = isHashtag(requestedTag) ? requestedTag : null;
   const { period, changePeriod } = useEra();
   const { session } = useAuth();
   const { followingUsers, followers, followingRevision, toggleFollow } = useFollow();
-  const { ratings, pointsMap, rateMemory, setNotice } = useRatings();
+  const { ratings, pointsMap, rateMemory } = useRatings();
+  const setNotice = useNotice((state) => state.setNotice);
+  const showToast = useNotice((state) => state.showToast);
 
   const [feedItems, setFeedItems] = useState<Memory[]>([]);
   const [selected, setSelected] = useState<Memory | null>(null);
   useEffect(() => {
-    if (pathname === '/feed') setSelected(null);
+    if (pathname === "/feed") setSelected(null);
   }, [pathname]);
   const [editing, setEditing] = useState<Memory | null>(null);
   const [deleting, setDeleting] = useState<Memory | null>(null);
 
   // Grupos y comunidad
   const [groups, setGroups] = useState<CommunityGroup[]>([]);
+  const [groupsLoaded, setGroupsLoaded] = useState(false);
   const myGroups = groups.filter((g) => g.isMember);
-  const [scope, setScope] = useState("all");
+  const requestedScope = searchParams.get("scope");
+  const [scope, setScope] = useState(requestedScope ?? "all");
+  useEffect(() => {
+    setScope(requestedScope ?? "all");
+  }, [requestedScope]);
   const [query, setQuery] = useState("");
   const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
   const [groupInfoId, setGroupInfoId] = useState<string | null>(null);
@@ -69,15 +89,29 @@ function FeedPageContent() {
     const controller = new AbortController();
     getGroups(controller.signal)
       .then((res) => {
-        if (!controller.signal.aborted) setGroups(res);
+        if (!controller.signal.aborted) {
+          setGroups(res);
+          setGroupsLoaded(true);
+        }
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
-          setNotice(err instanceof Error ? err.message : "No se pudieron cargar los grupos.");
+          showToast(err instanceof Error ? err.message : "No se pudieron cargar los grupos.", "error");
         }
       });
     return () => controller.abort();
-  }, [session, setNotice]);
+  }, [session, showToast]);
+
+  const selectedGroupDecade = groups.find((g) => g.id === scope)?.decade;
+  useEffect(() => {
+    if (selectedGroupDecade) changePeriod({ decade: selectedGroupDecade, year: null });
+    // Reset the period only when entering a group, preserving subsequent filters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scope, selectedGroupDecade]);
+  const unavailableGroup =
+    groupsLoaded &&
+    !["all", "general", "own", "groups"].includes(scope) &&
+    !groups.some((g) => g.id === scope);
 
   // Cargar recuerdos del grupo seleccionado
   useEffect(() => {
@@ -92,11 +126,14 @@ function FeedPageContent() {
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
-          setNotice(err instanceof Error ? err.message : "No se pudieron cargar los recuerdos del grupo.");
+          showToast(
+            err instanceof Error ? err.message : "No se pudieron cargar los recuerdos del grupo.",
+            "error",
+          );
         }
       });
     return () => controller.abort();
-  }, [groups, scope, setNotice]);
+  }, [groups, scope, showToast]);
 
   // Soporte para popstate (navegador atrás / adelante)
   useEffect(() => {
@@ -107,7 +144,9 @@ function FeedPageContent() {
         if (found) {
           setSelected(found);
         } else if (id) {
-          getPublication(id, false).then(setSelected).catch(() => {});
+          getPublication(id, false)
+            .then(setSelected)
+            .catch(() => {});
         }
       } else {
         setSelected(null);
@@ -125,14 +164,14 @@ function FeedPageContent() {
         router.push(`/perfil/${memory.author}`);
       }
     },
-    [router, session]
+    [router, session],
   );
 
   const handleMap = useCallback(
     (memory: Memory) => {
       router.push(`/explorar?recuerdo=${memory.id}`);
     },
-    [router]
+    [router],
   );
 
   const handleSelect = useCallback(
@@ -143,19 +182,34 @@ function FeedPageContent() {
           changePeriod({ decade, year: null });
         }
         setSelected(memory);
-        const returnTo = initialHashtag ? `/feed?tag=${encodeURIComponent(initialHashtag)}` : "/feed";
-        window.history.pushState(null, "", `/recuerdo/${memory.id}?returnTo=${encodeURIComponent(returnTo)}`);
+        const returnParams = new URLSearchParams();
+        if (initialHashtag) returnParams.set("tag", initialHashtag);
+        if (scope !== "all") returnParams.set("scope", scope);
+        const returnTo = `/feed${returnParams.size ? `?${returnParams}` : ""}`;
+        window.history.pushState(
+          null,
+          "",
+          `/recuerdo/${memory.id}?returnTo=${encodeURIComponent(returnTo)}`,
+        );
       } else {
         setSelected(null);
-        window.history.pushState(null, "", initialHashtag ? `/feed?tag=${encodeURIComponent(initialHashtag)}` : "/feed");
+        const params = new URLSearchParams();
+        if (initialHashtag) params.set("tag", initialHashtag);
+        if (scope !== "all") params.set("scope", scope);
+        window.history.pushState(null, "", `/feed${params.size ? `?${params}` : ""}`);
       }
     },
-    [period.decade, changePeriod, initialHashtag]
+    [period.decade, changePeriod, initialHashtag, scope],
   );
 
   const chooseScope = useCallback(
     (value: string) => {
       setScope(value);
+      const params = new URLSearchParams(window.location.search);
+      if (value === "all") params.delete("scope");
+      else params.set("scope", value);
+      const queryString = params.toString();
+      window.history.pushState(null, "", "/feed" + (queryString ? "?" + queryString : ""));
       setQuery("");
       setSelected(null);
       const group = groups.find((g) => g.id === value);
@@ -163,7 +217,7 @@ function FeedPageContent() {
         changePeriod({ decade: group.decade, year: null });
       }
     },
-    [groups, changePeriod]
+    [groups, changePeriod],
   );
 
   const handleTabChange = useCallback(
@@ -176,7 +230,7 @@ function FeedPageContent() {
         chooseScope("all");
       }
     },
-    [scope, groups, chooseScope]
+    [scope, groups, chooseScope],
   );
 
   const createGroup = useCallback(
@@ -187,7 +241,7 @@ function FeedPageContent() {
       try {
         const created = await createRemoteGroup(group);
         setGroups((curr) => [...curr, created]);
-        setScope(created.id);
+        chooseScope(created.id);
         setSelected(null);
         setQuery("");
         changePeriod({ decade: created.decade, year: null });
@@ -196,7 +250,7 @@ function FeedPageContent() {
         return err instanceof Error ? err.message : "No se pudo crear el grupo.";
       }
     },
-    [groups, changePeriod]
+    [groups, changePeriod, chooseScope],
   );
 
   const joinGroup = useCallback(
@@ -210,7 +264,23 @@ function FeedPageContent() {
         return err instanceof Error ? err.message : "No se pudo completar la unión al grupo.";
       }
     },
-    [setNotice]
+    [setNotice],
+  );
+
+  const leaveSelectedGroup = useCallback(
+    async (groupId: string): Promise<string | null> => {
+      try {
+        await leaveRemoteGroup(groupId);
+        setGroups((curr) => curr.map((g) => (g.id === groupId ? { ...g, isMember: false } : g)));
+        setGroupMemories([]);
+        setScope("groups");
+        setNotice("Saliste del grupo.");
+        return null;
+      } catch (error) {
+        return error instanceof Error ? error.message : "No se pudo salir del grupo.";
+      }
+    },
+    [setNotice],
   );
 
   const groupUpdated = useCallback(
@@ -218,7 +288,7 @@ function FeedPageContent() {
       setGroups((curr) => curr.map((g) => (g.id === updated.id ? updated : g)));
       if (scope === updated.id) changePeriod({ decade: updated.decade, year: null });
     },
-    [scope, changePeriod]
+    [scope, changePeriod],
   );
 
   const groupRemoved = useCallback(
@@ -231,7 +301,7 @@ function FeedPageContent() {
       setQuery("");
       setNotice(message);
     },
-    [setNotice]
+    [setNotice],
   );
 
   const openMemberProfile = useCallback(
@@ -243,7 +313,7 @@ function FeedPageContent() {
         router.push(`/perfil/${member.username}`);
       }
     },
-    [router, session]
+    [router, session],
   );
 
   const handleAdd = useCallback(() => {
@@ -254,19 +324,22 @@ function FeedPageContent() {
     (tag: string) => {
       router.push(`/explorar?action=recordar&tag=${encodeURIComponent(tag)}`);
     },
-    [router]
+    [router],
   );
 
-  const confirmDelete = useCallback((memory: Memory): string | null => {
-    eliminarPublicacion(memory.id).catch(console.error);
-    setFeedItems((current) => current.filter((m) => m.id !== memory.id));
-    if (selected?.id === memory.id) {
-      setSelected(null);
-      window.history.pushState(null, "", "/feed");
-    }
-    setNotice("Recuerdo eliminado.");
-    return null;
-  }, [selected, setNotice]);
+  const confirmDelete = useCallback(
+    (memory: Memory): string | null => {
+      eliminarPublicacion(memory.id).catch(console.error);
+      setFeedItems((current) => current.filter((m) => m.id !== memory.id));
+      if (selected?.id === memory.id) {
+        setSelected(null);
+        window.history.pushState(null, "", "/feed");
+      }
+      setNotice("Recuerdo eliminado.");
+      return null;
+    },
+    [selected, setNotice],
+  );
 
   const saveEdit = useCallback(
     (memory: Memory): string | null => {
@@ -291,7 +364,7 @@ function FeedPageContent() {
       setNotice("Recuerdo modificado.");
       return null;
     },
-    [feedItems, editing, groups, selected, setNotice]
+    [feedItems, editing, groups, selected, setNotice],
   );
 
   const viewingGroup = groups.some((g) => g.id === scope);
@@ -299,28 +372,32 @@ function FeedPageContent() {
   const filteredMemories = filterMemories(
     filterCommunity(communityMemories, scope, groups, query),
     period,
-    "Todas"
+    "Todas",
   );
 
   const communityControls = (
-    <CommunityControls
-      groups={myGroups}
-      searchGroups={groups}
-      scope={scope}
-      query={query}
-      decade={period.decade}
-      profile={false}
-      canCreate={!!session}
-      onQuery={(val) => {
-        setQuery(val);
-        setSelected(null);
-      }}
-      onScope={chooseScope}
-      onCreate={createGroup}
-      onJoinGroup={joinGroup}
-      onAddToGroup={(groupId) => router.push(`/explorar?action=recordar&groupId=${groupId}`)}
-      onShowInfo={setGroupInfoId}
-    />
+    <>
+      {unavailableGroup && <p role="alert">Este grupo no existe o ya no está disponible.</p>}
+      <CommunityControls
+        groups={myGroups}
+        searchGroups={groups}
+        scope={scope}
+        query={query}
+        decade={period.decade}
+        profile={false}
+        canCreate={!!session}
+        onQuery={(val) => {
+          setQuery(val);
+          setSelected(null);
+        }}
+        onScope={chooseScope}
+        onCreate={createGroup}
+        onJoinGroup={joinGroup}
+        onLeaveGroup={leaveSelectedGroup}
+        onAddToGroup={(groupId) => router.push(`/explorar?action=recordar&groupId=${groupId}`)}
+        onShowInfo={setGroupInfoId}
+      />
+    </>
   );
 
   const activeGroupInfo = groups.find((g) => g.id === groupInfoId);
@@ -329,6 +406,7 @@ function FeedPageContent() {
     <>
       <SocialFeed
         key={session?.usuarioId ?? "guest"}
+        showFeedAd={(scope === "all" || scope === "general") && !query.trim()}
         initialHashtag={initialHashtag}
         active={true}
         onItems={setFeedItems}
@@ -341,18 +419,27 @@ function FeedPageContent() {
         onDelete={(m) => setDeleting(m)}
         onProfile={handleProfile}
         groupIds={groups.map((g) => g.id)}
+        groupNames={Object.fromEntries(groups.map((g) => [g.id, g.name]))}
         suggestedAuthors={[
-          ...feedItems
-            .filter((m) => m.authorId)
-            .map((m) => ({ name: m.author, id: m.authorId! })),
+          ...feedItems.filter((m) => m.authorId).map((m) => ({ name: m.author, id: m.authorId! })),
           ...followers.map((u) => ({ name: u.username, id: u.id })),
         ]}
         groupOpenRequest={groupOpenRequest}
+        groupActions={groups
+          .filter((g) => g.id === scope)
+          .map((group) => (
+            <GroupHeaderActions
+              key={group.id}
+              group={group}
+              canPublish={!!session}
+              onInfo={() => setGroupInfoId(group.id)}
+              onPublish={() => router.push("/explorar?action=recordar&groupId=" + group.id)}
+              onJoin={() => joinGroup(group.id)}
+            />
+          ))}
         community={communityControls}
         groupName={groups.find((g) => g.id === scope)?.name}
-        onRepostCreated={(id) =>
-          setRepostedPublicationIds((curr) => [...new Set([...curr, id])])
-        }
+        onRepostCreated={(id) => setRepostedPublicationIds((curr) => [...new Set([...curr, id])])}
         decade={period.decade}
         memories={filteredMemories}
         following={followingUsernames}
@@ -398,10 +485,18 @@ function FeedPageContent() {
           onDeleted={(groupId) =>
             groupRemoved(
               groupId,
-              "Grupo eliminado. Sus recuerdos se conservaron como publicaciones generales."
+              "Grupo eliminado. Sus recuerdos se conservaron como publicaciones generales.",
             )
           }
-          onLeft={(groupId) => groupRemoved(groupId, "Saliste del grupo.")}
+          onLeft={(groupId) => {
+            setGroups((curr) =>
+              curr.map((g) => (g.id === groupId ? { ...g, isMember: false } : g)),
+            );
+            setGroupMemories([]);
+            setGroupInfoId(null);
+            setScope("groups");
+            setNotice("Saliste del grupo.");
+          }}
           onOpenMember={openMemberProfile}
         />
       )}

@@ -1,30 +1,32 @@
 "use client";
 
-import AccountCategoryToast from '../account/AccountCategoryToast';
-import { useAccountCategory } from '../../context/AccountCategoryContext';
-
-import React, { useRef } from "react";
+import AccountCategoryToast from "../account/AccountCategoryToast";
+import { useAccountCategory } from "../../context/AccountCategoryContext";
+import React, { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2 } from "lucide-react";
+import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, Music2 } from "lucide-react";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
+import { useGuestAccess } from "../auth/GuestAccessProvider";
 import { useFollow } from "../../context/FollowContext";
 import EraTimeline from "../EraTimeline";
 import EraChrome, { EraIcon } from "../EraChrome";
 import Player from "../Player";
 import UserSearch from "../UserSearch";
 import AuthMenu from "../auth/AuthMenu";
-import { useRatings } from "../../context/RatingsContext";
+import ToastViewport from "./ToastViewport";
 import AchievementToast from "../AchievementToast";
 import useAchievementNotifications from "../../hooks/useAchievementNotifications";
 import Notification from "../Notification";
-import type { Period } from '../../types';
+import ExpoGameButton from "./ExpoGameButton";
+import type { Period } from "../../types";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { session } = useAuth();
+  const { session, status } = useAuth();
   const { requireCreation } = useAccountCategory();
+  const { firstMemoryId, ready, canViewMemory, requireAccount } = useGuestAccess();
   const {
     period,
     changePeriod,
@@ -38,17 +40,46 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   } = useEra();
 
   const { followingUsers, toggleFollow } = useFollow();
-  const { notice, setNotice } = useRatings();
   const achievementNotice = useAchievementNotifications(session?.usuarioId ?? null, session?.token);
 
   const mobileOptions = useRef<HTMLDialogElement>(null);
   const mobileOptionsTrigger = useRef<HTMLButtonElement>(null);
+  const detailId = pathname.startsWith("/recuerdo/")
+    ? decodeURIComponent(pathname.slice("/recuerdo/".length).split("/")[0])
+    : null;
+  const guestRestrictedRoute =
+    pathname === "/feed" ||
+    pathname.startsWith("/feed/") ||
+    (!!firstMemoryId &&
+      (pathname === "/perfil" ||
+        pathname.startsWith("/perfil/") ||
+        pathname === "/chat" ||
+        pathname.startsWith("/chat/")));
+  const hideGuestContent =
+    ((status === "loading" || (status === "anonymous" && !ready)) &&
+      (guestRestrictedRoute || !!detailId)) ||
+    (status === "anonymous" &&
+      ready &&
+      (guestRestrictedRoute || (!!detailId && firstMemoryId !== detailId)));
+
+  useEffect(() => {
+    if (!ready || status !== "anonymous") return;
+    if (guestRestrictedRoute) {
+      requireAccount();
+      router.replace("/explorar");
+    } else if (detailId) {
+      if (!canViewMemory(detailId)) router.replace("/explorar");
+    }
+  }, [detailId, guestRestrictedRoute, ready, status, canViewMemory, requireAccount, router]);
 
   function handlePeriodChange(next: Period) {
-    if (pathname.startsWith('/recuerdo/')) {
-      const requestedReturn = new URLSearchParams(window.location.search).get('returnTo');
-      const destination = requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
-        ? requestedReturn : '/feed';
+    if (pathname.startsWith("/recuerdo/")) {
+      const requestedReturn = new URLSearchParams(window.location.search).get("returnTo");
+      const destination = !session
+        ? "/explorar"
+        : requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn)
+          ? requestedReturn
+          : "/feed";
       // La sincronización de la época escribe la URL; navegar después evita que
       // history.replaceState restaure la ruta de detalle sobre el router.push.
       changePeriod(next, () => queueMicrotask(() => router.push(destination)));
@@ -57,18 +88,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     changePeriod(next);
   }
 
-  let currentView: "map" | "feed" | "profile" | "chat" = "map";
+  let currentView: "map" | "feed" | "profile" | "chat" | "game" = "map";
   if (pathname.startsWith("/feed") || pathname.startsWith("/recuerdo")) {
     currentView = "feed";
   } else if (pathname.startsWith("/chat")) {
     currentView = "chat";
   } else if (pathname.startsWith("/perfil")) {
     currentView = "profile";
+  } else if (pathname.startsWith("/juego")) {
+    currentView = "game";
   } else if (pathname.startsWith("/explorar")) {
     currentView = "map";
   }
 
   const handleNavigate = (destination: "map" | "stories" | "facts" | "music") => {
+    if (destination !== "map" && !session && firstMemoryId && !requireAccount()) return;
     if (destination === "music") {
       setMusicOpen(!musicOpen);
       if (window.innerWidth < 900) {
@@ -85,18 +119,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       return;
     }
     if (destination === "stories") {
-      if (window.innerWidth < 900) { setMusicOpen(false); setFactsOpen(false); }
+      if (window.innerWidth < 900) {
+        setMusicOpen(false);
+        setFactsOpen(false);
+      }
       setPanelOpen(!panelOpen);
       return;
     }
     if (destination === "facts") {
-      if (window.innerWidth < 900) { setMusicOpen(false); setPanelOpen(false); }
+      if (window.innerWidth < 900) {
+        setMusicOpen(false);
+        setPanelOpen(false);
+      }
       setFactsOpen(!factsOpen);
       return;
     }
   };
 
   const handleRecordar = () => {
+    if (!session && firstMemoryId && !requireAccount()) return;
     if (!requireCreation()) return;
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));
@@ -115,14 +156,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         period={period}
         onChange={handlePeriodChange}
         action={
-          <button
-            aria-label="Recordar"
-            className="primary-button time-add-memory"
-            onClick={handleRecordar}
-          >
-            <Plus size={16} />
-            <span>Recordar</span>
-          </button>
+          session ? (
+            <button
+              aria-label="Recordar"
+              className="primary-button time-add-memory"
+              onClick={handleRecordar}
+            >
+              <Plus size={16} />
+              <span>Recordar</span>
+            </button>
+          ) : null
         }
       />
 
@@ -133,25 +176,32 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {currentView === "map"
               ? "Explorar"
               : currentView === "feed"
-              ? "Feed"
-              : currentView === "chat"
-              ? "Chat"
-              : "Mi perfil"}
+                ? "Feed"
+                : currentView === "chat"
+                  ? "Chat"
+                  : currentView === "game"
+                    ? "Juego de décadas"
+                    : "Mi perfil"}
           </strong>
         </div>
-        <button
-          className="mobile-add-button"
-          aria-label="Sumar mi recuerdo"
-          onClick={handleRecordar}
-        >
-          <Plus size={23} />
-        </button>
+        {session && currentView !== "game" && (
+          <button
+            className="mobile-add-button"
+            aria-label="Sumar mi recuerdo"
+            onClick={handleRecordar}
+          >
+            <Plus size={23} />
+          </button>
+        )}
       </div>
 
       <button
         ref={mobileOptionsTrigger}
         className="mobile-era-button mobile-map-options"
-        onClick={() => mobileOptions.current?.showModal()}
+        onClick={() => {
+          if (!session && firstMemoryId && !requireAccount()) return;
+          mobileOptions.current?.showModal();
+        }}
         aria-label="Abrir opciones de exploración"
         title="Opciones de exploración"
       >
@@ -203,8 +253,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 {destination === "stories"
                   ? "Recuerdos"
                   : destination === "facts"
-                  ? "Efemérides"
-                  : "Música"}
+                    ? "Efemérides"
+                    : "Música"}
               </span>
             </button>
           ))}
@@ -247,6 +297,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           onClick={() => {
             setPanelOpen(false);
             setFactsOpen(false);
+            if (!session && !requireAccount()) return;
             router.push("/feed");
           }}
         >
@@ -296,7 +347,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         )}
       </nav>
 
-      {children}
+      {currentView === "map" && (
+        <ExpoGameButton
+          decade={period.decade}
+          onClick={() => {
+            setPanelOpen(false);
+            setFactsOpen(false);
+            setMusicOpen(false);
+            router.push("/juego");
+          }}
+        />
+      )}
+
+      {hideGuestContent ? null : children}
 
       <Player
         key={period.decade}
@@ -310,25 +373,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         }}
       />
 
-      {notice && (
-        <div
-          className={`toast${notice === "¡Recuerdo guardado! Ya tiene su lugar en el mapa." ? " memory-saved-notice" : ""}`}
-          role="status"
-          aria-atomic="true"
-        >
-          {notice === "¡Recuerdo guardado! Ya tiene su lugar en el mapa." && (
-            <CircleCheck size={24} aria-hidden="true" />
-          )}
-          <span>{notice}</span>
-          <button
-            className="icon-button"
-            aria-label="Cerrar aviso"
-            onClick={() => setNotice(null)}
-          >
-            <X size={20} />
-          </button>
-        </div>
-      )}
+      <ToastViewport />
 
       <AccountCategoryToast />
 

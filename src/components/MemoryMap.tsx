@@ -1,5 +1,5 @@
 import PinMemoryPreview from "./PinMemoryPreview";
-import type { MapBounds } from '../publicationsApi';
+import type { MapBounds } from "../publicationsApi";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
@@ -30,7 +30,9 @@ function icon(memory?: Memory, selected = false) {
   if (!cached) {
     const symbol = isGroup
       ? '<img src="/groups/community-pin.svg" width="36" height="44" alt="" />'
-      : memory ? symbols[memory.category] : "+";
+      : memory
+        ? symbols[memory.category]
+        : "+";
     cached = L.divIcon({
       className: "memory-marker-wrapper",
       html: `<span class="memory-marker marker-${category} ${isGroup ? "community-marker" : ""} ${selected ? "selected" : ""}">${symbol}</span>`,
@@ -64,9 +66,15 @@ function MapActions({
 }) {
   const reportBounds = () => {
     const b = map.getBounds();
-    const west = b.getWest(), east = b.getEast();
-    const normalize = (value: number) => ((value + 180) % 360 + 360) % 360 - 180;
-    onBoundsChange?.({ minLatitud: Math.max(-90,b.getSouth()), maxLatitud: Math.min(90,b.getNorth()), minLongitud: east-west >= 360 ? -180 : normalize(west), maxLongitud: east-west >= 360 ? 180 : normalize(east) });
+    const west = b.getWest(),
+      east = b.getEast();
+    const normalize = (value: number) => ((((value + 180) % 360) + 360) % 360) - 180;
+    onBoundsChange?.({
+      minLatitud: Math.max(-90, b.getSouth()),
+      maxLatitud: Math.min(90, b.getNorth()),
+      minLongitud: east - west >= 360 ? -180 : normalize(west),
+      maxLongitud: east - west >= 360 ? 180 : normalize(east),
+    });
   };
   const map = useMapEvents({
     moveend: () => reportBounds(),
@@ -74,7 +82,9 @@ function MapActions({
       if (picking) onPick({ lat: e.latlng.lat, lng: e.latlng.lng });
     },
   });
-  useEffect(() => { reportBounds(); }, [map, onBoundsChange]);
+  useEffect(() => {
+    reportBounds();
+  }, [map, onBoundsChange]);
   useEffect(() => {
     const observer = new ResizeObserver(() => {
       if (map.getContainer().clientWidth > 0) map.invalidateSize({ pan: false, animate: false });
@@ -87,40 +97,55 @@ function MapActions({
   selectedRef.current = selected;
   useEffect(() => {
     const fit = () => {
-      if (!fitPoints) {map.setView(center, 4);return;}
+      if (!fitPoints) {
+        map.setView(center, 4);
+        return;
+      }
       const points = JSON.parse(fitPoints) as [number, number][];
-      map.invalidateSize({animate:false});
-      if (points.length) map.fitBounds(L.latLngBounds(points), {padding:[50,50], maxZoom:13, animate:false});
-      else map.setView(center,4);
+      map.invalidateSize({ animate: false });
+      if (points.length)
+        map.fitBounds(L.latLngBounds(points), { padding: [50, 50], maxZoom: 13, animate: false });
+      else map.setView(center, 4);
     };
     fit();
     if (fitPoints === undefined) return;
-    const observer = new ResizeObserver(() => { if (!selectedRef.current) fit(); });
+    const observer = new ResizeObserver(() => {
+      if (!selectedRef.current) fit();
+    });
     observer.observe(map.getContainer());
     return () => observer.disconnect();
   }, [reset, map, fitPoints]);
   useEffect(() => {
     if (active === false) return;
-    if (!selected) { focusedPin.current = null; return; }
+    if (!selected) {
+      focusedPin.current = null;
+      return;
+    }
     const locationKey = `${selected.id}:${selected.lat}:${selected.lng}`;
     if (focusedPin.current === locationKey) return;
     focusedPin.current = locationKey;
     if (selected) {
-      const mobile = matchMedia('(max-width: 899px)').matches;
+      const mobile = matchMedia("(max-width: 899px)").matches;
       const zoom = mobile ? 12 : Math.max(map.getZoom(), 14);
       const size = map.getSize();
       const target = mobile
-        ? map.unproject(map.project([selected.lat, selected.lng], zoom).add([size.x * .24, size.y * .07]), zoom)
+        ? map.unproject(
+            map.project([selected.lat, selected.lng], zoom).add([size.x * 0.24, size.y * 0.07]),
+            zoom,
+          )
         : L.latLng(selected.lat, selected.lng);
       map.flyTo(target, zoom, {
-        animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .7,
+        animate: !matchMedia("(prefers-reduced-motion: reduce)").matches,
+        duration: 0.7,
       });
     }
   }, [selected, active, map]);
   useEffect(() => {
-    if (searchTarget) map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
-      animate: !matchMedia("(prefers-reduced-motion: reduce)").matches, duration: .8,
-    });
+    if (searchTarget)
+      map.flyTo([searchTarget.lat, searchTarget.lng], 16, {
+        animate: !matchMedia("(prefers-reduced-motion: reduce)").matches,
+        duration: 0.8,
+      });
   }, [searchTarget, map]);
   useEffect(() => {
     map.getContainer().style.cursor = picking ? "crosshair" : "";
@@ -268,10 +293,7 @@ export default function MemoryMap({
                 add: (e) => {
                   e.target
                     .getElement()
-                    ?.setAttribute(
-                      "aria-label",
-                      `${m.title}, ${m.year}, ${m.category}`,
-                    );
+                    ?.setAttribute("aria-label", `${m.title}, ${m.year}, ${m.category}`);
                 },
                 click: () => {
                   if (picking) onPick({ lat: m.lat, lng: m.lng });
@@ -279,26 +301,55 @@ export default function MemoryMap({
                 },
               }}
             >
-              <Tooltip direction="top">{m.title} · {m.year}</Tooltip>
+              <Tooltip direction="top">
+                {m.title} · {m.year}
+              </Tooltip>
             </Marker>
           ))}
           {canShowPreview && (
-            <CircleMarker key={selected.id} center={[selected.lat,selected.lng]} radius={0} opacity={0} fillOpacity={0} interactive={false}>
-              <Tooltip position={[selected.lat,selected.lng]} direction="right" offset={[25,-20]} permanent interactive className="pin-message-preview">
+            <CircleMarker
+              key={selected.id}
+              center={[selected.lat, selected.lng]}
+              radius={0}
+              opacity={0}
+              fillOpacity={0}
+              interactive={false}
+            >
+              <Tooltip
+                position={[selected.lat, selected.lng]}
+                direction="right"
+                offset={[25, -20]}
+                permanent
+                interactive
+                className="pin-message-preview"
+              >
                 <PinMemoryPreview
                   memory={selected}
                   showRelations={showRelations}
                   onClose={onClosePreview}
                   onSelect={onSelectRelated ?? onSelect}
                   onOpen={onOpen}
-                  onMoment={onMoment ? id => onMoment(id, selected) : undefined}
+                  onMoment={onMoment ? (id) => onMoment(id, selected) : undefined}
                 />
               </Tooltip>
             </CircleMarker>
           )}
-          {searchTarget && <Marker position={[searchTarget.lat, searchTarget.lng]} icon={icon()} draggable title="Arrastrá para ajustar la ubicación" eventHandlers={{ dragend: event => {
-            const point = event.target.getLatLng(); onSearchMove?.({ ...searchTarget, lat: point.lat, lng: point.lng });
-          }}}><Tooltip>Ubicación encontrada · Arrastrá para ajustar</Tooltip></Marker>}
+          {searchTarget && (
+            <Marker
+              position={[searchTarget.lat, searchTarget.lng]}
+              icon={icon()}
+              draggable
+              title="Arrastrá para ajustar la ubicación"
+              eventHandlers={{
+                dragend: (event) => {
+                  const point = event.target.getLatLng();
+                  onSearchMove?.({ ...searchTarget, lat: point.lat, lng: point.lng });
+                },
+              }}
+            >
+              <Tooltip>Ubicación encontrada · Arrastrá para ajustar</Tooltip>
+            </Marker>
+          )}
           {draft && (
             <Marker
               position={[draft.lat, draft.lng]}
@@ -310,9 +361,12 @@ export default function MemoryMap({
         <button
           className="map-reset"
           onClick={() => setReset((r) => r + 1)}
-          aria-label={fitMemories ? "Encuadrar todos los recuerdos" : "Volver a la vista de Argentina"}
+          aria-label={
+            fitMemories ? "Encuadrar todos los recuerdos" : "Volver a la vista de Argentina"
+          }
         >
-          <LocateFixed size={18} /> <span>{fitMemories ? "Ver todos los recuerdos" : "Ver Argentina"}</span>
+          <LocateFixed size={18} />{" "}
+          <span>{fitMemories ? "Ver todos los recuerdos" : "Ver Argentina"}</span>
         </button>
         {picking && (
           <div className="map-notice picking" role="status">
@@ -324,8 +378,8 @@ export default function MemoryMap({
         {tileError && (
           <div className="map-notice map-error" role="status">
             <span>
-              Parte del mapa no pudo cargar. Revisá tu conexión; los recuerdos
-              siguen disponibles en la lista.
+              Parte del mapa no pudo cargar. Revisá tu conexión; los recuerdos siguen disponibles en
+              la lista.
             </span>
             <button
               onClick={() => {

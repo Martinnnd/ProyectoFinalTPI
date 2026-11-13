@@ -11,6 +11,7 @@ import MemoryForm from "../MemoryForm";
 import { useAccountCategory } from "../../context/AccountCategoryContext";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
+import { useGuestAccess } from "../auth/GuestAccessProvider";
 import {
   categories,
   filterMemories,
@@ -27,12 +28,14 @@ import {
 } from "../../publicationsApi";
 import type { Point } from "../MemoryMap";
 import { availableDecades } from "../../eras/registry";
-import { useRatings } from "../../context/RatingsContext";
-import useFeedPrefetch from '../../hooks/useFeedPrefetch';
+import { useNotice } from "../../context/NoticeProvider";
+import useFeedPrefetch from "../../hooks/useFeedPrefetch";
 
 function ExploreContent() {
   const [mobileCategorySlot, setMobileCategorySlot] = useState<HTMLElement | null>(null);
-  useEffect(() => { setMobileCategorySlot(document.getElementById("mobile-category-slot")); }, []);
+  useEffect(() => {
+    setMobileCategorySlot(document.getElementById("mobile-category-slot"));
+  }, []);
   const router = useRouter();
   const searchParams = useSearchParams();
   const recuerdoParam = searchParams.get("recuerdo");
@@ -53,14 +56,20 @@ function ExploreContent() {
 
   const { session, status } = useAuth();
   const { requireCreation } = useAccountCategory();
-  const { setNotice } = useRatings();
+  const {
+    canViewMemory,
+    ready: guestAccessReady,
+    firstMemoryId,
+    requireAccount,
+  } = useGuestAccess();
+  const setNotice = useNotice((state) => state.setNotice);
 
   const [category, setCategory] = useState<Category | "Todas">("Todas");
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const reportBounds = useCallback(
     (next: MapBounds) =>
       setBounds((current) => (JSON.stringify(current) === JSON.stringify(next) ? current : next)),
-    []
+    [],
   );
 
   const [remotePins, setRemotePins] = useState<Memory[]>([]);
@@ -69,6 +78,22 @@ function ExploreContent() {
   const [selectedId, setSelectedId] = useState<string | null>(recuerdoParam);
   const [remoteSelected, setRemoteSelected] = useState<Memory | null>(null);
   const selectedSeed = useRef<Memory | null>(null);
+
+  useEffect(() => {
+    if (!recuerdoParam || status === "loading" || !guestAccessReady) return;
+    if (!canViewMemory(recuerdoParam)) {
+      setSelectedId(null);
+      router.replace("/explorar", { scroll: false });
+    }
+  }, [recuerdoParam, status, guestAccessReady, canViewMemory, router]);
+
+  useEffect(() => {
+    if (actionParam !== "recordar" || status !== "anonymous" || !firstMemoryId) return;
+    setPicking(false);
+    setDraft(null);
+    requireAccount();
+    router.replace("/explorar", { scroll: false });
+  }, [actionParam, status, firstMemoryId, requireAccount, router]);
 
   const [picking, setPicking] = useState(actionParam === "recordar");
   const [draft, setDraft] = useState<Point | null>(null);
@@ -117,7 +142,9 @@ function ExploreContent() {
             setMapDataReady(true);
           }
         })
-        .catch(() => { if (!controller.signal.aborted) setMapDataReady(true); });
+        .catch(() => {
+          if (!controller.signal.aborted) setMapDataReady(true);
+        });
     }, 300);
     return () => {
       clearTimeout(timer);
@@ -132,7 +159,10 @@ function ExploreContent() {
       return;
     }
     if (status === "loading") return;
-    const pin = [selectedSeed.current, remoteSelected, ...remotePins].find((m) => m?.id === selectedId);
+    if (!guestAccessReady || !canViewMemory(selectedId)) return;
+    const pin = [selectedSeed.current, remoteSelected, ...remotePins].find(
+      (m) => m?.id === selectedId,
+    );
     const controller = new AbortController();
 
     getPublication(pin ?? selectedId, true, controller.signal)
@@ -150,17 +180,18 @@ function ExploreContent() {
       });
 
     return () => controller.abort();
-  }, [selectedId, mapRevision, status]);
+  }, [selectedId, mapRevision, status, guestAccessReady, canViewMemory]);
 
   const memories = filterMemories(remotePins, period, category);
   const selected =
     remoteSelected?.id === selectedId
       ? remoteSelected
       : selectedSeed.current?.id === selectedId
-      ? selectedSeed.current
-      : memories.find((m) => m.id === selectedId) ?? null;
+        ? selectedSeed.current
+        : (memories.find((m) => m.id === selectedId) ?? null);
 
   function select(memory: Memory) {
+    if (!canViewMemory(memory.id)) return;
     selectedSeed.current = memory;
     setRemoteSelected(memory);
     setSelectedId(memory.id);
@@ -179,6 +210,7 @@ function ExploreContent() {
   }
 
   function selectRelatedMemory(memory: Memory) {
+    if (!canViewMemory(memory.id)) return;
     const decade = (Math.floor(memory.year / 10) * 10) as Decade;
     if (!availableDecades.includes(decade)) {
       setNotice("Este recuerdo pertenece a una década que todavía no está disponible en el mapa.");
@@ -197,10 +229,12 @@ function ExploreContent() {
   }
 
   function openPublication(memory: Memory) {
+    if (!canViewMemory(memory.id)) return;
     router.push(`/recuerdo/${memory.id}`);
   }
 
   function startAdding() {
+    if (!session && firstMemoryId && !requireAccount()) return;
     setPicking(true);
     setSelectedId(null);
     setPanelOpen(false);
@@ -213,6 +247,7 @@ function ExploreContent() {
     if (actionParam) {
       const params = new URLSearchParams(searchParams.toString());
       params.delete("action");
+      params.delete("groupId");
       const qs = params.toString();
       router.replace(qs ? `/explorar?${qs}` : "/explorar", { scroll: false });
     }
@@ -221,15 +256,28 @@ function ExploreContent() {
   async function saveCreation(memory: Memory) {
     try {
       let res;
-      if (groupIdParam) {
+      if (memory.groupId) {
         const { createGroupMemory } = await import("../../groupsApi");
-        res = await createGroupMemory(groupIdParam, memory);
+        res = await createGroupMemory(memory.groupId, memory);
       } else {
         const { crearPublicacion } = await import("../../api");
         res = await crearPublicacion(memory, undefined, userLocation);
       }
       if (res && res.id) {
-        memory = { ...memory, id: res.id.toString(), source: "backend", groupId: groupIdParam ?? undefined };
+        memory = { ...memory, id: res.id.toString(), source: "backend" };
+        if (memory.taggedUsers && memory.taggedUsers.length > 0) {
+          try {
+            const { tagUsersInPublication } = await import("../../publicationsApi");
+            const userIdsToTag = memory.taggedUsers
+              .filter((u) => (session?.usuarioId ? u.id !== session.usuarioId : true))
+              .map((u) => u.id);
+            if (userIdsToTag.length > 0) {
+              await tagUsersInPublication(res.id, userIdsToTag);
+            }
+          } catch {
+            // El recuerdo se guardó con éxito en el mapa aunque las etiquetas no se hayan podido sincronizar
+          }
+        }
       }
       setRemotePins((curr) => [memory, ...curr.filter((m) => m.id !== memory.id)]);
       setMapRevision((r) => r + 1);
@@ -238,6 +286,7 @@ function ExploreContent() {
       if (actionParam) {
         const params = new URLSearchParams(searchParams.toString());
         params.delete("action");
+        params.delete("groupId");
         const qs = params.toString();
         router.replace(qs ? `/explorar?${qs}` : "/explorar", { scroll: false });
       }
@@ -251,12 +300,24 @@ function ExploreContent() {
 
   return (
     <>
-      {mobileCategorySlot && createPortal(
-        <label className="mobile-category">Categoría
-          <select value={category} onChange={event => { setCategory(event.target.value as Category | "Todas"); setSelectedId(null); }}>
-            {(["Todas", ...categories] as const).map(value => <option key={value}>{value}</option>)}
-          </select>
-        </label>, mobileCategorySlot)}
+      {mobileCategorySlot &&
+        createPortal(
+          <label className="mobile-category">
+            Categoría
+            <select
+              value={category}
+              onChange={(event) => {
+                setCategory(event.target.value as Category | "Todas");
+                setSelectedId(null);
+              }}
+            >
+              {(["Todas", ...categories] as const).map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          </label>,
+          mobileCategorySlot,
+        )}
       <a className="skip-link" href="#explore">
         Saltar al mapa
       </a>
@@ -318,7 +379,11 @@ function ExploreContent() {
         <div className="stories-drawer stories-index">
           <div className="drawer-heading">
             <span className="eyebrow">{theme.storiesTitle}</span>
-            <button className="icon-button" aria-label="Cerrar historias" onClick={() => setPanelOpen(false)}>
+            <button
+              className="icon-button"
+              aria-label="Cerrar historias"
+              onClick={() => setPanelOpen(false)}
+            >
               <X size={19} />
             </button>
           </div>
@@ -327,13 +392,18 @@ function ExploreContent() {
       )}
 
       {factsOpen && !picking && !draft && (
-        <EraFacts key={`${period.decade}-${period.year}`} period={period} onClose={() => setFactsOpen(false)} />
+        <EraFacts
+          key={`${period.decade}-${period.year}`}
+          period={period}
+          onClose={() => setFactsOpen(false)}
+        />
       )}
 
       {draft && (
         <MemoryForm
           point={draft}
           defaultHashtags={tagParam ? [tagParam] : undefined}
+          groupId={groupIdParam ?? undefined}
           decade={period.decade}
           onCancel={cancelCreation}
           onSave={saveCreation}
