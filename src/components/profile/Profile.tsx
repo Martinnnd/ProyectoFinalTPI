@@ -1,3 +1,5 @@
+import AccountCategoryStatus from '../account/AccountCategoryStatus';
+import { useAccountCategory } from '../../context/AccountCategoryContext';
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { userTiers } from "../../data";
@@ -87,6 +89,7 @@ export default function Profile({
   onEditProfile?: () => void;
 }) {
   const isOwnProfile = isOwnProfileProp ?? !author;
+  const { account, requireCreation } = useAccountCategory();
   const album = useRef<HTMLElement>(null);
   const mapDialog = useRef<HTMLDialogElement>(null);
   const mapReturnFocus = useRef<HTMLElement | null>(null);
@@ -107,8 +110,11 @@ export default function Profile({
 
   const ownMemories = useMemo(() => allMemories.filter((m) => !m.repost), [allMemories]);
 
-  const userCategory = (reputation ?? "Errante") as UserCategory;
+  const userCategory = (isOwnProfile && account ? account.categoria.nombre : reputation ?? "Errante") as UserCategory;
   const tiers = useMemo<DescribedTier[]>(() => {
+    if (userCategory === 'Marca') return [{
+      name: 'Marca', rule: { kind: 'subscription' }, requirement: 'Cuenta de marca con beneficios propios.', state: 'current',
+    }];
     const current = userTiers.findIndex(tier => tier.name === userCategory);
     return userTiers.map((tier, index) => ({
       ...tier, state: index === current ? 'current' : index < current ? 'reached' : 'locked',
@@ -218,6 +224,7 @@ export default function Profile({
           onEditProfile={onEditProfile}
           onToggleFollowUser={onFollow}
         />
+        {isOwnProfile && <AccountCategoryStatus onCreate={() => { if (requireCreation()) onAdd(); }} />}
         <ProfileShortcuts
           author={author}
           presentation={presentation}
@@ -261,7 +268,7 @@ export default function Profile({
             onDelete={onDelete}
             onOpen={onOpen}
             onSelectOnMap={(memory) => { onSelect(memory); openMap(); }}
-            onAdd={onAdd}
+            onAdd={() => { if (requireCreation()) onAdd(); }}
           />
         )}
         <ProfileDialogs

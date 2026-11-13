@@ -456,3 +456,9 @@
   .era-1970 .achievement-toast,
   .era-1970.view-map .stories-drawer { right:36px; }
 }
+
+/* Categorías de cuenta */
+
+.era-1970 .account-notice { border-radius:2px; border:2px solid var(--line); }
+.era-1970 .account-notice-titlebar { border-bottom:3px double var(--line); text-transform:uppercase; letter-spacing:.08em; background:var(--surface); }
+.era-1970 .account-notice-content strong { font-family:Georgia,'Times New Roman',serif; }

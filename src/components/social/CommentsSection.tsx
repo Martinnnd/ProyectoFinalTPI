@@ -1,3 +1,5 @@
+import { LockKeyhole } from 'lucide-react';
+import { useAccountCategory } from '../../context/AccountCategoryContext';
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import type {
@@ -27,6 +29,8 @@ export default function CommentsSection({
   onDeleteComment: (commentId: string) => void | Promise<void>;
 }) {
   const { isAuthenticated } = useAuth();
+  const { hasPermission, requirePermission, loading, error: categoryError } = useAccountCategory();
+  const canComment = hasPermission('Comentar');
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -64,6 +68,8 @@ export default function CommentsSection({
                   comment={comment}
                   comments={comments}
                   interactive={isAuthenticated}
+                  canReply={canComment}
+                  onDeniedReply={() => requirePermission('Comentar')}
                   onReply={(parentId, text) =>
                     onAddComment(memoryId, text, parentId)
                   }
@@ -75,10 +81,11 @@ export default function CommentsSection({
                 />
               ))}
           </div>
-          {isAuthenticated ? <form
+          {isAuthenticated && canComment ? <form
             onSubmit={async (event) => {
               event.preventDefault();
               if (!draft.trim() || sending) return;
+              if (!requirePermission('Comentar')) return;
               setSending(true);
               setError("");
               try {
@@ -107,7 +114,10 @@ export default function CommentsSection({
               {sending ? "Enviando…" : "Comentar"}
             </button>
             {error && <p role="alert">{error}</p>}
-          </form> : <p className="comments-auth-required"><Link href="/auth/login?returnTo=/explorar">Iniciá sesión</Link> para comentar o reaccionar.</p>}
+          </form> : isAuthenticated ? <p className="account-permission-note" role="status">
+            <LockKeyhole size={17} aria-hidden="true" />
+            {loading ? 'Consultando tus permisos…' : categoryError || <>Publicá tu primer recuerdo para habilitar comentarios y respuestas. <Link href="/perfil">Ver mi categoría</Link></>}
+          </p> : <p className="comments-auth-required"><Link href="/auth/login?returnTo=/explorar">Iniciá sesión</Link> para comentar o reaccionar.</p>}
         </>
       )}
     </section>

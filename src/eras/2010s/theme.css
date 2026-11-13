@@ -144,3 +144,9 @@
   .era-2010 .profile-device-bottom { min-height:36px; }
   .era-2010 .profile-device-knob { width:20px; height:20px; }
 }
+
+/* Categorías de cuenta */
+
+.era-2010 .account-notice-titlebar { background:var(--surface); padding-top:10px; border-bottom:2px solid var(--accent); }
+.era-2010 .account-notice-icon { border-radius:50%; }
+.era-2010 .account-category-badge { background:var(--soft); padding:5px 10px; border-radius:14px; }

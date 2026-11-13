@@ -9,6 +9,8 @@ export const categories = [
 ] as const;
 export type Category = (typeof categories)[number];
 export type Decade = 1970 | 1980 | 1990 | 2000 | 2010 | 2020;
+export type MemoryAttachment = { kind: "image" | "video" | "youtube"; url: string };
+
 export interface Memory {
   id: string;
   title: string;
@@ -37,6 +39,7 @@ export interface Memory {
   groupId?: string;
   image?: string;
   imageCaption?: string;
+  attachments?: MemoryAttachment[];
   media?: { kind: "image" | "video" | "youtube"; url: string };
   music?: { spotifyId: string; title: string; artist: string };
   reference?: string;
@@ -53,7 +56,7 @@ export interface Period {
   decade: Decade;
   year: number | null;
 }
-export type UserCategory = "Errante" | "Nostálgico" | "Aedo" | "Mnemosine";
+export type UserCategory = "Errante" | "Nostálgico" | "Aedo" | "Mnemosine" | "Marca";
 /** Each tier is unlocked by a different kind of evidence, not only by a count. */
 export type TierRule =
   | { kind: "memories"; min: number }

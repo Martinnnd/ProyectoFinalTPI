@@ -1,5 +1,8 @@
 "use client";
 
+import AccountCategoryToast from '../account/AccountCategoryToast';
+import { useAccountCategory } from '../../context/AccountCategoryContext';
+
 import React, { useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, CircleCheck, Music2 } from "lucide-react";
@@ -21,6 +24,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { session } = useAuth();
+  const { requireCreation } = useAccountCategory();
   const {
     period,
     changePeriod,
@@ -93,6 +97,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   const handleRecordar = () => {
+    if (!requireCreation()) return;
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("nostalgiar:start-recordar"));
     }
@@ -324,6 +329,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </button>
         </div>
       )}
+
+      <AccountCategoryToast />
 
       {achievementNotice.achievement && (
         <AchievementToast

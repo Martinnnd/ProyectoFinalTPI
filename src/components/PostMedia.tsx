@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import type { Memory } from '../types';
+import { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getMemoryAttachments } from '../publicationMedia';
+import type { Memory, MemoryAttachment } from '../types';
 import { youtubeId, safeMediaUrl, normalizeAttachment } from '../media';
 import RetroMediaPlaceholder from './RetroMediaPlaceholder';
 
@@ -36,24 +38,28 @@ export default function PostMedia({
   memory: Memory;
   showFallbackWhenEmpty?: boolean;
 }) {
+  const attachments = getMemoryAttachments(memory);
+  const [selected, setSelected] = useState(0);
+  useEffect(() => { setSelected(0); }, [memory.id, attachments.length]);
+  if (attachments.length === 0) return showFallbackWhenEmpty
+    ? <RetroMediaPlaceholder year={memory.year} title={memory.title} category={memory.category} failed={false} /> : null;
+  const current = Math.min(selected, attachments.length - 1);
+  if (attachments.length === 1) return <AttachmentContent memory={memory} media={attachments[0]} />;
+  return (
+    <section className="post-media-gallery" aria-roledescription="carrusel" aria-label={'Adjuntos de ' + memory.title}
+      onClick={event => event.stopPropagation()}>
+      <AttachmentContent key={current} memory={memory} media={attachments[current]} />
+      <div className="post-media-gallery-nav">
+        <button type="button" aria-label="Adjunto anterior" disabled={current === 0} onClick={() => setSelected(current - 1)}><ChevronLeft size={19} /></button>
+        <span role="status" aria-live="polite">Adjunto {current + 1} de {attachments.length}</span>
+        <button type="button" aria-label="Siguiente adjunto" disabled={current === attachments.length - 1} onClick={() => setSelected(current + 1)}><ChevronRight size={19} /></button>
+      </div>
+    </section>
+  );
+}
+
+function AttachmentContent({ memory, media }: { memory: Memory; media: MemoryAttachment }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const stored = memory.media ?? (memory.image ? { kind: 'image' as const, url: memory.image } : undefined);
-  const media = stored ? normalizeAttachment(stored) : undefined;
-
-  if (!media) {
-    if (showFallbackWhenEmpty) {
-      return (
-        <RetroMediaPlaceholder
-          year={memory.year}
-          title={memory.title}
-          category={memory.category}
-          failed={false}
-        />
-      );
-    }
-    return null;
-  }
-
   if (media.kind === 'youtube') {
     const id = youtubeId(media.url);
     return id ? (

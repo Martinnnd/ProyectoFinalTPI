@@ -21,6 +21,8 @@ export type Publication = {
   fecha: string;
   fechaCreacion?: string;
   categoria: number | string;
+  adjuntos?: { url: string; tipo: number | string; orden: number }[];
+  musica?: { spotifyId: string; titulo: string; artista: string } | null;
   urlMultimedia: string;
   tipoMultimedia: number | string;
   autor: { id: number; username: string };
@@ -66,8 +68,14 @@ export async function getMapPublications(bounds: MapBounds, period: Period, sele
   return { hayMas: result.hayMas, memories: result.pines.map((pin): Memory => ({ id: String(pin.id), title: 'Recuerdo', description: '', author: '', place: '', year, category: category(pin.categoria), lat: pin.latitud, lng: pin.longitud, source: 'backend' })) };
 }
 export function toMemory(data: Publication, pin: Memory): Memory {
-  const url = data.urlMultimedia ? new URL(data.urlMultimedia, API_BASE_URL).href : '';
-  const video = data.tipoMultimedia === 1 || data.tipoMultimedia === 'Video';
+  const attachments = data.adjuntos?.slice().sort((a, b) => a.orden - b.orden).map(attachment => {
+    const url = new URL(attachment.url, API_BASE_URL).href;
+    const kind = youtubeId(url) ? 'youtube' as const
+      : attachment.tipo === 1 || attachment.tipo === 'Video' ? 'video' as const : 'image' as const;
+    return { kind, url };
+  });
+  const url = data.urlMultimedia ? new URL(data.urlMultimedia, API_BASE_URL).href : attachments?.[0]?.url ?? '';
+  const video = data.tipoMultimedia === 1 || data.tipoMultimedia === 'Video' || (!data.urlMultimedia && attachments?.[0]?.kind !== 'image' && Boolean(attachments?.length));
 
   let repost: Memory['repost'] = undefined;
   let author = data.autor?.username ?? '';
@@ -127,6 +135,8 @@ export function toMemory(data: Publication, pin: Memory): Memory {
     lat: data.lugar?.latitud ?? pin.lat,
     lng: data.lugar?.longitud ?? pin.lng,
     groupId: data.grupo ? String(data.grupo.id) : pin.groupId,
+    attachments: attachments?.length ? attachments : undefined,
+    music: data.musica ? { spotifyId: data.musica.spotifyId, title: data.musica.titulo, artist: data.musica.artista } : undefined,
     image: url && !video && !youtubeId(url) ? url : undefined,
     media: url && (video || youtubeId(url)) ? { kind: youtubeId(url) ? 'youtube' : 'video', url } : undefined
   };

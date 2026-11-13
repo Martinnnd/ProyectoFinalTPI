@@ -1134,3 +1134,9 @@
 
 .era-2000 .place-search-panel { border:1px solid #7faccd; border-radius:10px; box-shadow:0 8px 24px #17385840; }
 .era-2000 .place-search-panel header { background:linear-gradient(#69bafa,#1460b1); color:white; text-shadow:0 1px #10477c; }
+
+/* Categorías de cuenta */
+
+.era-2000 .account-notice { border-color:#547fae; }
+.era-2000 .account-notice-titlebar { background:linear-gradient(#68a9f0,#2b70bd); color:white; border-bottom-color:#22578e; text-shadow:0 1px #17416c; }
+.era-2000 .account-category-badge { border:1px solid #aac7e6; border-radius:12px; padding:3px 9px; background:linear-gradient(#fff,#e2effc); }

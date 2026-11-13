@@ -12,6 +12,8 @@ export default function CommentItem({
   comment,
   comments,
   interactive,
+  canReply = interactive,
+  onDeniedReply,
   onReply,
   onReaction,
   onLoadReplies,
@@ -21,6 +23,8 @@ export default function CommentItem({
   comment: MemoryComment;
   comments: MemoryComment[];
   interactive: boolean;
+  canReply?: boolean;
+  onDeniedReply?: () => void;
   onReply: (parentId: string, text: string) => void | Promise<void>;
   onReaction: (commentId: string, reaction: CommentReaction) => void | Promise<void>;
   onLoadReplies: (commentId: string) => void | Promise<void>;
@@ -124,7 +128,7 @@ export default function CommentItem({
               {interactive && (
                 <div className="comment-reaction-controls" ref={controls}>
                   <button type="button" className="comment-reply-button" aria-expanded={replyOpen}
-                    onClick={() => setReplyOpen((value) => !value)}>Responder</button>
+                    onClick={() => { if (!canReply) { onDeniedReply?.(); return; } setReplyOpen((value) => !value); }}>Responder</button>
                   <button type="button" className="comment-react-button" aria-label="Reaccionar al comentario"
                     aria-haspopup="true" aria-expanded={pickerOpen}
                     onClick={() => setPickerOpen((value) => !value)}>
@@ -163,7 +167,7 @@ export default function CommentItem({
             </div>
           )}
           {actionError && <p className="comment-action-error" role="alert">{actionError}</p>}
-          {interactive && !comment.deleted && replyOpen && (
+          {interactive && canReply && !comment.deleted && replyOpen && (
             <form className="comment-reply-form" onSubmit={async (event) => {
               event.preventDefault();
               if (!replyDraft.trim() || replySending) return;
@@ -198,7 +202,7 @@ export default function CommentItem({
           {repliesExpanded && replies.length > 0 && (
             <div className={`comment-replies${depth >= 2 ? " is-depth-capped" : ""}`}>
               {replies.map((reply) => (
-                <CommentItem key={reply.id} comment={reply} comments={comments} interactive={interactive}
+                <CommentItem key={reply.id} comment={reply} comments={comments} interactive={interactive} canReply={canReply} onDeniedReply={onDeniedReply}
                   onReply={onReply} onReaction={onReaction} onLoadReplies={onLoadReplies}
                   onDelete={onDelete} depth={depth + 1} />
               ))}

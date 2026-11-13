@@ -1,3 +1,5 @@
+import { AccountCategoryProvider } from '../../context/AccountCategoryContext';
+import '../../components/account/accountCategory.css';
 import type { Metadata } from "next";
 import "leaflet/dist/leaflet.css";
 import "../../styles.css";
@@ -36,11 +38,13 @@ export const metadata: Metadata = {
 export default function MainAppLayout({ children }: { children: React.ReactNode }) {
   return (
     <EraProvider>
+      <AccountCategoryProvider>
       <RatingsProvider>
         <FollowProvider>
           <AppShell>{children}</AppShell>
         </FollowProvider>
       </RatingsProvider>
+      </AccountCategoryProvider>
     </EraProvider>
   );
 }

@@ -1,3 +1,4 @@
+import { notifyAccountActionDenied } from '../../accountCategoryEvents';
 import { refreshSessionRequest } from "./authApi";
 import { notifyAchievementsChanged } from "../../achievementEvents";
 import { feedCache, queryCache } from '../../sessionQueryCache';
@@ -42,6 +43,8 @@ export async function apiFetch(
   }
 
   if (response.status !== 401 || !allowRefresh) {
+    if (method !== 'GET' && method !== 'HEAD' && /^\/api\/(publicaciones|grupos)(\/|$)/.test(path))
+      await notifyAccountActionDenied(response, session?.usuarioId ?? null);
     if (response.ok && /^(POST|PUT|PATCH|DELETE)$/i.test(init.method ?? "GET") && !path.endsWith('/impresiones') && !path.startsWith('/api/usuario/me/')) {
       notifyAchievementsChanged();
     }

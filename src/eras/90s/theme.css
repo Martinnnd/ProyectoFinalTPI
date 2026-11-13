@@ -1132,3 +1132,10 @@
 .era-1990 .place-search-panel,.era-1990 .place-search-trigger { border-radius:0; border:2px solid; border-color:#fff #555 #555 #fff; background:#c0c0c0; box-shadow:2px 2px 0 #0006; }
 .era-1990 .place-search-panel header { background:#000080; color:white; }
 .era-1990 .place-search-field { border-radius:0; border:2px inset #ddd; }
+
+/* Categorías de cuenta */
+
+.era-1990 .account-notice { padding:3px; border:0; box-shadow:var(--raised),4px 4px 0 #0005; }
+.era-1990 .account-notice-titlebar { background:#000080; color:white; border:0; }
+.era-1990 .account-notice-icon { background:#d4d0c8; box-shadow:var(--sunken); }
+.era-1990 .account-status { box-shadow:var(--raised); }

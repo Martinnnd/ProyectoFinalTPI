@@ -34,17 +34,41 @@ export function buildPublicationFormData(memory: Memory, authorId?: number, gpsU
     formData.append('GpsLongitud', String(gpsUsuario.lng));
   }
 
+  if (memory.attachments && memory.attachments.length > 0) {
+    if (memory.attachments.length > 4) throw new Error('Una publicación admite hasta 4 adjuntos.');
+    memory.attachments.forEach((attachment, index) => {
+      const prefix = 'Adjuntos[' + index + '].';
+      formData.append(prefix + 'Tipo', attachment.kind === 'image' ? 'Foto' : 'Video');
+      appendMedia(formData, attachment.url, prefix + 'Archivo', prefix + 'Url', index);
+    });
+  } else {
   const mediaUrl = memory.image || memory.media?.url || '';
   const isVideo = memory.media && memory.media.kind !== 'image';
   formData.append('TipoMultimedia', isVideo ? 'Video' : 'Foto');
 
-  if (mediaUrl.startsWith('data:')) {
-    const blob = dataUriToBlob(mediaUrl);
-    const extension = blob.type.split('/')[1] || 'jpg';
-    formData.append('Archivo', blob, `upload.${extension}`);
-  } else if (mediaUrl) {
-    formData.append('UrlArchivo', mediaUrl);
+  appendMedia(formData, mediaUrl, 'Archivo', 'UrlArchivo', 0);
+  }
+
+  if (memory.music) {
+    const music = memory.music;
+    if (!/^[A-Za-z0-9]{22}$/.test(music.spotifyId)
+      || !music.title.trim() || music.title.length > 120
+      || !music.artist.trim() || music.artist.length > 120)
+      throw new Error('La música requiere una canción de Spotify, título y artista válidos.');
+    formData.append('Musica.SpotifyId', music.spotifyId);
+    formData.append('Musica.Titulo', music.title.trim());
+    formData.append('Musica.Artista', music.artist.trim());
   }
 
   return formData;
+}
+
+function appendMedia(form: FormData, url: string, fileField: string, urlField: string, index: number) {
+  if (url.startsWith('data:')) {
+    const blob = dataUriToBlob(url);
+    const extension = blob.type.split('/')[1] || 'jpg';
+    form.append(fileField, blob, 'adjunto-' + index + '.' + extension);
+  } else if (url) {
+    form.append(urlField, url);
+  }
 }

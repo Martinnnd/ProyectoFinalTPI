@@ -8,6 +8,7 @@ import MainMap from "../MainMap";
 import SidePanel from "../SidePanel";
 import EraFacts from "../EraFacts";
 import MemoryForm from "../MemoryForm";
+import { useAccountCategory } from "../../context/AccountCategoryContext";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
 import {
@@ -51,6 +52,7 @@ function ExploreContent() {
   } = useEra();
 
   const { session, status } = useAuth();
+  const { requireCreation } = useAccountCategory();
   const { setNotice } = useRatings();
 
   const [category, setCategory] = useState<Category | "Todas">("Todas");
@@ -303,6 +305,7 @@ function ExploreContent() {
           onOpen={openPublication}
           picking={picking}
           onPick={(point) => {
+            if (!requireCreation()) return;
             setDraft(point);
             setPicking(false);
           }}

@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import LikeButton from "./LikeButton";
 
 export default function PostActions({
+  canShare = true,
+  onDeniedShare,
   memoryTitle,
   memoryId,
   memoryYear,
@@ -21,6 +23,8 @@ export default function PostActions({
   onRepost,
   onSave,
 }: {
+  canShare?: boolean;
+  onDeniedShare?: () => void;
   memoryTitle: string;
   memoryId?: string;
   memoryYear?: number;
@@ -107,6 +111,7 @@ export default function PostActions({
               }
               return;
             }
+            if (!canShare && !reposted) { onDeniedShare?.(); return; }
             setRepostOpen((open) => !open);
           }}
         >
@@ -141,6 +146,7 @@ export default function PostActions({
               type="button"
               onClick={() => {
                 setRepostOpen(false);
+                if (!canShare) { onDeniedShare?.(); return; }
                 if (onQuote) onQuote();
                 else onRepost?.();
               }}

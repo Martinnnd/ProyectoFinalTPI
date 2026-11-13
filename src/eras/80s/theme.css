@@ -927,3 +927,9 @@
 @media (max-width:899px) {
   .era-1980 .era-activity-dock { display:none; }
 }
+
+/* Categorías de cuenta */
+
+.era-1980 .account-notice { border:2px solid var(--accent); box-shadow:4px 4px 0 #ff2cbb66,0 0 22px #4ff7f32b; }
+.era-1980 .account-notice-titlebar { color:var(--accent); letter-spacing:.06em; font-family:var(--font-display); }
+.era-1980 .account-category-badge { text-shadow:0 0 9px #4ff7f34d; }

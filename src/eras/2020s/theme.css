@@ -218,3 +218,10 @@
   .app.map-app.era-2020 .device-2020 .mobile-mini-controls .mobile-mini-play { border-color:#80eddc; background:#6eebd6; color:#0b2730; }
   .app.map-app.era-2020 .device-2020 .mobile-mini-seek input { accent-color:#6aedd8; }
 }
+
+/* Categorías de cuenta */
+
+.era-2020 .account-notice { background:color-mix(in srgb,var(--surface) 95%,transparent); backdrop-filter:blur(16px); border-color:#5ce5cc55; }
+.era-2020 .account-notice-titlebar { background:#5ce5cc0c; }
+.era-2020 .account-notice-icon { background:#5ce5cc16; border:1px solid #5ce5cc35; }
+.era-2020 .account-category-badge { background:#5ce5cc12; border:1px solid #5ce5cc3b; padding:5px 10px; border-radius:20px; }

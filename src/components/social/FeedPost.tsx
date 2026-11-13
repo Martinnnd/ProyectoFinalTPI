@@ -1,3 +1,4 @@
+import { useAccountCategory } from '../../context/AccountCategoryContext';
 import { Ellipsis, MapPin, Pencil, Repeat2, Trash2 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import PostMedia, { PostMusic } from "../PostMedia";
@@ -74,10 +75,11 @@ export default function FeedPost({
   onSave: () => void;
   onHashtag: (tag: string) => void;
 }) {
+  const { hasPermission, requirePermission } = useAccountCategory();
   const [commentCount, setCommentCount] = useState(memory.commentCount ?? 0);
   useEffect(() => setCommentCount(memory.commentCount ?? 0), [memory.id, memory.commentCount]);
   const hasInlineImage =
-    memory.image && !memory.media && !youtubeId(memory.image);
+    memory.image && !memory.media && !youtubeId(memory.image) && (memory.attachments?.length ?? 0) <= 1;
   const splitPhoto = Boolean(hasInlineImage && !selected && !memory.repost?.comment);
 
   const isSimpleRepost = Boolean(memory.repost && !memory.repost.comment);
@@ -187,7 +189,7 @@ export default function FeedPost({
             })
           : memory;
         const targetHasInlineImage =
-          targetQuoted.image && !targetQuoted.media && !youtubeId(targetQuoted.image);
+          targetQuoted.image && !targetQuoted.media && !youtubeId(targetQuoted.image) && (targetQuoted.attachments?.length ?? 0) <= 1;
 
         return (
           <div
@@ -248,7 +250,7 @@ export default function FeedPost({
                 />
               )}
             </button>
-            {(targetQuoted.media || (targetQuoted.image && youtubeId(targetQuoted.image))) && (
+            {(targetQuoted.media || (targetQuoted.image && youtubeId(targetQuoted.image)) || (targetQuoted.attachments?.length ?? 0) > 1) && (
               <PostMedia memory={targetQuoted} />
             )}
             {!!memoryHashtags(targetQuoted).length && (
@@ -285,11 +287,13 @@ export default function FeedPost({
         memoryTitle={memory.title}
         value={rating}
         totalPoints={memory.points ?? 0}
-        canRate={canRate}
+        canRate={canRate && hasPermission('PuntuarPublicacion')}
         isOwn={isHeaderAuthorOwn}
-        onRate={onRate}
+        onRate={value => { if (requirePermission('PuntuarPublicacion')) onRate(value); }}
       />
       <PostActions
+        canShare={hasPermission('Compartir')}
+        onDeniedShare={() => requirePermission('Compartir')}
         directUnrepost={directUnrepost}
         memoryTitle={memory.title}
         memoryId={memory.id}

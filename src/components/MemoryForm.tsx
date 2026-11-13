@@ -1,16 +1,19 @@
-import { publicationMediaError, REQUIRE_PUBLICATION_MEDIA } from '../publicationMedia';
-import { youtubeId, spotifyId, safeMediaUrl, normalizeAttachment } from "../media";
+import { getMemoryAttachments, publicationAttachmentsError, REQUIRE_PUBLICATION_MEDIA } from '../publicationMedia';
+import { spotifyId } from "../media";
 import { eraRegistry } from "../eras/registry";
 import { extractHashtags } from "../hashtags";
 import { localToday, memoryDateIso } from "../memoryDate";
-import GooglePhotosPicker from "./GooglePhotosPicker";
+import MemoryAttachmentsField from "./MemoryAttachmentsField";
+import AccountCategoryStatus from "./account/AccountCategoryStatus";
+import { useAccountCategory } from "../context/AccountCategoryContext";
+import { creationRestriction } from "../accountCategories";
 import MemoryDatePicker from "./MemoryDatePicker";
 import DiscardDraftDialog from './DiscardDraftDialog';
 import MemoryEditForm from './MemoryEditForm';
 import type { ComponentProps } from 'react';
   import { useEffect, useRef, useState } from "react";
-  import { X, Save, Loader2, Upload, Images, Link } from "lucide-react";
-  import { categories, type Memory, type Decade } from "../types";
+  import { X, Save, Loader2, LockKeyhole } from "lucide-react";
+  import { categories, type Memory, type MemoryAttachment, type Decade } from "../types";
   import type { Point } from "./MemoryMap";
   function MemoryCreationForm({
     initial,
@@ -46,40 +49,21 @@ import type { ComponentProps } from 'react';
       return [text, missing.map(tag => `#${tag}`).join(" ")].filter(Boolean).join("\n\n");
     });
     const detectedHashtags = extractHashtags(description);
-    const [mediaKind,setMediaKind]=useState<'image'|'video'|'youtube'>(initial?.media?.kind ?? (youtubeId(initial?.image ?? '') ? 'youtube' : 'image'));
-    const [mediaUrl,setMediaUrl]=useState(initial?.media?.url ?? initial?.image ?? '');
-    const [mediaSelected, setMediaSelected] = useState(Boolean(initial?.media?.url ?? initial?.image));
-    const [mediaSource, setMediaSource] = useState<'file' | 'google' | 'link'>(() => {
-      const url = initial?.media?.url ?? initial?.image ?? '';
-      return url && !url.startsWith('data:') ? 'link' : 'file';
-    });
-    const [loadingFile,setLoadingFile]=useState(false);
-    const [googlePhotosBusy, setGooglePhotosBusy] = useState(false);
-    const fileVersion=useRef(0);
-    const [musicChoice,setMusicChoice]=useState(initial?.music ? 'custom' : '');
-    const tracks=eraRegistry[decade].content.music;
-    async function readFile(file:File|undefined){
-      const version=++fileVersion.current;
-      if(!file)return;
-      setLoadingFile(false);
-      if(file.size>2*1024*1024){setError('El archivo supera 2 MB. Usá un enlace para archivos más grandes.');return;}
-      const kind=file.type.startsWith('image/')?'image':file.type.startsWith('video/')?'video':null;
-      if(!kind){setError('Elegí una foto o video compatible.');return;}
-      setLoadingFile(true);setError('');
-      await new Promise<void>(resolve => {
-        const reader=new FileReader();
-        reader.onload=()=>{if(version===fileVersion.current){dirty.current=true;setMediaKind(kind);setMediaUrl(String(reader.result));setMediaSelected(true);setLoadingFile(false);}resolve();};
-        reader.onerror=()=>{if(version===fileVersion.current){setError('No se pudo leer el archivo.');setLoadingFile(false);}resolve();};
-        reader.readAsDataURL(file);
-      });
-    }
+    const { account, hasPermission, refresh } = useAccountCategory();
+    const [attachments, setAttachments] = useState<MemoryAttachment[]>(() => initial ? getMemoryAttachments(initial) : []);
+    const [mediaBusy, setMediaBusy] = useState(false);
+    const [pendingLink, setPendingLink] = useState(false);
+    const [musicChoice, setMusicChoice] = useState(initial?.music ? 'custom' : '');
+    const tracks = eraRegistry[decade].content.music;
+    const canAddMusic = hasPermission('AgregarMusicaAPublicacion');
+    const canSuggestMusic = hasPermission('SugerirMusica');
     const [error, setError] = useState("");
+    useEffect(() => { void refresh(); }, [refresh]);
     useEffect(() => {
       const previous = document.activeElement as HTMLElement | null;
       dialog.current?.showModal();
       stepHeading.current?.focus();
       return () => {
-        fileVersion.current++;
         previous?.focus();
       };
     }, []);
@@ -88,8 +72,9 @@ import type { ComponentProps } from 'react';
     }, [step]);
     function validateStep(form: HTMLFormElement, index: number): boolean {
       if (index === 0) {
-        if (loadingFile || googlePhotosBusy) { setError("Esperá a que termine de cargar el archivo."); return false; }
-        const mediaError = publicationMediaError(mediaUrl, mediaKind);
+        if (mediaBusy) { setError("Esperá a que termine de cargar el archivo."); return false; }
+        if (pendingLink) { setError("Agregá el enlace al recuerdo o borrá el campo antes de continuar."); return false; }
+        const mediaError = publicationAttachmentsError(attachments, account?.maximoAdjuntos ?? 1);
         if (mediaError) { setError(mediaError); return false; }
       }
       const fields = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[data-form-step="${index}"] input, [data-form-step="${index}"] textarea, [data-form-step="${index}"] select`);
@@ -104,7 +89,7 @@ import type { ComponentProps } from 'react';
     const [saving, setSaving] = useState(false);
     async function submit(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
-      if (saving || googlePhotosBusy || loadingFile) return;
+      if (saving || mediaBusy) return;
       if (!validateStep(event.currentTarget, step)) return;
       if (step < steps.length - 1) { setStep(step + 1); return; }
       for (let index = 0; index < steps.length; index++) {
@@ -129,9 +114,9 @@ import type { ComponentProps } from 'react';
         setError("Completá los campos y elegí una fecha válida entre 1970 y hoy.");
         return;
       }
-      if(loadingFile){setError('Esperá a que termine de cargar el archivo.');return;}
-      const mediaError = publicationMediaError(mediaUrl, mediaKind);
-      if (mediaError) { setError(mediaError); return; }
+      const restriction = creationRestriction(account);
+      if (restriction) { setError(restriction); return; }
+      if (musicChoice && !canAddMusic) { setError("La música en publicaciones se habilita desde Aedo."); setStep(3); return; }
       let music:Memory['music'];
       if(musicChoice==='custom'){
         const id=spotifyId(String(data.get('spotifyUrl')));
@@ -148,8 +133,9 @@ import type { ComponentProps } from 'react';
         ...initial,
         image: undefined,
         music: undefined,
-        media: mediaUrl ? normalizeAttachment({kind:mediaKind,url:mediaUrl}) : undefined,
-        ...(mediaUrl && mediaKind==='image'&&!youtubeId(mediaUrl)?{image:mediaUrl}:{}),
+        attachments,
+        media: attachments[0],
+        ...(attachments[0]?.kind === 'image' ? {image: attachments[0].url} : {}),
         ...(music?{music}:{}),
         id: initial?.id ?? crypto.randomUUID(),
         title,
@@ -167,8 +153,8 @@ import type { ComponentProps } from 'react';
       });
       
       if (typeof result === "string") setError(result);
-      } catch {
-        setError("No se pudo guardar el recuerdo. Tus datos siguen acá; intentá de nuevo.");
+      } catch (reason) {
+        setError(reason instanceof Error ? reason.message : "No se pudo guardar el recuerdo. Tus datos siguen acá; intentá de nuevo.");
       } finally {
         setSaving(false);
       }
@@ -196,47 +182,20 @@ import type { ComponentProps } from 'react';
           </button>
         </div>
         <h2 id="form-title">{initial ? "Editar mi recuerdo" : "¿Qué pasó en este lugar?"}</h2>
+        <AccountCategoryStatus compact />
         <ol className="memory-form-progress" aria-label="Pasos del recuerdo">
           {steps.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined}><span aria-hidden="true">{index + 1}</span>{label}</li>)}
         </ol>
         <h3 ref={stepHeading} tabIndex={-1} className="memory-form-step-title">Paso {step + 1} de {steps.length}: {steps[step]}{step === 3 || (step === 0 && !REQUIRE_PUBLICATION_MEDIA) ? " · opcional" : ""}</h3>
         <form noValidate onSubmit={submit} onChangeCapture={() => {dirty.current = true; setError("");}}>
           <div data-form-step="0" hidden={step !== 0}>
-          <fieldset className="media-fields"><legend>Foto o video · {REQUIRE_PUBLICATION_MEDIA ? "obligatorio" : "opcional"}</legend>
-            {!REQUIRE_PUBLICATION_MEDIA && <small>Podés publicar tu historia sin agregar una foto, un video ni un enlace.</small>}
-            <div className="media-source-selector" role="group" aria-label="Origen del adjunto">
-              <button type="button" aria-pressed={mediaSource === 'file'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('file'); setError(''); }}><Upload size={18} aria-hidden="true" />Archivo</button>
-              <button type="button" aria-pressed={mediaSource === 'google'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('google'); setError(''); }}><Images size={18} aria-hidden="true" />Google Photos</button>
-              <button type="button" aria-pressed={mediaSource === 'link'} aria-controls="media-source-panel" disabled={mediaSelected || googlePhotosBusy || saving || loadingFile} onClick={() => { setMediaSource('link'); setError(''); }}><Link size={18} aria-hidden="true" />Enlace</button>
-            </div>
-            <div id="media-source-panel" className="media-source-panel" hidden={mediaSelected}>
-              {mediaSource === 'file' && <label>Subir foto o video (hasta 2 MB)<input type="file" disabled={saving || loadingFile} accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/ogg" onChange={e=>{void readFile(e.target.files?.[0]);e.target.value='';}}/></label>}
-              {mediaSource === 'google' && <GooglePhotosPicker disabled={saving || loadingFile} onFile={readFile} onBusyChange={setGooglePhotosBusy} />}
-              {mediaSource === 'link' && <>
-                <label>Tipo de adjunto<select disabled={saving} value={mediaKind} onChange={e=>{fileVersion.current++;setLoadingFile(false);setMediaKind(e.target.value as typeof mediaKind);setMediaUrl('');}}><option value="image">Foto</option><option value="video">Video</option><option value="youtube">YouTube</option></select></label>
-                <label>{mediaKind==='youtube'?'Enlace de YouTube':'O pegá un enlace HTTPS al archivo'}<input type="url" disabled={saving} value={mediaUrl.startsWith('data:')?'':mediaUrl} placeholder={mediaKind==='youtube'?'https://www.youtube.com/watch?v=…':'https://…'} onChange={e=>{fileVersion.current++;setLoadingFile(false);const url=e.target.value.trim();setMediaUrl(url);if(youtubeId(url))setMediaKind('youtube');}}/></label>
-                <button type="button" className="secondary-button" onClick={() => {
-                  if (!mediaUrl || (mediaKind === 'youtube' ? !youtubeId(mediaUrl) : !safeMediaUrl(mediaUrl, mediaKind))) { setError('Pegá un enlace válido para adjuntarlo.'); return; }
-                  setError(''); setMediaSelected(true); dirty.current = true;
-                }}>Usar enlace</button>
-              </>}
-            </div>
-            {loadingFile&&<small role="status">Cargando archivo…</small>}
-            {mediaSelected && <div className="memory-attachment-preview">
-              {mediaKind === 'image' && safeMediaUrl(mediaUrl, 'image') && <img className="attachment-preview" src={mediaUrl} alt="Vista previa del adjunto" />}
-              {mediaKind === 'video' && safeMediaUrl(mediaUrl, 'video') && <video src={mediaUrl} controls preload="metadata" aria-label="Vista previa del video" />}
-              {mediaKind === 'youtube' && youtubeId(mediaUrl) && <>
-                <img className="attachment-preview youtube-attachment-thumbnail" src={`https://i.ytimg.com/vi/${youtubeId(mediaUrl)}/hqdefault.jpg`} alt="Miniatura del video de YouTube adjunto" />
-                <span className="youtube-attachment-badge">YouTube</span>
-              </>}
-              <button type="button" className="memory-attachment-remove" aria-label="Quitar adjunto" disabled={googlePhotosBusy || saving} onClick={() => { fileVersion.current++; setLoadingFile(false); setMediaUrl(''); setMediaSelected(false); setError(''); dirty.current=true; }}><X size={20} aria-hidden="true" /></button>
-            </div>}
-            {!REQUIRE_PUBLICATION_MEDIA && !mediaSelected && <button type="button" className="secondary-button"
-              disabled={saving || loadingFile || googlePhotosBusy} onClick={() => {
-                fileVersion.current++; setMediaUrl(''); setMediaSelected(false); setError(''); setStep(1);
-              }}>Continuar sin adjunto</button>}
-            {step === 0 && error && <p className="form-error" role="alert">{error}</p>}
-          </fieldset>
+          <MemoryAttachmentsField value={attachments} maxAttachments={account?.maximoAdjuntos ?? 1}
+            disabled={saving || !account} required={REQUIRE_PUBLICATION_MEDIA}
+            onChange={value => { dirty.current = true; setAttachments(value); setError(""); }}
+            onBusyChange={setMediaBusy} onPendingChange={setPendingLink} onError={setError} />
+          {!REQUIRE_PUBLICATION_MEDIA && attachments.length === 0 && <button type="button" className="secondary-button"
+            disabled={saving || mediaBusy || pendingLink} onClick={() => { setError(""); setStep(1); }}>Continuar sin adjunto</button>}
+          {step === 0 && error && <p className="form-error" role="alert">{error}</p>}
           </div>
           <div data-form-step="1" hidden={step !== 1}>
           <label>
@@ -289,9 +248,23 @@ import type { ComponentProps } from 'react';
 
           </div>
           <div data-form-step="3" hidden={step !== 3}>
-          <fieldset className="media-fields"><legend>Música de fondo · opcional</legend><label>Elegir canción<select value={musicChoice} onChange={e=>setMusicChoice(e.target.value)}><option value="">Sin música</option>{tracks.map(track=><option key={track.spotifyId} value={track.spotifyId}>{track.title} — {track.artist}</option>)}<option value="custom">Otra canción de Spotify…</option></select></label>
-          {musicChoice==='custom'&&<><label>Enlace de Spotify<input name="spotifyUrl" defaultValue={initial?.music ? `https://open.spotify.com/track/${initial.music.spotifyId}` : ""} type="url" required placeholder="https://open.spotify.com/track/…"/></label><label>Tema<input name="songTitle" defaultValue={initial?.music?.title} required maxLength={120}/></label><label>Artista<input name="songArtist" defaultValue={initial?.music?.artist} required maxLength={120}/></label></>}
-          <small>Este paso es opcional. Podés guardar tu recuerdo sin agregar música.</small></fieldset>
+          <fieldset className="media-fields"><legend>Música de fondo · opcional</legend>
+          {canAddMusic ? <>
+            <label>Elegir canción<select value={musicChoice} onChange={event => setMusicChoice(event.target.value)}>
+              <option value="">Sin música</option>
+              {canSuggestMusic && tracks.map(track => <option key={track.spotifyId} value={track.spotifyId}>{track.title} — {track.artist}</option>)}
+              <option value="custom">Otra canción de Spotify…</option>
+            </select></label>
+            {canSuggestMusic && <small>Estas sugerencias acompañan la época que estás recorriendo.</small>}
+            {musicChoice === 'custom' && <>
+              <label>Enlace de Spotify<input name="spotifyUrl" defaultValue={initial?.music ? 'https://open.spotify.com/track/' + initial.music.spotifyId : ''}
+                type="url" required placeholder="https://open.spotify.com/track/…" /></label>
+              <label>Tema<input name="songTitle" defaultValue={initial?.music?.title} required maxLength={120} /></label>
+              <label>Artista<input name="songArtist" defaultValue={initial?.music?.artist} required maxLength={120} /></label>
+            </>}
+          </> : <p className="account-permission-note"><LockKeyhole size={17} aria-hidden="true" />
+            La música se habilita desde Aedo, cuando uno de tus recuerdos recibe 30 puntos de nostalgia.</p>}
+          <small>Podés guardar tu recuerdo sin agregar música.</small></fieldset>
           </div>
           {step !== 0 && error && (
             <p className="form-error" role="alert">
@@ -302,15 +275,15 @@ import type { ComponentProps } from 'react';
             Revisá tu historia antes de guardar el recuerdo.
           </p>
           <div className="dialog-actions">
-            {step > 0 && <button type="button" className="secondary-button" disabled={saving || loadingFile || googlePhotosBusy} onClick={() => { setError(""); setStep(step - 1); }}>Atrás</button>}
+            {step > 0 && <button type="button" className="secondary-button" disabled={saving || mediaBusy} onClick={() => { setError(""); setStep(step - 1); }}>Atrás</button>}
             <button type="button" className="secondary-button" onClick={requestClose} disabled={saving}>
               Cancelar
             </button>
-            <button className="primary-button" type="submit" disabled={saving || loadingFile || googlePhotosBusy}>
+            <button className="primary-button" type="submit" disabled={saving || mediaBusy || !account || account.publicacionesRestantes === 0}>
               {saving ? (
                 <><Loader2 size={17} style={{ animation: "device-spin 1s linear infinite" }} /> Guardando...</>
               ) : (
-                <>{step === steps.length - 1 && <Save size={17} />} {loadingFile ? "Cargando archivo…" : step < steps.length - 1 ? "Continuar" : "Guardar recuerdo"}</>
+                <>{step === steps.length - 1 && <Save size={17} />} {mediaBusy ? "Cargando archivo…" : step < steps.length - 1 ? "Continuar" : "Guardar recuerdo"}</>
               )}
             </button>
           </div>
