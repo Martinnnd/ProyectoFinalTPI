@@ -5,36 +5,57 @@ import type { NotificationDto, NotificationType } from "./types";
  * Backend-pending types (categoryPromotion and emailMessages) use placeholders.
  */
 export function getNotificationText(notification: NotificationDto): string {
-  const { type, senderUsername } = notification;
+  const { type, senderUsername, puntaje } = notification;
 
   switch (type) {
     case "newFollower":
       return senderUsername
-        ? `@${senderUsername} te empezó a seguir`
-        : "Alguien te empezó a seguir";
+        ? `@${senderUsername} empezó a seguirte.`
+        : "Alguien empezó a seguirte.";
 
     case "publicationComment":
-      return "Comentarios en tu publicación";
+      return senderUsername
+        ? `@${senderUsername} comentó en tu recuerdo.`
+        : "Comentaron en tu recuerdo.";
 
     case "publicationRating":
-      return "Puntuaciones en tu publicación";
+      if (puntaje != null) {
+        return senderUsername
+          ? `@${senderUsername} puntuó tu recuerdo con ${puntaje} puntos.`
+          : `Puntuaron tu recuerdo con ${puntaje} puntos.`;
+      }
+      return senderUsername
+        ? `@${senderUsername} puntuó tu recuerdo.`
+        : "Puntuaron tu recuerdo.";
+
+    case "publicationLike":
+      return senderUsername
+        ? `A @${senderUsername} le gustó tu recuerdo.`
+        : "A alguien le gustó tu recuerdo.";
+
+    case "publicationRepost":
+      return senderUsername
+        ? `@${senderUsername} compartió tu recuerdo.`
+        : "Alguien compartió tu recuerdo.";
 
     case "categoryPromotion":
-      return "¡Felicidades! Subiste de categoría";
+      return "¡Felicitaciones! Subiste de categoría.";
 
     case "emailMessages":
-      return "Recibiste mensajes en tu correo";
+      return "Tienes nuevos mensajes en tu casilla de correo.";
 
     case "chatMessage":
-      return "Recibiste mensajes en el chat";
+      return senderUsername
+        ? `@${senderUsername} te envió un mensaje.`
+        : "Recibiste un mensaje nuevo.";
 
     case "administrative":
-      return "Uno de tus contenidos fue dado de baja por no cumplir los estándares de la comunidad";
+      return "Ocultamos tu publicación porque no cumple con las normas comunitarias.";
 
     case "userTagged":
       return senderUsername
-        ? `@${senderUsername} te etiquetó en un recuerdo`
-        : "Te etiquetaron en un recuerdo";
+        ? `@${senderUsername} te etiquetó en un recuerdo.`
+        : "Te etiquetaron en un recuerdo.";
 
     default: {
       const exhaustiveCheck: never = type;
@@ -61,27 +82,23 @@ export function getNotificationNavigation(notification: NotificationDto): Notifi
 
     case "publicationComment":
     case "publicationRating":
+    case "publicationLike":
+    case "publicationRepost":
+    case "userTagged":
       return publicationId != null
-        ? { kind: "push", path: `/explorar?view=feed&post=${publicationId}` }
+        ? { kind: "push", path: `/recuerdo/${publicationId}` }
         : { kind: "none" };
 
     case "categoryPromotion":
-      // Placeholder — navigates to own profile where category is shown
       return { kind: "push", path: "/perfil" };
 
     case "emailMessages":
-      // Placeholder — main mail screen
-      return { kind: "push", path: "/correo" };
+      return { kind: "none" };
 
     case "chatMessage":
       return { kind: "openChat" };
 
     case "administrative":
-      return publicationId != null
-        ? { kind: "push", path: `/explorar?view=feed&post=${publicationId}` }
-        : { kind: "none" };
-
-    case "userTagged":
       return publicationId != null
         ? { kind: "push", path: `/recuerdo/${publicationId}` }
         : { kind: "none" };
@@ -99,11 +116,13 @@ export function isNotificationFeatureImplemented(type: NotificationType): boolea
     case "newFollower":
     case "publicationComment":
     case "publicationRating":
+    case "publicationLike":
+    case "publicationRepost":
     case "chatMessage":
     case "administrative":
     case "userTagged":
-      return true;
     case "categoryPromotion":
+      return true;
     case "emailMessages":
       return false;
     default: {

@@ -34,6 +34,8 @@ describe("parseNotification", () => {
       ["MensajeChat", "chatMessage"],
       ["Administrativa", "administrative"],
       ["EtiquetadoEnPublicacion", "userTagged"],
+      ["MeGustaPublicacion", "publicationLike"],
+      ["CompartirPublicacion", "publicationRepost"],
     ];
 
     for (const [backendType, expectedType] of cases) {
@@ -45,6 +47,17 @@ describe("parseNotification", () => {
       });
       expect(result.type).toBe(expectedType);
     }
+  });
+
+  it("correctly maps puntaje when present", () => {
+    const result = parseNotification({
+      id: 1,
+      tipo: "PuntuacionEnPublicacion",
+      leida: false,
+      fechaCreacion: "2024-01-01T00:00:00Z",
+      puntaje: 5,
+    });
+    expect(result.puntaje).toBe(5);
   });
 
   it("maps the numeric administrative notification value", () => {
