@@ -4,8 +4,10 @@ import { createPortal } from "react-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Bell,
+  Heart,
   MessageCircle,
   Minus,
+  Repeat,
   User,
   Star,
   Trophy,
@@ -23,7 +25,6 @@ import {
   markAllNotificationsAsRead,
 } from "../notifications/notificationApi";
 import { useNotificationConnection } from "../notifications/useNotificationConnection";
-import { useNotice } from "../context/NoticeProvider";
 import { getNotificationText, getNotificationNavigation } from "../notifications/notificationUtils";
 
 function NotificationIcon({ type }: { type: NotificationType }) {
@@ -35,14 +36,16 @@ function NotificationIcon({ type }: { type: NotificationType }) {
       return <MessageCircle {...props} />;
     case "publicationRating":
       return <Star {...props} />;
+    case "publicationLike":
+      return <Heart {...props} />;
+    case "publicationRepost":
+      return <Repeat {...props} />;
     case "categoryPromotion":
       return <Trophy {...props} />;
     case "emailMessages":
       return <Mail {...props} />;
     case "chatMessage":
       return <MessageCircle {...props} />;
-    case "administrative":
-      return <ShieldAlert {...props} />;
     case "userTagged":
       return <UsersRound {...props} />;
     default:
@@ -71,7 +74,6 @@ export default function Notification({
   onOpenChat: () => void;
 }) {
   const { session } = useAuth();
-  const showToast = useNotice((state) => state.showToast);
   const { isFollowing, toggleFollow } = useFollow();
   const [pendingFollows, setPendingFollows] = useState<Set<string>>(new Set());
   const followRequests = useRef(new Set<string>());
@@ -111,7 +113,7 @@ export default function Notification({
         if (!cancelled) setNotifications(data);
       })
       .catch((requestError) => {
-        if (!cancelled) showToast(requestError instanceof Error ? requestError.message : "No se pudieron cargar las notificaciones.", "error");
+        if (!cancelled) console.error("[Notifications] Error loading:", requestError);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -141,7 +143,7 @@ export default function Notification({
         previous.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)),
       );
       markNotificationAsRead(notification.id).catch((requestError) => {
-        showToast(requestError instanceof Error ? requestError.message : "No se pudo marcar la notificación como leída.", "error");
+        console.error("[Notifications] Error marking as read:", requestError);
         setNotifications((previous) =>
           previous.map((item) => (item.id === notification.id ? { ...item, isRead: false } : item)),
         );
@@ -170,7 +172,7 @@ export default function Notification({
         requestError instanceof Error
           ? requestError.message
           : "No se pudieron marcar las notificaciones.";
-      showToast(message, "error");
+      setError(message);
       getNotifications()
         .then(setNotifications)
         .catch(() => {

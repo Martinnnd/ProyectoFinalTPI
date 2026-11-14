@@ -2,6 +2,8 @@ export type NotificationType =
   | "newFollower"
   | "publicationComment"
   | "publicationRating"
+  | "publicationLike"
+  | "publicationRepost"
   | "categoryPromotion"
   | "emailMessages"
   | "chatMessage"
@@ -16,6 +18,7 @@ export interface NotificationDto {
   publicationId?: number;
   senderId?: number;
   senderUsername?: string;
+  puntaje?: number;
 }
 
 const notificationTypeByApiValue: Record<string | number, NotificationType> = {
@@ -27,6 +30,8 @@ const notificationTypeByApiValue: Record<string | number, NotificationType> = {
   MensajeChat: "chatMessage",
   Administrativa: "administrative",
   EtiquetadoEnPublicacion: "userTagged",
+  MeGustaPublicacion: "publicationLike",
+  CompartirPublicacion: "publicationRepost",
   0: "newFollower",
   1: "publicationComment",
   2: "publicationRating",
@@ -34,6 +39,9 @@ const notificationTypeByApiValue: Record<string | number, NotificationType> = {
   4: "emailMessages",
   5: "chatMessage",
   6: "administrative",
+  7: "userTagged",
+  8: "publicationLike",
+  9: "publicationRepost",
 };
 
 const apiField = {
@@ -43,6 +51,7 @@ const apiField = {
   publicationId: "publicacionId",
   senderId: "emisorId",
   senderUsername: "emisorUsername",
+  puntaje: "puntaje",
 } as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -102,6 +111,14 @@ export function parseNotification(value: unknown): NotificationDto {
       throw new Error("Invalid notification response.");
     }
     notification.senderUsername = senderUsername;
+  }
+
+  const puntaje = value[apiField.puntaje];
+  if (puntaje != null) {
+    if (typeof puntaje !== "number" || !Number.isFinite(puntaje)) {
+      throw new Error("Invalid notification response.");
+    }
+    notification.puntaje = puntaje;
   }
 
   return notification;

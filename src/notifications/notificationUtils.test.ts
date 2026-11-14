@@ -23,27 +23,65 @@ describe("getNotificationText", () => {
     const text = getNotificationText(
       makeNotification({ type: "newFollower", senderUsername: "pepito" }),
     );
-    expect(text).toBe("@pepito te empezó a seguir");
+    expect(text).toBe("@pepito empezó a seguirte.");
   });
 
   it("uses generic text for newFollower without username", () => {
     const text = getNotificationText(makeNotification({ type: "newFollower" }));
-    expect(text).toBe("Alguien te empezó a seguir");
+    expect(text).toBe("Alguien empezó a seguirte.");
   });
 
-  it("returns correct text for publicationComment", () => {
-    const text = getNotificationText(makeNotification({ type: "publicationComment" }));
-    expect(text).toBe("Comentarios en tu publicación");
+  it("returns correct text for publicationComment with and without username", () => {
+    expect(
+      getNotificationText(
+        makeNotification({ type: "publicationComment", senderUsername: "pepito" }),
+      ),
+    ).toBe("@pepito comentó en tu recuerdo.");
+    expect(getNotificationText(makeNotification({ type: "publicationComment" }))).toBe(
+      "Comentaron en tu recuerdo.",
+    );
   });
 
-  it("returns correct text for publicationRating", () => {
-    const text = getNotificationText(makeNotification({ type: "publicationRating" }));
-    expect(text).toBe("Puntuaciones en tu publicación");
+  it("returns correct text for publicationRating with score and username", () => {
+    expect(
+      getNotificationText(
+        makeNotification({ type: "publicationRating", senderUsername: "pepito", puntaje: 5 }),
+      ),
+    ).toBe("@pepito puntuó tu recuerdo con 5 puntos.");
+    expect(
+      getNotificationText(makeNotification({ type: "publicationRating", puntaje: 4 })),
+    ).toBe("Puntuaron tu recuerdo con 4 puntos.");
+    expect(
+      getNotificationText(
+        makeNotification({ type: "publicationRating", senderUsername: "pepito" }),
+      ),
+    ).toBe("@pepito puntuó tu recuerdo.");
+    expect(getNotificationText(makeNotification({ type: "publicationRating" }))).toBe(
+      "Puntuaron tu recuerdo.",
+    );
   });
 
-  it("returns placeholder text for categoryPromotion", () => {
+  it("returns correct text for publicationLike", () => {
+    expect(
+      getNotificationText(makeNotification({ type: "publicationLike", senderUsername: "pepito" })),
+    ).toBe("A @pepito le gustó tu recuerdo.");
+    expect(getNotificationText(makeNotification({ type: "publicationLike" }))).toBe(
+      "A alguien le gustó tu recuerdo.",
+    );
+  });
+
+  it("returns correct text for publicationRepost", () => {
+    expect(
+      getNotificationText(makeNotification({ type: "publicationRepost", senderUsername: "pepito" })),
+    ).toBe("@pepito compartió tu recuerdo.");
+    expect(getNotificationText(makeNotification({ type: "publicationRepost" }))).toBe(
+      "Alguien compartió tu recuerdo.",
+    );
+  });
+
+  it("returns text for categoryPromotion", () => {
     const text = getNotificationText(makeNotification({ type: "categoryPromotion" }));
-    expect(text).toContain("categoría");
+    expect(text).toBe("¡Felicitaciones! Subiste de categoría.");
   });
 
   it("returns placeholder text for emailMessages", () => {
@@ -52,13 +90,17 @@ describe("getNotificationText", () => {
   });
 
   it("returns correct text for chatMessage", () => {
-    const text = getNotificationText(makeNotification({ type: "chatMessage" }));
-    expect(text).toContain("chat");
+    expect(
+      getNotificationText(makeNotification({ type: "chatMessage", senderUsername: "pepito" })),
+    ).toBe("@pepito te envió un mensaje.");
+    expect(getNotificationText(makeNotification({ type: "chatMessage" }))).toBe(
+      "Recibiste un mensaje nuevo.",
+    );
   });
 
   it("explains an administrative moderation action", () => {
-    expect(getNotificationText(makeNotification({ type: "administrative" }))).toContain(
-      "dado de baja",
+    expect(getNotificationText(makeNotification({ type: "administrative" }))).toBe(
+      "Ocultamos tu publicación porque no cumple con las normas comunitarias.",
     );
   });
 
@@ -66,12 +108,12 @@ describe("getNotificationText", () => {
     const text = getNotificationText(
       makeNotification({ type: "userTagged", senderUsername: "juan" }),
     );
-    expect(text).toBe("@juan te etiquetó en un recuerdo");
+    expect(text).toBe("@juan te etiquetó en un recuerdo.");
   });
 
   it("returns generic text for userTagged without senderUsername", () => {
     const text = getNotificationText(makeNotification({ type: "userTagged" }));
-    expect(text).toBe("Te etiquetaron en un recuerdo");
+    expect(text).toBe("Te etiquetaron en un recuerdo.");
   });
 });
 
@@ -90,11 +132,11 @@ describe("getNotificationNavigation", () => {
     expect(nav).toEqual({ kind: "none" });
   });
 
-  it("returns push to publication for publicationComment with publicationId", () => {
+  it("returns push to /recuerdo/:id for publicationComment with publicationId", () => {
     const nav = getNotificationNavigation(
       makeNotification({ type: "publicationComment", publicationId: 99 }),
     );
-    expect(nav).toEqual({ kind: "push", path: "/explorar?view=feed&post=99" });
+    expect(nav).toEqual({ kind: "push", path: "/recuerdo/99" });
   });
 
   it("returns none for publicationComment without publicationId", () => {
@@ -102,11 +144,25 @@ describe("getNotificationNavigation", () => {
     expect(nav).toEqual({ kind: "none" });
   });
 
-  it("returns push to publication for publicationRating with publicationId", () => {
+  it("returns push to /recuerdo/:id for publicationRating with publicationId", () => {
     const nav = getNotificationNavigation(
       makeNotification({ type: "publicationRating", publicationId: 55 }),
     );
-    expect(nav).toEqual({ kind: "push", path: "/explorar?view=feed&post=55" });
+    expect(nav).toEqual({ kind: "push", path: "/recuerdo/55" });
+  });
+
+  it("returns push to /recuerdo/:id for publicationLike with publicationId", () => {
+    const nav = getNotificationNavigation(
+      makeNotification({ type: "publicationLike", publicationId: 66 }),
+    );
+    expect(nav).toEqual({ kind: "push", path: "/recuerdo/66" });
+  });
+
+  it("returns push to /recuerdo/:id for publicationRepost with publicationId", () => {
+    const nav = getNotificationNavigation(
+      makeNotification({ type: "publicationRepost", publicationId: 77 }),
+    );
+    expect(nav).toEqual({ kind: "push", path: "/recuerdo/77" });
   });
 
   it("returns none for publicationRating without publicationId", () => {
@@ -119,9 +175,9 @@ describe("getNotificationNavigation", () => {
     expect(nav).toEqual({ kind: "push", path: "/perfil" });
   });
 
-  it("returns push to /correo for emailMessages", () => {
+  it("returns none for emailMessages", () => {
     const nav = getNotificationNavigation(makeNotification({ type: "emailMessages" }));
-    expect(nav).toEqual({ kind: "push", path: "/correo" });
+    expect(nav).toEqual({ kind: "none" });
   });
 
   it("returns openChat for chatMessage", () => {
@@ -132,7 +188,7 @@ describe("getNotificationNavigation", () => {
   it("opens the moderated publication for administrative notifications", () => {
     expect(
       getNotificationNavigation(makeNotification({ type: "administrative", publicationId: 88 })),
-    ).toEqual({ kind: "push", path: "/explorar?view=feed&post=88" });
+    ).toEqual({ kind: "push", path: "/recuerdo/88" });
   });
 
   it("returns push to /recuerdo/:id for userTagged with publicationId", () => {
@@ -155,13 +211,15 @@ describe("isNotificationFeatureImplemented", () => {
     expect(isNotificationFeatureImplemented("newFollower")).toBe(true);
     expect(isNotificationFeatureImplemented("publicationComment")).toBe(true);
     expect(isNotificationFeatureImplemented("publicationRating")).toBe(true);
+    expect(isNotificationFeatureImplemented("publicationLike")).toBe(true);
+    expect(isNotificationFeatureImplemented("publicationRepost")).toBe(true);
     expect(isNotificationFeatureImplemented("chatMessage")).toBe(true);
     expect(isNotificationFeatureImplemented("administrative")).toBe(true);
     expect(isNotificationFeatureImplemented("userTagged")).toBe(true);
+    expect(isNotificationFeatureImplemented("categoryPromotion")).toBe(true);
   });
 
   it("returns false for types with pending backend", () => {
-    expect(isNotificationFeatureImplemented("categoryPromotion")).toBe(false);
     expect(isNotificationFeatureImplemented("emailMessages")).toBe(false);
   });
 });
