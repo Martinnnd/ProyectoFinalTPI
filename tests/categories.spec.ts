@@ -172,7 +172,7 @@ async function prepare(
   });
   await page.goto(initialPath);
   if (initialPath.startsWith("/perfil"))
-    await expect(page.locator('.account-status[data-category="' + initial + '"]')).toBeVisible();
+    await expect(page.locator('.account-status[data-category="' + initial + '"]')).toBeAttached();
   else await expect(page.getByText("Recuerdo de la plaza", { exact: true }).first()).toBeVisible();
   return {
     requests,
@@ -193,10 +193,21 @@ async function openForm(page: Page) {
   const create = page.getByRole("button", { name: "Recordar", exact: true });
   if (await create.isVisible()) await create.click();
   else await page.getByRole("button", { name: "Sumar mi recuerdo", exact: true }).click();
+  return pickMemoryPoint(page);
+}
+
+async function pickMemoryPoint(page: Page) {
   const map = page.locator("#explore .memory-map");
   await expect(map).toBeVisible();
   await map.press("Enter");
   const dialog = page.getByRole("dialog", { name: "¿Qué pasó en este lugar?" });
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+async function openCategories(page: Page) {
+  const dialog = page.getByRole("dialog", { name: "Tu categoría", exact: true });
+  if (!(await dialog.isVisible())) await page.locator(".profile-category button").click();
   await expect(dialog).toBeVisible();
   return dialog;
 }
@@ -247,13 +258,28 @@ test("Errante tiene acciones limitadas y el cartel cambia en vivo con las seis �
   }
   expect(styles.size).toBe(6);
   expect(api.requests).not.toContain("POST /api/publicaciones/25/repost");
+  await notice.getByRole("link", { name: "Ver mi categoría y mi cupo" }).click();
+  const categories = page.getByRole("dialog", { name: "Tu categoría", exact: true });
+  await expect(categories).toBeVisible();
+  await expect(categories.getByRole("region", { name: "Categoría y cupo semanal" })).toContainText(
+    "Te quedan 5 recuerdos",
+  );
+  await expect(page.locator(".profile-main > .account-status")).toHaveCount(0);
+  await categories.screenshot({ path: "test-results/perfil-categoria-2020.png" });
+  await page.keyboard.press("Escape");
+  await expect(categories).not.toBeVisible();
+  await expect(page).not.toHaveURL(/categoria=cuenta/);
 });
 
 test("el primer recuerdo sin foto actualiza categoría y cupo y muestra el ascenso", async ({
   page,
 }) => {
-  const api = await prepare(page);
-  await openForm(page);
+  const api = await prepare(page, "Errante", "/perfil?era=1990&categoria=cuenta");
+  const categories = page.getByRole("dialog", { name: "Tu categoría", exact: true });
+  await expect(categories).toBeVisible();
+  await categories.getByRole("button", { name: "Publicar mi primer recuerdo" }).click();
+  await expect(categories).not.toBeVisible();
+  await pickMemoryPoint(page);
   const dialog = await fillStory(page);
   await expect(dialog.locator("#tag-user-input")).toBeDisabled();
   await expect(
@@ -265,6 +291,7 @@ test("el primer recuerdo sin foto actualiza categoría y cupo y muestra el ascen
   expect(api.body()).not.toContain('name="Archivo"');
   expect(api.body()).not.toContain('name="Adjuntos[0].Archivo"');
   await page.goto("/perfil?era=1990");
+  await openCategories(page);
   await expect(page.locator('.account-status[data-category="Nostalgico"]')).toContainText(
     "Te quedan 4 recuerdos",
   );
@@ -338,11 +365,16 @@ test("Aedo se consulta sin un ascenso falso y un cambio posterior se refleja al 
   api.setCategory("Aedo", 1);
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.locator(".account-notice")).toContainText("¡Ahora sos Aedo!");
+  await page
+    .locator(".account-notice")
+    .getByRole("link", { name: "Ver mi categoría y mi cupo" })
+    .click();
+  await expect(page.getByRole("dialog", { name: "Tu categoría", exact: true })).toBeVisible();
   await expect(page.locator('.account-status[data-category="Aedo"]')).toContainText(
     "Te quedan 6 recuerdos",
   );
   await page.reload();
-  await expect(page.locator('.account-status[data-category="Aedo"]')).toBeVisible();
+  await expect(page.locator('.account-status[data-category="Aedo"]')).toBeAttached();
   await expect(page.locator(".account-notice")).not.toBeVisible();
 });
 
@@ -391,6 +423,18 @@ test("la información de categoría y el formulario se mantienen dentro del anch
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await prepare(page, "Mnemosine", "/perfil?era=2000");
+  const categories = await openCategories(page);
+  await expect(categories).toContainText("Publicaciones ilimitadas");
+  await categories.getByText("Los beneficios de tu categoría", { exact: true }).click();
+  await expect(categories).toContainText("Hasta 4 adjuntos por recuerdo");
+  const popupSize = await categories.evaluate((element) => ({
+    width: element.clientWidth,
+    content: element.scrollWidth,
+  }));
+  expect(popupSize.content).toBeLessThanOrEqual(popupSize.width);
+  await categories.screenshot({ path: "test-results/perfil-categoria-mobile-2000.png" });
+  await categories.getByRole("button", { name: "Cerrar categorías" }).click();
+  await expect(categories).not.toBeVisible();
   const dialog = await openForm(page);
   await dialog.locator("input[type=file]").setInputFiles([
     { name: "a.png", mimeType: "image/png", buffer: png },

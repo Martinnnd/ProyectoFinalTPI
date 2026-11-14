@@ -69,7 +69,7 @@ export default function AccountCategoryToast() {
           <strong>{notice.title}</strong>
           <p>{notice.description}</p>
           <Link
-            href={isAuthenticated ? "/perfil" : "/auth/login?returnTo=/explorar"}
+            href={isAuthenticated ? "/perfil?categoria=cuenta" : "/auth/login?returnTo=/explorar"}
             onClick={dismissNotice}
           >
             {isAuthenticated ? "Ver mi categoría y mi cupo" : "Iniciar sesión"}

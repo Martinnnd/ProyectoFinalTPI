@@ -4,7 +4,7 @@ El frontend consulta `GET /api/categorias-cuenta/me` con la sesión actual. La c
 
 ## Comportamiento
 
-- El perfil propio muestra la categoría, los beneficios y el cupo semanal. Los avisos y las tarjetas usan el estilo de la época seleccionada, desde los 70 hasta los 2020.
+- La categoría se muestra junto al nombre en el perfil. Al hacer clic se abre el popup con los beneficios, el cupo semanal y las reglas para avanzar. Los avisos y el popup usan el estilo de la época seleccionada, desde los 70 hasta los 2020. El enlace de los avisos abre directamente ese popup.
 - Errante puede publicar su primer recuerdo; al confirmarlo, se consulta nuevamente la categoría y se muestra el ascenso a Nostálgico. Ese recuerdo consume uno de los cinco lugares semanales.
 - Los comentarios, las puntuaciones y los reposts requieren los permisos correspondientes. Los likes, los guardados y seguir perfiles conservan su funcionamiento.
 - Aedo tiene siete recuerdos semanales y puede agregar música de Spotify. El ascenso lo determina el backend cuando una publicación recibe treinta puntos de nostalgia.

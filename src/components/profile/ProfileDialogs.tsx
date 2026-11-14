@@ -1,5 +1,5 @@
 import { Lock, X } from "lucide-react";
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import type { Achievement } from "../../types";
 import type { describeTiers } from "../../data";
 
@@ -11,6 +11,7 @@ export default function ProfileDialogs({
   catalogue,
   unlockedCount,
   tiers,
+  accountDetails,
   onCloseCatalogue,
   onCloseTiers,
 }: {
@@ -19,6 +20,7 @@ export default function ProfileDialogs({
   catalogue: Achievement[];
   unlockedCount: number;
   tiers: Tier[];
+  accountDetails?: ReactNode;
   onCloseCatalogue: () => void;
   onCloseTiers: () => void;
 }) {
@@ -105,6 +107,7 @@ export default function ProfileDialogs({
           </button>
         </header>
         <div className="tier-dialog-content">
+          {accountDetails}
           <ul className="tier-list">
             {tiers.map((tier) => (
               <li key={tier.name} className={`tier-card is-${tier.state}`}>

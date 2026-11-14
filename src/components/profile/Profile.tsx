@@ -1,5 +1,6 @@
 import AccountCategoryStatus from "../account/AccountCategoryStatus";
 import { useAccountCategory } from "../../context/AccountCategoryContext";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { userTiers } from "../../data";
@@ -144,6 +145,10 @@ export default function Profile({
 }) {
   const isOwnProfile = isOwnProfileProp ?? !author;
   const { account, requireCreation } = useAccountCategory();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryRequested = isOwnProfile && searchParams.get("categoria") === "cuenta";
   const album = useRef<HTMLElement>(null);
   const mapDialog = useRef<HTMLDialogElement>(null);
   const mapReturnFocus = useRef<HTMLElement | null>(null);
@@ -279,7 +284,18 @@ export default function Profile({
   function closeTiers() {
     setTiersOpen(false);
     tiersDialog.current?.close();
+    if (categoryRequested) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("categoria");
+      router.replace(pathname + (params.size ? "?" + params.toString() : ""), { scroll: false });
+    }
   }
+
+  useEffect(() => {
+    if (!categoryRequested) return;
+    setTiersOpen(true);
+    tiersDialog.current?.showModal();
+  }, [categoryRequested]);
 
   return (
     <main
@@ -318,13 +334,6 @@ export default function Profile({
           onEditProfile={onEditProfile}
           onToggleFollowUser={onFollow}
         />
-        {isOwnProfile && (
-          <AccountCategoryStatus
-            onCreate={() => {
-              if (requireCreation()) onAdd();
-            }}
-          />
-        )}
         <ProfileShortcuts
           author={author}
           presentation={presentation}
@@ -418,6 +427,18 @@ export default function Profile({
           catalogue={catalogue}
           unlockedCount={unlocked.length}
           tiers={tiers}
+          accountDetails={
+            isOwnProfile ? (
+              <AccountCategoryStatus
+                onCreate={() => {
+                  if (!requireCreation()) return;
+                  setTiersOpen(false);
+                  tiersDialog.current?.close();
+                  onAdd();
+                }}
+              />
+            ) : undefined
+          }
           onCloseCatalogue={closeCatalogue}
           onCloseTiers={closeTiers}
         />
