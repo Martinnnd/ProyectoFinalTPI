@@ -58,7 +58,7 @@ export default function ProfileShortcuts({
           className={activeTab === "tagged" ? "active" : undefined}
         >
           <Users size={16} />
-          {author ? "Donde aparece" : "Donde aparezco"}
+          {author ? "Dónde aparece" : "Dónde aparezco"}
           {taggedCount !== undefined && <span>{taggedCount}</span>}
         </button>
       )}
