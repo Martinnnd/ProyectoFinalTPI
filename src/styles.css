@@ -2223,3 +2223,23 @@ textarea {
   border: 1px solid var(--line);
   z-index: 800;
 }
+
+.app .map-notice.picking .picking-drag-handle {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  align-self: stretch;
+  padding: 6px;
+  min-width: 32px;
+  margin-left: 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.app .map-notice.picking.is-dragging .picking-drag-handle {
+  cursor: grabbing;
+}
+.app .map-notice.draggable-picking {
+  z-index: 615;
+  max-width: 100%;
+}

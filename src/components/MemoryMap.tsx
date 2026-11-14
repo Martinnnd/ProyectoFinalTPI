@@ -1,3 +1,4 @@
+import MapPickingNotice from "./MapPickingNotice";
 import PinMemoryPreview from "./PinMemoryPreview";
 import type { MapBounds } from "../publicationsApi";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -10,7 +11,7 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import L from "leaflet";
-import { LocateFixed, MapPin, RotateCcw } from "lucide-react";
+import { LocateFixed, RotateCcw } from "lucide-react";
 import { symbols, type Memory } from "../types";
 export type Point = { lat: number; lng: number; label?: string };
 const center: [number, number] = [-38.4, -64.4];
@@ -369,11 +370,7 @@ export default function MemoryMap({
           <span>{fitMemories ? "Ver todos los recuerdos" : "Ver Argentina"}</span>
         </button>
         {picking && (
-          <div className="map-notice picking" role="status">
-            <MapPin size={22} aria-hidden="true" />
-            <span>Elegí un lugar en el mapa para tu recuerdo.</span>
-            <button onClick={onCancel}>Cancelar</button>
-          </div>
+          <MapPickingNotice onCancel={onCancel} />
         )}
         {tileError && (
           <div className="map-notice map-error" role="status">
