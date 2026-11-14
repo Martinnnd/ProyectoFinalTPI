@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { CheckCircle2, ImageOff, RotateCcw, Trophy, XCircle } from "lucide-react";
+import { CheckCircle2, ExternalLink, ImageOff, RotateCcw, Trophy, XCircle } from "lucide-react";
 import type { Decade } from "../../types";
 import {
   createGameQuestions,
@@ -13,17 +13,51 @@ import {
   type DecadeQuestion,
 } from "./decadeQuestions";
 import styles from "./DecadeGame.module.css";
+import { getPublicationDecadePhotos } from "./decadePhotosApi";
 
-export default function DecadeGame() {
+export default function DecadeGame({ localQuestions }: { localQuestions: DecadeQuestion[] }) {
+  const localCatalog = useRef(localQuestions);
+  localCatalog.current = localQuestions;
   const [questions, setQuestions] = useState<DecadeQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedDecade, setSelectedDecade] = useState<Decade | null>(null);
   const [score, setScore] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [communityUnavailable, setCommunityUnavailable] = useState(false);
+  const [round, setRound] = useState(0);
 
   useEffect(() => {
-    setQuestions(createGameQuestions());
-  }, []);
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    setLoading(true);
+    setQuestions([]);
+    setCurrentIndex(0);
+    setSelectedDecade(null);
+    setScore(0);
+    setImageFailed(false);
+    setCommunityUnavailable(false);
+    async function prepare() {
+      let community: DecadeQuestion[] = [];
+      try {
+        community = await getPublicationDecadePhotos(controller.signal);
+      } catch {
+        if (!cancelled) setCommunityUnavailable(true);
+      } finally {
+        clearTimeout(timeout);
+      }
+      if (cancelled) return;
+      setQuestions(createGameQuestions([...localCatalog.current, ...community]));
+      setLoading(false);
+    }
+    void prepare();
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [round]);
 
   const finished = questions.length > 0 && currentIndex >= questions.length;
   const currentQuestion = questions[currentIndex];
@@ -46,14 +80,10 @@ export default function DecadeGame() {
   }
 
   function restart() {
-    setQuestions(createGameQuestions());
-    setCurrentIndex(0);
-    setSelectedDecade(null);
-    setScore(0);
-    setImageFailed(false);
+    setRound((value) => value + 1);
   }
 
-  if (questions.length === 0) {
+  if (loading) {
     return (
       <main className={styles.page} aria-busy="true">
         <p className={styles.loading} role="status">
@@ -62,6 +92,19 @@ export default function DecadeGame() {
       </main>
     );
   }
+
+  if (questions.length < GAME_LENGTH)
+    return (
+      <main className={styles.page}>
+        <section className={styles.resultCard}>
+          <h1>Todavía faltan fotos para jugar</h1>
+          <p>Necesitamos al menos {GAME_LENGTH} fotos disponibles para armar una partida.</p>
+          <button className={styles.primaryAction} type="button" onClick={restart}>
+            Volver a intentar
+          </button>
+        </section>
+      </main>
+    );
 
   if (finished) {
     const won = isWinningScore(score);
@@ -112,6 +155,12 @@ export default function DecadeGame() {
           </div>
         </header>
 
+        {communityUnavailable && (
+          <p className={styles.catalogNotice} role="status">
+            Las publicaciones no están disponibles ahora. Esta partida usa las fotos del archivo.
+          </p>
+        )}
+
         <div className={styles.progressTrack} aria-hidden="true">
           <span style={{ width: `${((currentIndex + 1) / GAME_LENGTH) * 100}%` }} />
         </div>
@@ -123,6 +172,7 @@ export default function DecadeGame() {
               src={currentQuestion.image}
               alt={`Fotografía para identificar, pregunta ${currentIndex + 1} de ${GAME_LENGTH}`}
               fill
+              unoptimized={currentQuestion.source === "publication"}
               priority={currentIndex === 0}
               sizes="(max-width: 899px) 100vw, 760px"
               className={styles.photo}
@@ -131,11 +181,8 @@ export default function DecadeGame() {
           ) : (
             <div className={styles.missingImage} role="alert">
               <ImageOff size={40} aria-hidden="true" />
-              <strong>Falta cargar esta fotografía</strong>
-              <span>
-                Agregá <code>{currentQuestion.decade}.jpg</code> en{" "}
-                <code>public/juego-decadas</code>.
-              </span>
+              <strong>No pudimos cargar esta fotografía</strong>
+              <span>Podés continuar con otra foto.</span>
               <button type="button" onClick={nextQuestion}>
                 Omitir esta foto
               </button>
@@ -184,6 +231,17 @@ export default function DecadeGame() {
                   ? `La fotografía pertenece a los ${formatDecade(currentQuestion.decade).toLowerCase()}.`
                   : `La respuesta era ${formatDecade(currentQuestion.decade).toLowerCase()}.`}
               </span>
+              {currentQuestion.source === "publication" && (
+                <a
+                  className={styles.publicationLink}
+                  href={`/recuerdo/${currentQuestion.publicationId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Ver publicación (se abre en otra pestaña)"
+                >
+                  Ver publicación <ExternalLink size={14} aria-hidden="true" />
+                </a>
+              )}
             </div>
             <button type="button" onClick={nextQuestion}>
               {currentIndex === GAME_LENGTH - 1 ? "Ver resultado" : "Siguiente foto"}
