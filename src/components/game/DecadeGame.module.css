@@ -25,6 +25,24 @@
   font-weight: 700;
 }
 
+.catalogNotice {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.publicationLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
 .gameCard,
 .resultCard {
   width: min(820px, 100%);

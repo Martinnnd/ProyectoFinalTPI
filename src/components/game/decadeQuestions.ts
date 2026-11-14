@@ -1,24 +1,29 @@
 import type { Decade } from "../../types";
 
-export interface DecadeQuestion {
+type BaseQuestion = {
   id: string;
   image: string;
   decade: Decade;
-}
+};
+
+export type DecadeQuestion = BaseQuestion &
+  ({ source: "local" } | { source: "publication"; publicationId: number });
 
 export const decadeOptions: readonly Decade[] = [1970, 1980, 1990, 2000, 2010, 2020];
-
-export const decadeQuestions: readonly DecadeQuestion[] = decadeOptions.map((decade) => ({
-  id: String(decade),
-  image: `/juego-decadas/${decade}.jpg`,
-  decade,
-}));
 
 export const GAME_LENGTH = 5;
 export const WINNING_SCORE = 4;
 
-export function createGameQuestions(random: () => number = Math.random): DecadeQuestion[] {
-  const shuffled = [...decadeQuestions];
+export function createGameQuestions(
+  pool: readonly DecadeQuestion[],
+  random: () => number = Math.random,
+): DecadeQuestion[] {
+  const images = new Set<string>();
+  const shuffled = pool.filter((question) => {
+    if (images.has(question.image)) return false;
+    images.add(question.image);
+    return true;
+  });
 
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const randomIndex = Math.floor(random() * (index + 1));
