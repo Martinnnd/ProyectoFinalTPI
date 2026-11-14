@@ -2224,22 +2224,17 @@ textarea {
   z-index: 800;
 }
 
-.app .map-notice.picking .picking-drag-handle {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  align-self: stretch;
-  padding: 6px;
-  min-width: 32px;
-  margin-left: 0;
+.app .map-notice.draggable-picking {
+  z-index: 615;
+  max-width: 100%;
   cursor: grab;
   touch-action: none;
   user-select: none;
 }
-.app .map-notice.picking.is-dragging .picking-drag-handle {
+.app .map-notice.draggable-picking.is-dragging {
   cursor: grabbing;
 }
-.app .map-notice.draggable-picking {
-  z-index: 615;
-  max-width: 100%;
+.app .map-notice.draggable-picking:focus-visible {
+  outline: 3px solid var(--picking-highlight, var(--surface));
+  outline-offset: 3px;
 }

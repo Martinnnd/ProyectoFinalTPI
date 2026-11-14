@@ -55,7 +55,8 @@ for (const mobile of [false, true]) {
       .getByRole("button", { name: mobile ? "Sumar mi recuerdo" : "Recordar", exact: true })
       .click();
     const notice = page.locator(".map-notice.picking");
-    const handle = page.getByRole("button", { name: "Mover cartel de ubicación" });
+    const handle = notice.locator("span");
+    await expect(notice.getByRole("button")).toHaveCount(1);
     await expect(notice).toBeVisible();
     await page.waitForTimeout(600); // Wait for the notice's entrance animation.
     const before = (await notice.boundingBox())!;
@@ -70,7 +71,7 @@ for (const mobile of [false, true]) {
     const after = (await notice.boundingBox())!;
     expect(Math.abs(after.y - before.y)).toBeGreaterThan(40);
     await expect(page.getByRole("dialog")).toHaveCount(0);
-    await handle.focus();
+    await notice.focus();
     await page.keyboard.press("ArrowDown");
     expect((await notice.boundingBox())!.y).toBeGreaterThan(after.y);
     await page.mouse.move(
@@ -84,7 +85,22 @@ for (const mobile of [false, true]) {
     const clamped = (await notice.boundingBox())!;
     expect(clamped.x).toBeGreaterThanOrEqual(bounds.x - 1);
     expect(clamped.y).toBeGreaterThanOrEqual(bounds.y - 1);
-    await notice.getByRole("button", { name: "Cancelar", exact: true }).click();
+    const cancel = notice.getByRole("button", { name: "Cancelar", exact: true });
+    const cancelBounds = (await cancel.boundingBox())!;
+    const beforeCancelDrag = (await notice.boundingBox())!;
+    await page.mouse.move(
+      cancelBounds.x + cancelBounds.width / 2,
+      cancelBounds.y + cancelBounds.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      cancelBounds.x + cancelBounds.width / 2,
+      cancelBounds.y + cancelBounds.height + 40,
+      { steps: 5 },
+    );
+    await page.mouse.up();
+    expect((await notice.boundingBox())!.y).toBeCloseTo(beforeCancelDrag.y, 0);
+    await cancel.click();
     await expect(notice).toHaveCount(0);
   });
 }

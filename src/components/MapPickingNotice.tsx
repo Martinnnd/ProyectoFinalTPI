@@ -1,4 +1,4 @@
-import { GripVertical, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export default function MapPickingNotice({ onCancel }: { onCancel: () => void }) {
@@ -49,61 +49,60 @@ export default function MapPickingNotice({ onCancel }: { onCancel: () => void })
           : undefined
       }
       onClick={(event) => event.stopPropagation()}
+      tabIndex={0}
+      aria-label="Elegí un lugar en el mapa para tu recuerdo. Arrastrá el cartel o usá las flechas para moverlo."
+      title="Arrastrá para mover; también podés usar las flechas"
+      onPointerDown={(event) => {
+        if (!event.isPrimary || event.button !== 0 || (event.target as Element).closest("button"))
+          return;
+        event.preventDefault();
+        event.currentTarget.focus();
+        event.stopPropagation();
+        const element = notice.current!;
+        const bounds = element.getBoundingClientRect();
+        const parent = element.parentElement!.getBoundingClientRect();
+        drag.current = {
+          id: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          left: bounds.left - parent.left,
+          top: bounds.top - parent.top,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+        setDragging(true);
+      }}
+      onPointerMove={(event) => {
+        const current = drag.current;
+        if (!current || current.id !== event.pointerId) return;
+        move(current.left + event.clientX - current.x, current.top + event.clientY - current.y);
+      }}
+      onLostPointerCapture={() => {
+        drag.current = null;
+        setDragging(false);
+      }}
+      onPointerUp={(event) => {
+        if (event.currentTarget.hasPointerCapture(event.pointerId))
+          event.currentTarget.releasePointerCapture(event.pointerId);
+      }}
+      onPointerCancel={() => {
+        drag.current = null;
+        setDragging(false);
+      }}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return;
+        const delta = {
+          ArrowLeft: [-16, 0],
+          ArrowRight: [16, 0],
+          ArrowUp: [0, -16],
+          ArrowDown: [0, 16],
+        }[event.key];
+        if (!delta) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const element = notice.current!;
+        move(element.offsetLeft + delta[0], element.offsetTop + delta[1]);
+      }}
     >
-      <button
-        type="button"
-        className="picking-drag-handle"
-        aria-label="Mover cartel de ubicación"
-        title="Arrastrá para mover; también podés usar las flechas"
-        onPointerDown={(event) => {
-          if (!event.isPrimary || event.button !== 0) return;
-          event.stopPropagation();
-          const element = notice.current!;
-          const bounds = element.getBoundingClientRect();
-          const parent = element.parentElement!.getBoundingClientRect();
-          drag.current = {
-            id: event.pointerId,
-            x: event.clientX,
-            y: event.clientY,
-            left: bounds.left - parent.left,
-            top: bounds.top - parent.top,
-          };
-          event.currentTarget.setPointerCapture(event.pointerId);
-          setDragging(true);
-        }}
-        onPointerMove={(event) => {
-          const current = drag.current;
-          if (!current || current.id !== event.pointerId) return;
-          move(current.left + event.clientX - current.x, current.top + event.clientY - current.y);
-        }}
-        onLostPointerCapture={() => {
-          drag.current = null;
-          setDragging(false);
-        }}
-        onPointerUp={(event) => {
-          if (event.currentTarget.hasPointerCapture(event.pointerId))
-            event.currentTarget.releasePointerCapture(event.pointerId);
-        }}
-        onPointerCancel={() => {
-          drag.current = null;
-          setDragging(false);
-        }}
-        onKeyDown={(event) => {
-          const delta = {
-            ArrowLeft: [-16, 0],
-            ArrowRight: [16, 0],
-            ArrowUp: [0, -16],
-            ArrowDown: [0, 16],
-          }[event.key];
-          if (!delta) return;
-          event.preventDefault();
-          event.stopPropagation();
-          const element = notice.current!;
-          move(element.offsetLeft + delta[0], element.offsetTop + delta[1]);
-        }}
-      >
-        <GripVertical size={20} aria-hidden="true" />
-      </button>
       <MapPin size={22} aria-hidden="true" />
       <span>Elegí un lugar en el mapa para tu recuerdo.</span>
       <button type="button" onClick={onCancel}>
