@@ -9,7 +9,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { loginRequest, logoutRequest, refreshSessionRequest, registerRequest } from "./authApi";
+import {
+  googleLoginRequest,
+  type GoogleAuthResult,
+  loginRequest,
+  logoutRequest,
+  refreshSessionRequest,
+  registerRequest,
+} from "./authApi";
 import {
   AUTH_CHANGE_EVENT,
   beginAuthInit,
@@ -17,7 +24,6 @@ import {
   completeAuthInit,
   getStoredSession,
   storeSession,
-  tokenExpiresAt,
 } from "./authStorage";
 import type { AuthSession, AuthStatus, LoginCredentials, RegisterCredentials } from "./authTypes";
 
@@ -27,6 +33,7 @@ export type AuthContextValue = {
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<AuthSession>;
   register: (credentials: RegisterCredentials) => Promise<AuthSession>;
+  googleLogin: (credential: string, username?: string) => Promise<GoogleAuthResult>;
   logout: () => Promise<void>;
 };
 
@@ -99,6 +106,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return nextSession;
   }, []);
 
+  const googleLogin = useCallback(async (credential: string, username?: string) => {
+    const result = await googleLoginRequest(credential, username);
+    if (!("requiereUsername" in result)) {
+      storeSession(result);
+      setSession(result);
+      setStatus("authenticated");
+    }
+    return result;
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await logoutRequest();
@@ -116,9 +133,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: status === "authenticated",
       login,
       register,
+      googleLogin,
       logout,
     }),
-    [session, status, login, register, logout],
+    [session, status, login, register, googleLogin, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -70,3 +70,24 @@ export async function logoutRequest(): Promise<void> {
 
   if (!response.ok) throw await toAuthError(response);
 }
+
+export type GoogleAuthResult = AuthSession | { requiereUsername: true };
+
+export async function googleLoginRequest(
+  credential: string,
+  username?: string,
+): Promise<GoogleAuthResult> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+    method: "POST",
+    headers: authHeaders,
+    credentials: "include",
+    body: JSON.stringify({ credential, username }),
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw await toAuthError(response);
+  const result = await response.json();
+  if (result.requiereUsername === true) return { requiereUsername: true };
+  const { logrosNuevos, ...session } = result;
+  rememberLoginAchievements(session.usuarioId, logrosNuevos);
+  return session as AuthSession;
+}

@@ -217,3 +217,21 @@
     animation: none;
   }
 }
+
+.googleAccess {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+.googleAccess:empty {
+  display: none;
+}
+.googleAccess form {
+  display: grid;
+  width: 100%;
+  gap: 12px;
+}
+.googleAccess [role="alert"] {
+  color: var(--auth-error, #a22b32);
+}

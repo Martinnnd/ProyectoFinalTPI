@@ -1,5 +1,7 @@
 "use client";
 
+import GoogleSignIn from "./GoogleSignIn";
+
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,6 +33,7 @@ export default function AuthForm({
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const isRegister = mode === "registro";
+  const [googleRegistration, setGoogleRegistration] = useState(false);
 
   function validate(): Record<string, string> {
     const errors: Record<string, string> = {};
@@ -106,102 +109,106 @@ export default function AuthForm({
         </div>
       )}
 
-      <form className={styles.form} onSubmit={submit} noValidate>
-        {isRegister && (
+      {!googleRegistration && (
+        <form className={styles.form} onSubmit={submit} noValidate>
+          {isRegister && (
+            <label className={styles.field}>
+              <span>Nombre de usuario</span>
+              <span className={styles.inputShell}>
+                <User aria-hidden="true" size={18} />
+                <input
+                  name="username"
+                  autoComplete="username"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  aria-invalid={!!fieldErrors.username}
+                  aria-describedby={fieldErrors.username ? "username-error" : undefined}
+                  minLength={3}
+                  maxLength={50}
+                  required
+                />
+              </span>
+              {fieldErrors.username && <small id="username-error">{fieldErrors.username}</small>}
+            </label>
+          )}
+
           <label className={styles.field}>
-            <span>Nombre de usuario</span>
+            <span>Email</span>
             <span className={styles.inputShell}>
-              <User aria-hidden="true" size={18} />
+              <Mail aria-hidden="true" size={18} />
               <input
-                name="username"
-                autoComplete="username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                aria-invalid={!!fieldErrors.username}
-                aria-describedby={fieldErrors.username ? "username-error" : undefined}
-                minLength={3}
-                maxLength={50}
+                type="email"
+                name="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                aria-invalid={!!fieldErrors.email}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
+                maxLength={200}
                 required
               />
             </span>
-            {fieldErrors.username && <small id="username-error">{fieldErrors.username}</small>}
+            {fieldErrors.email && <small id="email-error">{fieldErrors.email}</small>}
           </label>
-        )}
 
-        <label className={styles.field}>
-          <span>Email</span>
-          <span className={styles.inputShell}>
-            <Mail aria-hidden="true" size={18} />
-            <input
-              type="email"
-              name="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              aria-invalid={!!fieldErrors.email}
-              aria-describedby={fieldErrors.email ? "email-error" : undefined}
-              maxLength={200}
-              required
-            />
-          </span>
-          {fieldErrors.email && <small id="email-error">{fieldErrors.email}</small>}
-        </label>
-
-        <label className={styles.field}>
-          <span>Contraseña</span>
-          <span className={styles.inputShell}>
-            <LockKeyhole aria-hidden="true" size={18} />
-            <input
-              type={showPassword ? "text" : "password"}
-              name="contrasena"
-              autoComplete={isRegister ? "new-password" : "current-password"}
-              value={contrasena}
-              onChange={(event) => setContrasena(event.target.value)}
-              aria-invalid={!!fieldErrors.contrasena}
-              aria-describedby={fieldErrors.contrasena ? "password-error" : undefined}
-              minLength={isRegister ? 8 : undefined}
-              maxLength={100}
-              required
-            />
-            <button
-              className={styles.reveal}
-              type="button"
-              onClick={() => setShowPassword((current) => !current)}
-              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </span>
-          {fieldErrors.contrasena && <small id="password-error">{fieldErrors.contrasena}</small>}
-        </label>
-
-        {isRegister && (
           <label className={styles.field}>
-            <span>Confirmar contraseña</span>
+            <span>Contraseña</span>
             <span className={styles.inputShell}>
               <LockKeyhole aria-hidden="true" size={18} />
               <input
                 type={showPassword ? "text" : "password"}
-                name="confirmation"
-                autoComplete="new-password"
-                value={confirmation}
-                onChange={(event) => setConfirmation(event.target.value)}
-                aria-invalid={!!fieldErrors.confirmation}
-                aria-describedby={fieldErrors.confirmation ? "confirmation-error" : undefined}
+                name="contrasena"
+                autoComplete={isRegister ? "new-password" : "current-password"}
+                value={contrasena}
+                onChange={(event) => setContrasena(event.target.value)}
+                aria-invalid={!!fieldErrors.contrasena}
+                aria-describedby={fieldErrors.contrasena ? "password-error" : undefined}
+                minLength={isRegister ? 8 : undefined}
+                maxLength={100}
                 required
               />
+              <button
+                className={styles.reveal}
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </span>
-            {fieldErrors.confirmation && (
-              <small id="confirmation-error">{fieldErrors.confirmation}</small>
-            )}
+            {fieldErrors.contrasena && <small id="password-error">{fieldErrors.contrasena}</small>}
           </label>
-        )}
 
-        <button className={styles.submit} type="submit" disabled={submitting}>
-          {submitting && <Loader2 className={styles.spinner} size={18} aria-hidden="true" />}
-          {submitting ? "Procesando…" : isRegister ? "Crear mi cuenta" : "Ingresar"}
-        </button>
-      </form>
+          {isRegister && (
+            <label className={styles.field}>
+              <span>Confirmar contraseña</span>
+              <span className={styles.inputShell}>
+                <LockKeyhole aria-hidden="true" size={18} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="confirmation"
+                  autoComplete="new-password"
+                  value={confirmation}
+                  onChange={(event) => setConfirmation(event.target.value)}
+                  aria-invalid={!!fieldErrors.confirmation}
+                  aria-describedby={fieldErrors.confirmation ? "confirmation-error" : undefined}
+                  required
+                />
+              </span>
+              {fieldErrors.confirmation && (
+                <small id="confirmation-error">{fieldErrors.confirmation}</small>
+              )}
+            </label>
+          )}
+
+          <button className={styles.submit} type="submit" disabled={submitting}>
+            {submitting && <Loader2 className={styles.spinner} size={18} aria-hidden="true" />}
+            {submitting ? "Procesando…" : isRegister ? "Crear mi cuenta" : "Ingresar"}
+          </button>
+        </form>
+      )}
+
+      <GoogleSignIn key={mode} returnTo={returnTo} onRegistrationChange={setGoogleRegistration} />
 
       <p className={styles.switchMode}>
         {isRegister ? "¿Ya tenés una cuenta?" : "¿Todavía no tenés cuenta?"}{" "}

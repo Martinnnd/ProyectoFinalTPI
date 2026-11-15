@@ -135,3 +135,5 @@ Para iniciar sesión en el frontend o en Swagger:
 
 Para más detalles sobre el funcionamiento interno, reinicio de la base y configuración de PostgreSQL/PostGIS, consultar el [README del Backend](../ProyectoFinalTPI.Backend/README.md).
 
+
+Inicio de sesión con Google: ver [docs/GOOGLE_LOGIN.md](docs/GOOGLE_LOGIN.md).
