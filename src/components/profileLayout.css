@@ -496,11 +496,29 @@
   }
 }
 
-.app.view-profile .profile-achievements-trigger {
-  padding: 4px 0;
-  border: 0;
-  background: transparent;
+/* Match the profile section buttons for actions beside the user's identity. */
+.app.view-profile .profile-header-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--soft);
   box-shadow: none;
-  color: inherit;
-  font: inherit;
+  color: var(--ink);
+  font: 12px var(--font-body);
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+.app.view-profile .profile-header-button:hover {
+  color: var(--accent);
+  background: var(--soft);
+  box-shadow: none;
+  text-shadow: none;
+  text-decoration: none;
+}
+.app.view-profile .profile-header-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }

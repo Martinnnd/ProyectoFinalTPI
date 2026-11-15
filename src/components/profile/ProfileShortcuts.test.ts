@@ -50,7 +50,7 @@ describe("ProfileShortcuts - Sección de guardados en el perfil", () => {
     expect(html).not.toContain("Sus guardados");
   });
 
-  it("muestra la pestaña 'Donde aparezco' en el perfil propio cuando onOpenTagged está presente", () => {
+  it("muestra la pestaña 'Dónde aparezco' en el perfil propio cuando onOpenTagged está presente", () => {
     const html = renderToStaticMarkup(
       createElement(ProfileShortcuts, {
         presentation: presentationMock,
@@ -64,11 +64,11 @@ describe("ProfileShortcuts - Sección de guardados en el perfil", () => {
       }),
     );
 
-    expect(html).toContain("Donde aparezco");
+    expect(html).toContain("Dónde aparezco");
     expect(html).toContain("3");
   });
 
-  it("muestra la pestaña 'Donde aparece' en el perfil de otro usuario cuando onOpenTagged está presente", () => {
+  it("muestra la pestaña 'Dónde aparece' en el perfil de otro usuario cuando onOpenTagged está presente", () => {
     const html = renderToStaticMarkup(
       createElement(ProfileShortcuts, {
         author: "OtroUsuario",
@@ -83,7 +83,7 @@ describe("ProfileShortcuts - Sección de guardados en el perfil", () => {
       }),
     );
 
-    expect(html).toContain("Donde aparece");
+    expect(html).toContain("Dónde aparece");
     expect(html).toContain("1");
   });
 });

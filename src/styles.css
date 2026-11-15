@@ -2223,3 +2223,18 @@ textarea {
   border: 1px solid var(--line);
   z-index: 800;
 }
+
+.app .map-notice.draggable-picking {
+  z-index: 615;
+  max-width: 100%;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.app .map-notice.draggable-picking.is-dragging {
+  cursor: grabbing;
+}
+.app .map-notice.draggable-picking:focus-visible {
+  outline: 3px solid var(--picking-highlight, var(--surface));
+  outline-offset: 3px;
+}

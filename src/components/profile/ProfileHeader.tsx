@@ -161,7 +161,7 @@ export default function ProfileHeader({
                 <div className="profile-category">
                   {isOwnProfile ? (
                     <button
-                      className="profile-note"
+                      className="profile-note profile-header-button"
                       onClick={onOpenTiers}
                       aria-haspopup="dialog"
                       aria-expanded={tiersOpen}
@@ -267,7 +267,7 @@ export default function ProfileHeader({
                 <h3>
                   <button
                     type="button"
-                    className="profile-achievements-trigger"
+                    className="profile-achievements-trigger profile-header-button"
                     onClick={onOpenAchievements}
                     aria-haspopup="dialog"
                     aria-expanded={achievementsOpen}
