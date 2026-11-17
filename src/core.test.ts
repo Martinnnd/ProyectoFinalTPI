@@ -170,6 +170,31 @@ describe("Autoría de recuerdos y reposts", () => {
     const headerAuthor = repostSinComentario.repost?.author || repostSinComentario.author;
     expect(getMemoryAuthorDisplay({ author: headerAuthor })).toBe("Susana");
 
+    // Autoría por authorId incluso si el username cambió o no coincide
+    expect(isOwnMemory({ author: "NombreAnterior", authorId: 17 })).toBe(true);
+    expect(getMemoryAuthorDisplay({ author: "NombreAnterior", authorId: 17 })).toBe("Vos");
+    expect(isOwnMemory({ author: "Nico", authorId: 99 })).toBe(false);
+
+    cerrarSesion();
+  });
+
+  it("rechaza identificadores inválidos en operaciones de publicación sin caer a ID 1", async () => {
+    const { repostearPublicacion, quitarRepost, citarPublicacion, eliminarPublicacion, guardarSesion, cerrarSesion } =
+      await import("./api");
+
+    guardarSesion({
+      token: "fake-jwt",
+      usuarioId: 17,
+      username: "Nico",
+      email: "nico@example.com",
+      esAdmin: false,
+    });
+
+    await expect(repostearPublicacion("invalido")).rejects.toThrow("El identificador de la publicación no es válido.");
+    await expect(quitarRepost("")).rejects.toThrow("El identificador de la publicación no es válido.");
+    await expect(citarPublicacion("abc", "un comentario")).rejects.toThrow("El identificador de la publicación no es válido.");
+    await expect(eliminarPublicacion("0")).rejects.toThrow("El identificador de la publicación no es válido.");
+
     cerrarSesion();
   });
 });

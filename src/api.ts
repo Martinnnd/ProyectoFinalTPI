@@ -12,23 +12,35 @@ export const guardarSesion = storeSession;
 export const cerrarSesion = clearStoredSession;
 
 export function isOwnMemory(
-  memory: { author?: string; source?: string } | null | undefined,
+  memory: { author?: string; authorId?: number; source?: string } | null | undefined,
 ): boolean {
   if (!memory) return false;
   if (memory.source === "local" || memory.author === "Vos") return true;
   const sesion = getSesion();
-  if (sesion && sesion.username && memory.author) {
+  if (!sesion) return false;
+  if (sesion.usuarioId && memory.authorId) {
+    return memory.authorId === sesion.usuarioId;
+  }
+  if (sesion.username && memory.author) {
     return memory.author.trim().toLowerCase() === sesion.username.trim().toLowerCase();
   }
   return false;
 }
 
 export function getMemoryAuthorDisplay(
-  memory: { author?: string; source?: string } | null | undefined,
+  memory: { author?: string; authorId?: number; source?: string } | null | undefined,
 ): string {
   if (!memory) return "Desconocido";
   if (isOwnMemory(memory)) return "Vos";
   return memory.author || "Desconocido";
+}
+
+function parsePublicationId(id: string | number): number {
+  const numericId = typeof id === "number" ? id : parseInt(String(id).replace(/\D/g, ""), 10);
+  if (!Number.isSafeInteger(numericId) || numericId <= 0) {
+    throw new Error("El identificador de la publicación no es válido.");
+  }
+  return numericId;
 }
 
 function requireSession(): AuthSession {
@@ -40,7 +52,7 @@ function requireSession(): AuthSession {
 export async function repostearPublicacion(id: string, autorId?: number) {
   const sesion = requireSession();
   const finalAutorId = autorId ?? sesion.usuarioId;
-  const numericId = parseInt(id.replace(/\D/g, ""), 10) || 1;
+  const numericId = parsePublicationId(id);
 
   const response = await apiFetch(
     `${API_BASE_URL}/api/publicaciones/${numericId}/repost?usuarioId=${finalAutorId}`,
@@ -59,7 +71,7 @@ export async function repostearPublicacion(id: string, autorId?: number) {
 export async function quitarRepost(id: string, autorId?: number) {
   const sesion = requireSession();
   const finalAutorId = autorId ?? sesion.usuarioId;
-  const numericId = parseInt(id.replace(/\D/g, ""), 10) || 1;
+  const numericId = parsePublicationId(id);
 
   const response = await apiFetch(
     `${API_BASE_URL}/api/publicaciones/${numericId}/repost?usuarioId=${finalAutorId}`,
@@ -78,7 +90,7 @@ export async function quitarRepost(id: string, autorId?: number) {
 export async function citarPublicacion(id: string, descripcion: string, autorId?: number) {
   const sesion = requireSession();
   const finalAutorId = autorId ?? sesion.usuarioId;
-  const numericId = parseInt(id.replace(/\D/g, ""), 10) || 1;
+  const numericId = parsePublicationId(id);
 
   const response = await apiFetch(`${API_BASE_URL}/api/publicaciones/${numericId}/citar`, {
     method: "POST",
@@ -99,7 +111,7 @@ export async function citarPublicacion(id: string, descripcion: string, autorId?
 export async function eliminarPublicacion(id: string, autorId?: number) {
   const sesion = requireSession();
   const finalAutorId = sesion.usuarioId;
-  const numericId = parseInt(id.replace(/\D/g, ""), 10) || 1;
+  const numericId = parsePublicationId(id);
 
   const url =
     finalAutorId !== undefined
