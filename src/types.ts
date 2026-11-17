@@ -37,6 +37,8 @@ export interface Memory {
   /** Publication time, independent of the historical year of the memory. */
   createdAt?: string;
   groupId?: string;
+  /** Optional destination capsules for a new publication; not a visibility flag. */
+  capsuleIds?: number[];
   image?: string;
   imageCaption?: string;
   attachments?: MemoryAttachment[];

@@ -188,6 +188,7 @@ export default function MemoryMap({
   searchTarget,
   onSearchMove,
   fitMemories = false,
+  fitBounds,
   memories,
   selected,
   onSelect,
@@ -207,6 +208,7 @@ export default function MemoryMap({
   searchTarget?: Point | null;
   onSearchMove?: (point: Point) => void;
   fitMemories?: boolean;
+  fitBounds?: MapBounds;
   memories: Memory[];
   selected: Memory | null;
   onSelect: (m: Memory) => void;
@@ -231,9 +233,14 @@ export default function MemoryMap({
   }, [loaded, retry]);
 
   const fitPointsStr = useMemo(() => {
+    if (fitBounds)
+      return JSON.stringify([
+        [fitBounds.minLatitud, fitBounds.minLongitud],
+        [fitBounds.maxLatitud, fitBounds.maxLongitud],
+      ]);
     if (!fitMemories || !memories.length) return undefined;
     return JSON.stringify(memories.map((m) => [m.lat, m.lng]));
-  }, [fitMemories, memories]);
+  }, [fitMemories, memories, fitBounds]);
 
   const markersToRender = useMemo(() => {
     if (!showRelations) return memories;
@@ -369,9 +376,7 @@ export default function MemoryMap({
           <LocateFixed size={18} />{" "}
           <span>{fitMemories ? "Ver todos los recuerdos" : "Ver Argentina"}</span>
         </button>
-        {picking && (
-          <MapPickingNotice onCancel={onCancel} />
-        )}
+        {picking && <MapPickingNotice onCancel={onCancel} />}
         {tileError && (
           <div className="map-notice map-error" role="status">
             <span>

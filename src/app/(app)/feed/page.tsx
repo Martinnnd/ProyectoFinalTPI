@@ -15,7 +15,8 @@ import { useRatings } from "../../../context/RatingsContext";
 import { useNotice } from "../../../context/NoticeProvider";
 import { eliminarPublicacion } from "../../../api";
 import { getPublication } from "../../../publicationsApi";
-import { filterCommunity } from "../../../groups";
+import { filterCommunity, isGroupFeedScope, tabForFeedScope } from "../../../groups";
+import { feedCache } from "../../../sessionQueryCache";
 import {
   getGroups,
   getGroupMemories,
@@ -71,13 +72,24 @@ function FeedPageContent() {
   const [groups, setGroups] = useState<CommunityGroup[]>([]);
   const [groupsLoaded, setGroupsLoaded] = useState(false);
   const myGroups = groups.filter((g) => g.isMember);
-  const requestedScope = searchParams.get("scope");
-  const [scope, setScope] = useState(requestedScope ?? "all");
-  useEffect(() => {
-    setScope(requestedScope ?? "all");
-  }, [requestedScope]);
+  const scope = searchParams.get("scope") ?? new URLSearchParams(returnQuery).get("scope") ?? "all";
+  // La URL es la fuente del grupo seleccionado, también al usar Atrás/Adelante.
+  const setScope = useCallback((value: string) => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete("returnTo");
+    if (value === "all") params.delete("scope");
+    else params.set("scope", value);
+    window.history.pushState(null, "", "/feed" + (params.size ? `?${params}` : ""));
+  }, []);
+  const [tabChoice, setTabChoice] = useState<{ userId: number; tab: FeedTab } | null>(null);
+  const preferredTab =
+    tabChoice && tabChoice.userId === session?.usuarioId
+      ? tabChoice.tab
+      : (feedCache.get<FeedTab>(`${session?.usuarioId ?? "guest"}:feed-view`) ?? "all");
+  const feedTab = tabForFeedScope(scope, preferredTab);
   const [query, setQuery] = useState("");
   const [groupMemories, setGroupMemories] = useState<Memory[]>([]);
+  const [groupRead, setGroupRead] = useState<{ scope: string; error: string } | null>(null);
   const [groupInfoId, setGroupInfoId] = useState<string | null>(null);
   const [groupOpenRequest, setGroupOpenRequest] = useState(0);
   const [repostedPublicationIds, setRepostedPublicationIds] = useState<string[]>([]);
@@ -96,7 +108,10 @@ function FeedPageContent() {
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
-          showToast(err instanceof Error ? err.message : "No se pudieron cargar los grupos.", "error");
+          showToast(
+            err instanceof Error ? err.message : "No se pudieron cargar los grupos.",
+            "error",
+          );
         }
       });
     return () => controller.abort();
@@ -120,12 +135,21 @@ function FeedPageContent() {
     if (!activeGroup) return;
 
     const controller = new AbortController();
+    setGroupRead(null);
     getGroupMemories(activeGroup.id, controller.signal)
       .then((mems) => {
-        if (!controller.signal.aborted) setGroupMemories(mems);
+        if (!controller.signal.aborted) {
+          setGroupMemories(mems);
+          setGroupRead({ scope: activeGroup.id, error: "" });
+        }
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
+          setGroupRead({
+            scope: activeGroup.id,
+            error:
+              err instanceof Error ? err.message : "No se pudieron cargar los recuerdos del grupo.",
+          });
           showToast(
             err instanceof Error ? err.message : "No se pudieron cargar los recuerdos del grupo.",
             "error",
@@ -199,17 +223,12 @@ function FeedPageContent() {
         window.history.pushState(null, "", `/feed${params.size ? `?${params}` : ""}`);
       }
     },
-    [period.decade, changePeriod, initialHashtag, scope],
+    [period.decade, changePeriod, initialHashtag, scope, setSelected],
   );
 
   const chooseScope = useCallback(
     (value: string) => {
       setScope(value);
-      const params = new URLSearchParams(window.location.search);
-      if (value === "all") params.delete("scope");
-      else params.set("scope", value);
-      const queryString = params.toString();
-      window.history.pushState(null, "", "/feed" + (queryString ? "?" + queryString : ""));
       setQuery("");
       setSelected(null);
       const group = groups.find((g) => g.id === value);
@@ -217,20 +236,21 @@ function FeedPageContent() {
         changePeriod({ decade: group.decade, year: null });
       }
     },
-    [groups, changePeriod],
+    [groups, changePeriod, setScope, setQuery, setSelected],
   );
 
   const handleTabChange = useCallback(
     (tab: FeedTab) => {
+      if (session) setTabChoice({ userId: session.usuarioId, tab });
       if (tab === "groups") {
         chooseScope("groups");
         return;
       }
-      if (scope === "groups" || groups.some((g) => g.id === scope)) {
+      if (isGroupFeedScope(scope)) {
         chooseScope("all");
       }
     },
-    [scope, groups, chooseScope],
+    [scope, session, chooseScope, setTabChoice],
   );
 
   const createGroup = useCallback(
@@ -250,7 +270,7 @@ function FeedPageContent() {
         return err instanceof Error ? err.message : "No se pudo crear el grupo.";
       }
     },
-    [groups, changePeriod, chooseScope],
+    [groups, changePeriod, chooseScope, setGroups, setSelected, setQuery],
   );
 
   const joinGroup = useCallback(
@@ -264,7 +284,7 @@ function FeedPageContent() {
         return err instanceof Error ? err.message : "No se pudo completar la unión al grupo.";
       }
     },
-    [setNotice],
+    [setNotice, setGroups],
   );
 
   const leaveSelectedGroup = useCallback(
@@ -280,7 +300,7 @@ function FeedPageContent() {
         return error instanceof Error ? error.message : "No se pudo salir del grupo.";
       }
     },
-    [setNotice],
+    [setNotice, setScope, setGroups, setGroupMemories],
   );
 
   const groupUpdated = useCallback(
@@ -288,7 +308,7 @@ function FeedPageContent() {
       setGroups((curr) => curr.map((g) => (g.id === updated.id ? updated : g)));
       if (scope === updated.id) changePeriod({ decade: updated.decade, year: null });
     },
-    [scope, changePeriod],
+    [scope, changePeriod, setGroups],
   );
 
   const groupRemoved = useCallback(
@@ -301,7 +321,7 @@ function FeedPageContent() {
       setQuery("");
       setNotice(message);
     },
-    [setNotice],
+    [setNotice, setScope, setGroups, setGroupMemories, setGroupInfoId, setSelected, setQuery],
   );
 
   const openMemberProfile = useCallback(
@@ -313,7 +333,7 @@ function FeedPageContent() {
         router.push(`/perfil/${member.username}`);
       }
     },
-    [router, session],
+    [router, session, setGroupInfoId],
   );
 
   const handleAdd = useCallback(() => {
@@ -338,7 +358,7 @@ function FeedPageContent() {
       setNotice("Recuerdo eliminado.");
       return null;
     },
-    [selected, setNotice],
+    [selected, setNotice, setFeedItems, setSelected],
   );
 
   const saveEdit = useCallback(
@@ -364,7 +384,7 @@ function FeedPageContent() {
       setNotice("Recuerdo modificado.");
       return null;
     },
-    [feedItems, editing, groups, selected, setNotice],
+    [feedItems, editing, groups, selected, setNotice, setFeedItems, setSelected, setEditing],
   );
 
   const viewingGroup = groups.some((g) => g.id === scope);
@@ -408,6 +428,14 @@ function FeedPageContent() {
         key={session?.usuarioId ?? "guest"}
         showFeedAd={(scope === "all" || scope === "general") && !query.trim()}
         initialHashtag={initialHashtag}
+        feedTab={feedTab}
+        contentLoading={
+          isGroupFeedScope(scope) &&
+          scope !== "groups" &&
+          !unavailableGroup &&
+          groupRead?.scope !== scope
+        }
+        contentError={groupRead?.scope === scope ? groupRead.error : ""}
         active={true}
         onItems={setFeedItems}
         filterFeed={(items) =>
