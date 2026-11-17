@@ -315,3 +315,21 @@ export async function untagUserInPublication(
     method: "DELETE",
   });
 }
+
+export async function updatePublication(
+  id: number | string,
+  data: { title: string; description: string },
+): Promise<Publication> {
+  const numericId = typeof id === "number" ? id : parseInt(String(id).replace(/\D/g, ""), 10);
+  if (!Number.isSafeInteger(numericId) || numericId <= 0) {
+    throw new Error("El identificador de la publicación no es válido.");
+  }
+  return publicationRequest<Publication>(`/${numericId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      titulo: data.title.trim(),
+      descripcion: data.description.trim(),
+    }),
+  });
+}
