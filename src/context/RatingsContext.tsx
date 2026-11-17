@@ -4,8 +4,9 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { useAuth } from "../components/auth/AuthProvider";
 import { useRouter } from "next/navigation";
 import { ratePublication } from "../publicationsApi";
-import { type NostalgiaRatings } from "../nostalgiaRatings";
 import { useNotice } from "./NoticeProvider";
+
+export type NostalgiaRatings = Record<string, number>;
 
 interface RatingsContextType {
   ratings: NostalgiaRatings;

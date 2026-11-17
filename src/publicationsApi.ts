@@ -249,12 +249,6 @@ export function ratePublication(id: number | string, puntaje: number): Promise<R
   });
 }
 
-export async function removePublicationRating(id: number | string): Promise<RatingState> {
-  return publicationRequest<RatingState>(`/${id}/puntuacion`, {
-    method: "DELETE",
-  });
-}
-
 export type LikeState = {
   publicacionId: number;
   cantidadLikes: number;
@@ -299,12 +293,6 @@ export async function tagUsersInPublication(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ usuariosIds }),
   });
-}
-
-export async function getTaggedUsers(
-  publicacionId: number | string,
-): Promise<{ id: number; username: string }[]> {
-  return publicationRequest(`/${publicacionId}/etiquetas`);
 }
 
 export async function untagUserInPublication(

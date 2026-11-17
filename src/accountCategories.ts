@@ -87,14 +87,6 @@ export function hasAccountPermission(
   return state?.categoria.permisos.includes(permission) ?? false;
 }
 
-export function canCreateMemory(state: AccountCategoryState | null): boolean {
-  return Boolean(
-    state &&
-    (state.categoria.permitePrimerRecuerdo || hasAccountPermission(state, "CrearRecuerdo")) &&
-    state.publicacionesRestantes !== 0,
-  );
-}
-
 export function formatWeekReset(date: string): string {
   return new Intl.DateTimeFormat("es-AR", {
     weekday: "long",

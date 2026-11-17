@@ -88,38 +88,3 @@ export function weeklyTrends(memories: Memory[], now = Date.now()): WeeklyTrend[
     .map(([tag, entry]) => ({ tag, count: entry.count, authors: entry.authors.size }))
     .sort((a, b) => b.count - a.count || b.authors - a.authors || a.tag.localeCompare(b.tag, "es"));
 }
-
-export interface HashtagContribution {
-  id: string;
-  tag: string;
-  author: string;
-  text: string;
-  createdAt: string;
-}
-
-export const THREAD_STORAGE_KEY = "nostalgia.hashtag-threads.v1";
-
-export function loadContributions(storage: Pick<Storage, "getItem">): HashtagContribution[] {
-  const raw: unknown = JSON.parse(storage.getItem(THREAD_STORAGE_KEY) ?? "[]");
-  if (!Array.isArray(raw)) throw new Error("Invalid thread storage");
-  const ids = new Set<string>();
-  return raw.filter((item): item is HashtagContribution => {
-    if (
-      !item ||
-      typeof item !== "object" ||
-      typeof item.id !== "string" ||
-      !item.id ||
-      ids.has(item.id) ||
-      !isHashtag(item.tag) ||
-      item.author !== "Vos" ||
-      typeof item.text !== "string" ||
-      !item.text.trim() ||
-      item.text.length > 1000 ||
-      typeof item.createdAt !== "string" ||
-      !Number.isFinite(Date.parse(item.createdAt))
-    )
-      return false;
-    ids.add(item.id);
-    return true;
-  });
-}

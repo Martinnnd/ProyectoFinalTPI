@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  canCreateMemory,
   creationRestriction,
   formatWeekReset,
   hasAccountPermission,
@@ -33,7 +32,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("Categoría y permisos del servidor", () => {
   it("habilita el primer recuerdo de Errante sin conceder comentarios ni puntuaciones", () => {
-    expect(canCreateMemory(state)).toBe(true);
+    expect(creationRestriction(state)).toBeNull();
     expect(hasAccountPermission(state, "Comentar")).toBe(false);
     expect(hasAccountPermission(state, "PuntuarPublicacion")).toBe(false);
     expect(hasAccountPermission(state, "DarLike")).toBe(true);
@@ -49,7 +48,7 @@ describe("Categoría y permisos del servidor", () => {
 
   it("bloquea crear al agotarse el cupo y muestra la fecha de reinicio argentina", () => {
     const exhausted = { ...state, publicacionesConsumidas: 5, publicacionesRestantes: 0 };
-    expect(canCreateMemory(exhausted)).toBe(false);
+    expect(creationRestriction(exhausted)).not.toBeNull();
     expect(creationRestriction(exhausted)).toContain("domingo");
     expect(creationRestriction(exhausted)).toContain("00:00 (Argentina)");
     expect(formatWeekReset(state.reinicioSemana)).toContain("15");
@@ -68,7 +67,7 @@ describe("Categoría y permisos del servidor", () => {
         publicacionesIlimitadas: true,
       },
     });
-    expect(canCreateMemory(unlimited)).toBe(true);
+    expect(creationRestriction(unlimited)).toBeNull();
     expect(quotaDescription(unlimited)).toBe("Publicaciones ilimitadas");
     expect(unlimited.maximoAdjuntos).toBe(4);
   });
@@ -86,7 +85,6 @@ describe("Categoría y permisos del servidor", () => {
   });
 
   it("mantiene cerradas las acciones hasta conocer la cuenta", () => {
-    expect(canCreateMemory(null)).toBe(false);
     expect(hasAccountPermission(null, "Compartir")).toBe(false);
   });
 
