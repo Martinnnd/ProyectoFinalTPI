@@ -5,7 +5,7 @@ import type { Decade, Memory } from "../types";
 import DiscardDraftDialog from "./DiscardDraftDialog";
 import { useOptionalAuth } from "./auth/AuthProvider";
 import { buscarUsuarios, type UsuarioBusqueda } from "../userApi";
-import { tagUsersInPublication, untagUserInPublication } from "../publicationsApi";
+import { tagUsersInPublication, untagUserInPublication, updatePublication } from "../publicationsApi";
 
 export default function MemoryEditForm({
   initial,
@@ -117,9 +117,14 @@ export default function MemoryEditForm({
         return true;
       });
 
-      // Sincronizar etiquetas en el backend para publicaciones persistidas
+      // Sincronizar título, descripción y etiquetas en el backend para publicaciones persistidas
       const numericId = Number(initial.id);
       if (Number.isSafeInteger(numericId) && numericId > 0) {
+        await updatePublication(numericId, {
+          title: title.trim(),
+          description: description.trim(),
+        });
+
         const initialIds = (initial.taggedUsers ?? []).map((u) => u.id);
         const currentIds = cleanTaggedUsers.map((u) => u.id);
         const toAdd = currentIds.filter((id) => !initialIds.includes(id));
@@ -149,8 +154,12 @@ export default function MemoryEditForm({
         taggedUsers: cleanTaggedUsers,
       });
       if (typeof result === "string") setError(result);
-    } catch {
-      setError("No se pudo guardar el recuerdo. Tus cambios siguen acá; intentá de nuevo.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo guardar el recuerdo. Tus cambios siguen acá; intentá de nuevo.",
+      );
     } finally {
       setSaving(false);
     }

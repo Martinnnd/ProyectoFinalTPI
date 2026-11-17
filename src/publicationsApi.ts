@@ -249,12 +249,6 @@ export function ratePublication(id: number | string, puntaje: number): Promise<R
   });
 }
 
-export async function removePublicationRating(id: number | string): Promise<RatingState> {
-  return publicationRequest<RatingState>(`/${id}/puntuacion`, {
-    method: "DELETE",
-  });
-}
-
 export type LikeState = {
   publicacionId: number;
   cantidadLikes: number;
@@ -301,17 +295,29 @@ export async function tagUsersInPublication(
   });
 }
 
-export async function getTaggedUsers(
-  publicacionId: number | string,
-): Promise<{ id: number; username: string }[]> {
-  return publicationRequest(`/${publicacionId}/etiquetas`);
-}
-
 export async function untagUserInPublication(
   publicacionId: number | string,
   usuarioId: number,
 ): Promise<void> {
   return publicationRequest(`/${publicacionId}/etiquetas/${usuarioId}`, {
     method: "DELETE",
+  });
+}
+
+export async function updatePublication(
+  id: number | string,
+  data: { title: string; description: string },
+): Promise<Publication> {
+  const numericId = typeof id === "number" ? id : parseInt(String(id).replace(/\D/g, ""), 10);
+  if (!Number.isSafeInteger(numericId) || numericId <= 0) {
+    throw new Error("El identificador de la publicación no es válido.");
+  }
+  return publicationRequest<Publication>(`/${numericId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      titulo: data.title.trim(),
+      descripcion: data.description.trim(),
+    }),
   });
 }

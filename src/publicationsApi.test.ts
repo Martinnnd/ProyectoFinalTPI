@@ -8,6 +8,7 @@ import {
   ratePublication,
   savePublication,
   unsavePublication,
+  updatePublication,
 } from "./publicationsApi";
 import { createComment, getComments } from "./commentsApi";
 import type { Memory } from "./types";
@@ -303,5 +304,31 @@ describe("Publicaciones del backend", () => {
       respond({ title: "Validación", errors: { Contenido: ["Contenido obligatorio."] } }, 400),
     );
     await expect(createComment("25", "")).rejects.toThrow("Contenido obligatorio.");
+  });
+  it("envía PUT con título y descripción para editar un recuerdo", async () => {
+    guardarSesion({
+      usuarioId: 42,
+      token: "token-test",
+      username: "Ana",
+      email: "ana@example.com",
+      esAdmin: false,
+    });
+    const fetch = respond({ id: 25, titulo: "Nuevo Título", descripcion: "Nueva Descripción" });
+    vi.stubGlobal("fetch", fetch);
+
+    await updatePublication("25", { title: " Nuevo Título ", description: " Nueva Descripción " });
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    const [url, init] = fetch.mock.calls[0];
+    expect(url).toBe(`${API_BASE_URL}/api/publicaciones/25`);
+    expect(init.method).toBe("PUT");
+    expect(JSON.parse(init.body)).toEqual({
+      titulo: "Nuevo Título",
+      descripcion: "Nueva Descripción",
+    });
+
+    await expect(updatePublication("invalido", { title: "T", description: "D" })).rejects.toThrow(
+      "El identificador de la publicación no es válido.",
+    );
   });
 });

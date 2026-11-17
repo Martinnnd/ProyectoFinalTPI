@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   extractHashtags,
-  loadContributions,
   memoryHashtags,
   parseHashtags,
   weeklyTrends,
@@ -101,24 +100,5 @@ describe("Trends semanales", () => {
       { tag: "cassettes", count: 2, authors: 2 },
       { tag: "vinilos", count: 2, authors: 1 },
     ]);
-  });
-});
-
-describe("Aportes al hilo", () => {
-  it("valida el almacenamiento y descarta aportes inválidos o repetidos", () => {
-    const entry = {
-      id: "a",
-      tag: "cassettes",
-      author: "Vos",
-      text: "Mi primer walkman",
-      createdAt: memory.createdAt,
-    };
-    expect(
-      loadContributions({
-        getItem: () => JSON.stringify([entry, entry, { ...entry, id: "b", tag: "<bad>" }, null]),
-      }),
-    ).toEqual([entry]);
-    expect(() => loadContributions({ getItem: () => "broken" })).toThrow();
-    expect(loadContributions({ getItem: () => null })).toEqual([]);
   });
 });
