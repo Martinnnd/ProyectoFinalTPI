@@ -346,6 +346,11 @@ export default function Profile({
           onOpenSaved={isOwnProfile && userId ? handleOpenSaved : undefined}
           onOpenTagged={userId ? handleOpenTagged : undefined}
           onOpenMap={openMap}
+          onOpenCapsules={
+            userId
+              ? () => router.push(isOwnProfile ? "/capsulas" : `/capsulas?propietarioId=${userId}`)
+              : undefined
+          }
         />
         <ProfileMapDialog
           dialogRef={mapDialog}

@@ -61,6 +61,9 @@ export default function SocialFeed({
   backLabel = "Volver al feed",
   showFeedAd = false,
   initialHashtag,
+  feedTab,
+  contentLoading = false,
+  contentError = "",
   active,
   onItems,
   filterFeed,
@@ -95,6 +98,9 @@ export default function SocialFeed({
   backLabel?: string;
   showFeedAd?: boolean;
   initialHashtag?: string | null;
+  feedTab?: FeedTab;
+  contentLoading?: boolean;
+  contentError?: string;
   active: boolean;
   onItems: (items: Memory[]) => void;
   filterFeed: (items: Memory[]) => Memory[];
@@ -139,7 +145,8 @@ export default function SocialFeed({
   const [repostMemory, setRepostMemory] = useState<Memory | null>(null);
   const [saves, setSaves] = useState<string[]>([]);
   const viewKey = `${session?.usuarioId ?? "guest"}:feed-view`;
-  const [tab, setTab] = useState<FeedTab>(() => feedCache.get<FeedTab>(viewKey) ?? "all");
+  const [localTab, setTab] = useState<FeedTab>(() => feedCache.get<FeedTab>(viewKey) ?? "all");
+  const tab = feedTab ?? localTab;
   useEffect(() => {
     if (active && !selected && tab !== "groups") feedCache.set(viewKey, tab, Infinity);
   }, [active, selected?.id, tab, viewKey]);
@@ -152,10 +159,10 @@ export default function SocialFeed({
   }
   useEffect(() => {
     if (groupName) {
-      setTab("groups");
+      if (feedTab === undefined) setTab("groups");
       setHashtag(null);
     }
-  }, [groupName, groupOpenRequest]);
+  }, [groupName, groupOpenRequest, feedTab]);
   const remote = useRemoteFeed(
     tab === "groups" ? null : tab === "following" ? "seguidos" : "para-vos",
     active && isAuthenticated,
@@ -560,7 +567,13 @@ export default function SocialFeed({
             }}
           />
         )}
-        {!selected && browsingGroups && community && (
+        {!selected && tab === "groups" && contentLoading && (
+          <p role="status" className="feed-loading">
+            Cargando recuerdos del grupo…
+          </p>
+        )}
+        {!selected && tab === "groups" && contentError && <p role="alert">{contentError}</p>}
+        {!selected && browsingGroups && community && !contentLoading && (
           <div className="feed-group-directory">{community}</div>
         )}
         <div className="feed-posts">
@@ -704,7 +717,9 @@ export default function SocialFeed({
             !posts.length &&
             (hashtag
               ? !hashtagFeed.loading && !hashtagFeed.error && !hashtagFeed.hayMas
-              : tab === "groups" || (!remote.loading && !remote.error && !remote.hayMas)) && (
+              : tab === "groups"
+                ? !contentLoading && !contentError
+                : !remote.loading && !remote.error && !remote.hayMas) && (
               <div className="feed-empty">
                 <h3>
                   {hashtag

@@ -143,7 +143,7 @@ export default function FeedPost({
               : `${displayAuthor} publicó un recuerdo en`}{" "}
             <Link
               className="post-group-link"
-              href={`/feed?scope=${encodeURIComponent(memory.groupId)}`}
+              href={`/feed?tab=groups&scope=${encodeURIComponent(memory.groupId)}`}
             >
               {groupName ?? "Ver grupo"}
             </Link>
