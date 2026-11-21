@@ -33,6 +33,13 @@ export function buildPublicationFormData(
   formData.append("Latitud", String(memory.lat));
   formData.append("Longitud", String(memory.lng));
   if (authorId !== undefined) formData.append("AutorId", String(authorId));
+  const capsuleIds = [...new Set(memory.capsuleIds ?? [])];
+  if (
+    capsuleIds.length > 100 ||
+    capsuleIds.some((id) => !Number.isSafeInteger(id) || id <= 0 || id > 2147483647)
+  )
+    throw new Error("Elegí hasta 100 cápsulas válidas.");
+  capsuleIds.forEach((id, index) => formData.append(`CapsulasIds[${index}]`, String(id)));
   if (gpsUsuario) {
     formData.append("GpsLatitud", String(gpsUsuario.lat));
     formData.append("GpsLongitud", String(gpsUsuario.lng));

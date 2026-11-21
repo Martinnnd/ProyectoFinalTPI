@@ -23,8 +23,14 @@ export default function RecuerdoPage({ params }: { params: Promise<{ id: string 
   const searchParams = useSearchParams();
   const requestedReturn = searchParams.get("returnTo");
   const returnTo =
-    requestedReturn && /^\/perfil(?:\/[^/?#]+)?$/.test(requestedReturn) ? requestedReturn : "/feed";
-  const backLabel = returnTo === "/feed" ? "Volver al feed" : "Volver al perfil";
+    requestedReturn && /^(?:\/perfil(?:\/[^/?#]+)?|\/capsulas\/[1-9]\d*)$/.test(requestedReturn)
+      ? requestedReturn
+      : "/feed";
+  const backLabel = returnTo.startsWith("/capsulas/")
+    ? "Volver a la cápsula"
+    : returnTo === "/feed"
+      ? "Volver al feed"
+      : "Volver al perfil";
   const { id } = resolvedParams;
 
   const { period, changePeriod } = useEra();

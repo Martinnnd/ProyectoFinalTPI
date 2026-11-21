@@ -1,4 +1,4 @@
-import { Bookmark, Grid3x3, MapPin, Users } from "lucide-react";
+import { Bookmark, Grid3x3, MapPin, Users, Archive } from "lucide-react";
 import type { ProfilePresentation } from "./profileTypes";
 
 export default function ProfileShortcuts({
@@ -13,6 +13,7 @@ export default function ProfileShortcuts({
   onOpenSaved,
   onOpenTagged,
   onOpenMap,
+  onOpenCapsules,
 }: {
   author?: string;
   presentation: ProfilePresentation;
@@ -25,6 +26,7 @@ export default function ProfileShortcuts({
   onOpenSaved?: () => void;
   onOpenTagged?: () => void;
   onOpenMap: () => void;
+  onOpenCapsules?: () => void;
 }) {
   return (
     <nav className="profile-shortcuts" aria-label="Secciones del perfil">
@@ -66,6 +68,12 @@ export default function ProfileShortcuts({
         <MapPin size={16} />
         {author ? "Sus lugares" : "Mis lugares"}
       </button>
+      {onOpenCapsules && (
+        <button type="button" onClick={onOpenCapsules}>
+          <Archive size={16} />
+          {author ? "Sus cápsulas" : "Mis cápsulas"}
+        </button>
+      )}
       <span className="profile-motto">{presentation.footer}</span>
     </nav>
   );

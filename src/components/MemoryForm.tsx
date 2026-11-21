@@ -12,6 +12,7 @@ import { buscarUsuarios, type UsuarioBusqueda } from "../userApi";
 import { useOptionalAuth } from "./auth/AuthProvider";
 import { useNotice } from "../context/NoticeProvider";
 import MemoryAttachmentsField from "./MemoryAttachmentsField";
+import PublicationCapsuleSelector from "./capsules/PublicationCapsuleSelector";
 import AccountCategoryStatus from "./account/AccountCategoryStatus";
 import { useAccountCategory } from "../context/AccountCategoryContext";
 import { creationRestriction } from "../accountCategories";
@@ -76,6 +77,11 @@ function MemoryCreationForm({
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [groupsError, setGroupsError] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(groupId ?? "");
+  const [capsuleSelection, setCapsuleSelection] = useState<{ ownerId?: number; ids: number[] }>({
+    ids: [],
+  });
+  const selectedCapsuleIds =
+    capsuleSelection.ownerId === session?.usuarioId ? capsuleSelection.ids : [];
   useEffect(() => {
     const controller = new AbortController();
     getGroups(controller.signal)
@@ -301,6 +307,7 @@ function MemoryCreationForm({
         category: data.get("category") as Memory["category"],
         description,
         groupId: selectedGroupId || undefined,
+        capsuleIds: selectedCapsuleIds,
         hashtags: hashtags.tags,
         taggedUsers: taggedUsers
           .filter((u) => {
@@ -469,6 +476,17 @@ function MemoryCreationForm({
                     : "Todavía no te uniste a ningún grupo. Tu recuerdo se publicará para todos."}
             </small>
           </div>
+          {session && (
+            <PublicationCapsuleSelector
+              key={session.usuarioId}
+              value={selectedCapsuleIds}
+              disabled={saving}
+              onChange={(ids) => {
+                dirty.current = true;
+                setCapsuleSelection({ ownerId: session.usuarioId, ids });
+              }}
+            />
+          )}
           <div className="memory-tag-users-section">
             <label htmlFor="tag-user-input" className="tag-users-label">
               <Users size={15} /> ¿Quiénes estuvieron ahí?

@@ -1,0 +1,6 @@
+.app.view-capsules > .map-toolbar,
+.app.view-capsules .place-search,
+.app.view-capsules .mobile-map-options,
+.app.view-capsules .era-atmosphere {
+  display: none;
+}
