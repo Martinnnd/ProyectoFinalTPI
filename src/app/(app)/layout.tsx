@@ -26,6 +26,7 @@ import "../../eras/70s/tvViews.css";
 import "../../mobile.css";
 import "../../eras/2020s/theme.css";
 import "../../components/auth/guestAccess.css";
+import "../../components/puntos/puntos.css";
 
 import { EraProvider } from "../../context/EraContext";
 import { FollowProvider } from "../../context/FollowContext";

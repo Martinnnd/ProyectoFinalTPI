@@ -45,7 +45,7 @@ describe("privacidad y contratos de cápsulas", () => {
   });
 
   it("conserva o retira la portada subida mediante una edición JSON y admite reemplazarla", async () => {
-    fetch.mockResolvedValue(Response.json({ id: 4 }));
+    fetch.mockImplementation(async () => Response.json({ id: 4 }));
     await updateCapsule(4, { ...input, conservarPortadaSubida: false });
     expect(JSON.parse(String(fetch.mock.calls[0][1]?.body)).conservarPortadaSubida).toBe(false);
     await updateCapsule(4, input, new File(["foto"], "viaje.png", { type: "image/png" }));

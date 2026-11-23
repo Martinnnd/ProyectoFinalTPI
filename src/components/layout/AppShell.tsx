@@ -2,6 +2,7 @@
 
 import AccountCategoryToast from "../account/AccountCategoryToast";
 import { useAccountCategory } from "../../context/AccountCategoryContext";
+import PuntosBalanceChip from "../puntos/PuntosBalanceChip";
 import React, { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -168,14 +169,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         onChange={handlePeriodChange}
         action={
           session ? (
-            <button
-              aria-label="Recordar"
-              className="primary-button time-add-memory"
-              onClick={handleRecordar}
-            >
-              <Plus size={16} />
-              <span>Recordar</span>
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <PuntosBalanceChip />
+              <button
+                aria-label="Recordar"
+                className="primary-button time-add-memory"
+                onClick={handleRecordar}
+              >
+                <Plus size={16} />
+                <span>Recordar</span>
+              </button>
+            </div>
           ) : null
         }
       />
@@ -197,15 +201,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       : "Mi perfil"}
           </strong>
         </div>
-        {session && currentView !== "game" && (
-          <button
-            className="mobile-add-button"
-            aria-label="Sumar mi recuerdo"
-            onClick={handleRecordar}
-          >
-            <Plus size={23} />
-          </button>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {session && <PuntosBalanceChip compact />}
+          {session && currentView !== "game" && (
+            <button
+              className="mobile-add-button"
+              aria-label="Sumar mi recuerdo"
+              onClick={handleRecordar}
+            >
+              <Plus size={23} />
+            </button>
+          )}
+        </div>
       </div>
 
       <button

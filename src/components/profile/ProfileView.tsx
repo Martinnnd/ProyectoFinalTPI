@@ -30,6 +30,7 @@ import {
   leaveGroup,
   type CreateGroupInput,
 } from "../../groupsApi";
+import { confirmarCompraPack } from "../../puntosNostalgiaApi";
 import type { CommunityGroup, Decade, Memory, TierProgress } from "../../types";
 
 export default function ProfileView(props: { targetUsername?: string }) {
@@ -49,6 +50,7 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
   const period = useEraState((state) => state.period);
   const { followingUsers, followers, toggleFollow } = useFollow();
   const setNotice = useNotice((state) => state.setNotice);
+  const showToast = useNotice((state) => state.showToast);
 
   const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
@@ -58,6 +60,45 @@ function ProfileContent({ targetUsername }: { targetUsername?: string }) {
     (profileUser !== null && profileUser.id === session?.usuarioId);
   const usernameToFetch = isOwnProfile ? session?.usuarioId : targetUsername;
   const [revision, setRevision] = useState(0);
+
+  // Manejo de retorno de pago de puntos (Mercado Pago o fallback local)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const puntosParam = params.get("puntos");
+    const compraIdParam = params.get("compraId");
+    const paymentId = params.get("payment_id") || params.get("collection_id") || undefined;
+
+    if (!puntosParam) return;
+
+    if (puntosParam === "exito") {
+      const compraId = Number(compraIdParam);
+      if (Number.isFinite(compraId) && compraId > 0 && paymentId) {
+        confirmarCompraPack(compraId, paymentId)
+          .then((resultado) => {
+            showToast(
+              `¡Pago exitoso! Se acreditaron +${resultado.puntosAcreditados} puntos de nostalgia a tu cuenta.`,
+              "success"
+            );
+          })
+          .catch(() => {
+            // Si el webhook ya lo acreditó o no se pudo validar
+          })
+          .finally(() => {
+            router.replace(pathname);
+          });
+      } else {
+        router.replace(pathname);
+      }
+    } else if (puntosParam === "fallo") {
+      showToast("El pago no pudo completarse. Podés intentar nuevamente.", "error");
+      router.replace(pathname);
+    } else if (puntosParam === "pendiente") {
+      showToast("Tu pago está pendiente de confirmación en Mercado Pago.", "info");
+      router.replace(pathname);
+    }
+  }, [pathname, router, showToast]);
+
   useEffect(() => {
     const refresh = () => setRevision((value) => value + 1);
     window.addEventListener(ACHIEVEMENTS_UPDATED, refresh);
