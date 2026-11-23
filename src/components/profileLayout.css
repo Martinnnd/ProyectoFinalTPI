@@ -18,11 +18,9 @@
   min-width: 0;
 }
 .profile-groups {
-  position: sticky;
-  top: 0;
-  max-height: 100%;
-  overflow: auto;
-  scrollbar-width: thin;
+  position: static;
+  max-height: none;
+  overflow: visible;
 }
 .profile-groups .community-cards {
   grid-template-columns: minmax(0, 1fr);
@@ -109,6 +107,21 @@
 .app.view-profile .profile-category {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.app.view-profile .profile-daily-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.profile-points-isotype {
+  flex: none;
+  width: 20px;
+  height: 17px;
+  object-fit: contain;
+  filter: var(--isotype-shadow);
 }
 .profile-edit-dialog {
   width: min(480px, calc(100vw - 28px));

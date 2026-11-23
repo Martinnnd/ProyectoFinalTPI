@@ -16,6 +16,7 @@ import type { Achievement, Period } from "../../types";
 import type { ProfilePresentation } from "./profileTypes";
 import ReportButton from "../../reports/ReportDialog";
 import { reportTarget } from "../../reports/reportTypes";
+import DailyPointsBadge from "./DailyPointsBadge";
 import PuntosBalanceChip from "../puntos/PuntosBalanceChip";
 
 type FollowList = "followers" | "following";
@@ -172,6 +173,7 @@ export default function ProfileHeader({
                   ) : (
                     <span className="profile-note">{userCategory}</span>
                   )}
+                  {isOwnProfile && session && <DailyPointsBadge key={session.usuarioId} />}
                 </div>
               )}
               {isOwnProfile && <PuntosBalanceChip />}

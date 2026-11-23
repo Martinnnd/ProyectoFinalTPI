@@ -20,10 +20,11 @@ import CommentsPanel from "./CommentsPanel";
 import PublicationsPanel from "./PublicationsPanel";
 import UsersPanel from "./UsersPanel";
 import ReportsPanel from "./ReportsPanel";
+import MusicRankingPanel from "./MusicRankingPanel";
 import ToastViewport from "../components/layout/ToastViewport";
 import styles from "./admin.module.css";
 
-type Section = "overview" | "publications" | "users" | "comments" | "reports";
+type Section = "overview" | "publications" | "users" | "comments" | "reports" | "music";
 
 const sections = [
   { id: "overview" as const, label: "Resumen", icon: LayoutDashboard },
@@ -31,6 +32,7 @@ const sections = [
   { id: "users" as const, label: "Usuarios", icon: Users },
   { id: "comments" as const, label: "Comentarios", icon: MessageSquareText },
   { id: "reports" as const, label: "Reportes", icon: Flag },
+  { id: "music" as const, label: "Ranking musical", icon: BarChart3 },
 ];
 
 export default function AdminDashboard() {
@@ -84,6 +86,7 @@ export default function AdminDashboard() {
         {section === "users" && <UsersPanel currentUserId={session!.usuarioId} />}
         {section === "comments" && <CommentsPanel />}
         {section === "reports" && <ReportsPanel />}
+        {section === "music" && <MusicRankingPanel />}
       </main>
       <ToastViewport />
     </div>
