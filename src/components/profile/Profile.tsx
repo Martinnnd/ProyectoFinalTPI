@@ -1,4 +1,5 @@
 import AccountCategoryStatus from "../account/AccountCategoryStatus";
+import ProfileMusicRanking from "../../musicRanking/ProfileMusicRanking";
 import { useAccountCategory } from "../../context/AccountCategoryContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
@@ -444,11 +445,12 @@ export default function Profile({
         />
       </div>
       {community && (
-        <aside className="profile-groups" aria-label="Mis grupos">
+        <aside className="profile-groups" aria-label="Mis grupos y ranking musical">
           <details className="profile-groups-disclosure">
             <summary>Mis grupos y comunidades</summary>
             {community}
           </details>
+          <ProfileMusicRanking decade={period.decade} />
         </aside>
       )}
     </main>

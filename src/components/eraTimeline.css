@@ -1,5 +1,6 @@
 .app.map-app {
   --time-height: 54px;
+  --isotype-shadow: drop-shadow(0 0 1px rgb(0 0 0 / 70%)) drop-shadow(0 0 4px rgb(0 0 0 / 50%));
   margin-top: var(--time-height);
   height: calc(100dvh - var(--time-height));
 }
@@ -30,7 +31,7 @@
 .time-brand > img {
   display: block;
   object-fit: contain;
-  filter: drop-shadow(0 0 1px rgb(0 0 0 / 70%)) drop-shadow(0 0 4px rgb(0 0 0 / 50%));
+  filter: var(--isotype-shadow);
 }
 .time-brand > span {
   font:
@@ -262,7 +263,9 @@
   display: none;
 }
 
-.app.view-game :is(.activity-dock-options, .system-taskbar) button:not([aria-controls="music-player"]),
+.app.view-game
+  :is(.activity-dock-options, .system-taskbar)
+  button:not([aria-controls="music-player"]),
 .app.view-game .system-taskbar .taskbar-separator {
   display: none;
 }
@@ -459,9 +462,10 @@
 }
 
 /* Each era keeps its own typography and material treatment. */
-.era-1970 .time-brand > img,
-.era-1980 .time-brand > img {
-  filter: drop-shadow(0 0 2px rgb(255 255 255 / 30%)) drop-shadow(0 0 4px rgb(255 255 255 / 20%));
+.app.era-1970,
+.app.era-1980 {
+  --isotype-shadow: drop-shadow(0 0 2px rgb(255 255 255 / 30%))
+    drop-shadow(0 0 4px rgb(255 255 255 / 20%));
 }
 .app.era-1970 .time-navigation {
   color: #eee9dc;
