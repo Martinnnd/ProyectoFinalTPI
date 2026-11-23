@@ -1,5 +1,6 @@
 import MapPickingNotice from "./MapPickingNotice";
 import PinMemoryPreview from "./PinMemoryPreview";
+import TreasureMapLayer from "../treasure/TreasureMapLayer";
 import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
@@ -71,6 +72,7 @@ export default function MapboxMap(
     onFallback: () => void;
     userLocation?: { lat: number; lng: number } | null;
     locationResolved: boolean;
+    treasureEnabled?: boolean;
   },
 ) {
   const period = useEraState((state) => state.period);
@@ -94,6 +96,7 @@ export default function MapboxMap(
   const previewPopup = useRef<mapboxgl.Popup | null>(null);
   const focusedPin = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [treasureVisible, setTreasureVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
   const [controls, setControls] = useState(false);
@@ -479,6 +482,12 @@ export default function MapboxMap(
           previewContent,
         )}
       <div ref={container} className="memory-map" data-mapbox-ready={ready} />
+      <TreasureMapLayer
+        map={ready ? instance.current : null}
+        active={props.active !== false && props.treasureEnabled === true}
+        picking={!!props.picking}
+        onVisibilityChange={setTreasureVisible}
+      />
 
       {controls && (
         <aside id="mapbox-settings" className="mapbox-settings" aria-label="Estilo del mapa">
@@ -538,9 +547,7 @@ export default function MapboxMap(
           </label>
         </aside>
       )}
-      {props.picking && (
-        <MapPickingNotice onCancel={props.onCancel} />
-      )}
+      {props.picking && <MapPickingNotice onCancel={props.onCancel} />}
       {error && (
         <div className="mapbox-status" role="alert">
           {error}
@@ -549,13 +556,16 @@ export default function MapboxMap(
           <button onClick={() => setError(null)}>Cerrar aviso</button>
         </div>
       )}
-      {props.showEmptyState !== false && !props.memories.length && !props.picking && (
-        <div className="map-empty">
-          No hay recuerdos con esta combinación.
-          <br />
-          <small>Probá otra categoría o toda la década.</small>
-        </div>
-      )}
+      {props.showEmptyState !== false &&
+        !props.memories.length &&
+        !props.picking &&
+        !treasureVisible && (
+          <div className="map-empty">
+            No hay recuerdos con esta combinación.
+            <br />
+            <small>Probá otra categoría o toda la década.</small>
+          </div>
+        )}
     </section>
   );
 }

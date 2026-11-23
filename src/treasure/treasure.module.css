@@ -1,0 +1,149 @@
+.clue {
+  margin: 6px 14px 14px;
+  padding: 12px 15px;
+  border-inline-start: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--surface) 90%, var(--accent));
+  color: var(--ink);
+  font: inherit;
+  border-radius: var(--radius);
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.clue p {
+  margin: 7px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.clue a {
+  color: var(--accent);
+  font-size: 12px;
+  text-underline-offset: 3px;
+}
+.clue[data-decade="1970"] {
+  border: 1px dashed var(--line);
+  box-shadow: 2px 3px 0 color-mix(in srgb, var(--ink) 10%, transparent);
+}
+.clue[data-decade="1980"] {
+  border-radius: 0;
+  border: 1px solid var(--accent);
+}
+.clue[data-decade="1990"] {
+  border-radius: 0;
+  border: 2px ridge var(--line);
+}
+.clue[data-decade="2000"] {
+  border-radius: 12px 12px 12px 2px;
+}
+.clue[data-decade="2020"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--surface) 95%, var(--accent));
+}
+.marker {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid #ffe6a6;
+  background: #342513;
+  color: #ffd069;
+  box-shadow:
+    0 3px 14px #0008,
+    0 0 12px #ffc45755;
+  cursor: pointer;
+}
+.marker:hover {
+  background: #65431c;
+}
+.marker:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 5px;
+}
+.marker:disabled {
+  cursor: wait;
+}
+.spark {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  color: #ffe8a8;
+  font-size: 17px;
+}
+.found {
+  width: min(390px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 30px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  font-family: var(--font-body);
+  text-align: center;
+}
+.found::backdrop {
+  background: #0008;
+  backdrop-filter: blur(3px);
+}
+.found .eyebrow {
+  justify-content: center;
+}
+.found h2 {
+  margin: 12px 0;
+  font-size: 25px;
+}
+.found p {
+  line-height: 1.5;
+}
+.found button {
+  padding: 11px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-ink, #fff);
+  font: inherit;
+  cursor: pointer;
+}
+.found button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+.saved {
+  color: var(--muted);
+  font-size: 13px;
+}
+.trophy {
+  color: #cf9623;
+  animation: treasure-arrive 0.5s ease-out;
+}
+.spin {
+  animation: treasure-spin 1s linear infinite;
+}
+@keyframes treasure-arrive {
+  from {
+    transform: translateY(10px) scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes treasure-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trophy,
+  .spin {
+    animation: none;
+  }
+}

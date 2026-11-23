@@ -8,8 +8,9 @@ const MapboxMap = lazy(() => import("./MapboxMap"));
 export type MapProps = ComponentProps<typeof MemoryMap>;
 export default function MainMap({
   onUserLocation,
+  treasureEnabled = false,
   ...props
-}: MapProps & { onUserLocation?: (point: Point | null) => void }) {
+}: MapProps & { onUserLocation?: (point: Point | null) => void; treasureEnabled?: boolean }) {
   const token =
     process.env.NEXT_PUBLIC_MAP_MODE === "2d"
       ? undefined
@@ -128,6 +129,7 @@ export default function MainMap({
         >
           <MapboxMap
             {...mapProps}
+            treasureEnabled={treasureEnabled}
             token={token!}
             onFallback={() => setFallback(true)}
             userLocation={userLocation}

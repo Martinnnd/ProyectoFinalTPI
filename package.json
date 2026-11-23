@@ -18,7 +18,8 @@
     "test:e2e:game": "playwright test --config playwright.decade-game.config.ts",
     "test:e2e:categories": "playwright test --config playwright.categories.config.ts",
     "test:e2e:user-search": "playwright test --config playwright.user-search.config.ts",
-    "test:e2e:mapbox": "playwright test --config playwright.mapbox.config.ts"
+    "test:e2e:mapbox": "playwright test --config playwright.mapbox.config.ts",
+    "test:e2e:treasure": "playwright test --config playwright.treasure.config.ts"
   },
   "dependencies": {
     "@microsoft/signalr": "^10.0.11",

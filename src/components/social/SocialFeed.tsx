@@ -23,6 +23,7 @@ import { LoaderCircle, RefreshCw } from "lucide-react";
 import { feedCache } from "../../sessionQueryCache";
 import { getFeedItemKey, mergeFeedItems } from "../../feedItems";
 import AdSenseSlot from "../ads/AdSenseSlot";
+import TreasureClue from "../../treasure/TreasureClue";
 
 const FEED_AD_AFTER = 4;
 
@@ -577,6 +578,7 @@ export default function SocialFeed({
           <div className="feed-group-directory">{community}</div>
         )}
         <div className="feed-posts">
+          {!selected && !hashtag && tab === "all" && !groupName && <TreasureClue />}
           {(selected ? [selected] : posts).flatMap((memory, index) => {
             const isQuote = Boolean(
               memory.quotedMemory ||

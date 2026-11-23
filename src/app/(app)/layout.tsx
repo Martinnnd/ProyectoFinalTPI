@@ -33,6 +33,7 @@ import { FollowProvider } from "../../context/FollowContext";
 import { RatingsProvider } from "../../context/RatingsContext";
 import AppShell from "../../components/layout/AppShell";
 import { GuestAccessProvider } from "../../components/auth/GuestAccessProvider";
+import { TreasureProvider } from "../../treasure/TreasureProvider";
 
 export const metadata: Metadata = {
   title: "Nostalgiar",
@@ -46,7 +47,9 @@ export default function MainAppLayout({ children }: { children: React.ReactNode 
         <RatingsProvider>
           <FollowProvider>
             <GuestAccessProvider>
-              <AppShell>{children}</AppShell>
+              <TreasureProvider>
+                <AppShell>{children}</AppShell>
+              </TreasureProvider>
             </GuestAccessProvider>
           </FollowProvider>
         </RatingsProvider>

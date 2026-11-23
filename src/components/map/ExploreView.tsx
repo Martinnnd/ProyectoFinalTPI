@@ -354,6 +354,7 @@ function ExploreContent() {
 
       <main id="explore" className="map-canvas">
         <MainMap
+          treasureEnabled
           onUserLocation={setUserLocation}
           active={true}
           showEmptyState={false}
