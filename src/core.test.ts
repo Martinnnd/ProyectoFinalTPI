@@ -70,10 +70,11 @@ describe("Categoría del visitante", () => {
     for (const memories of [1, 4, 250])
       expect(resolveUserCategory(progress({ memories }))).toBe("Nostálgico");
   });
-  it("exige 30 puntos para Aedo y una suscripción para Mnemosine", () => {
+  it("exige 30 puntos para Aedo y 200 puntos para Mnemosine", () => {
     expect(resolveUserCategory(progress({ memories: 12, points: 29 }))).toBe("Nostálgico");
     expect(resolveUserCategory(progress({ memories: 12, points: 30 }))).toBe("Aedo");
-    expect(resolveUserCategory(progress({ subscribed: true }))).toBe("Mnemosine");
+    expect(resolveUserCategory(progress({ memories: 12, points: 199 }))).toBe("Aedo");
+    expect(resolveUserCategory(progress({ memories: 12, points: 200 }))).toBe("Mnemosine");
   });
   it("marca en el diálogo la categoría actual y las que faltan", () => {
     expect(describeTiers(progress({ memories: 3 })).map((tier) => tier.state)).toEqual([

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filterCommunity } from "./groups";
+import { filterCommunity, tabForFeedScope } from "./groups";
 import { initialMemories } from "./data";
 import { loadMemories, saveMemories } from "./storage";
 import type { CommunityGroup } from "./types";
@@ -12,6 +12,21 @@ const group: CommunityGroup = {
   isMember: true,
   isCreator: true,
 };
+
+describe("entrada al feed por contexto", () => {
+  it.each(["groups", "12", "999"])(
+    "abre %s sin depender de que hayan cargado los grupos",
+    (scope) => {
+      expect(tabForFeedScope(scope, "all")).toBe("groups");
+      expect(tabForFeedScope(scope, "following")).toBe("groups");
+    },
+  );
+  it.each(["all", "general", "own"])("conserva la pestaña personal en %s", (scope) => {
+    expect(tabForFeedScope(scope, "all")).toBe("all");
+    expect(tabForFeedScope(scope, "following")).toBe("following");
+    expect(tabForFeedScope(scope, "groups")).toBe("all");
+  });
+});
 
 describe("Grupos en común", () => {
   it("separa publicaciones generales y del grupo, y permite buscar", () => {

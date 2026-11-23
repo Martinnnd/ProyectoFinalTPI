@@ -36,6 +36,31 @@ it("omite AutorId cuando el backend obtiene el usuario del token", () => {
   expect(form.has("AutorId")).toBe(false);
 });
 
+it("envía una sola asociación por cápsula en el multipart compartido con grupos", () => {
+  const form = buildPublicationFormData({ ...memory, capsuleIds: [7, 9, 7] }, 1);
+  expect(form.get("CapsulasIds[0]")).toBe("7");
+  expect(form.get("CapsulasIds[1]")).toBe("9");
+  expect(form.has("CapsulasIds[2]")).toBe(false);
+});
+
+it("mantiene el formulario anterior si no se elige una cápsula", () => {
+  expect(
+    [...buildPublicationFormData(memory).keys()].some((key) => key.startsWith("CapsulasIds")),
+  ).toBe(false);
+});
+
+it("rechaza identificadores de cápsula inválidos antes de enviar la publicación", () => {
+  expect(() => buildPublicationFormData({ ...memory, capsuleIds: [-1] })).toThrow(
+    "cápsulas válidas",
+  );
+  expect(() =>
+    buildPublicationFormData({
+      ...memory,
+      capsuleIds: Array.from({ length: 101 }, (_, i) => i + 1),
+    }),
+  ).toThrow("100");
+});
+
 it("envía el día y mes elegidos a medianoche UTC", () => {
   const form = buildPublicationFormData({ ...memory, date: "1991-04-15", year: 1991 });
   expect(form.get("Fecha")).toBe("1991-04-15T00:00:00.000Z");

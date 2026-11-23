@@ -5,6 +5,7 @@ import { useAuth } from "../components/auth/AuthProvider";
 import { useRouter } from "next/navigation";
 import { ratePublication } from "../publicationsApi";
 import { useNotice } from "./NoticeProvider";
+import { notificarPuntosActualizados } from "../puntosNostalgiaApi";
 
 export type NostalgiaRatings = Record<string, number>;
 
@@ -62,6 +63,7 @@ export function RatingsProvider({ children }: { children: React.ReactNode }) {
             [postId]: res.miPuntuacion!,
           }));
         }
+        notificarPuntosActualizados();
       } catch (error) {
         if (currentAccount.current === currentUserId)
           showToast(error instanceof Error ? error.message : "No se pudo registrar la puntuación.", "error");

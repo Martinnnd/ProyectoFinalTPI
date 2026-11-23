@@ -567,11 +567,13 @@
     transform 180ms ease;
 }
 .post-ratings button[data-filled="true"] img {
-  filter: var(--isotype-shadow);
+
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 70%)) drop-shadow(0 0 3px rgb(0 0 0 / 40%));
   opacity: 1;
 }
 .post-ratings button:not(:disabled):hover img {
   transform: scale(1.13);
+  filter: drop-shadow(0 0 2px #d97706) drop-shadow(0 0 5px rgba(217, 119, 6, 0.6));
   opacity: 1;
 }
 .post-ratings button:focus-visible {

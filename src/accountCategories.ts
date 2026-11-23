@@ -115,7 +115,7 @@ export function permissionDescription(permission: AccountPermission): string {
   if (permission === "AgregarMusicaAPublicacion")
     return "La música en tus publicaciones se habilita desde Aedo. Llegás cuando un recuerdo recibe 30 puntos de nostalgia.";
   if (permission === "AdjuntarVariasFotos")
-    return "Los adjuntos múltiples están disponibles para Mnemosine y cuentas Marca.";
+    return "Los adjuntos múltiples están disponibles para Mnemosine y cuentas Marca. Llegás cuando un recuerdo supera los 200 puntos de nostalgia.";
   return "Publicá tu primer recuerdo para pasar de Errante a Nostálgico y habilitar comentarios, puntuaciones y reposts.";
 }
 
