@@ -127,6 +127,11 @@ export default function AccountCategoryStatus({
               Para llegar a Aedo, uno de tus recuerdos tiene que recibir 30 puntos de nostalgia.
             </p>
           )}
+          {account.categoria.codigo === "Aedo" && (
+            <p>
+              Para llegar a Mnemosine, uno de tus recuerdos tiene que superar los 200 puntos de nostalgia.
+            </p>
+          )}
           <small>
             Los reposts y las etiquetas no consumen cupo. Borrar un recuerdo no devuelve su lugar de
             esa semana.

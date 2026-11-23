@@ -46,8 +46,8 @@ export const userTiers: UserTier[] = [
   },
   {
     name: "Mnemosine",
-    rule: { kind: "subscription" },
-    requirement: "Tenés una suscripción mensual activa.",
+    rule: { kind: "points", min: 200 },
+    requirement: "Uno de tus recuerdos supera los 200 puntos de nostalgia.",
   },
 ];
 
