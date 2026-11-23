@@ -1,0 +1,1861 @@
+/* Chip de Saldo de Puntos en la barra superior */
+.puntos-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface, rgba(255, 255, 255, 0.95));
+  border: 1px solid var(--line, #cbd5e1);
+  color: var(--ink, #0f172a);
+  padding: 4px 10px 4px 6px;
+  border-radius: var(--radius, 20px);
+  font-family: var(--font-body, inherit);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.puntos-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent, #d97706);
+}
+
+.puntos-chip.is-compact {
+  padding: 3px 7px 3px 5px;
+  gap: 5px;
+  font-size: 12px;
+}
+
+.puntos-chip.is-compact .puntos-chip-icon {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+}
+
+.puntos-chip.is-compact .puntos-chip-amount {
+  font-size: 13px;
+}
+
+.puntos-chip.is-compact .puntos-chip-plus {
+  width: 15px;
+  height: 15px;
+  font-size: 11px;
+}
+
+.puntos-chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.puntos-chip:hover .puntos-chip-icon {
+  transform: scale(1.08);
+}
+
+.puntos-chip-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 70%)) drop-shadow(0 0 3px rgb(0 0 0 / 40%));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.puntos-chip:hover .puntos-chip-icon img {
+  filter: drop-shadow(0 0 2px #d97706) drop-shadow(0 0 5px rgba(217, 119, 6, 0.6));
+}
+
+.puntos-chip-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  line-height: 1;
+}
+
+.puntos-chip-amount {
+  font-family: var(--font-display, inherit);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--accent, #c2410c);
+  letter-spacing: -0.2px;
+}
+
+.puntos-chip-label {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.88;
+}
+
+.puntos-chip-plus {
+  background: var(--soft, #ffedd5);
+  color: var(--ink, #9a3412);
+  border-radius: 50%;
+  width: 17px;
+  height: 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  margin-left: 2px;
+  transition: transform 0.15s ease;
+}
+
+.puntos-chip:hover .puntos-chip-plus {
+  transform: scale(1.15);
+}
+
+/* ========================================================
+   ADAPTACIONES DE CONTRASTE Y ESTILO PARA CADA ÉPOCA
+   ======================================================== */
+
+/* --- ÉPOCA 1970 (Canal 70 / Madera y Bronce) --- */
+.era-1970 .puntos-chip {
+  background: linear-gradient(#e6e7de, #babeb1);
+  color: #1e251c;
+  border: 2px outset #c4c8ba;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-display, "Courier New", monospace);
+}
+
+.era-1970 .puntos-chip:hover {
+  background: #f0f2e9;
+  border-color: #d6dacd;
+}
+
+.era-1970 .puntos-chip-icon {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.era-1970 .puntos-chip-icon img {
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 70%)) drop-shadow(0 0 3px rgb(0 0 0 / 50%));
+}
+
+.era-1970 .puntos-chip:hover .puntos-chip-icon img {
+  filter: drop-shadow(0 0 2px #8c4d15) drop-shadow(0 0 4px rgba(140, 77, 21, 0.6));
+}
+
+.era-1970 .puntos-chip-amount {
+  color: #3b2816;
+  font-weight: 900;
+}
+
+.era-1970 .puntos-chip-label {
+  color: #20271e;
+  font-weight: 700;
+}
+
+.era-1970 .puntos-chip-plus {
+  background: #463222;
+  color: #eee9dc;
+  border-radius: 3px;
+  border: 1px solid #735338;
+}
+
+/* --- ÉPOCA 1980 (Synthwave / VHS / Neon Violeta) --- */
+.era-1980 .puntos-chip {
+  background: #200f33;
+  color: #f9edff;
+  border: 1px solid #48f9f0;
+  border-radius: 0;
+  box-shadow: 2.5px 2.5px 0 #ff2cbb, 0 0 12px rgba(72, 249, 240, 0.3);
+  font-family: var(--font-display, "Audiowide", "Courier New", monospace);
+  letter-spacing: 0.5px;
+}
+
+.era-1980 .puntos-chip:hover {
+  background: #371854;
+  box-shadow: 3.5px 3.5px 0 #ff2cbb, 0 0 18px rgba(79, 247, 243, 0.55);
+  border-color: #70fffb;
+}
+
+.era-1980 .puntos-chip-icon {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.era-1980 .puntos-chip-icon img {
+  /* Glow del logo para los 80s */
+  filter: drop-shadow(0 0 2px rgb(255 255 255 / 65%)) drop-shadow(0 0 4px #4ff7f3) drop-shadow(0 0 7px rgba(255, 44, 187, 0.75));
+}
+
+.era-1980 .puntos-chip:hover .puntos-chip-icon img {
+  filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 6px #4ff7f3) drop-shadow(0 0 11px #ff2cbb);
+}
+
+.era-1980 .puntos-chip-amount {
+  color: #4ff7f3;
+  font-weight: 900;
+  text-shadow: 0 0 6px rgba(79, 247, 243, 0.7);
+}
+
+.era-1980 .puntos-chip-label {
+  color: #f9edff;
+  font-weight: 700;
+  text-shadow: 0 0 4px rgba(255, 44, 187, 0.6);
+}
+
+.era-1980 .puntos-chip-plus {
+  background: #ff2cbb;
+  color: #ffffff;
+  border-radius: 0;
+  box-shadow: 0 0 6px #ff2cbb;
+}
+
+/* --- ÉPOCA 1990 (Windows 95 / Gris Biselado 3D) --- */
+.era-1990 .puntos-chip {
+  background: #c0c0c0;
+  color: #000000;
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px #ffffff,
+    inset -1px -1px #000000,
+    inset 2px 2px #dfdfdf,
+    inset -2px -2px #808080;
+  font-family: "Tahoma", "MS Sans Serif", Arial, sans-serif;
+}
+
+.era-1990 .puntos-chip:hover {
+  background: #d4d0c8;
+}
+
+.era-1990 .puntos-chip:active {
+  box-shadow:
+    inset 1px 1px #808080,
+    inset -1px -1px #ffffff,
+    inset 2px 2px #161616,
+    inset -2px -2px #dfdfdf;
+  transform: translate(1px, 1px);
+}
+
+.era-1990 .puntos-chip-icon {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.era-1990 .puntos-chip-icon img {
+  filter: drop-shadow(1px 1px 0 #ffffff) drop-shadow(-1px -1px 0 #808080);
+}
+
+.era-1990 .puntos-chip-amount {
+  color: #000080;
+  font-weight: 900;
+}
+
+.era-1990 .puntos-chip-label {
+  color: #111111;
+  font-weight: 700;
+}
+
+.era-1990 .puntos-chip-plus {
+  background: #008080;
+  color: #ffffff;
+  border-radius: 1px;
+  box-shadow: inset 1px 1px #ffffff, inset -1px -1px #000000;
+}
+
+/* --- ÉPOCA 2000 (Windows XP / MSN / Aqua Brillante) --- */
+.era-2000 .puntos-chip {
+  background: linear-gradient(#ffffff 0%, #d8eaff 100%);
+  color: #174083;
+  border: 1px solid #83a9d3;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 #ffffff, 0 2px 5px rgba(23, 64, 131, 0.2);
+  font-family: var(--font-body, "Verdana", sans-serif);
+}
+
+.era-2000 .puntos-chip:hover {
+  background: linear-gradient(#ffffff, #c7e1ff);
+  border-color: #316ac8;
+  box-shadow: inset 0 1px 0 #ffffff, 0 3px 8px rgba(38, 109, 166, 0.35);
+}
+
+.era-2000 .puntos-chip-icon {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.era-2000 .puntos-chip-icon img {
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 60%)) drop-shadow(0 0 3px rgba(33, 104, 131, 0.4));
+}
+
+.era-2000 .puntos-chip:hover .puntos-chip-icon img {
+  filter: drop-shadow(0 0 2px #d9531e) drop-shadow(0 0 6px rgba(217, 83, 30, 0.6));
+}
+
+.era-2000 .puntos-chip-amount {
+  color: #d9531e;
+  font-weight: 800;
+}
+
+.era-2000 .puntos-chip-label {
+  color: #174083;
+  font-weight: 700;
+}
+
+.era-2000 .puntos-chip-plus {
+  background: linear-gradient(#55a0e9, #1b62b7);
+  color: #ffffff;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+
+/* --- ÉPOCA 2010 (Diario Fotográfico / Minimalismo Cálido) --- */
+.era-2010 .puntos-chip {
+  background: #fffdf8;
+  color: #253b46;
+  border: 1px solid #b5c8ca;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(37, 59, 70, 0.12);
+  font-family: var(--font-body, "Trebuchet MS", sans-serif);
+}
+
+.era-2010 .puntos-chip:hover {
+  background: #f7faf7;
+  border-color: #2b7190;
+  box-shadow: 0 3px 10px rgba(43, 113, 144, 0.2);
+}
+
+.era-2010 .puntos-chip-icon {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.era-2010 .puntos-chip-icon img {
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 60%)) drop-shadow(0 0 3px rgba(33, 104, 131, 0.4));
+}
+
+.era-2010 .puntos-chip-amount {
+  color: #216883;
+  font-weight: 800;
+}
+
+.era-2010 .puntos-chip-label {
+  color: #617782;
+  font-weight: 600;
+}
+
+.era-2010 .puntos-chip-plus {
+  background: #e9f1ef;
+  color: #2b7190;
+  border-radius: 6px;
+}
+
+/* --- ÉPOCA 2020 (Dark Mode / Glassmorphism / Menta Neón) --- */
+.era-2020 .puntos-chip {
+  background: rgba(23, 33, 45, 0.88);
+  color: #f3f7fb;
+  border: 1px solid #4d6871;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(3, 9, 14, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  font-family: var(--font-body, "Inter", sans-serif);
+}
+
+.era-2020 .puntos-chip:hover {
+  background: rgba(28, 48, 60, 0.95);
+  border-color: #5ce5cc;
+  box-shadow: 0 4px 20px rgba(92, 229, 204, 0.25);
+}
+
+.era-2020 .puntos-chip-icon {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.era-2020 .puntos-chip-icon img {
+  /* Glow del logo para 2020s */
+  filter: drop-shadow(0 0 2px rgb(255 255 255 / 60%)) drop-shadow(0 0 5px #5ce5cc) drop-shadow(0 0 8px rgba(92, 229, 204, 0.5));
+}
+
+.era-2020 .puntos-chip:hover .puntos-chip-icon img {
+  filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 7px #5ce5cc) drop-shadow(0 0 12px rgba(92, 229, 204, 0.8));
+}
+
+.era-2020 .puntos-chip-amount {
+  color: #5ce5cc;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(92, 229, 204, 0.4);
+}
+
+.era-2020 .puntos-chip-label {
+  color: #a3b2c2;
+  font-weight: 600;
+}
+
+.era-2020 .puntos-chip-plus {
+  background: #5ce5cc;
+  color: #08242a;
+  box-shadow: 0 0 8px rgba(92, 229, 204, 0.5);
+}
+
+/* Diálogo Modal de Puntos */
+.puntos-dialog {
+  border: none;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  max-width: 580px;
+  width: 92vw;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+}
+
+.puntos-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.puntos-dialog-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+}
+
+.puntos-dialog-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.puntos-dialog-header-logo {
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 70%)) drop-shadow(0 0 4px rgb(0 0 0 / 40%));
+}
+
+.puntos-dialog-header-title h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.puntos-dialog-content {
+  background: #ffffff;
+  color: #0f172a;
+  padding: 20px 24px 24px 24px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Tarjetas de Desglose de Saldo */
+.puntos-balance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.puntos-balance-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  text-align: center;
+}
+
+.puntos-balance-card.total {
+  grid-column: span 2;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fde68a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  padding: 14px 20px;
+}
+
+.puntos-balance-card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.puntos-balance-card.total .puntos-balance-card-label {
+  color: #92400e;
+}
+
+.puntos-balance-card-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.puntos-balance-card.total .puntos-balance-card-val {
+  font-size: 26px;
+  color: #b45309;
+}
+
+.puntos-balance-card-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Grilla de Packs */
+.puntos-packs-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.puntos-packs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 540px) {
+  .puntos-packs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.puntos-pack-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #ffffff;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.puntos-pack-card:hover {
+  border-color: #d97706;
+  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.15);
+  transform: translateY(-2px);
+}
+
+.puntos-pack-card.destacado {
+  border: 2px solid #d97706;
+  background: #fffdf7;
+}
+
+.puntos-pack-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #d97706;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.puntos-pack-icon {
+  margin: 10px auto;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.puntos-pack-icon img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 70%)) drop-shadow(0 0 4px rgb(0 0 0 / 40%));
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.puntos-pack-card:hover .puntos-pack-icon img,
+.puntos-pack-card.destacado .puntos-pack-icon img {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 2px #d97706) drop-shadow(0 0 6px rgba(217, 119, 6, 0.6));
+}
+
+.puntos-pack-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 2px;
+}
+
+.puntos-pack-points {
+  font-size: 20px;
+  font-weight: 800;
+  color: #b45309;
+  margin-bottom: 6px;
+}
+
+.puntos-pack-pricing {
+  margin-bottom: 12px;
+}
+
+.puntos-pack-price-usd {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.puntos-pack-price-ars {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.puntos-buy-button {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  width: 100%;
+}
+
+.puntos-buy-button:hover:not(:disabled) {
+  background: #d97706;
+}
+
+.puntos-buy-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Pantalla de Checkout / Confirmación */
+.puntos-checkout-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 14px;
+  text-align: center;
+}
+
+.puntos-checkout-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.puntos-mp-btn {
+  background: #009ee3;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0, 158, 227, 0.3);
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.puntos-mp-btn:hover {
+  background: #0081ba;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 158, 227, 0.4);
+}
+
+.puntos-success-alert {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Clases base para el modal de puntos */
+.puntos-sparkle-icon {
+  color: #b45309;
+}
+
+.puntos-dialog-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.puntos-checkout-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: #0f172a;
+}
+
+.puntos-checkout-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.puntos-checkout-price {
+  margin: 12px 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.puntos-checkout-price-usd {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.puntos-packs-subheading {
+  font-weight: 400;
+  color: #64748b;
+}
+
+.puntos-packs-loading-text {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ========================================================
+   ADAPTACIONES DE ÉPOCA PARA EL MODAL DE PUNTOS
+   ======================================================== */
+
+/* --- MODAL ÉPOCA 1970 (Madera, bronce, tipografía analógica) --- */
+.puntos-dialog.era-1970 {
+  background: #f4efe4;
+  color: #2b1f13;
+  border: 3px outset #a07850;
+  border-radius: 6px;
+  box-shadow: 0 16px 36px rgba(43, 31, 19, 0.45);
+  font-family: var(--font-display, "Courier New", monospace);
+}
+
+.puntos-dialog.era-1970::backdrop {
+  background: rgba(30, 20, 10, 0.72);
+}
+
+.puntos-dialog.era-1970 .puntos-dialog-header {
+  background: linear-gradient(to bottom, #543924, #3d2716);
+  border-bottom: 2px solid #855b35;
+  color: #f7f3e8;
+  padding: 12px 18px;
+}
+
+.puntos-dialog.era-1970 .puntos-dialog-header-title h2 {
+  color: #fcf9f0;
+  font-family: var(--font-display, "Courier New", monospace);
+  letter-spacing: 0.5px;
+}
+
+.puntos-dialog.era-1970 .puntos-dialog-close {
+  background: #3d2716;
+  color: #f7f3e8;
+  border: 1px outset #855b35;
+  border-radius: 3px;
+}
+
+.puntos-dialog.era-1970 .puntos-dialog-close:hover {
+  background: #543924;
+}
+
+.puntos-dialog.era-1970 .puntos-dialog-content {
+  background: #f4efe4;
+  color: #2b1f13;
+}
+
+.puntos-dialog.era-1970 .puntos-balance-card {
+  background: #eae2d1;
+  border: 1px solid #c9bca6;
+  border-radius: 4px;
+}
+
+.puntos-dialog.era-1970 .puntos-balance-card-label {
+  color: #5c442e;
+}
+
+.puntos-dialog.era-1970 .puntos-balance-card-val {
+  color: #2b1f13;
+}
+
+.puntos-dialog.era-1970 .puntos-balance-card-sub {
+  color: #6e5842;
+}
+
+.puntos-dialog.era-1970 .puntos-balance-card.total {
+  background: linear-gradient(135deg, #e5d8be, #dac9a8);
+  border: 2px solid #b89868;
+}
+
+.puntos-dialog.era-1970 .puntos-balance-card.total .puntos-balance-card-label {
+  color: #6e4016;
+}
+
+.puntos-dialog.era-1970 .puntos-balance-card.total .puntos-balance-card-val {
+  color: #7a3e0f;
+}
+
+.puntos-dialog.era-1970 .puntos-sparkle-icon {
+  color: #7a3e0f;
+}
+
+.puntos-dialog.era-1970 .puntos-packs-heading {
+  color: #2b1f13;
+}
+
+.puntos-dialog.era-1970 .puntos-packs-subheading,
+.puntos-dialog.era-1970 .puntos-packs-loading-text {
+  color: #6e5842;
+}
+
+.puntos-dialog.era-1970 .puntos-pack-card {
+  background: #fbf7ee;
+  border: 2px outset #c9bca6;
+  border-radius: 4px;
+}
+
+.puntos-dialog.era-1970 .puntos-pack-card:hover {
+  border-color: #855b35;
+  box-shadow: 0 4px 12px rgba(133, 91, 53, 0.2);
+}
+
+.puntos-dialog.era-1970 .puntos-pack-card.destacado {
+  border: 2px solid #855b35;
+  background: #f6ecdb;
+}
+
+.puntos-dialog.era-1970 .puntos-pack-badge {
+  background: #855b35;
+  color: #fcf9f0;
+  border-radius: 2px;
+}
+
+.puntos-dialog.era-1970 .puntos-pack-title {
+  color: #2b1f13;
+}
+
+.puntos-dialog.era-1970 .puntos-pack-points {
+  color: #7a3e0f;
+}
+
+.puntos-dialog.era-1970 .puntos-pack-price-usd {
+  color: #2b1f13;
+}
+
+.puntos-dialog.era-1970 .puntos-pack-price-ars {
+  color: #6e5842;
+}
+
+.puntos-dialog.era-1970 .puntos-buy-button {
+  background: linear-gradient(to bottom, #543924, #3d2716);
+  color: #f7f3e8;
+  border: 1px outset #855b35;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.puntos-dialog.era-1970 .puntos-buy-button:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #6d4b30, #543924);
+}
+
+.puntos-dialog.era-1970 .puntos-checkout-box {
+  background: #eae2d1;
+  border: 1px solid #c9bca6;
+  border-radius: 4px;
+}
+
+.puntos-dialog.era-1970 .puntos-checkout-title {
+  color: #2b1f13;
+}
+
+.puntos-dialog.era-1970 .puntos-checkout-subtitle {
+  color: #6e5842;
+}
+
+.puntos-dialog.era-1970 .puntos-checkout-price {
+  color: #7a3e0f;
+}
+
+.puntos-dialog.era-1970 .puntos-checkout-price-usd {
+  color: #6e5842;
+}
+
+/* --- MODAL ÉPOCA 1980 (Synthwave / Arcade Neón / Magenta & Cyan) --- */
+.puntos-dialog.era-1980 {
+  background: #140826;
+  color: #f8ebff;
+  border: 2px solid #00f5ff;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #ff007f, 0 0 25px rgba(0, 245, 255, 0.35);
+  font-family: var(--font-display, "Audiowide", "Courier New", monospace);
+}
+
+.puntos-dialog.era-1980::backdrop {
+  background: rgba(10, 2, 22, 0.88);
+}
+
+.puntos-dialog.era-1980 .puntos-dialog-header {
+  background: #240a3e;
+  border-bottom: 2px solid #ff007f;
+  color: #00f5ff;
+  padding: 14px 20px;
+}
+
+.puntos-dialog.era-1980 .puntos-dialog-header-title h2 {
+  color: #00f5ff;
+  font-family: var(--font-display, "Audiowide", "Courier New", monospace);
+  text-shadow: 0 0 8px rgba(0, 245, 255, 0.75);
+  letter-spacing: 0.5px;
+}
+
+.puntos-dialog.era-1980 .puntos-dialog-close {
+  background: #140826;
+  color: #ff007f;
+  border: 1px solid #ff007f;
+  border-radius: 0;
+  box-shadow: 0 0 6px rgba(255, 0, 127, 0.5);
+}
+
+.puntos-dialog.era-1980 .puntos-dialog-close:hover {
+  background: #ff007f;
+  color: #ffffff;
+}
+
+.puntos-dialog.era-1980 .puntos-dialog-content {
+  background: #140826;
+  color: #f8ebff;
+}
+
+.puntos-dialog.era-1980 .puntos-balance-card {
+  background: #210d3f;
+  border: 1px solid #6b21a8;
+  border-radius: 0;
+  box-shadow: inset 0 0 8px rgba(107, 33, 168, 0.3);
+}
+
+.puntos-dialog.era-1980 .puntos-balance-card-label {
+  color: #00f5ff;
+}
+
+.puntos-dialog.era-1980 .puntos-balance-card-val {
+  color: #ffffff;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+
+.puntos-dialog.era-1980 .puntos-balance-card-sub {
+  color: #c4b5fd;
+}
+
+.puntos-dialog.era-1980 .puntos-balance-card.total {
+  background: linear-gradient(135deg, #2b0b4e, #421074);
+  border: 2px solid #ff007f;
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.35);
+}
+
+.puntos-dialog.era-1980 .puntos-balance-card.total .puntos-balance-card-label {
+  color: #ff80df;
+}
+
+.puntos-dialog.era-1980 .puntos-balance-card.total .puntos-balance-card-val {
+  color: #00f5ff;
+  text-shadow: 0 0 10px #00f5ff;
+}
+
+.puntos-dialog.era-1980 .puntos-balance-card.total .puntos-balance-card-sub {
+  color: #e9d5ff;
+}
+
+.puntos-dialog.era-1980 .puntos-sparkle-icon {
+  color: #ff007f;
+  filter: drop-shadow(0 0 8px #ff007f);
+}
+
+.puntos-dialog.era-1980 .puntos-packs-heading {
+  color: #00f5ff;
+  text-shadow: 0 0 6px rgba(0, 245, 255, 0.5);
+}
+
+.puntos-dialog.era-1980 .puntos-packs-subheading,
+.puntos-dialog.era-1980 .puntos-packs-loading-text {
+  color: #c4b5fd;
+}
+
+.puntos-dialog.era-1980 .puntos-pack-card {
+  background: #1c0a35;
+  border: 1px solid #7928ca;
+  border-radius: 0;
+  box-shadow: 2px 2px 0 #ff007f;
+}
+
+.puntos-dialog.era-1980 .puntos-pack-card:hover {
+  border-color: #00f5ff;
+  box-shadow: 3px 3px 0 #ff007f, 0 0 16px rgba(0, 245, 255, 0.4);
+}
+
+.puntos-dialog.era-1980 .puntos-pack-card.destacado {
+  border: 2px solid #00f5ff;
+  background: #270f49;
+  box-shadow: 3px 3px 0 #ff007f, 0 0 18px rgba(0, 245, 255, 0.35);
+}
+
+.puntos-dialog.era-1980 .puntos-pack-badge {
+  background: #ff007f;
+  color: #ffffff;
+  border-radius: 0;
+  box-shadow: 0 0 8px #ff007f;
+}
+
+.puntos-dialog.era-1980 .puntos-pack-title {
+  color: #ffffff;
+}
+
+.puntos-dialog.era-1980 .puntos-pack-points {
+  color: #00f5ff;
+  text-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
+}
+
+.puntos-dialog.era-1980 .puntos-pack-price-usd {
+  color: #ff80df;
+}
+
+.puntos-dialog.era-1980 .puntos-pack-price-ars {
+  color: #c4b5fd;
+}
+
+.puntos-dialog.era-1980 .puntos-buy-button {
+  background: #ff007f;
+  color: #ffffff;
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
+  font-family: inherit;
+  letter-spacing: 0.5px;
+}
+
+.puntos-dialog.era-1980 .puntos-buy-button:hover:not(:disabled) {
+  background: #00f5ff;
+  color: #140826;
+  box-shadow: 0 0 14px #00f5ff;
+}
+
+.puntos-dialog.era-1980 .puntos-checkout-box {
+  background: #1c0a35;
+  border: 1px solid #7928ca;
+  border-radius: 0;
+}
+
+.puntos-dialog.era-1980 .puntos-checkout-title {
+  color: #00f5ff;
+}
+
+.puntos-dialog.era-1980 .puntos-checkout-subtitle {
+  color: #c4b5fd;
+}
+
+.puntos-dialog.era-1980 .puntos-checkout-price {
+  color: #ff80df;
+}
+
+.puntos-dialog.era-1980 .puntos-checkout-price-usd {
+  color: #c4b5fd;
+}
+
+/* --- MODAL ÉPOCA 1990 (Windows 95 / Dial-Up / 3D Bevel) --- */
+.puntos-dialog.era-1990 {
+  background: #c0c0c0;
+  color: #000000;
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px #ffffff,
+    inset -2px -2px #000000,
+    inset 3px 3px #dfdfdf,
+    inset -3px -3px #808080,
+    0 12px 30px rgba(0, 0, 0, 0.55);
+  font-family: "Tahoma", "MS Sans Serif", Arial, sans-serif;
+}
+
+.puntos-dialog.era-1990::backdrop {
+  background: rgba(0, 128, 128, 0.45);
+}
+
+.puntos-dialog.era-1990 .puntos-dialog-header {
+  background: linear-gradient(90deg, #000080, #1084d0);
+  border-bottom: 2px solid #808080;
+  color: #ffffff;
+  padding: 4px 6px;
+  margin: 3px 3px 0 3px;
+}
+
+.puntos-dialog.era-1990 .puntos-dialog-header-title h2 {
+  color: #ffffff;
+  font-family: "Tahoma", "MS Sans Serif", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.puntos-dialog.era-1990 .puntos-dialog-close {
+  background: #c0c0c0;
+  color: #000000;
+  border-radius: 0;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 1px 1px #ffffff,
+    inset -1px -1px #000000,
+    inset 2px 2px #dfdfdf,
+    inset -2px -2px #808080;
+}
+
+.puntos-dialog.era-1990 .puntos-dialog-close:active {
+  box-shadow:
+    inset 1px 1px #000000,
+    inset -1px -1px #ffffff;
+}
+
+.puntos-dialog.era-1990 .puntos-dialog-content {
+  background: #c0c0c0;
+  color: #000000;
+  padding: 14px;
+}
+
+.puntos-dialog.era-1990 .puntos-balance-card {
+  background: #ffffff;
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px #808080,
+    inset -1px -1px #ffffff,
+    inset 2px 2px #000000,
+    inset -2px -2px #dfdfdf;
+}
+
+.puntos-dialog.era-1990 .puntos-balance-card-label {
+  color: #606060;
+  font-size: 10px;
+}
+
+.puntos-dialog.era-1990 .puntos-balance-card-val {
+  color: #000080;
+}
+
+.puntos-dialog.era-1990 .puntos-balance-card-sub {
+  color: #404040;
+}
+
+.puntos-dialog.era-1990 .puntos-balance-card.total {
+  background: #ffffd8;
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px #808080,
+    inset -1px -1px #ffffff,
+    inset 2px 2px #000000,
+    inset -2px -2px #dfdfdf;
+}
+
+.puntos-dialog.era-1990 .puntos-balance-card.total .puntos-balance-card-label {
+  color: #806000;
+}
+
+.puntos-dialog.era-1990 .puntos-balance-card.total .puntos-balance-card-val {
+  color: #000080;
+}
+
+.puntos-dialog.era-1990 .puntos-sparkle-icon {
+  color: #000080;
+}
+
+.puntos-dialog.era-1990 .puntos-packs-heading {
+  color: #000000;
+}
+
+.puntos-dialog.era-1990 .puntos-packs-subheading,
+.puntos-dialog.era-1990 .puntos-packs-loading-text {
+  color: #555555;
+}
+
+.puntos-dialog.era-1990 .puntos-pack-card {
+  background: #c0c0c0;
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px #ffffff,
+    inset -1px -1px #000000,
+    inset 2px 2px #dfdfdf,
+    inset -2px -2px #808080;
+}
+
+.puntos-dialog.era-1990 .puntos-pack-card:hover {
+  background: #d4d0c8;
+}
+
+.puntos-dialog.era-1990 .puntos-pack-card.destacado {
+  background: #e8e8f8;
+  box-shadow:
+    inset 2px 2px #000080,
+    inset -2px -2px #000080;
+}
+
+.puntos-dialog.era-1990 .puntos-pack-badge {
+  background: #000080;
+  color: #ffffff;
+  border-radius: 0;
+  box-shadow: inset 1px 1px #ffffff, inset -1px -1px #000000;
+}
+
+.puntos-dialog.era-1990 .puntos-pack-title {
+  color: #000000;
+}
+
+.puntos-dialog.era-1990 .puntos-pack-points {
+  color: #000080;
+}
+
+.puntos-dialog.era-1990 .puntos-pack-price-usd {
+  color: #000000;
+}
+
+.puntos-dialog.era-1990 .puntos-pack-price-ars {
+  color: #555555;
+}
+
+.puntos-dialog.era-1990 .puntos-buy-button {
+  background: #c0c0c0;
+  color: #000000;
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px #ffffff,
+    inset -1px -1px #000000,
+    inset 2px 2px #dfdfdf,
+    inset -2px -2px #808080;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.puntos-dialog.era-1990 .puntos-buy-button:hover:not(:disabled) {
+  background: #d4d0c8;
+}
+
+.puntos-dialog.era-1990 .puntos-buy-button:active:not(:disabled) {
+  box-shadow:
+    inset 1px 1px #000000,
+    inset -1px -1px #ffffff,
+    inset 2px 2px #808080,
+    inset -2px -2px #dfdfdf;
+  transform: translate(1px, 1px);
+}
+
+.puntos-dialog.era-1990 .puntos-checkout-box {
+  background: #ffffff;
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px #808080,
+    inset -1px -1px #ffffff,
+    inset 2px 2px #000000,
+    inset -2px -2px #dfdfdf;
+}
+
+.puntos-dialog.era-1990 .puntos-checkout-title {
+  color: #000080;
+}
+
+.puntos-dialog.era-1990 .puntos-checkout-subtitle {
+  color: #555555;
+}
+
+.puntos-dialog.era-1990 .puntos-checkout-price {
+  color: #000080;
+}
+
+.puntos-dialog.era-1990 .puntos-checkout-price-usd {
+  color: #555555;
+}
+
+/* --- MODAL ÉPOCA 2000 (Windows XP / MSN / Aqua Brillante) --- */
+.puntos-dialog.era-2000 {
+  background: #f4f8fe;
+  color: #174083;
+  border: 2px solid #0055ea;
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 85, 234, 0.28);
+  font-family: var(--font-body, "Verdana", sans-serif);
+}
+
+.puntos-dialog.era-2000::backdrop {
+  background: rgba(16, 50, 120, 0.55);
+}
+
+.puntos-dialog.era-2000 .puntos-dialog-header {
+  background: linear-gradient(to bottom, #2b70f8 0%, #0055ea 50%, #0045c4 100%);
+  border-bottom: 1px solid #002d84;
+  color: #ffffff;
+  padding: 10px 18px;
+}
+
+.puntos-dialog.era-2000 .puntos-dialog-header-title h2 {
+  color: #ffffff;
+  font-family: var(--font-body, "Verdana", sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0, 30, 90, 0.7);
+}
+
+.puntos-dialog.era-2000 .puntos-dialog-close {
+  background: linear-gradient(to bottom, #f98e72 0%, #e04423 50%, #b82a0d 100%);
+  color: #ffffff;
+  border: 1px solid #7a1502;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.puntos-dialog.era-2000 .puntos-dialog-close:hover {
+  background: linear-gradient(to bottom, #ffa48c 0%, #eb5535 50%, #c83517 100%);
+}
+
+.puntos-dialog.era-2000 .puntos-dialog-content {
+  background: linear-gradient(to bottom, #f4f8fe, #e5f0fc);
+  color: #174083;
+}
+
+.puntos-dialog.era-2000 .puntos-balance-card {
+  background: linear-gradient(to bottom, #ffffff, #eaf2ff);
+  border: 1px solid #99bfe8;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 #ffffff, 0 2px 5px rgba(23, 64, 131, 0.1);
+}
+
+.puntos-dialog.era-2000 .puntos-balance-card-label {
+  color: #336699;
+}
+
+.puntos-dialog.era-2000 .puntos-balance-card-val {
+  color: #174083;
+}
+
+.puntos-dialog.era-2000 .puntos-balance-card-sub {
+  color: #557799;
+}
+
+.puntos-dialog.era-2000 .puntos-balance-card.total {
+  background: linear-gradient(135deg, #fff7eb, #ffe8cc);
+  border: 1.5px solid #ffb266;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 #ffffff, 0 3px 8px rgba(217, 83, 30, 0.15);
+}
+
+.puntos-dialog.era-2000 .puntos-balance-card.total .puntos-balance-card-label {
+  color: #a84308;
+}
+
+.puntos-dialog.era-2000 .puntos-balance-card.total .puntos-balance-card-val {
+  color: #d9531e;
+}
+
+.puntos-dialog.era-2000 .puntos-balance-card.total .puntos-balance-card-sub {
+  color: #8c4c1a;
+}
+
+.puntos-dialog.era-2000 .puntos-sparkle-icon {
+  color: #d9531e;
+  filter: drop-shadow(0 0 4px rgba(217, 83, 30, 0.4));
+}
+
+.puntos-dialog.era-2000 .puntos-packs-heading {
+  color: #174083;
+}
+
+.puntos-dialog.era-2000 .puntos-packs-subheading,
+.puntos-dialog.era-2000 .puntos-packs-loading-text {
+  color: #557799;
+}
+
+.puntos-dialog.era-2000 .puntos-pack-card {
+  background: linear-gradient(to bottom, #ffffff, #f0f6ff);
+  border: 1px solid #9ec3ee;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 #ffffff, 0 2px 6px rgba(0, 85, 234, 0.08);
+}
+
+.puntos-dialog.era-2000 .puntos-pack-card:hover {
+  border-color: #316ac8;
+  box-shadow: inset 0 1px 0 #ffffff, 0 4px 12px rgba(49, 106, 200, 0.25);
+}
+
+.puntos-dialog.era-2000 .puntos-pack-card.destacado {
+  border: 2px solid #d9531e;
+  background: linear-gradient(to bottom, #ffffff, #fff5eb);
+  box-shadow: 0 4px 12px rgba(217, 83, 30, 0.2);
+}
+
+.puntos-dialog.era-2000 .puntos-pack-badge {
+  background: linear-gradient(to bottom, #f58442, #d9531e);
+  color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.puntos-dialog.era-2000 .puntos-pack-title {
+  color: #174083;
+}
+
+.puntos-dialog.era-2000 .puntos-pack-points {
+  color: #d9531e;
+}
+
+.puntos-dialog.era-2000 .puntos-pack-price-usd {
+  color: #174083;
+}
+
+.puntos-dialog.era-2000 .puntos-pack-price-ars {
+  color: #557799;
+}
+
+.puntos-dialog.era-2000 .puntos-buy-button {
+  background: linear-gradient(to bottom, #4ca6fe 0%, #1f77d0 50%, #1059a8 100%);
+  color: #ffffff;
+  border: 1px solid #0d4685;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.15);
+  font-family: inherit;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.puntos-dialog.era-2000 .puntos-buy-button:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #63b3ff 0%, #308ce8 50%, #166dc7 100%);
+}
+
+.puntos-dialog.era-2000 .puntos-checkout-box {
+  background: linear-gradient(to bottom, #ffffff, #eaf2ff);
+  border: 1px solid #99bfe8;
+  border-radius: 8px;
+}
+
+.puntos-dialog.era-2000 .puntos-checkout-title {
+  color: #174083;
+}
+
+.puntos-dialog.era-2000 .puntos-checkout-subtitle {
+  color: #557799;
+}
+
+.puntos-dialog.era-2000 .puntos-checkout-price {
+  color: #d9531e;
+}
+
+.puntos-dialog.era-2000 .puntos-checkout-price-usd {
+  color: #557799;
+}
+
+/* --- MODAL ÉPOCA 2010 (Minimalismo Cálido / Hipster Flat) --- */
+.puntos-dialog.era-2010 {
+  background: #fffdfa;
+  color: #253b46;
+  border: 1px solid #b5c8ca;
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(37, 59, 70, 0.16);
+  font-family: var(--font-body, "Trebuchet MS", sans-serif);
+}
+
+.puntos-dialog.era-2010::backdrop {
+  background: rgba(37, 59, 70, 0.6);
+}
+
+.puntos-dialog.era-2010 .puntos-dialog-header {
+  background: #f3ede2;
+  border-bottom: 1px solid #e0d8ca;
+  color: #253b46;
+  padding: 16px 22px;
+}
+
+.puntos-dialog.era-2010 .puntos-dialog-header-title h2 {
+  color: #253b46;
+  font-family: var(--font-body, "Trebuchet MS", sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.puntos-dialog.era-2010 .puntos-dialog-close {
+  background: transparent;
+  color: #253b46;
+  border: 1px solid #d8cfc0;
+  border-radius: 6px;
+}
+
+.puntos-dialog.era-2010 .puntos-dialog-close:hover {
+  background: #e4dcce;
+}
+
+.puntos-dialog.era-2010 .puntos-dialog-content {
+  background: #fffdfa;
+  color: #253b46;
+}
+
+.puntos-dialog.era-2010 .puntos-balance-card {
+  background: #f7faf7;
+  border: 1px solid #dbe6e4;
+  border-radius: 10px;
+}
+
+.puntos-dialog.era-2010 .puntos-balance-card-label {
+  color: #617782;
+}
+
+.puntos-dialog.era-2010 .puntos-balance-card-val {
+  color: #216883;
+}
+
+.puntos-dialog.era-2010 .puntos-balance-card-sub {
+  color: #617782;
+}
+
+.puntos-dialog.era-2010 .puntos-balance-card.total {
+  background: linear-gradient(135deg, #fdf6ea, #faebd2);
+  border: 1px solid #e5cc9c;
+  border-radius: 10px;
+}
+
+.puntos-dialog.era-2010 .puntos-balance-card.total .puntos-balance-card-label {
+  color: #8c5a17;
+}
+
+.puntos-dialog.era-2010 .puntos-balance-card.total .puntos-balance-card-val {
+  color: #9c6114;
+}
+
+.puntos-dialog.era-2010 .puntos-balance-card.total .puntos-balance-card-sub {
+  color: #8c5a17;
+}
+
+.puntos-dialog.era-2010 .puntos-sparkle-icon {
+  color: #9c6114;
+}
+
+.puntos-dialog.era-2010 .puntos-packs-heading {
+  color: #253b46;
+}
+
+.puntos-dialog.era-2010 .puntos-packs-subheading,
+.puntos-dialog.era-2010 .puntos-packs-loading-text {
+  color: #617782;
+}
+
+.puntos-dialog.era-2010 .puntos-pack-card {
+  background: #ffffff;
+  border: 1px solid #dbe6e4;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(37, 59, 70, 0.05);
+}
+
+.puntos-dialog.era-2010 .puntos-pack-card:hover {
+  border-color: #216883;
+  box-shadow: 0 6px 16px rgba(33, 104, 131, 0.15);
+}
+
+.puntos-dialog.era-2010 .puntos-pack-card.destacado {
+  border: 2px solid #216883;
+  background: #f7fbfa;
+}
+
+.puntos-dialog.era-2010 .puntos-pack-badge {
+  background: #216883;
+  color: #ffffff;
+  border-radius: 6px;
+}
+
+.puntos-dialog.era-2010 .puntos-pack-title {
+  color: #253b46;
+}
+
+.puntos-dialog.era-2010 .puntos-pack-points {
+  color: #216883;
+}
+
+.puntos-dialog.era-2010 .puntos-pack-price-usd {
+  color: #253b46;
+}
+
+.puntos-dialog.era-2010 .puntos-pack-price-ars {
+  color: #617782;
+}
+
+.puntos-dialog.era-2010 .puntos-buy-button {
+  background: #216883;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.puntos-dialog.era-2010 .puntos-buy-button:hover:not(:disabled) {
+  background: #185168;
+}
+
+.puntos-dialog.era-2010 .puntos-checkout-box {
+  background: #f7faf7;
+  border: 1px solid #dbe6e4;
+  border-radius: 10px;
+}
+
+.puntos-dialog.era-2010 .puntos-checkout-title {
+  color: #253b46;
+}
+
+.puntos-dialog.era-2010 .puntos-checkout-subtitle {
+  color: #617782;
+}
+
+.puntos-dialog.era-2010 .puntos-checkout-price {
+  color: #216883;
+}
+
+.puntos-dialog.era-2010 .puntos-checkout-price-usd {
+  color: #617782;
+}
+
+/* --- MODAL ÉPOCA 2020 (Dark OLED / Cyber Glassmorphism / Menta Neón) --- */
+.puntos-dialog.era-2020 {
+  background: rgba(16, 24, 34, 0.96);
+  color: #f3f7fb;
+  border: 1px solid #3d5564;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(92, 229, 204, 0.12);
+  backdrop-filter: blur(20px);
+  font-family: var(--font-body, "Inter", sans-serif);
+}
+
+.puntos-dialog.era-2020::backdrop {
+  background: rgba(5, 10, 16, 0.82);
+}
+
+.puntos-dialog.era-2020 .puntos-dialog-header {
+  background: #0d1520;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f3f7fb;
+  padding: 16px 22px;
+}
+
+.puntos-dialog.era-2020 .puntos-dialog-header-title h2 {
+  color: #f3f7fb;
+  font-family: var(--font-body, "Inter", sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.puntos-dialog.era-2020 .puntos-dialog-close {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f3f7fb;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.puntos-dialog.era-2020 .puntos-dialog-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.puntos-dialog.era-2020 .puntos-dialog-content {
+  background: rgba(16, 24, 34, 0.96);
+  color: #f3f7fb;
+}
+
+.puntos-dialog.era-2020 .puntos-balance-card {
+  background: rgba(23, 33, 45, 0.75);
+  border: 1px solid #2a3c48;
+  border-radius: 12px;
+}
+
+.puntos-dialog.era-2020 .puntos-balance-card-label {
+  color: #8c9ea8;
+}
+
+.puntos-dialog.era-2020 .puntos-balance-card-val {
+  color: #f3f7fb;
+}
+
+.puntos-dialog.era-2020 .puntos-balance-card-sub {
+  color: #8c9ea8;
+}
+
+.puntos-dialog.era-2020 .puntos-balance-card.total {
+  background: linear-gradient(135deg, rgba(16, 50, 48, 0.7), rgba(15, 25, 35, 0.85));
+  border: 1px solid rgba(92, 229, 204, 0.45);
+  border-radius: 12px;
+  box-shadow: 0 0 16px rgba(92, 229, 204, 0.15);
+}
+
+.puntos-dialog.era-2020 .puntos-balance-card.total .puntos-balance-card-label {
+  color: #7be0cc;
+}
+
+.puntos-dialog.era-2020 .puntos-balance-card.total .puntos-balance-card-val {
+  color: #5ce5cc;
+  text-shadow: 0 0 10px rgba(92, 229, 204, 0.5);
+}
+
+.puntos-dialog.era-2020 .puntos-balance-card.total .puntos-balance-card-sub {
+  color: #a3b2c2;
+}
+
+.puntos-dialog.era-2020 .puntos-sparkle-icon {
+  color: #5ce5cc;
+  filter: drop-shadow(0 0 8px rgba(92, 229, 204, 0.6));
+}
+
+.puntos-dialog.era-2020 .puntos-packs-heading {
+  color: #f3f7fb;
+}
+
+.puntos-dialog.era-2020 .puntos-packs-subheading,
+.puntos-dialog.era-2020 .puntos-packs-loading-text {
+  color: #8c9ea8;
+}
+
+.puntos-dialog.era-2020 .puntos-pack-card {
+  background: rgba(23, 33, 45, 0.65);
+  border: 1px solid #2a3c48;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.puntos-dialog.era-2020 .puntos-pack-card:hover {
+  border-color: #5ce5cc;
+  box-shadow: 0 0 20px rgba(92, 229, 204, 0.25);
+}
+
+.puntos-dialog.era-2020 .puntos-pack-card.destacado {
+  border: 1.5px solid #5ce5cc;
+  background: rgba(24, 40, 50, 0.85);
+  box-shadow: 0 0 18px rgba(92, 229, 204, 0.2);
+}
+
+.puntos-dialog.era-2020 .puntos-pack-badge {
+  background: #5ce5cc;
+  color: #08242a;
+  font-weight: 800;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(92, 229, 204, 0.5);
+}
+
+.puntos-dialog.era-2020 .puntos-pack-title {
+  color: #f3f7fb;
+}
+
+.puntos-dialog.era-2020 .puntos-pack-points {
+  color: #5ce5cc;
+  text-shadow: 0 0 6px rgba(92, 229, 204, 0.4);
+}
+
+.puntos-dialog.era-2020 .puntos-pack-price-usd {
+  color: #f3f7fb;
+}
+
+.puntos-dialog.era-2020 .puntos-pack-price-ars {
+  color: #8c9ea8;
+}
+
+.puntos-dialog.era-2020 .puntos-buy-button {
+  background: linear-gradient(135deg, #5ce5cc, #38bdf8);
+  color: #08242a;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(92, 229, 204, 0.35);
+}
+
+.puntos-dialog.era-2020 .puntos-buy-button:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(92, 229, 204, 0.6);
+  filter: brightness(1.1);
+}
+
+.puntos-dialog.era-2020 .puntos-checkout-box {
+  background: rgba(23, 33, 45, 0.75);
+  border: 1px solid #2a3c48;
+  border-radius: 12px;
+}
+
+.puntos-dialog.era-2020 .puntos-checkout-title {
+  color: #5ce5cc;
+}
+
+.puntos-dialog.era-2020 .puntos-checkout-subtitle {
+  color: #8c9ea8;
+}
+
+.puntos-dialog.era-2020 .puntos-checkout-price {
+  color: #5ce5cc;
+}
+
+.puntos-dialog.era-2020 .puntos-checkout-price-usd {
+  color: #8c9ea8;
+}

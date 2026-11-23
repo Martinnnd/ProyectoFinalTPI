@@ -8,6 +8,103 @@ const session = {
   esAdmin: false,
 };
 
+for (const destination of ["/feed?scope=12", "/feed?tab=groups&scope=12"]) {
+  test(`abre directamente el grupo sin consultar Para vos: ${destination}`, async ({ page }) => {
+    await mockApi(page);
+    const feedRequests: string[] = [];
+    let releaseGroups!: () => void;
+    let releaseMemories!: () => void;
+    const groupsGate = new Promise<void>((resolve) => {
+      releaseGroups = resolve;
+    });
+    const memoriesGate = new Promise<void>((resolve) => {
+      releaseMemories = resolve;
+    });
+    await page.route("**/api/feed/**", (route) => {
+      if (route.request().method() !== "OPTIONS")
+        feedRequests.push(new URL(route.request().url()).pathname);
+      return route.fulfill({ json: { items: [], siguienteCursor: null, hayMas: false } });
+    });
+    await page.route("**/api/grupos", async (route) => {
+      await groupsGate;
+      await route.fulfill({
+        json: [
+          {
+            id: 12,
+            nombre: "Nuestro barrio",
+            descripcion: "Historias del barrio",
+            decada: 2020,
+            esIntegrante: true,
+            esCreador: true,
+          },
+        ],
+      });
+    });
+    await page.route("**/api/grupos/12/recuerdos", async (route) => {
+      await memoriesGate;
+      await route.fulfill({
+        json: [
+          {
+            id: 73,
+            titulo: "Recuerdo publicado en el grupo",
+            descripcion: "Un recuerdo también incluido en dos cápsulas",
+            fecha: "2022-12-18T00:00:00Z",
+            fechaCreacion: "2026-11-17T12:00:00Z",
+            categoria: 0,
+            urlMultimedia: "",
+            tipoMultimedia: 0,
+            autor: { id: 1, username: "ana" },
+            lugar: { nombre: "Plaza", latitud: -34, longitud: -58 },
+            grupo: { id: 12 },
+          },
+        ],
+      });
+    });
+    try {
+      await page.goto(destination);
+      await expect(
+        page.getByRole("button", { name: "Mis grupos", exact: true }).first(),
+      ).toHaveAttribute("aria-pressed", "true");
+      expect(feedRequests).toEqual([]);
+      releaseGroups();
+      await expect(
+        page.getByRole("heading", { name: "Nuestro barrio", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("status").filter({ hasText: "Cargando recuerdos del grupo" }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Este grupo no tiene publicaciones para esta época y categoría", {
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      releaseMemories();
+      await expect(
+        page.getByRole("heading", { name: "Recuerdo publicado en el grupo", exact: true }),
+      ).toBeVisible();
+      expect(feedRequests).toEqual([]);
+      await page.getByRole("button", { name: "Para vos", exact: true }).click();
+      await expect
+        .poll(() => feedRequests.some((path) => path === "/api/feed/para-vos"))
+        .toBe(true);
+      await expect(page.getByRole("button", { name: "Para vos", exact: true })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await page.goBack();
+      await expect(
+        page.getByRole("heading", { name: "Nuestro barrio", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Mis grupos", exact: true }).first(),
+      ).toHaveAttribute("aria-pressed", "true");
+    } finally {
+      releaseGroups();
+      releaseMemories();
+    }
+  });
+}
+
 async function mockApi(page: Page) {
   let createdBody: Record<string, unknown> | null = null;
 
