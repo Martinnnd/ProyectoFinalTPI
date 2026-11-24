@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, LockKeyhole, Mail, User } from "lucide-react";
 import { AuthError } from "./authErrors";
 import { useAuth } from "./AuthProvider";
+import GoogleLoginButton from "./GoogleLoginButton";
 import { useNotice } from "../../context/NoticeProvider";
 import styles from "./auth.module.css";
 
@@ -20,7 +21,7 @@ export default function AuthForm({
   returnTo?: string;
 }) {
   const router = useRouter();
-  const { login, register } = useAuth();
+  const { login, register, status } = useAuth();
   const showToast = useNotice((state) => state.showToast);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -28,6 +29,7 @@ export default function AuthForm({
   const [confirmation, setConfirmation] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [procesandoGoogle, setProcesandoGoogle] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const isRegister = mode === "registro";
@@ -56,6 +58,7 @@ export default function AuthForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (procesandoGoogle || submitting) return;
     const validationErrors = validate();
     setFieldErrors(validationErrors);
     setError("");
@@ -197,11 +200,20 @@ export default function AuthForm({
           </label>
         )}
 
-        <button className={styles.submit} type="submit" disabled={submitting}>
+        <button className={styles.submit} type="submit" disabled={submitting || procesandoGoogle}>
           {submitting && <Loader2 className={styles.spinner} size={18} aria-hidden="true" />}
           {submitting ? "Procesando…" : isRegister ? "Crear mi cuenta" : "Ingresar"}
         </button>
       </form>
+
+      {!isRegister && status !== "loading" && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+        <GoogleLoginButton
+          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+          returnTo={returnTo}
+          disabled={submitting}
+          onBusy={setProcesandoGoogle}
+        />
+      )}
 
       <p className={styles.switchMode}>
         {isRegister ? "¿Ya tenés una cuenta?" : "¿Todavía no tenés cuenta?"}{" "}

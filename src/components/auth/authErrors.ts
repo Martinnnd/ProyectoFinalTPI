@@ -3,6 +3,7 @@ export class AuthError extends Error {
     message: string,
     public readonly status: number,
     public readonly fields: Record<string, string> = {},
+    public readonly code?: string,
   ) {
     super(message);
     this.name = "AuthError";
@@ -10,6 +11,7 @@ export class AuthError extends Error {
 }
 
 type ApiProblem = {
+  codigo?: string;
   mensaje?: string;
   detail?: string;
   title?: string;
@@ -52,5 +54,6 @@ export async function toAuthError(response: Response): Promise<AuthError> {
     problem?.mensaje ?? problem?.detail ?? firstFieldError ?? problem?.title ?? fallback,
     response.status,
     fields,
+    problem?.codigo,
   );
 }

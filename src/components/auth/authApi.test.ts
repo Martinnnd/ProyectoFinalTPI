@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { loginRequest, registerRequest } from "./authApi";
+import { googleNonceRequest, loginGoogleRequest, loginRequest, registerRequest } from "./authApi";
 import { AuthError } from "./authErrors";
 
 const session = {
@@ -72,4 +72,22 @@ it("convierte los errores del backend en errores de autenticación", async () =>
       contrasena: "password123",
     }),
   ).rejects.toMatchObject({ status: 409, name: "AuthError" } satisfies Partial<AuthError>);
+});
+
+it("pide un desafío y envía la credencial de Google con las cookies de sesión", async () => {
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json({ nonce: "desafio-test" }))
+    .mockResolvedValueOnce(Response.json(session));
+  vi.stubGlobal("fetch", fetch);
+
+  await expect(googleNonceRequest(new AbortController().signal)).resolves.toBe("desafio-test");
+  await expect(loginGoogleRequest("credencial-test")).resolves.toEqual(session);
+  expect(fetch.mock.calls[0][0]).toMatch(/\/api\/auth\/google\/nonce$/);
+  expect(fetch.mock.calls[1][0]).toMatch(/\/api\/auth\/google$/);
+  for (const [, request] of fetch.mock.calls) {
+    expect(request.credentials).toBe("include");
+    expect(request.headers["X-Nostalgiar-Request"]).toBe("1");
+  }
+  expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({ credential: "credencial-test" });
 });

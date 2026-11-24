@@ -166,6 +166,18 @@
   color: var(--muted);
   font-size: 0.9rem;
 }
+.googleLogin {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  color: var(--ink);
+}
+.googleLogin p {
+  margin: 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
 .switchMode a {
   color: var(--ink);
   font-weight: 800;

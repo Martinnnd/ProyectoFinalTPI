@@ -9,7 +9,7 @@ const authHeaders = {
   "X-Nostalgiar-Request": "1",
 };
 
-async function authRequest(path: string, body?: object): Promise<AuthSession> {
+async function postAuth(path: string, body?: object, signal?: AbortSignal): Promise<Response> {
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}/api/auth/${path}`, {
@@ -17,13 +17,20 @@ async function authRequest(path: string, body?: object): Promise<AuthSession> {
       headers: authHeaders,
       credentials: "include",
       body: body ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.timeout(10_000),
+      signal: signal
+        ? AbortSignal.any([signal, AbortSignal.timeout(10_000)])
+        : AbortSignal.timeout(10_000),
     });
   } catch {
     throw new Error("No pudimos conectar con el servidor. Comprobá que el backend esté encendido.");
   }
 
   if (!response.ok) throw await toAuthError(response);
+  return response;
+}
+
+async function authRequest(path: string, body?: object): Promise<AuthSession> {
+  const response = await postAuth(path, body);
   const { logrosNuevos, ...session }: AuthSession & { logrosNuevos?: AchievementState[] } =
     await response.json();
   rememberLoginAchievements(session.usuarioId, logrosNuevos);
@@ -32,6 +39,19 @@ async function authRequest(path: string, body?: object): Promise<AuthSession> {
 
 export function loginRequest(credentials: LoginCredentials): Promise<AuthSession> {
   return authRequest("login", credentials);
+}
+
+export async function googleNonceRequest(signal: AbortSignal): Promise<string> {
+  const response = await postAuth("google/nonce", undefined, signal);
+  const data = (await response.json()) as { nonce?: unknown };
+  if (typeof data.nonce !== "string" || !data.nonce) {
+    throw new Error("No pudimos preparar el inicio de sesión con Google.");
+  }
+  return data.nonce;
+}
+
+export function loginGoogleRequest(credential: string, contrasena?: string): Promise<AuthSession> {
+  return authRequest("google", { credential, contrasena });
 }
 
 export function registerRequest({

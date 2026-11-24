@@ -9,7 +9,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { loginRequest, logoutRequest, refreshSessionRequest, registerRequest } from "./authApi";
+import {
+  loginGoogleRequest,
+  loginRequest,
+  logoutRequest,
+  refreshSessionRequest,
+  registerRequest,
+} from "./authApi";
 import {
   AUTH_CHANGE_EVENT,
   beginAuthInit,
@@ -26,6 +32,7 @@ export type AuthContextValue = {
   status: AuthStatus;
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<AuthSession>;
+  loginGoogle: (credential: string, contrasena?: string) => Promise<AuthSession>;
   register: (credentials: RegisterCredentials) => Promise<AuthSession>;
   logout: () => Promise<void>;
 };
@@ -83,21 +90,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async (credentials: LoginCredentials) => {
-    const nextSession = await loginRequest(credentials);
+  const aplicarSesion = useCallback((nextSession: AuthSession) => {
     storeSession(nextSession);
     setSession(nextSession);
     setStatus("authenticated");
     return nextSession;
   }, []);
 
-  const register = useCallback(async (credentials: RegisterCredentials) => {
-    const nextSession = await registerRequest(credentials);
-    storeSession(nextSession);
-    setSession(nextSession);
-    setStatus("authenticated");
-    return nextSession;
-  }, []);
+  const login = useCallback(
+    async (credentials: LoginCredentials) => aplicarSesion(await loginRequest(credentials)),
+    [aplicarSesion],
+  );
+
+  const loginGoogle = useCallback(
+    async (credential: string, contrasena?: string) =>
+      aplicarSesion(await loginGoogleRequest(credential, contrasena)),
+    [aplicarSesion],
+  );
+
+  const register = useCallback(
+    async (credentials: RegisterCredentials) => aplicarSesion(await registerRequest(credentials)),
+    [aplicarSesion],
+  );
 
   const logout = useCallback(async () => {
     try {
@@ -115,10 +129,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       isAuthenticated: status === "authenticated",
       login,
+      loginGoogle,
       register,
       logout,
     }),
-    [session, status, login, register, logout],
+    [session, status, login, loginGoogle, register, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
