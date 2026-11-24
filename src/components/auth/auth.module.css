@@ -178,6 +178,18 @@
   font-size: 0.9rem;
   text-align: center;
 }
+.googleAccion:not([hidden]) {
+  display: grid;
+  min-height: 40px;
+  place-items: center;
+}
+.googleCancelar {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-decoration: underline;
+  cursor: pointer;
+}
 .switchMode a {
   color: var(--ink);
   font-weight: 800;

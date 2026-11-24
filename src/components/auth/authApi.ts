@@ -2,7 +2,12 @@ import { API_BASE_URL } from "../../apiConfig";
 import { rememberLoginAchievements } from "../../loginAchievements";
 import type { AchievementState } from "../../profileApi";
 import { toAuthError } from "./authErrors";
-import type { AuthSession, LoginCredentials, RegisterCredentials } from "./authTypes";
+import type {
+  AuthSession,
+  GoogleLoginCredentials,
+  LoginCredentials,
+  RegisterCredentials,
+} from "./authTypes";
 
 const authHeaders = {
   "Content-Type": "application/json",
@@ -50,8 +55,8 @@ export async function googleNonceRequest(signal: AbortSignal): Promise<string> {
   return data.nonce;
 }
 
-export function loginGoogleRequest(credential: string, contrasena?: string): Promise<AuthSession> {
-  return authRequest("google", { credential, contrasena });
+export function loginGoogleRequest(credentials: GoogleLoginCredentials): Promise<AuthSession> {
+  return authRequest("google", credentials);
 }
 
 export function registerRequest({

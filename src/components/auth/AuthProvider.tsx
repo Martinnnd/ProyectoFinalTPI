@@ -25,14 +25,20 @@ import {
   storeSession,
   tokenExpiresAt,
 } from "./authStorage";
-import type { AuthSession, AuthStatus, LoginCredentials, RegisterCredentials } from "./authTypes";
+import type {
+  AuthSession,
+  AuthStatus,
+  GoogleLoginCredentials,
+  LoginCredentials,
+  RegisterCredentials,
+} from "./authTypes";
 
 export type AuthContextValue = {
   session: AuthSession | null;
   status: AuthStatus;
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<AuthSession>;
-  loginGoogle: (credential: string, contrasena?: string) => Promise<AuthSession>;
+  loginGoogle: (credentials: GoogleLoginCredentials) => Promise<AuthSession>;
   register: (credentials: RegisterCredentials) => Promise<AuthSession>;
   logout: () => Promise<void>;
 };
@@ -103,8 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const loginGoogle = useCallback(
-    async (credential: string, contrasena?: string) =>
-      aplicarSesion(await loginGoogleRequest(credential, contrasena)),
+    async (credentials: GoogleLoginCredentials) =>
+      aplicarSesion(await loginGoogleRequest(credentials)),
     [aplicarSesion],
   );
 

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { useAuth } from "./AuthProvider";
 import { googleNonceRequest } from "./authApi";
 import { AuthError } from "./authErrors";
+import type { GoogleLoginCredentials } from "./authTypes";
 import styles from "./auth.module.css";
 
 type GoogleIdentity = {
@@ -28,6 +29,8 @@ type Props = {
   onBusy: (busy: boolean) => void;
 };
 
+type ConfirmacionGoogle = { credencial: string; tipo: "vincular" | "crear" };
+
 export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy }: Props) {
   const router = useRouter();
   const { loginGoogle } = useAuth();
@@ -36,30 +39,32 @@ export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy
   const [scriptListo, setScriptListo] = useState(false);
   const [intento, setIntento] = useState(0);
   const [procesando, setProcesando] = useState(false);
-  const [credential, setCredential] = useState<string | null>(null);
+  const [confirmacion, setConfirmacion] = useState<ConfirmacionGoogle | null>(null);
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
 
   const ingresar = useCallback(
-    async (credencial: string, password?: string) => {
+    async (credentials: GoogleLoginCredentials) => {
       if (enCurso.current) return;
       enCurso.current = true;
       setProcesando(true);
       onBusy(true);
       setError("");
       try {
-        await loginGoogle(credencial, password);
-        setCredential(null);
+        await loginGoogle(credentials);
+        setConfirmacion(null);
         router.replace(returnTo);
       } catch (reason) {
         if (reason instanceof AuthError && reason.code === "GOOGLE_VINCULACION_REQUERIDA") {
-          setCredential(credencial);
+          setConfirmacion({ credencial: credentials.credential, tipo: "vincular" });
+        } else if (reason instanceof AuthError && reason.code === "GOOGLE_CREACION_REQUERIDA") {
+          setConfirmacion({ credencial: credentials.credential, tipo: "crear" });
         } else {
           setError(
             reason instanceof Error ? reason.message : "No pudimos iniciar sesión con Google.",
           );
           if (reason instanceof AuthError && reason.code === "GOOGLE_CREDENCIAL_INVALIDA") {
-            setCredential(null);
+            setConfirmacion(null);
             setIntento((actual) => actual + 1);
           }
         }
@@ -88,7 +93,7 @@ export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy
           nonce,
           ux_mode: "popup",
           callback: ({ credential }) => {
-            if (!control.signal.aborted) void ingresar(credential);
+            if (!control.signal.aborted) void ingresar({ credential });
           },
         });
         identidad.renderButton(elemento, {
@@ -114,11 +119,19 @@ export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy
 
   function vincular(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (credential && !disabled) void ingresar(credential, contrasena);
+    if (confirmacion?.tipo === "vincular" && !disabled) {
+      void ingresar({ credential: confirmacion.credencial, contrasena });
+    }
   }
 
-  function cancelarVinculacion() {
-    setCredential(null);
+  function crearCuenta() {
+    if (confirmacion?.tipo === "crear" && !disabled) {
+      void ingresar({ credential: confirmacion.credencial, confirmarCreacion: true });
+    }
+  }
+
+  function cancelarConfirmacion() {
+    setConfirmacion(null);
     setContrasena("");
     setError("");
     setIntento((actual) => actual + 1);
@@ -132,10 +145,12 @@ export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy
         onReady={() => setScriptListo(true)}
         onError={() => setError("No pudimos cargar el botón de Google.")}
       />
-      <div ref={contenedor} hidden={Boolean(credential) || disabled || procesando} />
-      {procesando && <p role="status">Verificando con Google…</p>}
+      <div className={styles.googleAccion} hidden={Boolean(confirmacion) && !procesando}>
+        <div ref={contenedor} hidden={Boolean(confirmacion) || disabled || procesando} />
+        {procesando && <p role="status">Verificando con Google…</p>}
+      </div>
       {error && <p role="alert">{error}</p>}
-      {credential && (
+      {confirmacion?.tipo === "vincular" && (
         <form className={styles.form} onSubmit={vincular}>
           <label className={styles.field}>
             <span>Ingresá tu contraseña de Nostalgiar para vincular Google</span>
@@ -154,10 +169,30 @@ export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy
           <button className={styles.submit} type="submit" disabled={disabled || procesando}>
             Vincular e ingresar
           </button>
-          <button type="button" disabled={procesando} onClick={cancelarVinculacion}>
-            Cancelar
-          </button>
         </form>
+      )}
+      {confirmacion?.tipo === "crear" && (
+        <div className={styles.form}>
+          <p>En este entorno de Nostalgiar no encontramos una cuenta con el correo que elegiste.</p>
+          <button
+            type="button"
+            className={styles.submit}
+            disabled={disabled || procesando}
+            onClick={crearCuenta}
+          >
+            Crear una cuenta nueva
+          </button>
+        </div>
+      )}
+      {confirmacion && (
+        <button
+          type="button"
+          className={styles.googleCancelar}
+          disabled={procesando}
+          onClick={cancelarConfirmacion}
+        >
+          Cancelar
+        </button>
       )}
     </div>
   );

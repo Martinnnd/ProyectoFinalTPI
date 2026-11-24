@@ -12,6 +12,12 @@ export interface LoginCredentials {
   contrasena: string;
 }
 
+export interface GoogleLoginCredentials {
+  credential: string;
+  contrasena?: string;
+  confirmarCreacion?: boolean;
+}
+
 export interface RegisterCredentials extends LoginCredentials {
   username: string;
 }

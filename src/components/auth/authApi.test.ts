@@ -82,7 +82,7 @@ it("pide un desafío y envía la credencial de Google con las cookies de sesión
   vi.stubGlobal("fetch", fetch);
 
   await expect(googleNonceRequest(new AbortController().signal)).resolves.toBe("desafio-test");
-  await expect(loginGoogleRequest("credencial-test")).resolves.toEqual(session);
+  await expect(loginGoogleRequest({ credential: "credencial-test" })).resolves.toEqual(session);
   expect(fetch.mock.calls[0][0]).toMatch(/\/api\/auth\/google\/nonce$/);
   expect(fetch.mock.calls[1][0]).toMatch(/\/api\/auth\/google$/);
   for (const [, request] of fetch.mock.calls) {
@@ -90,4 +90,16 @@ it("pide un desafío y envía la credencial de Google con las cookies de sesión
     expect(request.headers["X-Nostalgiar-Request"]).toBe("1");
   }
   expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({ credential: "credencial-test" });
+});
+
+it("envía la confirmación de creación solo después de elegir crear cuenta", async () => {
+  const fetch = vi.fn().mockResolvedValueOnce(Response.json(session));
+  vi.stubGlobal("fetch", fetch);
+
+  await loginGoogleRequest({ credential: "credencial-test", confirmarCreacion: true });
+
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({
+    credential: "credencial-test",
+    confirmarCreacion: true,
+  });
 });
