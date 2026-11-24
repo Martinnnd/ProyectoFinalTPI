@@ -92,14 +92,19 @@ it("pide un desafío y envía la credencial de Google con las cookies de sesión
   expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({ credential: "credencial-test" });
 });
 
-it("envía la confirmación de creación solo después de elegir crear cuenta", async () => {
+it("envía el nombre elegido al confirmar la creación de una cuenta", async () => {
   const fetch = vi.fn().mockResolvedValueOnce(Response.json(session));
   vi.stubGlobal("fetch", fetch);
 
-  await loginGoogleRequest({ credential: "credencial-test", confirmarCreacion: true });
+  await loginGoogleRequest({
+    credential: "credencial-test",
+    confirmarCreacion: true,
+    username: "Mati",
+  });
 
   expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({
     credential: "credencial-test",
     confirmarCreacion: true,
+    username: "Mati",
   });
 });

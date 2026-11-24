@@ -41,6 +41,7 @@ export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy
   const [procesando, setProcesando] = useState(false);
   const [confirmacion, setConfirmacion] = useState<ConfirmacionGoogle | null>(null);
   const [contrasena, setContrasena] = useState("");
+  const [username, setUsername] = useState("");
   const [error, setError] = useState("");
 
   const ingresar = useCallback(
@@ -124,15 +125,26 @@ export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy
     }
   }
 
-  function crearCuenta() {
-    if (confirmacion?.tipo === "crear" && !disabled) {
-      void ingresar({ credential: confirmacion.credencial, confirmarCreacion: true });
+  function crearCuenta(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (confirmacion?.tipo !== "crear" || disabled) return;
+
+    const nombre = username.trim();
+    if (nombre.length < 3 || nombre.length > 50) {
+      setError("El nombre de usuario debe tener entre 3 y 50 caracteres.");
+      return;
     }
+    void ingresar({
+      credential: confirmacion.credencial,
+      confirmarCreacion: true,
+      username: nombre,
+    });
   }
 
   function cancelarConfirmacion() {
     setConfirmacion(null);
     setContrasena("");
+    setUsername("");
     setError("");
     setIntento((actual) => actual + 1);
   }
@@ -172,17 +184,26 @@ export default function GoogleLoginButton({ clientId, returnTo, disabled, onBusy
         </form>
       )}
       {confirmacion?.tipo === "crear" && (
-        <div className={styles.form}>
+        <form className={styles.form} onSubmit={crearCuenta}>
           <p>En este entorno de Nostalgiar no encontramos una cuenta con el correo que elegiste.</p>
-          <button
-            type="button"
-            className={styles.submit}
-            disabled={disabled || procesando}
-            onClick={crearCuenta}
-          >
+          <label className={styles.field}>
+            <span>Nombre de usuario</span>
+            <span className={styles.inputShell}>
+              <input
+                name="username"
+                autoComplete="username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                minLength={3}
+                maxLength={50}
+                required
+              />
+            </span>
+          </label>
+          <button type="submit" className={styles.submit} disabled={disabled || procesando}>
             Crear una cuenta nueva
           </button>
-        </div>
+        </form>
       )}
       {confirmacion && (
         <button

@@ -16,6 +16,7 @@ export interface GoogleLoginCredentials {
   credential: string;
   contrasena?: string;
   confirmarCreacion?: boolean;
+  username?: string;
 }
 
 export interface RegisterCredentials extends LoginCredentials {
