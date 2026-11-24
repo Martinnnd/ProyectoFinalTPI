@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
   Users,
+  MapPin,
 } from "lucide-react";
 import { useAuth } from "../components/auth/AuthProvider";
 import { getAdminStatistics, type AdminStatistics } from "./adminApi";
@@ -20,10 +21,11 @@ import CommentsPanel from "./CommentsPanel";
 import PublicationsPanel from "./PublicationsPanel";
 import UsersPanel from "./UsersPanel";
 import ReportsPanel from "./ReportsPanel";
+import TreasurePanel from "./TreasurePanel";
 import ToastViewport from "../components/layout/ToastViewport";
 import styles from "./admin.module.css";
 
-type Section = "overview" | "publications" | "users" | "comments" | "reports";
+type Section = "overview" | "publications" | "users" | "comments" | "reports" | "treasure";
 
 const sections = [
   { id: "overview" as const, label: "Resumen", icon: LayoutDashboard },
@@ -31,6 +33,7 @@ const sections = [
   { id: "users" as const, label: "Usuarios", icon: Users },
   { id: "comments" as const, label: "Comentarios", icon: MessageSquareText },
   { id: "reports" as const, label: "Reportes", icon: Flag },
+  { id: "treasure" as const, label: "Búsqueda del tesoro", icon: MapPin },
 ];
 
 export default function AdminDashboard() {
@@ -84,6 +87,7 @@ export default function AdminDashboard() {
         {section === "users" && <UsersPanel currentUserId={session!.usuarioId} />}
         {section === "comments" && <CommentsPanel />}
         {section === "reports" && <ReportsPanel />}
+        {section === "treasure" && <TreasurePanel />}
       </main>
       <ToastViewport />
     </div>

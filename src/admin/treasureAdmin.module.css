@@ -1,0 +1,120 @@
+.editor {
+  margin-bottom: 24px;
+}
+.editor h2 {
+  margin-top: 0;
+}
+.editor p {
+  color: var(--admin-muted);
+  line-height: 1.5;
+}
+.editor fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 16px;
+}
+.editor label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.editor input,
+.editor textarea,
+.editor select,
+.schedule select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  color: var(--admin-ink);
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  background: var(--admin-paper);
+  font: inherit;
+}
+.editor input:focus-visible,
+.editor textarea:focus-visible,
+.editor select:focus-visible,
+.schedule select:focus-visible {
+  outline: 2px solid var(--admin-green);
+  outline-offset: 2px;
+}
+.coordinates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.map {
+  width: 100%;
+  height: 330px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.search {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+.search label {
+  flex: 1;
+}
+.results {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.results button {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--admin-line);
+  color: var(--admin-ink);
+  background: var(--admin-paper);
+  text-align: left;
+  cursor: pointer;
+}
+.editor .checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.editor .checkbox input {
+  width: auto;
+}
+.editor footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.schedule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 310px;
+}
+.schedule select {
+  min-width: 150px;
+}
+.clue {
+  min-width: 220px;
+  max-width: 380px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 650px) {
+  .coordinates {
+    grid-template-columns: 1fr;
+  }
+  .search {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .map {
+    height: 280px;
+  }
+}

@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import type {
+  AdminTreasureLocation,
+  CurrentTreasure,
+  TreasureAdminPanel,
+} from "../src/admin/treasureAdminApi";
 
 // El renderer y la cámara son Mapbox reales. Estilo y API se sirven localmente
 // para no requerir credenciales de Mapbox ni tocar datos de ninguna cuenta.
@@ -14,7 +19,7 @@ const basemap = {
   layers: [{ id: "background", type: "background", paint: { "background-color": "#a8c7bd" } }],
 };
 
-async function prepare(page: Page, failFirst = false, postCount = 0) {
+async function prepare(page: Page, failFirst = false, postCount = 0, isAdmin = false) {
   let found: string | null = null;
   let captures = 0;
   let fail = failFirst;
@@ -103,7 +108,7 @@ async function prepare(page: Page, failFirst = false, postCount = 0) {
         usuarioId: 7,
         username: "buscador",
         email: "buscador@example.test",
-        esAdmin: false,
+        esAdmin: isAdmin,
       });
     if (path === "/api/categorias-cuenta/me")
       return reply({
@@ -129,6 +134,16 @@ async function prepare(page: Page, failFirst = false, postCount = 0) {
         reinicio: "2026-11-24T03:00:00Z",
         puntosExtra: 0,
         totalDisponible: 5,
+      });
+    if (path === "/api/admin/estadisticas")
+      return reply({
+        totalUsuarios: 0,
+        totalPublicaciones: 0,
+        publicacionesVisibles: 0,
+        publicacionesOcultas: 0,
+        publicacionesPorCategoria: [],
+        masGustadas: [],
+        masPuntuadas: [],
       });
     if (path === "/api/juegos/tesoro/actual")
       return reply({
@@ -293,4 +308,170 @@ test("deja la pista al final cuando el feed tiene menos de tres publicaciones", 
   await expect(
     clue.locator("xpath=preceding-sibling::article[contains(@class, 'feed-post')]"),
   ).toHaveCount(2);
+});
+
+async function prepareAdmin(page: Page, failFirstSave = false) {
+  await prepare(page, false, 0, true);
+  const locations: AdminTreasureLocation[] = [
+    {
+      id: 1,
+      nombre: "Plaza San Martín",
+      pista: "El Libertador cruzó los Andes.",
+      latitud: -34.59558,
+      longitud: -58.3785,
+      zoomMinimo: 18,
+      activa: true,
+    },
+  ];
+  let current: CurrentTreasure = { ...locations[0] };
+  const plans = new Map<string, number | null>();
+  let fail = failFirstSave;
+  await page.route("http://localhost:5198/api/admin/juegos/tesoro**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    const headers = {
+      "access-control-allow-origin": "http://localhost:3161",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "authorization,content-type,x-nostalgiar-request",
+      "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
+    };
+    const reply = (json: unknown) => route.fulfill({ headers, json });
+    if (request.method() === "OPTIONS") return route.fulfill({ status: 204, headers });
+    if (request.method() === "GET") {
+      const panel: TreasureAdminPanel = {
+        habilitado: true,
+        semanaActual: "2026-11-22",
+        actual: current,
+        ubicaciones: locations,
+        semanas: Array.from({ length: 13 }, (_, i) => {
+          const week = new Date(Date.UTC(2026, 10, 22 + i * 7)).toISOString().slice(0, 10);
+          const selected = plans.get(week);
+          const location =
+            selected === undefined
+              ? locations.find((l) => l.activa)
+              : locations.find((l) => l.id === selected && l.activa);
+          return {
+            semanaInicio: week,
+            editable: i > 0,
+            modo:
+              i === 0
+                ? "fijo"
+                : selected === undefined
+                  ? "automatica"
+                  : location
+                    ? "programada"
+                    : "pausada",
+            ubicacionId: selected ?? null,
+            nombre: location?.nombre ?? null,
+            pista: location?.pista ?? null,
+          };
+        }),
+      };
+      return reply(panel);
+    }
+    if (fail) {
+      fail = false;
+      return route.fulfill({
+        status: 500,
+        headers,
+        json: { detail: "No se pudo guardar. Intentá nuevamente." },
+      });
+    }
+    if (path.endsWith("/ubicaciones")) {
+      const location = {
+        ...request.postDataJSON(),
+        id: locations.length + 1,
+      } as AdminTreasureLocation;
+      locations.push(location);
+      return reply(location);
+    }
+    if (path.includes("/ubicaciones/")) {
+      const id = Number(path.split("/").at(-1));
+      const location = { ...request.postDataJSON(), id } as AdminTreasureLocation;
+      locations[locations.findIndex((l) => l.id === id)] = location;
+      return reply(location);
+    }
+    if (path.includes("/actual/"))
+      current = { ...request.postDataJSON(), id: current.id } as CurrentTreasure;
+    if (path.includes("/semanas/")) {
+      const week = path.split("/").at(-1)!;
+      if (request.method() === "DELETE") plans.delete(week);
+      else plans.set(week, request.postDataJSON().ubicacionId as number | null);
+    }
+    return route.fulfill({ status: 204, headers });
+  });
+  await page.goto("/admin");
+  await page.getByRole("button", { name: "Búsqueda del tesoro", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Ubicaciones y pistas" })).toBeVisible();
+  return { locations, plans, current: () => current };
+}
+
+test("el administrador crea lugares en el mapa, programa semanas y edita el vigente", async ({
+  page,
+}) => {
+  const state = await prepareAdmin(page);
+  await page.getByRole("button", { name: "Nueva ubicación", exact: true }).click();
+  await page.getByLabel("Nombre al encontrarlo").fill("El secreto de Retiro");
+  await page.getByLabel("Pista del feed").fill("Una nueva pista entre árboles de Retiro.");
+  await page.getByRole("searchbox", { name: "Buscar un lugar" }).fill("Plaza San Martín");
+  await page.getByRole("button", { name: "Buscar lugar", exact: true }).click();
+  await page.getByRole("button", { name: /Plaza San Martín.*Retiro/ }).click();
+  await expect(page.locator('[data-treasure-picker-ready="true"]')).toBeVisible();
+  await page.locator(".mapboxgl-canvas").click({ position: { x: 150, y: 100 } });
+  await expect(page.getByLabel("Latitud", { exact: true })).not.toHaveValue("-34.59558");
+  await page.getByRole("button", { name: "Guardar ubicación", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Editar El secreto de Retiro", exact: true }),
+  ).toBeVisible();
+  expect(state.locations).toHaveLength(2);
+  expect(state.locations[1].latitud).not.toBe(-34.59558);
+  const row = page
+    .getByRole("row")
+    .filter({ has: page.getByRole("combobox", { name: "Ubicación para 2026-11-29" }) });
+  for (const choice of ["2", "pause", "auto"]) {
+    await row.getByRole("combobox").selectOption(choice);
+    await row.getByRole("button", { name: "Guardar semana" }).click();
+    await expect(row.getByRole("button", { name: "Guardar semana" })).toBeDisabled();
+    if (choice === "auto") expect(state.plans.has("2026-11-29")).toBe(false);
+    else expect(state.plans.get("2026-11-29")).toBe(choice === "pause" ? null : 2);
+  }
+  await page.getByRole("button", { name: "Editar El secreto de Retiro", exact: true }).click();
+  await page.getByLabel("Ubicación activa", { exact: true }).uncheck();
+  await page.getByRole("button", { name: "Guardar ubicación", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Editar reto vigente" })).toBeVisible();
+  expect(state.locations[1].activa).toBe(false);
+  await page.getByRole("button", { name: "Editar reto vigente" }).click();
+  await expect(
+    page.getByText(/Quienes ya lo encontraron conservan el reto completado/),
+  ).toBeVisible();
+  await page.getByLabel("Pista del feed").fill("La pista del reto actual fue corregida.");
+  await page.getByLabel("Zoom mínimo").selectOption("19");
+  await page.getByRole("button", { name: "Guardar cambios en el reto actual" }).click();
+  await expect(page.getByRole("region", { name: "Reto de esta semana" })).toContainText(
+    "La pista del reto actual fue corregida.",
+  );
+  expect(state.current().zoomMinimo).toBe(19);
+  expect(state.locations[0].pista).toBe("El Libertador cruzó los Andes.");
+  await page.screenshot({ path: "test-results/tesoro-admin.png", fullPage: true });
+});
+
+test("el editor administrativo permite reintentar y usar coordenadas desde móvil", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = await prepareAdmin(page, true);
+  await page.getByRole("button", { name: "Nueva ubicación", exact: true }).click();
+  await page.getByLabel("Nombre al encontrarlo").fill("Obelisco");
+  await page.getByLabel("Pista del feed").fill("Una aguja señala el cielo porteño.");
+  await page.getByLabel("Latitud", { exact: true }).fill("-34.6037");
+  await page.getByLabel("Longitud", { exact: true }).fill("-58.3816");
+  await page.getByRole("button", { name: "Guardar ubicación", exact: true }).click();
+  await expect(
+    page.getByRole("form", { name: "Editar ubicación del tesoro" }).getByRole("alert"),
+  ).toContainText("No se pudo guardar. Intentá nuevamente.");
+  await expect(page.getByLabel("Nombre al encontrarlo")).toHaveValue("Obelisco");
+  await page.getByRole("button", { name: "Guardar ubicación", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Editar Obelisco", exact: true })).toBeVisible();
+  expect(state.locations[1].latitud).toBe(-34.6037);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

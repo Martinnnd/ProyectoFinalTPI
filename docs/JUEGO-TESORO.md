@@ -21,18 +21,37 @@ no se usa localStorage para decidir si alguien completó el reto.
 
 ## Configuración y ejecución
 
-- Requiere el backend de la rama `juego`, con la migración AgregarJuegoTesoro.
+- Requiere el backend de la rama `juego`, con las migraciones AgregarJuegoTesoro
+  y AdministrarJuegoTesoro aplicadas.
 - Configurar `NEXT_PUBLIC_API_URL` apuntando al backend local.
 - Mapbox debe estar disponible con `NEXT_PUBLIC_MAP_MODE=auto` y un token público
   válido en `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`. La alternativa Leaflet 2D conserva
   el funcionamiento existente, pero no muestra el tesoro.
-- La ubicación inicial y el catálogo de futuras semanas se configuran en el backend.
+- El catálogo y las semanas se gestionan desde `/admin` → Búsqueda del tesoro.
   La pista enviada al feed no incluye coordenadas.
 
 ```bash
 npm ci
 npm run dev
 ```
+
+## Administración
+
+Sólo las cuentas administradoras ven el panel y pueden usar sus endpoints.
+Permite crear y editar lugares con buscador, clic en el mapa o coordenadas,
+escribir pistas, elegir zoom mínimo y activar o desactivar ubicaciones.
+El selector usa Mapbox si está configurado y Leaflet en modo 2D. Si el mapa o
+el buscador no cargan se conservan los campos de coordenadas.
+
+La planificación muestra las próximas 12 semanas: asignar un lugar, pausar una
+semana o restaurar la rotación automática. La vista previa automática depende
+del catálogo activo y puede variar si éste cambia. Desactivar un lugar pausa
+las futuras semanas que lo tenían asignado mientras siga inactivo.
+
+**Editar reto vigente** permite mover el tesoro y corregir la pista o el zoom
+de esta semana, conservando los hallazgos y sin modificar el catálogo. Los
+jugadores reciben el cambio al recargar, volver a la pestaña o en hasta un minuto.
+Los errores de guardado conservan el formulario para poder reintentar.
 
 ## Archivos
 
@@ -53,4 +72,6 @@ posición aleatoria de la pista entre la tercera y la sexta publicación.
 con cámara plana, zoom, doble clic, persistencia, reintento, móvil y posición de la
 pista al interactuar y paginar. Sus APIs y estilo cartográfico son locales para
 no necesitar credenciales del proveedor.
+También cubre el panel administrativo: búsqueda y selección de punto, creación,
+desactivación, planificación, edición vigente y reintento de errores en móvil.
 Puede indicarse Chromium instalado mediante `PLAYWRIGHT_CHROMIUM_EXECUTABLE`.

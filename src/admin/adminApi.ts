@@ -135,7 +135,7 @@ function queryOf(values: Record<string, string | number | boolean | undefined>) 
   return query.toString();
 }
 
-async function adminRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function adminRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("X-Nostalgiar-Request", "1");
   if (init.body) headers.set("Content-Type", "application/json");
