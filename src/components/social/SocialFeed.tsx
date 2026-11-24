@@ -24,6 +24,7 @@ import { feedCache } from "../../sessionQueryCache";
 import { getFeedItemKey, mergeFeedItems } from "../../feedItems";
 import AdSenseSlot from "../ads/AdSenseSlot";
 import TreasureClue from "../../treasure/TreasureClue";
+import { useTreasureCluePosition } from "../../treasure/useTreasureCluePosition";
 
 const FEED_AD_AFTER = 4;
 
@@ -313,6 +314,15 @@ export default function SocialFeed({
       ? allMemories.filter((memory) => !!memory.groupId && groupIds.includes(memory.groupId))
       : allMemories;
   const posts = mergeFeedItems(hashtag ? hashtagFeed.items : browsingGroups ? [] : tabPosts);
+  const cluePosition = useTreasureCluePosition(
+    posts.length,
+    active &&
+      !selected &&
+      !hashtag &&
+      tab === "all" &&
+      !groupName &&
+      (posts.length > 0 || (!remote.loading && !remote.refreshing)),
+  );
   const showInlineAd =
     active && showFeedAd && !selected && !hashtag && tab === "all" && posts.length > FEED_AD_AFTER;
   useEffect(() => {
@@ -578,7 +588,7 @@ export default function SocialFeed({
           <div className="feed-group-directory">{community}</div>
         )}
         <div className="feed-posts">
-          {!selected && !hashtag && tab === "all" && !groupName && <TreasureClue />}
+          {cluePosition === 0 && <TreasureClue />}
           {(selected ? [selected] : posts).flatMap((memory, index) => {
             const isQuote = Boolean(
               memory.quotedMemory ||
@@ -707,9 +717,11 @@ export default function SocialFeed({
                 onHashtag={chooseHashtag}
               />
             );
-            return showInlineAd && index === FEED_AD_AFTER - 1
-              ? [post, <AdSenseSlot key="feed-ad" placement="feed" />]
-              : post;
+            const row = [post];
+            if (cluePosition === index + 1) row.push(<TreasureClue key="treasure-clue" />);
+            if (showInlineAd && index === FEED_AD_AFTER - 1)
+              row.push(<AdSenseSlot key="feed-ad" placement="feed" />);
+            return row;
           })}
           {active && selected && !selected.groupId && (
             <AdSenseSlot key={`memory-ad:${selected.id}`} placement="memory" />

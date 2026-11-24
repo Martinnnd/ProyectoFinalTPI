@@ -3,6 +3,12 @@
 El feed general incorpora una nota discreta, «Un rumor entre recuerdos», adaptada
 a la época. Su enlace abre Explorar sin centrar la cámara en la respuesta.
 
+La nota se intercala una sola vez después de la tercera, cuarta, quinta o sexta
+publicación, elegida al azar para cada usuario y reto durante esa sesión. Mantiene
+su lugar al dar likes, consultar el estado o cargar más páginas. Si el feed tiene
+menos publicaciones, aparece al final; si está vacío, se muestra sin esperar a
+que existan recuerdos. Durante la carga inicial no se adelanta al contenido.
+
 En Mapbox, un trofeo aparece al superar el zoom mínimo del reto y mirar su zona.
 No se consulta inclinación: también funciona con el mapa plano. Sólo participa
 el mapa de Explorar, no los mapas del perfil o de las cápsulas. El modo de crear
@@ -41,8 +47,10 @@ npm run dev
 
 ## Pruebas
 
-`npm test` y `npm run check` cubren contrato HTTP y normalización de la vista.
+`npm test` y `npm run check` cubren contrato HTTP, normalización de la vista y
+posición aleatoria de la pista entre la tercera y la sexta publicación.
 `npm run test:e2e:treasure` comprueba las seis épocas, navegación real de Mapbox
-con cámara plana, zoom, doble clic, persistencia, reintento y móvil. Sus APIs y
-estilo cartográfico son locales para no necesitar credenciales del proveedor.
+con cámara plana, zoom, doble clic, persistencia, reintento, móvil y posición de la
+pista al interactuar y paginar. Sus APIs y estilo cartográfico son locales para
+no necesitar credenciales del proveedor.
 Puede indicarse Chromium instalado mediante `PLAYWRIGHT_CHROMIUM_EXECUTABLE`.

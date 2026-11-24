@@ -14,12 +14,29 @@ const basemap = {
   layers: [{ id: "background", type: "background", paint: { "background-color": "#a8c7bd" } }],
 };
 
-async function prepare(page: Page, failFirst = false) {
+async function prepare(page: Page, failFirst = false, postCount = 0) {
   let found: string | null = null;
   let captures = 0;
   let fail = failFirst;
   const visibleZooms: number[] = [];
-  const pista = "Entre árboles y senderos, un Libertador a caballo guarda un secreto en Retiro.";
+  const pista =
+    "Cruzó los Andes y fue Libertador de Argentina, Chile y Perú. Hoy, a caballo entre los árboles de Retiro, guarda un secreto.";
+  const posts = Array.from({ length: postCount }, (_, index) => ({
+    id: index + 1,
+    titulo: `Recuerdo de prueba ${index + 1}`,
+    descripcionBreve: "Un recuerdo de nuestro barrio.",
+    fecha: "1995-01-01T00:00:00Z",
+    fechaCreacion: "2026-11-22T12:00:00Z",
+    categoria: 0,
+    tipoMultimedia: 0,
+    urlMultimedia: "",
+    adjuntos: [],
+    autor: { id: 2, username: "vecino" },
+    lugar: { nombre: "Retiro", latitud: -34.59558, longitud: -58.3785 },
+    cantidadLikes: 0,
+    cantidadComentarios: 0,
+    dioLike: false,
+  }));
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.route("https://api.mapbox.com/**", (route) =>
     route.fulfill({
@@ -150,8 +167,18 @@ async function prepare(page: Page, failFirst = false) {
       });
     }
     if (path.endsWith("/mapa")) return reply({ pines: [], hayMas: false });
-    if (path === "/api/feed/para-vos" || path === "/api/feed/seguidos")
-      return reply({ items: [], hayMas: false, siguienteCursor: null });
+    if (path === "/api/feed/para-vos" || path === "/api/feed/seguidos") {
+      const secondPage = url.searchParams.has("cursor");
+      const hayMas = !secondPage && posts.length > 8;
+      return reply({
+        items: secondPage ? posts.slice(8) : posts.slice(0, 8),
+        hayMas,
+        siguienteCursor: hayMas ? "pagina-2" : null,
+      });
+    }
+    if (path === "/api/feed/impresiones") return route.fulfill({ status: 204, headers });
+    if (/^\/api\/publicaciones\/\d+\/like$/.test(path))
+      return reply({ publicacionId: Number(path.split("/")[3]), cantidadLikes: 1, dioLike: true });
     return reply([]);
   });
   return { captures: () => captures, visibleZooms, pista };
@@ -219,4 +246,51 @@ test("permite reintentar una captura fallida en móvil", async ({ page }) => {
   expect(state.captures()).toBe(2);
   await page.screenshot({ path: "test-results/tesoro-encontrado-mobile.png" });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("muestra una sola pista después de tres a seis publicaciones y conserva su lugar al interactuar y paginar", async ({
+  page,
+}) => {
+  await prepare(page, false, 12);
+  await page.goto("/feed?era=1990");
+  const posts = page.locator("article.feed-post");
+  await expect(posts).toHaveCount(8);
+  const clue = page.getByRole("complementary", { name: "Pista del tesoro semanal" });
+  await expect(clue).toHaveCount(1);
+  const postsBeforeClue = () =>
+    clue.evaluate((element) => {
+      let count = 0;
+      for (
+        let sibling = element.previousElementSibling;
+        sibling;
+        sibling = sibling.previousElementSibling
+      ) {
+        if (sibling.matches("article.feed-post")) count++;
+      }
+      return count;
+    });
+  const position = await postsBeforeClue();
+  expect(position).toBeGreaterThanOrEqual(3);
+  expect(position).toBeLessThanOrEqual(6);
+  const like = page.getByRole("button", { name: "Me gusta: Recuerdo de prueba 1", exact: true });
+  await like.click();
+  await expect(like).toHaveAttribute("aria-pressed", "true");
+  expect(await postsBeforeClue()).toBe(position);
+  await page.locator(".feed-load-target").scrollIntoViewIfNeeded();
+  await expect(posts).toHaveCount(12);
+  await expect(clue).toHaveCount(1);
+  expect(await postsBeforeClue()).toBe(position);
+});
+
+test("deja la pista al final cuando el feed tiene menos de tres publicaciones", async ({
+  page,
+}) => {
+  await prepare(page, false, 2);
+  await page.goto("/feed?era=1990");
+  await expect(page.locator("article.feed-post")).toHaveCount(2);
+  const clue = page.getByRole("complementary", { name: "Pista del tesoro semanal" });
+  await expect(clue).toHaveCount(1);
+  await expect(
+    clue.locator("xpath=preceding-sibling::article[contains(@class, 'feed-post')]"),
+  ).toHaveCount(2);
 });
