@@ -40,16 +40,23 @@ export const metadata: Metadata = {
 
 export default function MainAppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <EraProvider>
-      <AccountCategoryProvider>
-        <RatingsProvider>
-          <FollowProvider>
-            <GuestAccessProvider>
-              <AppShell>{children}</AppShell>
-            </GuestAccessProvider>
-          </FollowProvider>
-        </RatingsProvider>
-      </AccountCategoryProvider>
-    </EraProvider>
+    <>
+      {/* eslint-disable-next-line @next/next/no-page-custom-font -- El layout es compartido y el CSS del mapa carga aunque fallen las fuentes. */}
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap"
+      />
+      <EraProvider>
+        <AccountCategoryProvider>
+          <RatingsProvider>
+            <FollowProvider>
+              <GuestAccessProvider>
+                <AppShell>{children}</AppShell>
+              </GuestAccessProvider>
+            </FollowProvider>
+          </RatingsProvider>
+        </AccountCategoryProvider>
+      </EraProvider>
+    </>
   );
 }
