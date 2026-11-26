@@ -19,6 +19,7 @@ import {
   validContribution,
 } from "./rules";
 import SongForm from "./SongForm";
+import NostalgiaPointSelector from "../components/social/NostalgiaPointSelector";
 import styles from "./profileRanking.module.css";
 
 export default function ProfileMusicRanking({ decade }: { decade: number }) {
@@ -45,7 +46,7 @@ function SessionRanking({ selectedDecade }: { selectedDecade: number }) {
       ? "Estamos consultando los permisos de tu categoría."
       : categoryError ||
         (!canSuggest
-          ? "Tu categoría no permite sugerir canciones. Las sugerencias están disponibles para Mnemosine y Marca."
+          ? "Tu categoría no permite sugerir canciones. Las sugerencias están disponibles para Mnemosine."
           : "");
 
   useEffect(() => {
@@ -114,7 +115,6 @@ function SessionRanking({ selectedDecade }: { selectedDecade: number }) {
                 : position <= 6
                   ? "Clasifican a la siguiente ronda, si reciben votos."
                   : `Puesto ${position}`;
-            const points = Number(view.contributions[song.id] ?? "1");
             return (
               <li
                 key={song.id}
@@ -153,37 +153,22 @@ function SessionRanking({ selectedDecade }: { selectedDecade: number }) {
                   </b>
                 </div>
                 <div id={`${id}-actions-${song.id}`} className={styles.songActions}>
-                  <form
-                    className={styles.vote}
-                    aria-label={`Aportar a ${song.titulo}`}
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      if (canVote) void store.vote(song.id, points);
-                    }}
+                  <div
+                    className={`post-ratings ${styles.vote}`}
+                    role="group"
+                    aria-label={`Puntuar canción: ${song.titulo}`}
+                    aria-busy={busy}
                   >
-                    <label htmlFor={`${id}-points-${song.id}`}>Aportar</label>
-                    <input
-                      id={`${id}-points-${song.id}`}
-                      aria-label={`Puntos para ${song.titulo}`}
-                      type="number"
-                      min={1}
-                      step={1}
-                      max={round?.saldo?.puntosRestantes ?? 0}
-                      required
-                      value={view.contributions[song.id] ?? "1"}
-                      disabled={!canVote || !active || busy || !round?.saldo?.puntosRestantes}
-                      onChange={(event) => view.setContribution(song.id, event.target.value)}
+                    <NostalgiaPointSelector
+                      title={song.titulo}
+                      canRate={canVote && active && !busy}
+                      maxPoints={round?.saldo?.puntosRestantes ?? 0}
+                      onRate={async (points) => {
+                        if (round && validContribution(points, round))
+                          await store.vote(song.id, points);
+                      }}
                     />
-                    <button
-                      type="submit"
-                      className="secondary-button"
-                      disabled={
-                        !canVote || !active || busy || !round || !validContribution(points, round)
-                      }
-                    >
-                      {busy ? "Enviando…" : "Dar puntos"}
-                    </button>
-                  </form>
+                  </div>
                   {round && canManage(song, session) && (
                     <div className={styles.management}>
                       <button
