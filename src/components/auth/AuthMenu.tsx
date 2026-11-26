@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, LogIn, LogOut, UserRound, Archive } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut, UserRound } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import styles from "./AuthMenu.module.css";
 
@@ -86,17 +86,6 @@ export default function AuthMenu({ profileActive = false, onOpenProfile }: AuthM
                 }}
               >
                 <UserRound size={16} /> Perfil
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className={styles.profileAction}
-                onClick={() => {
-                  router.push("/capsulas");
-                  setOpen(false);
-                }}
-              >
-                <Archive size={16} /> Mis cápsulas
               </button>
               <button
                 type="button"

@@ -595,6 +595,7 @@
     box-shadow: none;
   }
   .app .time-navigation .time-brand,
+  .app .time-navigation .time-header-actions,
   .app .time-navigation .time-add-memory {
     display: none;
   }

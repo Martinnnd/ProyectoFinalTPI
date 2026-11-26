@@ -65,6 +65,13 @@
   padding: 7px 12px;
   white-space: nowrap;
 }
+.time-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  gap: 10px;
+}
 .time-decades {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));

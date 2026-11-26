@@ -5,15 +5,7 @@ import { useAccountCategory } from "../../context/AccountCategoryContext";
 import PuntosBalanceChip from "../puntos/PuntosBalanceChip";
 import React, { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Plus,
-  X,
-  Newspaper,
-  MessageCircle,
-  SlidersHorizontal,
-  Music2,
-  Archive,
-} from "lucide-react";
+import { Plus, X, Newspaper, MessageCircle, SlidersHorizontal, Music2 } from "lucide-react";
 import { useEra } from "../../context/EraContext";
 import { useAuth } from "../auth/AuthProvider";
 import { useGuestAccess } from "../auth/GuestAccessProvider";
@@ -169,7 +161,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         onChange={handlePeriodChange}
         action={
           session ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div className="time-header-actions">
               <PuntosBalanceChip />
               <button
                 aria-label="Recordar"
@@ -324,22 +316,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <Newspaper />
           <span>Feed</span>
         </button>
-        {session && (
-          <button
-            aria-current={currentView === "capsules" ? "page" : undefined}
-            aria-label="Mis cápsulas"
-            title="Mis cápsulas"
-            className={currentView === "capsules" ? "rail-active" : ""}
-            onClick={() => {
-              setPanelOpen(false);
-              setFactsOpen(false);
-              router.push("/capsulas");
-            }}
-          >
-            <Archive />
-            <span>Cápsulas</span>
-          </button>
-        )}
         {session && (
           <button
             aria-current={currentView === "chat" ? "page" : undefined}
