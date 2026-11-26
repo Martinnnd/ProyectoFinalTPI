@@ -366,7 +366,10 @@
   z-index: 20;
 }
 .category-options {
+  left: auto;
+  right: 0;
   min-width: 220px;
+  max-width: calc(100vw - 32px);
   max-height: 48dvh;
   overflow: auto;
 }
