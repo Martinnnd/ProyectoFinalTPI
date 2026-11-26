@@ -4,20 +4,17 @@ import { rankingCountdown } from "./rules";
 
 afterEach(() => vi.useRealTimers());
 describe("estado del panel musical", () => {
-  it("aísla aportes entre perfiles y limpia las acciones al cambiar década", () => {
+  it("aísla los controles entre perfiles y limpia las acciones al cambiar década", () => {
     const first = createRankingViewStore();
     const second = createRankingViewStore();
-    first.getState().setContribution(12, "3");
     first.getState().toggleSong(12);
     first.getState().toggleSuggestion();
     first.getState().resetActions();
     expect(first.getState()).toMatchObject({
-      contributions: { 12: "3" },
       expandedSong: null,
       suggesting: false,
     });
     expect(second.getState()).toMatchObject({
-      contributions: {},
       suggesting: false,
     });
   });

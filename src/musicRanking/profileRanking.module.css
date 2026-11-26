@@ -115,17 +115,6 @@
   gap: 7px;
   font-size: 11px;
 }
-.vote input {
-  min-width: 0;
-  width: 49px;
-  padding: 7px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius, 6px);
-  color: var(--ink);
-  background: var(--surface);
-  font: inherit;
-}
-.vote button,
 .management button {
   padding: 7px 9px;
   font-size: 11px;

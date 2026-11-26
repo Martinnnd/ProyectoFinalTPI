@@ -51,6 +51,8 @@ describe("ranking en la barra lateral del perfil", () => {
     expect(html).toContain("No hay una ronda vigente");
     expect(html).toContain('disabled=""');
     expect(html).toContain('role="tooltip"');
+    expect(html).toContain("Las sugerencias están disponibles para Mnemosine.");
+    expect(html).not.toContain("Marca");
     expect(html).not.toContain("Actualizar ranking musical");
     expect(html).not.toContain("Elegimos la banda sonora");
     expect(html).not.toContain("/musica");
@@ -88,11 +90,19 @@ describe("ranking en la barra lateral del perfil", () => {
     expect(render(2000)).toContain("Ranking musical 2000");
     expect(render(2000)).not.toContain("Billie Jean");
     expect(html).toContain("Billie Jean");
-    expect(html).toContain('max="3"');
-    expect(html.match(/<form.*?<\/form>/s)?.[0]).not.toContain('disabled=""');
+    expect(html).toContain('aria-label="Puntuar canción: Billie Jean"');
+    expect(html.match(/src="\/nostalgiar-rail-logo.png"/g)).toHaveLength(5);
+    const pointButtons = html.match(
+      /<button[^>]+aria-label="Dar [1-5] puntos? de nostalgia[^>]*>/g,
+    )!;
+    expect(pointButtons).toHaveLength(5);
+    expect(pointButtons.filter((button) => button.includes('disabled=""'))).toHaveLength(2);
     expect(html).toContain('data-winner="true"');
     snapshot.round.saldo!.puntosRestantes = 0;
-    expect(render().match(/<form.*?<\/form>/s)?.[0]).toContain('disabled=""');
+    const exhausted = render().match(
+      /<button[^>]+aria-label="Dar [1-5] puntos? de nostalgia[^>]*>/g,
+    )!;
+    expect(exhausted.filter((button) => button.includes('disabled=""'))).toHaveLength(5);
   });
   it("distingue carga y ronda sin canciones", () => {
     snapshot.loading = true;

@@ -23,19 +23,36 @@ test("perfil concentra el ranking, muestra voto al hacer hover y explica la suge
   await expect(panel.locator('a[href^="/musica"]')).toHaveCount(0);
   await expect(panel.getByText(/puntos disponibles hoy/)).toHaveCount(0);
   await expect(panel.getByLabel(/Cierre de la ronda/)).toBeVisible();
-  const vote = panel.getByRole("form", { name: "Aportar a Billie Jean" });
+  const vote = panel.getByRole("group", { name: "Puntuar canción: Billie Jean" });
   await expect(vote).toBeHidden();
   await panel.getByText("Billie Jean", { exact: true }).hover();
   await expect(vote).toBeVisible();
-  await panel.getByLabel("Puntos para Billie Jean").fill("2");
-  await vote.getByRole("button", { name: "Dar puntos" }).click();
+  await expect(vote.getByRole("button")).toHaveCount(5);
+  await vote
+    .getByRole("button", { name: "Dar 2 puntos de nostalgia a Billie Jean", exact: true })
+    .click();
+  await expect(panel.getByText("Sumaste 2 puntos a la canción.")).toBeVisible();
+  await panel.getByText("Billie Jean", { exact: true }).hover();
   await expect(
-    page.getByRole("button", { name: /3 de 5 puntos diarios disponibles/ }),
-  ).toBeVisible();
+    vote.getByRole("button", { name: "Dar 4 puntos de nostalgia a Billie Jean", exact: true }),
+  ).toBeDisabled();
+  await vote
+    .getByRole("button", { name: "Dar 1 punto de nostalgia a Billie Jean", exact: true })
+    .click();
+  await expect(panel.getByText("Sumaste 1 punto a la canción.")).toBeVisible();
+  expect(
+    state.requests
+      .filter((request) => request.path.endsWith("/puntuacion"))
+      .map((request) => request.body),
+  ).toEqual([
+    { candidaturaId: 12, puntos: 2 },
+    { candidaturaId: 12, puntos: 1 },
+  ]);
   const suggest = panel.getByRole("button", { name: "Sugerir canción", exact: true });
   await expect(suggest).toBeDisabled();
   await panel.locator('span[aria-label^="Tu categoría no permite"]').hover();
   await expect(panel.getByRole("tooltip", { name: /Tu categoría/ })).toBeVisible();
+  await expect(panel.getByRole("tooltip", { name: /Tu categoría/ })).not.toContainText("Marca");
   expect(state.requests.filter((request) => request.path.endsWith("/sugerencias"))).toHaveLength(0);
   await page.screenshot({ path: "test-results/profile-music-ranking.png" });
 });
@@ -115,8 +132,9 @@ test("perfil permite corregir antes del primer voto y retirar con confirmación"
   await panel.getByRole("button", { name: "Guardar corrección", exact: true }).click();
   await expect(panel.getByText("Billie Jean corregida", { exact: true })).toBeVisible();
   await panel.getByText("Billie Jean corregida", { exact: true }).hover();
-  await panel.getByLabel("Puntos para Billie Jean corregida").fill("2");
-  await panel.getByRole("button", { name: "Dar puntos", exact: true }).click();
+  await panel
+    .getByRole("button", { name: "Dar 2 puntos de nostalgia a Billie Jean corregida", exact: true })
+    .click();
   await expect(panel.getByText("Sumaste 2 puntos a la canción.")).toBeVisible();
   await panel.getByText("Billie Jean corregida", { exact: true }).hover();
   await expect(panel.getByRole("button", { name: "Editar", exact: true })).toBeDisabled();
@@ -124,9 +142,10 @@ test("perfil permite corregir antes del primer voto y retirar con confirmación"
   expect(state.requests.filter((request) => request.method === "DELETE")).toHaveLength(0);
   await panel.getByRole("button", { name: "Confirmar retiro" }).click();
   await expect(panel.getByText("Todavía no hay canciones de 1980 en esta ronda.")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: /3 de 5 puntos diarios disponibles/ }),
-  ).toBeVisible();
+  expect(state.requests.find((request) => request.path.endsWith("/puntuacion"))?.body).toEqual({
+    candidaturaId: 12,
+    puntos: 2,
+  });
 });
 
 test("429 actualiza saldo sin repetir el voto", async ({ page }) => {
@@ -134,10 +153,14 @@ test("429 actualiza saldo sin repetir el voto", async ({ page }) => {
   const panel = await openRanking(page);
   state.reject();
   await panel.getByText("Billie Jean", { exact: true }).hover();
-  await panel.getByRole("button", { name: "Dar puntos", exact: true }).click();
+  await panel
+    .getByRole("button", { name: "Dar 1 punto de nostalgia a Billie Jean", exact: true })
+    .click();
   await expect(panel.getByText(/Puntos consumidos en publicaciones/)).toBeVisible();
   await panel.getByText("Billie Jean", { exact: true }).hover();
-  await expect(panel.getByRole("button", { name: "Dar puntos", exact: true })).toBeDisabled();
+  await expect(
+    panel.getByRole("button", { name: "Dar 1 punto de nostalgia a Billie Jean", exact: true }),
+  ).toBeDisabled();
   expect(state.requests.filter((request) => request.path.endsWith("/puntuacion"))).toHaveLength(1);
 });
 
@@ -148,7 +171,7 @@ test("móvil puede desplegar la puntuación con un toque y navegar a la última 
   await prepare(page, { profile: true, many: true });
   const panel = await openRanking(page);
   await panel.getByRole("button", { name: /Billie Jean Michael Jackson/ }).click();
-  await expect(panel.getByLabel("Puntos para Billie Jean")).toBeVisible();
+  await expect(panel.getByRole("group", { name: "Puntuar canción: Billie Jean" })).toBeVisible();
   await panel.getByText("Canción 8", { exact: true }).scrollIntoViewIfNeeded();
   await expect(panel.getByText("Canción 8", { exact: true })).toBeInViewport();
   expect(await panel.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
